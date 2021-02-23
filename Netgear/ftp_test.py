@@ -86,17 +86,44 @@ class ftp_test(LFCliBase):
         self.local_realm.wait_until_ports_appear(sta_list=self.station_list)
 
         #building layer4
-        self.cx_profile.direction =self.direction
+        self.cx_profile.direction ="dl"
         self.cx_profile.dest = "/dev/null"
-        self.cx_profile.create(ports=self.station_profile.station_names, ftp_ip="192.168.1.59/jk.txt",
-                                sleep_time=.5,
-                                debug_=self.debug,
-                                suppress_related_commands_=True, ftp=True, user="lanforge",
-                                passwd="lanforge",
-                                source="")
+
+        if self.direction == "download":
+            self.cx_profile.create(ports=self.station_profile.station_names, ftp_ip="192.168.1.59/jk.txt",
+                                    sleep_time=.5,debug_=self.debug,suppress_related_commands_=True, ftp=True, user="lanforge",
+                                    passwd="lanforge", source="")
+        elif self.direction == "upload":
+            data1 = []
+            data2 = {}
+
+            #reading data for getting ip"s of stations
+            data = self.json_get("ports/list?fields=IP")
+
+            for i in range(len(self.sta_list) + 6):
+                #getting station names as keys from json data
+                data1.append((str(list(data['interfaces'][i].keys())))[2:-2])
+
+                #creating dictionary of station name and ip's
+                data2[data1[i]] = data['interfaces'][i][data1[i]]['ip']
+
+            #dictionary of stations name and ip"s
+            dict_sta_ip = dict(list(data2.items())[6:])
+
+            print(dict_sta_ip)
+
+            #list of ip's
+            ip = list(dict_sta_ip.values())
+
+            eth_list = []
+            for client_num in range(len(self.station_list)):
+                eth_list.append(self.upstream_port)
+            for client_num in range(len(self.station_list)):
+                self.cx_profile.create(ports=eth_list, ftp_ip=ip[client_num] + "/jk.txt", sleep_time=.5,
+                                       debug_=self.debug, suppress_related_commands_=True, ftp=True,
+                                       user="lanforge", passwd="lanforge",
+                                       source="")
         print("Test Build done")
-
-
 
     def start(self, print_pass=False, print_fail=False):
         self.cx_profile.start_cx()
@@ -220,7 +247,22 @@ class ftp_test(LFCliBase):
             csvwriter = csv.writer(csvfile)
             csvwriter.writerow(fields)
             csvwriter.writerows(list_data)
-            
+
+
+    def ap_reboot(self, ip, user, pswd):
+        self.ip = ip
+        self.user = user
+        self.pswd = pswd
+
+        ssh = paramiko.SSHClient()  # creating shh client object we use this object to connect to router
+        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())  # automatically adds the missing host key
+        ssh.connect(ip, port=22, username=user, password=pswd, banner_timeout=600)
+
+        stdin, stdout, stderr = ssh.exec_command('reboot')
+        output = stdout.readlines()
+        ssh.close()
+        # print('\n'.join(output))
+        time.sleep(10)
 def main():
     # This has --mgr, --mgr_port and --debug
     parser = LFCliBase.create_bare_argparse(prog="netgear-ftp", formatter_class=argparse.RawTextHelpFormatter, epilog="About This Script")
@@ -255,6 +297,7 @@ def main():
                    )
     
     obj.precleanup()
+    obj.ap_reboot()
     obj.build()
     obj.start()
     if not obj.passes():
@@ -282,7 +325,7 @@ def main():
 
     obj.stop()
     obj.postcleanup()
-    ip_test.stop()
+    obj.stop()
 
 
 if __name__ == '__main__':
