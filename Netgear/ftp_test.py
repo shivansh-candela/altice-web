@@ -56,8 +56,8 @@ class ftp_test(LFCliBase):
         elif self.band == "Both":
             self.radio = ["wiphy0", "wiphy1"]
             self.num_sta = 20
-        if self.file_size == "50MB":
-            self.file_size=50000000
+        if self.file_size == "10MB":
+            self.file_size=10000000
         elif self.file_size == "500MB":
             self.file_size=500000000
         else:
@@ -68,11 +68,14 @@ class ftp_test(LFCliBase):
         self.count=0
         for rad in self.radio:
             if rad == "wiphy0":
+
                 #select an mode
                 self.station_profile.mode = 10
                 self.count=self.count+1
 
             elif rad == "wiphy1":
+
+                # select an mode
                 self.station_profile.mode = 6
                 self.count = self.count + 1
 
@@ -80,6 +83,7 @@ class ftp_test(LFCliBase):
             if self.count == 2:
                 self.sta_start_id = self.num_sta
                 self.num_sta = 2 * (self.num_sta)
+                self.station_profile.mode = 10
                 self.cx_profile.cleanup()
 
                 #create station list with sta_id 20
@@ -114,7 +118,8 @@ class ftp_test(LFCliBase):
         self.port_util.set_ftp(port_name=self.local_realm.name_to_eid(self.upstream)[2], resource=1, on=True)
 
         for rad in self.radio:
-        #station build
+
+            #station build
             self.station_profile.use_security(self.security, self.ssid, self.password)
             self.station_profile.set_number_template("00")
             self.station_profile.set_command_flag("add_sta", "create_admin_down", 1)
@@ -181,16 +186,16 @@ class ftp_test(LFCliBase):
 
 
     def stop(self):
-        for rad in self.radio:
-            self.cx_profile.stop_cx()
-            self.station_profile.admin_down()
+        #for rad in self.radio:
+        self.cx_profile.stop_cx()
+        self.station_profile.admin_down()
 
     def postcleanup(self):
-        for rad in self.radio:
-            self.cx_profile.cleanup()
-            self.station_profile.cleanup()
-            LFUtils.wait_until_ports_disappear(base_url=self.lfclient_url, port_list=self.station_profile.station_names,
-                                       debug=self.debug)
+        #for rad in self.radio:
+        self.cx_profile.cleanup()
+        self.station_profile.cleanup()
+        LFUtils.wait_until_ports_disappear(base_url=self.lfclient_url, port_list=self.station_profile.station_names,
+                                   debug=self.debug)
 
     def file_create(self):
         if os.path.isfile("/home/lanforge/Netgear.txt"):
@@ -203,13 +208,13 @@ class ftp_test(LFCliBase):
     def my_monitor(self):
         #data in json format
         data = self.json_get("layer4/list?fields=bytes-rd")
-        print(data)
+        #print(data)
 
         #list of layer 4 connections name
         self.data1 = []
         for i in range(self.num_sta):
             self.data1.append((str(list(data['endpoint'][i].keys())))[2:-2])
-        print(self.data1)
+        #print(self.data1)
 
         data2 = self.data1
         list_of_time = []
@@ -247,7 +252,7 @@ class ftp_test(LFCliBase):
         dw_time_list=[]
         for i in range(self.num_sta):
             dw_time_list.append(str(time_list[i]-time1)[:-7])
-        print("dw_time_list",dw_time_list)
+        #print("dw_time_list",dw_time_list)
         output_data = {}
         for i in range(self.num_sta):
             output_data[self.data1[i]] = dw_time_list[i]
@@ -281,20 +286,18 @@ class ftp_test(LFCliBase):
             csvwriter.writerow(fields)
             csvwriter.writerows(list_data)
 
-    def ftp_test_data(self,iteration_number,dict_data):
-        ftp_test_dict={}
+    def ftp_test_data(self,dict_data):
 
         #creating dictionary for single iteration
         create_dict={}
 
         list_time=list(dict_data.values())
+        create_dict["band"] = self.band
         create_dict["direction"]=self.direction
         create_dict["file_size"] = self.file_size
         create_dict["time"] = list_time
+        return  create_dict
 
-        #append the data in dictionary
-        ftp_test_dict[iteration_number]= create_dict
-        return ftp_test_dict
     def ap_reboot(self, ip, user, pswd):
         self.ip = ip
         self.user = user
@@ -328,6 +331,7 @@ def main():
 
     #use for creating ftp_test dictionary
     iteraration_num=0
+    ftp_data={}
 
     #For all combinat ftp_dataions of directions, file size and client counts, run the test
     for band in args.bands:
@@ -375,10 +379,12 @@ def main():
                 obj.write_file_csv(dict_sta_name_time, speed_list)
 
                 #dictionary of whole data
-                ftp_data=obj.ftp_test_data(iteraration_num,dict_sta_name_time)
 
+                ftp_data[iteraration_num]=obj.ftp_test_data(dict_sta_name_time)
+                #print("FTP Test Data", ftp_data)
                 obj.stop()
                 obj.postcleanup()
+
     print("FTP Test Data", ftp_data)
 
 
