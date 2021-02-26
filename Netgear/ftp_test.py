@@ -56,8 +56,8 @@ class ftp_test(LFCliBase):
         elif self.band == "Both":
             self.radio = ["wiphy0", "wiphy1"]
             self.num_sta = 20
-        if self.file_size == "200MB":
-            self.file_size=200000000
+        if self.file_size == "50MB":
+            self.file_size=50000000
         elif self.file_size == "500MB":
             self.file_size=500000000
         else:
@@ -133,7 +133,7 @@ class ftp_test(LFCliBase):
             self.cx_profile.dest = "/dev/null"
             print('DIRECTION',self.direction)
             if self.direction == "Download":
-                self.cx_profile.create(ports=self.station_profile.station_names, ftp_ip="192.168.212.17/jk.txt",
+                self.cx_profile.create(ports=self.station_profile.station_names, ftp_ip="192.168.212.17/Netgear.txt",
                                         sleep_time=.5,debug_=self.debug,suppress_related_commands_=True, ftp=True, user="lanforge",
                                         passwd="lanforge", source="")
 
@@ -259,7 +259,7 @@ class ftp_test(LFCliBase):
         for i in range(len(dict_time)):
             h,m,s=list_time[i].split(":")
             seconds=total = (int(h) * 3600 + int(m) * 60 + int(s))
-            speed_list.append((self.file_size//seconds)/10**2)
+            speed_list.append((self.file_size//seconds)/10**6)
         return speed_list
 
     def write_file_csv(self, dict_data, speed_list):
@@ -281,7 +281,20 @@ class ftp_test(LFCliBase):
             csvwriter.writerow(fields)
             csvwriter.writerows(list_data)
 
+    def ftp_test_data(self,iteration_number,dict_data):
+        ftp_test_dict={}
 
+        #creating dictionary for single iteration
+        create_dict={}
+
+        list_time=list(dict_data.values())
+        create_dict["direction"]=self.direction
+        create_dict["file_size"] = self.file_size
+        create_dict["time"] = list_time
+
+        #append the data in dictionary
+        ftp_test_dict[iteration_number]= create_dict
+        return ftp_test_dict
     def ap_reboot(self, ip, user, pswd):
         self.ip = ip
         self.user = user
@@ -312,9 +325,11 @@ def main():
     parser.add_argument('--clients', type=int, help='--num_client is number of stations', default=40)
     
     args = parser.parse_args()
-    print(args)
 
-    #For all combinations of directions, file size and client counts, run the test
+    #use for creating ftp_test dictionary
+    iteraration_num=0
+
+    #For all combinat ftp_dataions of directions, file size and client counts, run the test
     for band in args.bands:
         for direction in args.directions:
             for file_size in args.file_sizes:
@@ -330,6 +345,7 @@ def main():
                     direction=direction                      
                    )
 
+                iteraration_num=iteraration_num+1
                 obj.set_values()
                 obj.precleanup()
                 #obj.ap_reboot("192.168.208.22","admin","Password@123")
@@ -344,23 +360,26 @@ def main():
             
                 obj.start(False, False)
             
-                #return list of download completed time
+                #return list of download/upload completed time
                 time_list = obj.my_monitor()
             
-                #return dictionary of station name and download time
-                dict_time_list = obj.time_calculate(time_list, time1)
-                print("download time=", dict_time_list)
+                #return dictionary of station name and download/upload time
+                dict_sta_name_time = obj.time_calculate(time_list, time1)
+                #print("download time=", dict_sta_name_time)
             
                 #return list of speed of station
-                speed_list = obj.speed_calculate(dict_time_list)
-                print("speed_list", speed_list)
+                speed_list = obj.speed_calculate(dict_sta_name_time)
+                #print("speed_list", speed_list)
             
                 #create csv file of data
-                obj.write_file_csv(dict_time_list, speed_list)
+                obj.write_file_csv(dict_sta_name_time, speed_list)
+
+                #dictionary of whole data
+                ftp_data=obj.ftp_test_data(iteraration_num,dict_sta_name_time)
 
                 obj.stop()
                 obj.postcleanup()
-
+    print("FTP Test Data", ftp_data)
 
 
 if __name__ == '__main__':
