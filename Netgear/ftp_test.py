@@ -1,6 +1,7 @@
 #ftp download and upload
 import sys
 import datetime
+import csv
 if sys.version_info[0] != 3:
     print("This script requires Python 3")
     exit(1)
@@ -64,23 +65,34 @@ class ftp_test(LFCliBase):
 
 
     def precleanup(self):
-        count=0
+        self.count=0
         for rad in self.radio:
             if rad == "wiphy0":
                 #select an mode
                 self.station_profile.mode = 10
-                count=count+1
+                self.count=self.count+1
 
-            if rad == "wiphy1":
-                #select bgn mode
+            elif rad == "wiphy1":
                 self.station_profile.mode = 6
-                count = count + 1
+                self.count = self.count + 1
 
             #check Both band if both band then for 2G station id start with 20
-            if count == 2:
+            if self.count == 2:
                 self.sta_start_id = self.num_sta
                 self.num_sta = 2 * (self.num_sta)
+                self.cx_profile.cleanup()
 
+                #create station list with sta_id 20
+                self.station_list1 = LFUtils.portNameSeries(prefix_=self.sta_prefix, start_id_=self.sta_start_id,
+                                                           end_id_=self.num_sta - 1, padding_number_=10000,
+                                                           radio=rad)
+
+                #cleanup station list which started sta_id 20
+                self.station_profile.cleanup(self.station_list1, debug_=self.debug)
+                LFUtils.wait_until_ports_disappear(base_url=self.lfclient_url,
+                                                   port_list=self.station_list,
+                                                   debug=self.debug)
+                return
             #clean layer4 ftp traffic
             self.cx_profile.cleanup()
             self.station_list = LFUtils.portNameSeries(prefix_=self.sta_prefix, start_id_=self.sta_start_id,
@@ -110,15 +122,25 @@ class ftp_test(LFCliBase):
             self.station_profile.set_command_flag("set_port", "rpt_timer", 1)
             self.station_profile.create(radio=rad, sta_names_=self.station_list, debug=self.debug)
             self.local_realm.wait_until_ports_appear(sta_list=self.station_list)
-
+            self.station_profile.admin_up()
+            if self.local_realm.wait_for_ip(self.station_list):
+                self._pass("All stations got IPs")
+            else:
+                self._fail("Stations failed to get IPs")
+                exit(1)
             #building layer4
             self.cx_profile.direction ="dl"
             self.cx_profile.dest = "/dev/null"
-
-            if self.direction == "download":
-                self.cx_profile.create(ports=self.station_profile.station_names, ftp_ip="192.168.1.59/jk.txt",
+            print('DIRECTION',self.direction)
+            if self.direction == "Download":
+                self.cx_profile.create(ports=self.station_profile.station_names, ftp_ip="192.168.212.17/jk.txt",
                                         sleep_time=.5,debug_=self.debug,suppress_related_commands_=True, ftp=True, user="lanforge",
                                         passwd="lanforge", source="")
+
+            #check Both band present then build stations with another station list
+            if self.count ==2:
+                self.station_list = self.station_list1
+                self.station_profile.mode = 6
             '''elif self.direction == "upload":
                 data1 = []
                 data2 = {}
@@ -154,14 +176,6 @@ class ftp_test(LFCliBase):
     def start(self, print_pass=False, print_fail=False):
         for rad in self.radio:
             self.cx_profile.start_cx()
-            self.station_profile.admin_up()
-            temp_stas = self.station_profile.station_names.copy()
-            temp_stas.append(self.upstream)
-            if (self.local_realm.wait_for_ip(temp_stas)):
-                self._pass("All stations got IPs", print_pass)
-            else:
-                self._fail("Stations failed to get IPs", print_fail)
-                exit(1)
 
         print("Test Started")
 
@@ -193,7 +207,7 @@ class ftp_test(LFCliBase):
 
         #list of layer 4 connections name
         self.data1 = []
-        for i in range(len(self.sta_list)):
+        for i in range(self.num_sta):
             self.data1.append((str(list(data['endpoint'][i].keys())))[2:-2])
         print(self.data1)
 
@@ -202,10 +216,10 @@ class ftp_test(LFCliBase):
         list1 = []
         list2 = []
 
-        for i in range(len(self.sta_list)):
+        for i in range(self.num_sta):
             list_of_time.append(0)
         while list_of_time.count(0) != 0:
-            for i in range(len(self.sta_list)):
+            for i in range(self.num_sta):
                 data = self.json_get("layer4/list?fields=bytes-rd")
                 if data['endpoint'][i][data2[i]]['bytes-rd'] <= self.file_size:
                     # print(data['endpoint'][i][data1[i]]['bytes-rd'])
@@ -231,11 +245,11 @@ class ftp_test(LFCliBase):
 
     def time_calculate(self,time_list,time1):
         dw_time_list=[]
-        for i in range(len(self.sta_list)):
+        for i in range(self.num_sta):
             dw_time_list.append(str(time_list[i]-time1)[:-7])
         print("dw_time_list",dw_time_list)
         output_data = {}
-        for i in range(len(self.sta_list)):
+        for i in range(self.num_sta):
             output_data[self.data1[i]] = dw_time_list[i]
         return output_data
 
@@ -245,7 +259,7 @@ class ftp_test(LFCliBase):
         for i in range(len(dict_time)):
             h,m,s=list_time[i].split(":")
             seconds=total = (int(h) * 3600 + int(m) * 60 + int(s))
-            speed_list.append((200000000//seconds)/10**2)
+            speed_list.append((self.file_size//seconds)/10**2)
         return speed_list
 
     def write_file_csv(self, dict_data, speed_list):
@@ -315,6 +329,7 @@ def main():
                     file_size=file_size,
                     direction=direction                      
                    )
+
                 obj.set_values()
                 obj.precleanup()
                 #obj.ap_reboot("192.168.208.22","admin","Password@123")
@@ -325,7 +340,7 @@ def main():
                     exit(1)
 
                 #First time stamp
-                '''time1 = datetime.now()
+                time1 = datetime.now()
             
                 obj.start(False, False)
             
@@ -341,7 +356,7 @@ def main():
                 print("speed_list", speed_list)
             
                 #create csv file of data
-                obj.write_file_csv(dict_time_list, speed_list)'''
+                obj.write_file_csv(dict_time_list, speed_list)
 
                 obj.stop()
                 obj.postcleanup()
