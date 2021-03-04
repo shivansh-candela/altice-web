@@ -152,7 +152,7 @@ class ftp_test(LFCliBase):
                                         passwd="lanforge", source="")
 
 
-            elif self.direction == "upload":
+            elif self.direction == "Upload":
                 dict_sta_and_ip = {}
 
                 #data from GUI for find out ip addr of each station
@@ -174,14 +174,14 @@ class ftp_test(LFCliBase):
                 client_list = []
 
                 #list of all stations
-                for i in range(len(self.sta_list)):
+                for i in range(self.num_sta):
                     client_list.append(self.sta_list[i][4:])
 
                 #list of upstream port
                 eth_list.append(self.upstream_port)
 
                 #create layer for connection for upload
-                for client_num in range(len(self.sta_list)):
+                for client_num in range(self.num_sta):
                     self.cx_profile.create(ports=eth_list, ftp_ip=ip[client_num] + "/jk.txt", sleep_time=.5,
                                            debug_=self.debug, suppress_related_commands_=True, ftp=True,
                                            user=self.ftp_user, passwd=self.ftp_passwd,
@@ -352,7 +352,7 @@ def main():
     
     # Test variables
     parser.add_argument('--bands', nargs="+", help='--bands', default=["5G","2.4G","Both"])
-    parser.add_argument('--directions', nargs="+",help='--List with Upload and Download Options', default=["Download"])
+    parser.add_argument('--directions', nargs="+",help='--List with Upload and Download Options', default=["Download","Upload"])
     parser.add_argument('--file_sizes', nargs="+",help='--File Size defaults ["200MB","500MB","1000MB"]', default=["50MB","100MB","200MB"])
     parser.add_argument('--num_stations', type=int, help='--num_client is number of stations', default=40)
     
