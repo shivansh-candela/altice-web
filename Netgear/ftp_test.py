@@ -145,45 +145,52 @@ class ftp_test(LFCliBase):
             self.cx_profile.direction ="dl"
             self.cx_profile.dest = "/dev/null"
             print('DIRECTION',self.direction)
+
             if self.direction == "Download":
                 self.cx_profile.create(ports=self.station_profile.station_names, ftp_ip="192.168.212.17/Netgear.txt",
                                         sleep_time=.5,debug_=self.debug,suppress_related_commands_=True, ftp=True, user="lanforge",
                                         passwd="lanforge", source="")
 
-            #check Both band present then build stations with another station list
-            if self.count ==2:
-                self.station_list = self.station_list1
-                self.station_profile.mode = 6
-            '''elif self.direction == "upload":
-                data1 = []
-                data2 = {}
-    
-                #reading data for getting ip"s of stations
+
+            elif self.direction == "upload":
+                dict_sta_and_ip = {}
+
+                #data from GUI for find out ip addr of each station
                 data = self.json_get("ports/list?fields=IP")
-    
-                for i in range(len(self.sta_list) + 6):
-                    #getting station names as keys from json data
-                    data1.append((str(list(data['interfaces'][i].keys())))[2:-2])
-    
-                    #creating dictionary of station name and ip's
-                    data2[data1[i]] = data['interfaces'][i][data1[i]]['ip']
-    
-                #dictionary of stations name and ip"s
-                dict_sta_ip = dict(list(data2.items())[6:])
-    
-                print(dict_sta_ip)
-    
-                #list of ip's
-                ip = list(dict_sta_ip.values())
-    
+
+                # This loop for find out proper ip addr and station name
+                for i in self.sta_list:
+                    for j in data['interfaces']:
+                        for k in j:
+                            if i == k:
+                                dict_sta_and_ip[k] = j[i]['ip']
+
+                print("ip_sta_dict", dict_sta_and_ip)
+
+                #list of ip addr of all stations
+                ip = list(dict_sta_and_ip.values())
+
                 eth_list = []
-                for client_num in range(len(self.station_list)):
-                    eth_list.append(self.upstream_port)
-                for client_num in range(len(self.station_list)):
+                client_list = []
+
+                #list of all stations
+                for i in range(len(self.sta_list)):
+                    client_list.append(self.sta_list[i][4:])
+
+                #list of upstream port
+                eth_list.append(self.upstream_port)
+
+                #create layer for connection for upload
+                for client_num in range(len(self.sta_list)):
                     self.cx_profile.create(ports=eth_list, ftp_ip=ip[client_num] + "/jk.txt", sleep_time=.5,
                                            debug_=self.debug, suppress_related_commands_=True, ftp=True,
-                                           user="lanforge", passwd="lanforge",
-                                           source="")'''
+                                           user=self.ftp_user, passwd=self.ftp_passwd,
+                                           source="", upload_name=client_list[client_num])
+
+            # check Both band present then build stations with another station list
+            if self.count == 2:
+                self.station_list = self.station_list1
+                self.station_profile.mode = 6
         print("Test Build done")
 
     def start(self, print_pass=False, print_fail=False):
