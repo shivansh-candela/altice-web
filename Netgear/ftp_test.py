@@ -159,7 +159,7 @@ class ftp_test(LFCliBase):
                 data = self.json_get("ports/list?fields=IP")
 
                 # This loop for find out proper ip addr and station name
-                for i in self.sta_list:
+                for i in self.station_list:
                     for j in data['interfaces']:
                         for k in j:
                             if i == k:
@@ -174,17 +174,17 @@ class ftp_test(LFCliBase):
                 client_list = []
 
                 #list of all stations
-                for i in range(self.num_sta):
-                    client_list.append(self.sta_list[i][4:])
+                for i in range(len(self.station_list)):
+                    client_list.append(self.station_list[i][4:])
 
                 #list of upstream port
-                eth_list.append(self.upstream_port)
+                eth_list.append(self.upstream)
 
                 #create layer for connection for upload
-                for client_num in range(self.num_sta):
-                    self.cx_profile.create(ports=eth_list, ftp_ip=ip[client_num] + "/jk.txt", sleep_time=.5,
+                for client_num in range(len(self.station_list)):
+                    self.cx_profile.create(ports=eth_list, ftp_ip=ip[client_num] + "/Netgear.txt", sleep_time=.5,
                                            debug_=self.debug, suppress_related_commands_=True, ftp=True,
-                                           user=self.ftp_user, passwd=self.ftp_passwd,
+                                           user="lanforge", passwd="lanforge",
                                            source="", upload_name=client_list[client_num])
 
             # check Both band present then build stations with another station list
@@ -314,7 +314,7 @@ class ftp_test(LFCliBase):
 
         list_time=list(dict_data.values())
         create_dict["band"] = self.band
-        create_dict["direction"]=self.direction
+        create_dict["direction"] = self.direction
         create_dict["file_size"] = self.file_size
         create_dict["time"] = list_time
 
