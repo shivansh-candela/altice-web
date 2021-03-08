@@ -59,17 +59,35 @@ class ftp_test(LFCliBase):
 
         if self.band == "5G":
             self.radio = ["wiphy0"]
+            if self.file_size == "200MB":
+                self.duration=convert_min_in_time(13)
+            elif self.file_size == "500MB":
+                self.duration=convert_min_in_time(30)
+            elif self.file_size == "1000MB":
+                self.duration=convert_min_in_time(45)
         elif self.band == "2.4G":
             self.radio = ["wiphy1"]
+            if self.file_size == "200MB":
+                self.duration=convert_min_in_time(20)
+            elif self.file_size == "500MB":
+                self.duration=convert_min_in_time(50)
+            elif self.file_size == "1000MB":
+                self.duration=convert_min_in_time(70)
         elif self.band == "Both":
             self.radio = ["wiphy0", "wiphy1"]
             self.num_sta = 20
-        if self.file_size == "50MB":
-            self.file_size=50000000
-        elif self.file_size == "100MB":
-            self.file_size=100000000
-        elif self.file_size == "200MB" :
-            self.file_size = 200000000
+            if self.file_size == "200MB":
+                self.duration=convert_min_in_time(20)
+            elif self.file_size == "500MB":
+                self.duration=convert_min_in_time(50)
+            elif self.file_size == "1000MB":
+                self.duration=convert_min_in_time(70)
+        if self.file_size == "200MB":
+            self.file_size=200000000
+        elif self.file_size == "500MB":
+            self.file_size=500000000
+        elif self.file_size == "1000MB" :
+            self.file_size = 1000000000
 
 
     def precleanup(self):
@@ -219,7 +237,7 @@ class ftp_test(LFCliBase):
         os.system("fallocate -l " +self.file_size +" /home/lanforge/Netgear.txt")
         print("File creation done", self.file_size)
 
-    def my_monitor(self):
+    def my_monitor(self,time1):
         #data in json format
         data = self.json_get("layer4/list?fields=bytes-rd")
         #print(data)
@@ -238,6 +256,11 @@ class ftp_test(LFCliBase):
         for i in range(self.num_sta):
             list_of_time.append(0)
         while list_of_time.count(0) != 0:
+
+            #run script upto given time
+            if (str(datetime.now()- time1) >= self.duration):
+                break
+
             for i in range(self.num_sta):
                 data = self.json_get("layer4/list?fields=bytes-rd")
                 if data['endpoint'][i][data2[i]]['bytes-rd'] <= self.file_size:
@@ -278,36 +301,10 @@ class ftp_test(LFCliBase):
             output_data[self.data1[i]] = dw_time_list[i]
         return output_data
 
-    '''def speed_calculate(self,dict_time):
-        list_time=list(dict_time.values())
-        speed_list=[]
-        for i in range(len(dict_time)):
-            h,m,s=list_time[i].split(":")
-            seconds=total = (int(h) * 3600 + int(m) * 60 + int(s))
-            speed_list.append((self.file_size//seconds)/10**6)
-        return speed_list'''
 
-    '''def write_file_csv(self, dict_data, speed_list):
-        fields = ['Name', 'Download time(H:M:S)', 'Speed(Megabytes/Sec)']
-        list1 = list(dict_data.keys())
-        list2 = list(dict_data.values())
-        list_data = []
-        l = []
-
-        #create list of list
-        for i in range(len(dict_data)):
-            l.extend([list1[i], list2[i], speed_list[i]])
-            list_data.append(l)
-            l = []
-
-        filename = "download.csv"
-        with open(filename, 'w') as csvfile:
-            csvwriter = csv.writer(csvfile)
-            csvwriter.writerow(fields)
-            csvwriter.writerows(list_data)'''
 
     #Method for arrange ftp download/upload time data in dictionary
-    def ftp_test_data(self,dict_data):
+    def ftp_test_data(self,dict_data,pass_fail):
 
         #creating dictionary for single iteration
         create_dict={}
@@ -317,6 +314,7 @@ class ftp_test(LFCliBase):
         create_dict["direction"] = self.direction
         create_dict["file_size"] = self.file_size
         create_dict["time"] = list_time
+        create_dict["result"] = pass_fail
 
         return  create_dict
 
@@ -339,7 +337,23 @@ class ftp_test(LFCliBase):
         print("AP rebooted")
         time.sleep(240)
 
+    def convert_min_in_time(self,total_minutus):
 
+        # Get hours with floor division
+        hours = total_minutes // 60
+
+        # Get additional minutes with modulus
+        minutes = total_minutes % 60
+
+        # Create time as a string
+        time_string = str("%d:%02d" % (divmod(total_minutes, 60))) + ":00" + ":000000"
+
+        return time_string
+    def pass_fail_check(self,time_list):
+        if time_list.count(0) == 0:
+            return "Pass"
+        else:
+            return "Fail"
 
 def main():
     # This has --mgr, --mgr_port and --debug
@@ -353,7 +367,7 @@ def main():
     # Test variables
     parser.add_argument('--bands', nargs="+", help='--bands', default=["5G","2.4G","Both"])
     parser.add_argument('--directions', nargs="+",help='--List with Upload and Download Options', default=["Download","Upload"])
-    parser.add_argument('--file_sizes', nargs="+",help='--File Size defaults ["200MB","500MB","1000MB"]', default=["50MB","100MB","200MB"])
+    parser.add_argument('--file_sizes', nargs="+",help='--File Size defaults ["200MB","500MB","1000MB"]', default=["200MB","500MB","1000MB"])
     parser.add_argument('--num_stations', type=int, help='--num_client is number of stations', default=40)
     
     args = parser.parse_args()
@@ -397,13 +411,17 @@ def main():
                 obj.start(False, False)
             
                 #return list of download/upload completed time stamp
-                time_list = obj.my_monitor()
-            
+                time_list = obj.my_monitor(time1)
+                print(time_list)
+
+                # check pass or fail
+                pass_fail=pass_fail_check(time_list)
+
                 #return dictionary of station name and download/upload time
                 dict_sta_name_time = obj.time_calculate(time_list, time1)
 
                 #dictionary of whole data
-                ftp_data[iteraration_num]=obj.ftp_test_data(dict_sta_name_time)
+                ftp_data[iteraration_num]=obj.ftp_test_data(dict_sta_name_time,pass_fail)
 
                 obj.stop()
                 obj.postcleanup()
