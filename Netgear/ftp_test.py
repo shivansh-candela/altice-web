@@ -289,12 +289,18 @@ class ftp_test(LFCliBase):
 
     #calculate download/upload time
     def time_calculate(self,time_list,time1):
-        dw_time_list=[]
+        dw_time_list = []
         for i in range(self.num_sta):
-            time_hms=str(time_list[i]-time1)[:-7]
-            h, m, s = time_hms.split(":")
-            seconds = (int(h) * 3600 + int(m) * 60 + int(s))
-            dw_time_list.append(seconds)
+            dw_time_list.append(0)
+
+        for i in range(self.num_sta):
+            if time_list[i] ==0:
+                continue
+            else:
+                time_hms=str(time_list[i]-time1)[:-7]
+                h, m, s = time_hms.split(":")
+                seconds = (int(h) * 3600 + int(m) * 60 + int(s))
+                dw_time_list.append(seconds)
         #print("dw_time_list",dw_time_list)
         output_data = {}
         for i in range(self.num_sta):
