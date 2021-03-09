@@ -1,4 +1,7 @@
-
+""" this report generation template is used for load balancing test """
+--> date - 08-March-2021
+--> Nikita Yadav
+"""
 from datetime import datetime
 
 import os.path
@@ -115,7 +118,11 @@ def add_summary_table(summary2, summary5l, summary5h):
                 <br><br>
                 """
     return str(summary_html)
-def channel_utilization_description(objective="The Channel Utilization Test table provides you information set threshold , measured channel utiliszation from AP and status of client connection which can be used to decide the PASS/ FAIL criteria, if the the measured channel utilization value from AP is less than or equal to threshold value set in load balancing than it is considered as PASS criteria else it is a FAIL criteria"):
+def channel_utilization_description(objective="The Channel Utilization Test table provides you information regarding "
+                                              "set threshold , measured channel utiliszation from the AP "
+                                              "which is used to decide the PASS/ FAIL criteria, if the measured utilization "
+                                              "is equal or within the range of 5% increase or 5% decrease of the threshold value "
+                                              "then it's a PASS criteria else FAIL criteria."):
     description = """
                     <!-- Test Objective -->
                     <h3 align='left'>Channel Utilization</h3> 
@@ -123,13 +130,13 @@ def channel_utilization_description(objective="The Channel Utilization Test tabl
                     <br>
                     """
     return str(description)
-def channel_utilization_table(ch_connect, ch_threshold , ch_measured):
-    var = ""
+def channel_utilization_table(ch_threshold , ch_measured):
+    '''var = ""
     for i in ch_connect:
         if i == "NO":
             var = var + "<td colspan='1' bgcolor='orange'>NO</td>"
         else:
-            var = var + "<td colspan='1' bgcolor='#90EE90'>YES</td>"
+            var = var + "<td colspan='1' bgcolor='#90EE90'>YES</td>"'''
     var1 = ""
     for i in ch_threshold:
         var1 = var1 + "<td>" + i + "</td>"
@@ -160,9 +167,6 @@ def channel_utilization_table(ch_connect, ch_threshold , ch_measured):
                         </tr>
                           <tr>
                               <td>
-                                  Client Connect
-                              </td>""" + str(var) + """<tr>
-                              <td>
                                   Set Threshold Value
                               </td>""" + str(var1) + """</tr>
                           <tr>
@@ -174,7 +178,10 @@ def channel_utilization_table(ch_connect, ch_threshold , ch_measured):
                     <br><br>
                     """
     return str(summary_html)
-def Max_client_description(objective="The Max Client Connect Test table provides you information set threshold , measured channel utiliszation from AP and status of client connection which can be used to decide the PASS/ FAIL criteria, if the the measured channel utilization value from AP is less than or equal to threshold value set in load balancing than it is considered as PASS criteria else it is a FAIL criteria"):
+def Max_client_description(objective="The max client connect Test table provides you information regarding "
+                                     "set threshold , measured max client value from the AP  which can be used to "
+                                     "decide the PASS/ FAIL criteria, if the measured max client value is equal to threshold "
+                                     "value it's a PASS criteria else FAIL criteria."):
     description = """
                     <!-- Test Objective -->
                     <h3 align='left'>Max Client Connect</h3> 
@@ -182,13 +189,13 @@ def Max_client_description(objective="The Max Client Connect Test table provides
                     <br>
                     """
     return str(description)
-def Max_client_table(cl_connect, cl_threshold, cl_measured):
-    var = ""
+def Max_client_table(cl_threshold, cl_measured):
+    '''var = ""
     for i in cl_connect:
         if i == "NO":
             var = var + "<td colspan='1' bgcolor='orange'>NO</td>"
         else:
-            var = var + "<td colspan='1' bgcolor='#90EE90'>YES</td>"
+            var = var + "<td colspan='1' bgcolor='#90EE90'>YES</td>"'''
     var1 = ""
     for i in cl_threshold:
         var1 = var1 + "<td>" + i + "</td>"
@@ -218,10 +225,6 @@ def Max_client_table(cl_connect, cl_threshold, cl_measured):
                         </tr>
                           <tr>
                               <td>
-                                  Client Connect
-                              </td>""" + str(var) + """</tr>
-                          <tr>
-                              <td>
                                   Set Threshold Value
                               </td>""" + str(var1) + """ </tr>
                           <tr>
@@ -233,7 +236,11 @@ def Max_client_table(cl_connect, cl_threshold, cl_measured):
                     <br><br>
                     """
     return str(summary_html)
-def rssi_description(objective="The RSSI Test table provides you information set threshold , measured channel utiliszation from AP and status of client connection which can be used to decide the PASS/ FAIL criteria, if the the measured channel utilization value from AP is greater than or equal to threshold value set in load balancing than it is considered as PASS criteria else it is a FAIL criteria"):
+def rssi_description(objective="The RSSI Test table provides you information regarding "
+                               "set threshold , measured rssi  value from the AP which can "
+                               "be used to decide the PASS/ FAIL criteria, "
+                               "if the measured rssi value is within the range of 1dbm increase or 1dbm decrease of the threshold value"
+                               "or is equal to threshold value it's a PASS criteria else FAIL criteria."):
     description = """
                     <!-- Test Objective -->
                     <h3 align='left'> RSSI </h3> 
@@ -241,13 +248,13 @@ def rssi_description(objective="The RSSI Test table provides you information set
                     <br>
                     """
     return str(description)
-def RSSI_table(rssi_connect, rssi_set_threshold, rssi_measured):
-    var = ""
+def RSSI_table(rssi_set_threshold, rssi_measured):
+    '''var = ""
     for i in rssi_connect:
         if i == "NO":
             var = var + "<td colspan='1' bgcolor='orange'>NO</td>"
         else:
-            var = var + "<td colspan='1' bgcolor='#90EE90'>YES</td>"
+            var = var + "<td colspan='1' bgcolor='#90EE90'>YES</td>"'''
     var1 = ""
     for i in rssi_set_threshold:
         var1 = var1 + "<td>" + i + "</td>"
@@ -275,10 +282,6 @@ def RSSI_table(rssi_connect, rssi_set_threshold, rssi_measured):
                             </th>
 
                         </tr>
-                          <tr>
-                              <td>
-                                  Client Connect
-                              </td>""" + str(var) + """</tr>
                           <tr>
                               <td>
                                   Set Threshold Value
@@ -328,13 +331,10 @@ def generate_report(date=None,
                     summary_table2ghz= [] ,
                     summary_table5ghz=[],
                     summary_table5ghzh=[],
-                    channel_client_connect =[],
                     channel_set_threshold=[],
                     channel_measured=[],
-                    max_client_connect=[],
                     max_client_threshold=[],
                     max_client_measured=[] ,
-                    rssi_connect=[],
                     rssi_set_threshold=[],
                     rssi_measured=[],
                     report_path="/home/lanforge/html-reports/Loadbalancing"):
@@ -342,13 +342,13 @@ def generate_report(date=None,
     summary2 = summary_table2ghz
     summary5l = summary_table5ghz
     summary5h = summary_table5ghzh
-    ch_connect = channel_client_connect
+    #ch_connect = channel_client_connect
     ch_threshold = channel_set_threshold
     ch_measured = channel_measured
-    cl_connect = max_client_connect
+    #cl_connect = max_client_connect
     cl_threshold = max_client_threshold
     cl_measured = max_client_measured
-    rssi_connect = rssi_connect
+    #rssi_connect = rssi_connect
     rssi_set_threshold = rssi_set_threshold
     rssi_measured = rssi_measured
     reports_root = report_path + "/" + str(date)
@@ -368,11 +368,11 @@ def generate_report(date=None,
                   summary_table_description() + \
                   add_summary_table(summary2, summary5l, summary5h) + \
                   channel_utilization_description() + \
-                  channel_utilization_table(ch_connect, ch_threshold, ch_measured) + \
+                  channel_utilization_table(ch_threshold, ch_measured) + \
                   Max_client_description() + \
-                  Max_client_table(cl_connect, cl_threshold, cl_measured) + \
+                  Max_client_table(cl_threshold, cl_measured) + \
                   rssi_description() + \
-                  RSSI_table(rssi_connect, rssi_set_threshold, rssi_measured)
+                  RSSI_table(rssi_set_threshold, rssi_measured)
 
 
     f = open(reports_root + "/load_report.html", "a")
@@ -386,6 +386,7 @@ def generate_report(date=None,
 # test blocks from here
 if __name__ == '__main__':
     generate_report()
+
 
 
 
