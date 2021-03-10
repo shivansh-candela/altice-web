@@ -8,7 +8,7 @@ License: Free to distribute and modify. LANforge systems must be licensed.
 """
 import sys
 import datetime
-import csv
+from ftp_html import *
 import paramiko
 if sys.version_info[0] != 3:
     print("This script requires Python 3")
@@ -60,28 +60,28 @@ class ftp_test(LFCliBase):
         if self.band == "5G":
             self.radio = ["wiphy0"]
             if self.file_size == "200MB":
-                self.duration=convert_min_in_time(13)
+                self.duration = self.convert_min_in_time(13)
             elif self.file_size == "500MB":
-                self.duration=convert_min_in_time(30)
+                self.duration = self.convert_min_in_time(30)
             elif self.file_size == "1000MB":
-                self.duration=convert_min_in_time(45)
+                self.duration = self.convert_min_in_time(45)
         elif self.band == "2.4G":
             self.radio = ["wiphy1"]
             if self.file_size == "200MB":
-                self.duration=convert_min_in_time(20)
+                self.duration = self.convert_min_in_time(20)
             elif self.file_size == "500MB":
-                self.duration=convert_min_in_time(50)
+                self.duration = self.convert_min_in_time(50)
             elif self.file_size == "1000MB":
-                self.duration=convert_min_in_time(70)
+                self.duration = self.convert_min_in_time(70)
         elif self.band == "Both":
             self.radio = ["wiphy0", "wiphy1"]
             self.num_sta = 20
             if self.file_size == "200MB":
-                self.duration=convert_min_in_time(20)
+                self.duration = self.convert_min_in_time(20)
             elif self.file_size == "500MB":
-                self.duration=convert_min_in_time(50)
+                self.duration = self.convert_min_in_time(50)
             elif self.file_size == "1000MB":
-                self.duration=convert_min_in_time(70)
+                self.duration = self.convert_min_in_time(70)
         if self.file_size == "200MB":
             self.file_size=200000000
         elif self.file_size == "500MB":
@@ -258,7 +258,7 @@ class ftp_test(LFCliBase):
         while list_of_time.count(0) != 0:
 
             #run script upto given time
-            if (str(datetime.now()- time1) >= self.duration):
+            if str(datetime.now()- time1) >= self.duration:
                 break
 
             for i in range(self.num_sta):
@@ -297,10 +297,10 @@ class ftp_test(LFCliBase):
             if time_list[i] ==0:
                 continue
             else:
-                time_hms=str(time_list[i]-time1)[:-7]
+                time_hms = str(time_list[i]-time1)[:-7]
                 h, m, s = time_hms.split(":")
                 seconds = (int(h) * 3600 + int(m) * 60 + int(s))
-                dw_time_list.append(seconds)
+                dw_time_list[i] = seconds
         #print("dw_time_list",dw_time_list)
         output_data = {}
         for i in range(self.num_sta):
@@ -343,7 +343,7 @@ class ftp_test(LFCliBase):
         print("AP rebooted")
         time.sleep(240)
 
-    def convert_min_in_time(self,total_minutus):
+    def convert_min_in_time(self,total_minutes):
 
         # Get hours with floor division
         hours = total_minutes // 60
@@ -355,6 +355,7 @@ class ftp_test(LFCliBase):
         time_string = str("%d:%02d" % (divmod(total_minutes, 60))) + ":00" + ":000000"
 
         return time_string
+
     def pass_fail_check(self,time_list):
         if time_list.count(0) == 0:
             return "Pass"
@@ -377,6 +378,9 @@ def main():
     parser.add_argument('--num_stations', type=int, help='--num_client is number of stations', default=40)
     
     args = parser.parse_args()
+
+    # 1st time stamp for test duration
+    time_stamp1=datetime.now()
 
     #use for creating ftp_test dictionary
     iteraration_num=0
@@ -421,18 +425,43 @@ def main():
                 print(time_list)
 
                 # check pass or fail
-                pass_fail=pass_fail_check(time_list)
+                pass_fail = obj.pass_fail_check(time_list)
 
                 #return dictionary of station name and download/upload time
                 dict_sta_name_time = obj.time_calculate(time_list, time1)
 
                 #dictionary of whole data
-                ftp_data[iteraration_num]=obj.ftp_test_data(dict_sta_name_time,pass_fail)
+                ftp_data[iteraration_num] = obj.ftp_test_data(dict_sta_name_time,pass_fail)
 
                 obj.stop()
                 obj.postcleanup()
 
+    #2nd time stamp for test duration
+    time_stamp2=datetime.now
+
+    #total time for test duration
+    test_duration=time_stamp2-time_stamp2
+
     print("FTP Test Data", ftp_data)
+    date = str(datetime.now()).split(",")[0].replace(" ", "-").split(".")[0]
+    model = ap.get_ap_model("192.168.208.22", "root", "Password@123xzsawq@!")
+    model_name = model[0][12:]
+    test_setup_info = {
+        "AP Name": model_name,
+        "SSID": args.ssid,
+        "Test Duration": test_duration
+    }
+
+    input_setup_info = {
+        "IP": "192.168.208.22" ,
+        "user": "root"
+        "Contact": "support@candelatech.com"
+    }
+    generate_report(date,
+                    test_setup_info,
+                    input_setup_info,
+                    ftp_data,
+                    report_path="/home/lanforge/html-reports/FTP-Test")
 
 
 if __name__ == '__main__':
