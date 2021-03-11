@@ -68,7 +68,7 @@ def add_pass_fail_table(result_data):
     var2="<th>40 Clients-5GHz</th>"
     var3=" <th>20+20 Clients-2.4GHz+5GHz</th>"
 
-    for size in ["200000000","500000000","1000000000"]:
+    for size in [200000000,500000000,1000000000]:
         for d in ["Download","Upload"]:
             c=0
             for data in result_data.values():
@@ -81,7 +81,7 @@ def add_pass_fail_table(result_data):
             if c==0:
                 var1 = var1 + "<td>NA</td>"
 
-    for size in ["200000000","500000000","1000000000"]:
+    for size in [200000000,500000000,1000000000]:
         for d in ["Download","Upload"]:
             c=0
             for data in result_data.values():
@@ -95,7 +95,7 @@ def add_pass_fail_table(result_data):
                 var2 = var2 + "<td>NA</td>"
 
 
-    for size in ["200000000","500000000","1000000000"]:
+    for size in [200000000,500000000,1000000000]:
         for d in ["Download","Upload"]:
             c=0
             for data in result_data.values():
@@ -154,6 +154,114 @@ def add_pass_fail_table(result_data):
     return str(table_info)
 
 
+def download_upload_time_table(result_data):
+    var1 = "<th>40 Clients-2.4GHz</th>"
+    var2 = "<th>40 Clients-5GHz</th>"
+    var3 = " <th>20+20 Clients-2.4GHz+5GHz</th>"
+
+    for size in [200000000,500000000,1000000000]:
+        for d in ["Download", "Upload"]:
+            c = 0
+            for data in result_data.values():
+                data_time = data['time']
+                Min = min(data_time)
+                Max = max(data_time)
+                Sum = sum(data_time)
+                Len = len(data_time)
+                Avg = Sum // Len
+                string_data = "<span style='font-weight:bolder'>Min=</span>" + str(
+                    Min) + "," + "<span style='font-weight:bolder'>Max=</span>" + str(
+                    Max) + "," + "<span style='font-weight:bolder'>Avg=</span>" + str(Avg)
+                if data["band"] == "2.4G" and data["direction"] == d and data["file_size"] == size:
+                    c = c + 1
+                    var1 = var1 + """<td style='text-align:center'>""" + string_data + """</td>"""
+            if c == 0:
+                var1 = var1 + "<td style='text-align:center'><span style='font-weight:bolder'>Min</span>=N/A<br><span style='font-weight:bolder'>Max</span>=N/A<br><span style='font-weight:bolder'>Avg</span>=N/A</td>"
+
+    for size in [200000000,500000000,1000000000]:
+        for d in ["Download", "Upload"]:
+            c = 0
+            for data in result_data.values():
+                data_time = data['time']
+                Min = min(data_time)
+                Max = max(data_time)
+                Sum = sum(data_time)
+                Len = len(data_time)
+                Avg = Sum // Len
+                string_data = "<span style='font-weight:bolder'>Min=</span>" + str(
+                    Min) + "<br>" + "<span style='font-weight:bolder'>Max=</span>" + str(
+                    Max) + "<br>" + "<span style='font-weight:bolder'>Avg=</span>" + str(Avg)
+                if data["band"] == "5G" and data["direction"] == d and data["file_size"] == size:
+                    c = c + 1
+                    var2 = var2 + """<td style='text-align:center'>""" + string_data + """</td>"""
+            if c == 0:
+                var2 = var2 + "<td style='text-align:center'><span style='font-weight:bolder'>Min</span>=N/A<br><span style='font-weight:bolder'>Max</span>=N/A<br><span style='font-weight:bolder'>Avg</span>=N/A</td>"
+
+    for size in [200000000,500000000,1000000000]:
+        for d in ["Download", "Upload"]:
+            c = 0
+            for data in result_data.values():
+                data_time = data['time']
+                Min = min(data_time)
+                Max = max(data_time)
+                Sum = sum(data_time)
+                Len = len(data_time)
+                Avg = Sum // Len
+                string_data = "<span style='font-weight:bolder'>Min=</span>" + str(
+                    Min) + "," + "<span style='font-weight:bolder'>Max=</span>" + str(
+                    Max) + "," + "<span style='font-weight:bolder'>Avg=</span>" + str(Avg)
+                if data["band"] == "Both" and data["direction"] == d and data["file_size"] == size:
+                    c = c + 1
+                    var3 = var3 + """<td style='text-align:center'>""" + string_data + """</td>"""
+            if c == 0:
+                var3 = var3 + "<td style='text-align:center'><span style='font-weight:bolder'>Min</span>=N/A<br><span style='font-weight:bolder'>Max</span>=N/A<br><span style='font-weight:bolder'>Avg</span>=N/A</td>"
+
+    time_table = """
+                   <table border="1" width="1000px" cellpadding="2" cellspacing="0">
+                     <th style="width:1000px;background-color:grey">File Download/Upload Time (sec)</th>
+                    </table>
+                    <br>
+                    <!-- Table information -->
+                    <p align='left' width='900'>This Table will give  FTP Download/Upload Time of Clients.</p>
+                    <br>
+                    <table border="1" width="1000px" cellpadding="2" cellspacing="0">
+                     <tr>
+                        <th></th>
+                        <th colspan="2">Small File (200MB)</th>
+                        <th colspan="2">Medium File (500MB)</th>
+                        <th colspan="2">Big File (1000MB)</th>
+                      </tr>
+                      <tr>
+                        <th></th>
+                        <th>Download</th>
+                        <th>Upload</th>
+                          <th>Download</th>
+                        <th>Upload</th>
+                          <th>Download</th>
+                        <th>Upload</th>
+                      </tr>
+                      <tr>
+                        """ + var1 + """
+
+                     </tr>
+                      <tr>
+                        """ + var2 + """
+
+                     </tr>
+                       <tr>
+                        """ + var3 + """
+
+                     </tr>
+                    </table>
+                    <br> 
+
+
+
+    """
+
+    return str(time_table)
+
+
 def input_setup_info_table(input_setup_info=None):
     if input_setup_info is None:
         return None
@@ -205,6 +313,7 @@ def generate_report(ftp_data=None,
                   test_setup_information(test_setup_data) + \
                   test_objective() + \
                   add_pass_fail_table(ftp_data) + \
+                  download_upload_time_table(ftp_data) +\
                   input_setup_info_table(input_setup_info)
 
 
