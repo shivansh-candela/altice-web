@@ -7,7 +7,7 @@ Copyright 2021 Candela Technologies Inc
 License: Free to distribute and modify. LANforge systems must be licensed.
 """
 import sys
-import datetime
+#import datetime
 from ftp_html import *
 import paramiko
 if sys.version_info[0] != 3:
@@ -183,7 +183,7 @@ class ftp_test(LFCliBase):
                             if i == k:
                                 dict_sta_and_ip[k] = j[i]['ip']
 
-                print("ip_sta_dict", dict_sta_and_ip)
+
 
                 #list of ip addr of all stations
                 ip = list(dict_sta_and_ip.values())
@@ -380,7 +380,7 @@ def main():
     args = parser.parse_args()
 
     # 1st time stamp for test duration
-    time_stamp1=datetime.now()
+    time_stamp1 = datetime.now()
 
     #use for creating ftp_test dictionary
     iteraration_num=0
@@ -410,7 +410,6 @@ def main():
                 obj.precleanup()
                 obj.ap_reboot("192.168.208.22","root","Password@123xzsawq@!")
                 obj.build()
-                obj.start()
                 if not obj.passes():
                     print(obj.get_fail_message())
                     exit(1)
@@ -422,7 +421,6 @@ def main():
             
                 #return list of download/upload completed time stamp
                 time_list = obj.my_monitor(time1)
-                print(time_list)
 
                 # check pass or fail
                 pass_fail = obj.pass_fail_check(time_list)
@@ -437,31 +435,32 @@ def main():
                 obj.postcleanup()
 
     #2nd time stamp for test duration
-    time_stamp2=datetime.now
+    time_stamp2 = datetime.now()
 
     #total time for test duration
-    test_duration=time_stamp2-time_stamp2
+    test_duration = time_stamp2 - time_stamp1
 
     print("FTP Test Data", ftp_data)
+
     date = str(datetime.now()).split(",")[0].replace(" ", "-").split(".")[0]
-    model = ap.get_ap_model("192.168.208.22", "root", "Password@123xzsawq@!")
-    model_name = model[0][12:]
+
     test_setup_info = {
-        "AP Name": model_name,
+        "AP Name": "WAC505",
         "SSID": args.ssid,
-        "Test Duration": test_duration
+        "Number of Stations": "40",
+        "Test Duration": test_duration[:-7]
     }
 
     input_setup_info = {
         "IP": "192.168.208.22" ,
-        "user": "root"
+        "user": "root",
         "Contact": "support@candelatech.com"
     }
-    generate_report(date,
+    generate_report(ftp_data,
+                    date,
                     test_setup_info,
                     input_setup_info,
-                    ftp_data,
-                    report_path="/home/lanforge/html-reports/FTP-Test")
+                    graph_path="/home/lanforge/html-reports/FTP-Test")
 
 
 if __name__ == '__main__':
