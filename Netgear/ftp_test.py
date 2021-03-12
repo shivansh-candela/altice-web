@@ -75,7 +75,9 @@ class ftp_test(LFCliBase):
                 self.duration = self.convert_min_in_time(70)
         elif self.band == "Both":
             self.radio = ["wiphy0", "wiphy1"]
-            self.num_sta = 20
+
+            #if Both then number of stations are half for 2.4G and half for 5G
+            self.num_sta = self.num_sta // 2
             if self.file_size == "200MB":
                 self.duration = self.convert_min_in_time(20)
             elif self.file_size == "500MB":
@@ -438,7 +440,7 @@ def main():
     time_stamp2 = datetime.now()
 
     #total time for test duration
-    test_duration = time_stamp2 - time_stamp1
+    test_duration = str(time_stamp2 - time_stamp1)[:-7]
 
     print("FTP Test Data", ftp_data)
 
@@ -448,7 +450,7 @@ def main():
         "AP Name": "WAC505",
         "SSID": args.ssid,
         "Number of Stations": "40",
-        "Test Duration": test_duration[:-7]
+        "Test Duration": test_duration
     }
 
     input_setup_info = {
