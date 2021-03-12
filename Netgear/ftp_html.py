@@ -79,7 +79,7 @@ def add_pass_fail_table(result_data):
                     elif data["result"] == "Fail":
                         var1 = var1 + "<td style='background-color:Red'>Fail</td>"
             if c==0:
-                var1 = var1 + "<td>NA</td>"
+                var1 = var1 + "<td>N/A</td>"
 
     for size in [200000000,500000000,1000000000]:
         for d in ["Download","Upload"]:
@@ -92,7 +92,7 @@ def add_pass_fail_table(result_data):
                     elif data["result"] == "Fail":
                         var2 = var2 + "<td style='background-color:Red'>Fail</td>"
             if c==0:
-                var2 = var2 + "<td>NA</td>"
+                var2 = var2 + "<td>N/A</td>"
 
 
     for size in [200000000,500000000,1000000000]:
@@ -106,7 +106,7 @@ def add_pass_fail_table(result_data):
                     elif data["result"] == "Fail":
                         var3 = var3 + "<td style='background-color:Red'>Fail</td>"
             if c==0:
-                var3 = var3 + "<td>NA</td>"
+                var3 = var3 + "<td>N/A</td>"
 
 
 
@@ -169,9 +169,8 @@ def download_upload_time_table(result_data):
                 Sum = sum(data_time)
                 Len = len(data_time)
                 Avg = Sum // Len
-                string_data = "<span style='font-weight:bolder'>Min=</span>" + str(
-                    Min) + "," + "<span style='font-weight:bolder'>Max=</span>" + str(
-                    Max) + "," + "<span style='font-weight:bolder'>Avg=</span>" + str(Avg)
+                string_data = "<span style='font-weight:bolder'>Min=</span>" + str(Min)+"<br>" + "<span style='font-weight:bolder'>Max=</span>" + str(Max)+"<br>" + "<span style='font-weight:bolder'>Avg=</span>" + str(Avg)
+
                 if data["band"] == "2.4G" and data["direction"] == d and data["file_size"] == size:
                     c = c + 1
                     var1 = var1 + """<td style='text-align:center'>""" + string_data + """</td>"""
@@ -188,9 +187,8 @@ def download_upload_time_table(result_data):
                 Sum = sum(data_time)
                 Len = len(data_time)
                 Avg = Sum // Len
-                string_data = "<span style='font-weight:bolder'>Min=</span>" + str(
-                    Min) + "<br>" + "<span style='font-weight:bolder'>Max=</span>" + str(
-                    Max) + "<br>" + "<span style='font-weight:bolder'>Avg=</span>" + str(Avg)
+                string_data = "<span style='font-weight:bolder'>Min=</span>" + str(Min)+"<br>" + "<span style='font-weight:bolder'>Max=</span>" + str(Max)+"<br>" + "<span style='font-weight:bolder'>Avg=</span>" + str(Avg)
+
                 if data["band"] == "5G" and data["direction"] == d and data["file_size"] == size:
                     c = c + 1
                     var2 = var2 + """<td style='text-align:center'>""" + string_data + """</td>"""
@@ -207,9 +205,8 @@ def download_upload_time_table(result_data):
                 Sum = sum(data_time)
                 Len = len(data_time)
                 Avg = Sum // Len
-                string_data = "<span style='font-weight:bolder'>Min=</span>" + str(
-                    Min) + "," + "<span style='font-weight:bolder'>Max=</span>" + str(
-                    Max) + "," + "<span style='font-weight:bolder'>Avg=</span>" + str(Avg)
+                string_data = "<span style='font-weight:bolder'>Min=</span>" + str(Min)+"<br>" + "<span style='font-weight:bolder'>Max=</span>" + str(Max)+"<br>" + "<span style='font-weight:bolder'>Avg=</span>" + str(Avg)
+
                 if data["band"] == "Both" and data["direction"] == d and data["file_size"] == size:
                     c = c + 1
                     var3 = var3 + """<td style='text-align:center'>""" + string_data + """</td>"""
