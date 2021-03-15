@@ -258,6 +258,344 @@ def download_upload_time_table(result_data):
 
     return str(time_table)
 
+def graph_html(graph_path="",graph_name=""):
+    graph_html_obj = """
+    <h3>""" +graph_name+ """</h3> 
+      <img align='center' style='padding:15;margin:5;width:1000px;' src=""" + graph_path + """ border='1' />
+    <br><br>
+    """
+    return str(graph_html_obj)
+
+
+def bar_plot(ax, data, colors=None, total_width=0.8, single_width=1, legend=True):
+    # Check if colors where provided, otherwhise use the default color cycle
+    if colors is None:
+        colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
+
+    # Number of bars per group
+    n_bars = len(data)
+
+    # The width of a single bar
+    bar_width = total_width / n_bars
+
+    # List containing handles for the drawn bars, used for the legend
+    bars = []
+
+    # Iterate over all data
+    for i, (name, values) in enumerate(data.items()):
+        # The offset in x direction of that bar
+        x_offset = (i - n_bars / 2) * bar_width + bar_width / 2
+
+        # Draw a bar for every value of that type
+        for x, y in enumerate(values):
+            bar = ax.bar(x + x_offset, y, width=bar_width * single_width, color=colors[i % len(colors)])
+
+        # Add a handle to the last drawn bar, which we'll need for the legend
+        bars.append(bar[0])
+
+    # Draw legend if we need
+    if legend:
+        ax.legend(bars, data.keys())
+    ax.set_ylabel('Time in seconds')
+    ax.set_xlabel("stations")
+
+def generate_graph_1(result_data, x_axis, graph_path):
+    dict_of_graph = {}
+    color = []
+    graph_name = ""
+    count = 0
+
+    for data in result_data.values():
+        if data["band"] == "2.4G" and data["file_size"] == 200000000 and data["direction"] == "Download":
+            dict_of_graph["Download"] = data["time"]
+            color.append("Orange")
+            graph_name = "Small File Size (200MB) 40 Clients 2.4G-File Download Times(secs)"
+            count = count + 1
+        if data["band"] == "2.4G" and data["file_size"] == 200000000 and data["direction"] == "Upload":
+            dict_of_graph["Upload"] = data["time"]
+            color.append("Blue")
+            graph_name = "Small File Size (200MB) 40 Clients 2.4G-File Upload Times(secs)"
+            count = count + 1
+    if count == 2:
+        graph_name = "Small File Size (200MB) 40 Clients 2.4G-File Download and Upload Times(secs)"
+    if len(dict_of_graph) != 0:
+        fig, ax = plt.subplots()
+        bar_plot(ax, dict_of_graph, total_width=.8, single_width=.9, colors=color)
+        my_dpi = 96
+        figure = plt.gcf()  # get current figure
+        figure.set_size_inches(18, 6)
+
+        # when saving, specify the DPI
+        str(datetime.now()).split(",")[0].replace(" ", "-").split(".")[0]
+        plt.savefig(graph_path + "/image_1.png", dpi=my_dpi)
+        return str(graph_html(graph_path + "/image_1.png", graph_name))
+    else:
+        return ""
+
+
+def generate_graph_2(result_data, x_axis, graph_path):
+    dict_of_graph = {}
+    color = []
+    graph_name = ""
+    count = 0
+    for data in result_data.values():
+        if data["band"] == "2.4G" and data["file_size"] == 500000000 and data["direction"] == "Download":
+            dict_of_graph["Download"] = data["time"]
+            color.append("Orange")
+            graph_name = "Medium File Size (500MB) 40 Clients 2.4G-File Download Times(secs)"
+            count = count + 1
+        if data["band"] == "2.4G" and data["file_size"] == 500000000 and data["direction"] == "Upload":
+            dict_of_graph["Upload"] = data["time"]
+            color.append("Blue")
+            graph_name = "Medium File Size (500MB) 40 Clients 2.4G-File Upload Times(secs)"
+            count = count + 1
+    if count == 2:
+        graph_name = "Medium File Size (500MB) 40 Clients 2.4G-File Download and Upload Times(secs)"
+    if len(dict_of_graph) != 0:
+        fig, ax = plt.subplots()
+        bar_plot(ax, dict_of_graph, total_width=.8, single_width=.9, colors=color)
+        my_dpi = 96
+        figure = plt.gcf()  # get current figure
+        figure.set_size_inches(18, 6)
+
+        # when saving, specify the DPI
+        str(datetime.now()).split(",")[0].replace(" ", "-").split(".")[0]
+        plt.savefig(graph_path + "/image_2.png", dpi=my_dpi)
+        return str(graph_html(graph_path + "/image_2.png", graph_name))
+    else:
+        return ""
+
+
+def generate_graph_3(result_data, x_axis, graph_path):
+    dict_of_graph = {}
+    color = []
+    graph_name = ""
+    count = 0
+    for data in result_data.values():
+        if data["band"] == "2.4G" and data["file_size"] == 1000000000 and data["direction"] == "Download":
+            dict_of_graph["Download"] = data["time"]
+            color.append("Orange")
+            graph_name = "Big File Size (1000MB) 40 Clients 2.4G-File Download Times(secs)"
+            count = count + 1
+        if data["band"] == "2.4G" and data["file_size"] == 1000000000 and data["direction"] == "Upload":
+            dict_of_graph["Upload"] = data["time"]
+            color.append("Blue")
+            graph_name = "Big  File Size (1000MB) 40 Clients 2.4G-File Upload Times(secs)"
+            count = count + 1
+    if count == 2:
+        graph_name = "Big  File Size (1000MB) 40 Clients 2.4G-File Download and Upload Times(secs)"
+    if len(dict_of_graph) != 0:
+        fig, ax = plt.subplots()
+        bar_plot(ax, dict_of_graph, total_width=.8, single_width=.9, colors=color)
+        my_dpi = 96
+        figure = plt.gcf()  # get current figure
+        figure.set_size_inches(18, 6)
+
+        # when saving, specify the DPI
+        str(datetime.now()).split(",")[0].replace(" ", "-").split(".")[0]
+        plt.savefig(graph_path + "/image_3.png", dpi=my_dpi)
+        return str(graph_html(graph_path + "/image_3.png", graph_name))
+
+    else:
+        return ""
+
+
+def generate_graph_4(result_data, x_axis, graph_path):
+    dict_of_graph = {}
+    color = []
+    graph_name = ""
+    count = 0
+    for data in result_data.values():
+        if data["band"] == "5G" and data["file_size"] == 200000000 and data["direction"] == "Download":
+            dict_of_graph["Download"] = data["time"]
+            color.append("Orange")
+            graph_name = "Small File Size (200MB) 40 Clients 5G-File Download Times(secs)"
+            count = count + 1
+        if data["band"] == "5G" and data["file_size"] == 200000000 and data["direction"] == "Upload":
+            dict_of_graph["Upload"] = data["time"]
+            color.append("Blue")
+            graph_name = "Small File Size (200MB) 40 Clients 5G-File Upload Times(secs)"
+            count = count + 1
+    if count == 2:
+        graph_name = "Small File Size (200MB) 40 Clients 5G-File Download and Upload Times(secs)"
+    if len(dict_of_graph) != 0:
+        fig, ax = plt.subplots()
+        bar_plot(ax, dict_of_graph, total_width=.8, single_width=.9, colors=color)
+        my_dpi = 96
+        figure = plt.gcf()  # get current figure
+        figure.set_size_inches(18, 6)
+
+        # when saving, specify the DPI
+        str(datetime.now()).split(",")[0].replace(" ", "-").split(".")[0]
+        plt.savefig(graph_path + "/image_4.png", dpi=my_dpi)
+        return str(graph_html(graph_path + "/image_4.png", graph_name))
+    else:
+        return ""
+
+
+def generate_graph_5(result_data, x_axis, graph_path):
+    dict_of_graph = {}
+    color = []
+    graph_name = ""
+    count = 0
+    for data in result_data.values():
+        if data["band"] == "5G" and data["file_size"] == 500000000 and data["direction"] == "Download":
+            dict_of_graph["Download"] = data["time"]
+            color.append("Orange")
+            graph_name = "Medium File Size (500MB) 40 Clients 5G-File Download Times(secs)"
+            count = count + 1
+        if data["band"] == "5G" and data["file_size"] == 500000000 and data["direction"] == "Upload":
+            dict_of_graph["Upload"] = data["time"]
+            color.append("Blue")
+            graph_name = "Medium File Size (500MB) 40 Clients 5G-File Upload Times(secs)"
+            count = count + 1
+    if count == 2:
+        graph_name = "Medium File Size (500MB) 40 Clients 5G-File Download and Upload Times(secs)"
+    if len(dict_of_graph) != 0:
+        fig, ax = plt.subplots()
+        bar_plot(ax, dict_of_graph, total_width=.8, single_width=.9, colors=color)
+        my_dpi = 96
+        figure = plt.gcf()  # get current figure
+        figure.set_size_inches(18, 6)
+
+        # when saving, specify the DPI
+        str(datetime.now()).split(",")[0].replace(" ", "-").split(".")[0]
+        plt.savefig(graph_path + "/image_5.png", dpi=my_dpi)
+        return str(graph_html(graph_path + "/image_5.png", graph_name))
+    else:
+        return ""
+
+
+def generate_graph_6(result_data, x_axis, graph_path):
+    dict_of_graph = {}
+    color = []
+    graph_name = ""
+    count = 0
+    for data in result_data.values():
+        if data["band"] == "5G" and data["file_size"] == 1000000000 and data["direction"] == "Download":
+            dict_of_graph["Download"] = data["time"]
+            color.append("Orange")
+            graph_name = "Big File Size (1000MB) 40 Clients 5G-File Download Times(secs)"
+            count = count + 1
+        if data["band"] == "5G" and data["file_size"] == 1000000000 and data["direction"] == "Upload":
+            dict_of_graph["Upload"] = data["time"]
+            color.append("Blue")
+            graph_name = "Big File Size (1000MB) 40 Clients 5G-File Upload Times(secs)"
+            count = count + 1
+    if count == 2:
+        graph_name = "Big File Size (1000MB) 40 Clients 5G-File Download and Upload Times(secs)"
+    if len(dict_of_graph) != 0:
+        fig, ax = plt.subplots()
+        bar_plot(ax, dict_of_graph, total_width=.8, single_width=.9, colors=color)
+        my_dpi = 96
+        figure = plt.gcf()  # get current figure
+        figure.set_size_inches(18, 6)
+
+        # when saving, specify the DPI
+        str(datetime.now()).split(",")[0].replace(" ", "-").split(".")[0]
+        plt.savefig(graph_path + "/image_6.png", dpi=my_dpi)
+        return str(graph_html(graph_path + "/image_6.png", graph_name))
+    else:
+        return ""
+
+
+def generate_graph_7(result_data, x_axis, graph_path):
+    dict_of_graph = {}
+    color = []
+    graph_name = ""
+    count = 0
+    for data in result_data.values():
+        if data["band"] == "Both" and data["file_size"] == 200000000 and data["direction"] == "Download":
+            dict_of_graph["Download"] = data["time"]
+            color.append("Orange")
+            graph_name = "Small File Size (200MB) 40 Clients Both-File Download Times(secs)"
+            count = count + 1
+        if data["band"] == "Both" and data["file_size"] == 200000000 and data["direction"] == "Upload":
+            dict_of_graph["Upload"] = data["time"]
+            color.append("Blue")
+            graph_name = "Small File Size (200MB) 40 Clients Both-File Upload Times(secs)"
+            count = count + 1
+    if count == 2:
+        graph_name = "Small File Size (200MB) 40 Clients Both-File Download and Upload Times(secs)"
+    if len(dict_of_graph) != 0:
+        fig, ax = plt.subplots()
+        bar_plot(ax, dict_of_graph, total_width=.8, single_width=.9, colors=color)
+        my_dpi = 96
+        figure = plt.gcf()  # get current figure
+        figure.set_size_inches(18, 6)
+
+        # when saving, specify the DPI
+        str(datetime.now()).split(",")[0].replace(" ", "-").split(".")[0]
+        plt.savefig(graph_path + "/image_7.png", dpi=my_dpi)
+        return str(graph_html(graph_path + "/image_7.png", graph_name))
+    else:
+        return ""
+
+
+def generate_graph_8(result_data, x_axis, graph_path):
+    dict_of_graph = {}
+    color = []
+    graph_name = ""
+    count = 0
+    for data in result_data.values():
+        if data["band"] == "Both" and data["file_size"] == 500000000 and data["direction"] == "Download":
+            dict_of_graph["Download"] = data["time"]
+            color.append("Orange")
+            graph_name = "Medium File Size (500MB) 40 Clients Both-File Download Times(secs)"
+            count = count + 1
+        if data["band"] == "Both" and data["file_size"] == 500000000 and data["direction"] == "Upload":
+            dict_of_graph["Upload"] = data["time"]
+            color.append("Blue")
+            graph_name = "Medium File Size (500MB) 40 Clients Both-File Upload Times(secs)"
+            count = count + 1
+    if count == 2:
+        graph_name = "Medium File Size (500MB) 40 Clients Both-File Download and Upload Times(secs)"
+    if len(dict_of_graph) != 0:
+        fig, ax = plt.subplots()
+        bar_plot(ax, dict_of_graph, total_width=.8, single_width=.9, colors=color)
+        my_dpi = 96
+        figure = plt.gcf()  # get current figure
+        figure.set_size_inches(18, 6)
+
+        # when saving, specify the DPI
+        str(datetime.now()).split(",")[0].replace(" ", "-").split(".")[0]
+        plt.savefig(graph_path + "/image_8.png", dpi=my_dpi)
+        return str(graph_html(graph_path + "/image_8.png", graph_name))
+    else:
+        return ""
+
+
+def generate_graph_9(result_data, x_axis, graph_path):
+    dict_of_graph = {}
+    color = []
+    graph_name = ""
+    count = 0
+    for data in result_data.values():
+        if data["band"] == "Both" and data["file_size"] == 1000000000 and data["direction"] == "Download":
+            dict_of_graph["Download"] = data["time"]
+            color.append("Orange")
+            graph_name = "Big File Size (1000MB) 40 Clients Both-File Download Times(secs)"
+            count = count + 1
+        if data["band"] == "Both" and data["file_size"] == 1000000000 and data["direction"] == "Upload":
+            dict_of_graph["Upload"] = data["time"]
+            color.append("Blue")
+            graph_name = "Big File Size (1000MB) 40 Clients Both-File Upload Times(secs)"
+            count = count + 1
+    if count == 2:
+        graph_name = "Big File Size (1000MB) 40 Clients Both-File Download and Upload Times(secs)"
+    if len(dict_of_graph) != 0:
+        fig, ax = plt.subplots()
+        bar_plot(ax, dict_of_graph, total_width=.8, single_width=.9, colors=color)
+        my_dpi = 96
+        figure = plt.gcf()  # get current figure
+        figure.set_size_inches(18, 6)
+
+        # when saving, specify the DPI
+        str(datetime.now()).split(",")[0].replace(" ", "-").split(".")[0]
+        plt.savefig(graph_path + "/image_9.png", dpi=my_dpi)
+        return str(graph_html(graph_path + "/image_9.png", graph_name))
+    else:
+        return ""
 
 def input_setup_info_table(input_setup_info=None):
     if input_setup_info is None:
@@ -310,7 +648,16 @@ def generate_report(ftp_data=None,
                   test_setup_information(test_setup_data) + \
                   test_objective() + \
                   add_pass_fail_table(ftp_data) + \
-                  download_upload_time_table(ftp_data) +\
+                  download_upload_time_table(ftp_data) + \
+                  generate_graph_1(result_data, x_axis, graph_path=reports_root) + \
+                  generate_graph_2(result_data, x_axis, graph_path=reports_root) + \
+                  generate_graph_3(result_data, x_axis, graph_path=reports_root) + \
+                  generate_graph_4(result_data, x_axis, graph_path=reports_root) + \
+                  generate_graph_5(result_data, x_axis, graph_path=reports_root) + \
+                  generate_graph_6(result_data, x_axis, graph_path=reports_root) + \
+                  generate_graph_7(result_data, x_axis, graph_path=reports_root) + \
+                  generate_graph_8(result_data, x_axis, graph_path=reports_root) + \
+                  generate_graph_9(result_data, x_axis, graph_path=reports_root) + \
                   input_setup_info_table(input_setup_info)
 
 
