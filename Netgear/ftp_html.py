@@ -29,7 +29,7 @@ def report_banner(date):
                     <br><br>
                  """
     return str(banner_data)
-def test_objective(objective= "The FTP Test is designed to test the performance of the Netgear Access Point.File Transfer Protocol is a standard network protocol used to transfer files between computers(a client and server) over a TCP/IP network. "):
+def test_objective(objective= 'This FTP Test is used to "Verify that N clients connected on Specified band and can simultaneously download some amount of file from FTP server and measuring the time taken by client to Download/Upload the file."'):
     test_objective = """
                     <!-- Test Objective -->
                     <h3 align='left'>Objective</h3> 
