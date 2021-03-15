@@ -632,6 +632,9 @@ def generate_report(ftp_data=None,
     # Need to pass this to test_setup_information()
     input_setup_info = input_setup_info
     test_setup_data = test_setup_info
+    x_axis = []
+    for i in range(1, 41, 1):
+        x_axis.append(i)
 
     reports_root = graph_path + "/" + str(date)
     if path.exists(graph_path):
