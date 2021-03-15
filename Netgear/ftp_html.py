@@ -297,7 +297,7 @@ def bar_plot(ax, data, colors=None, total_width=0.8, single_width=1, legend=True
     if legend:
         ax.legend(bars, data.keys())
     ax.set_ylabel('Time in seconds')
-    ax.set_xlabel("stations")
+    ax.set_xlabel("Stations")
 
 def generate_graph_1(result_data, x_axis, graph_path):
     dict_of_graph = {}
@@ -649,15 +649,15 @@ def generate_report(ftp_data=None,
                   test_objective() + \
                   add_pass_fail_table(ftp_data) + \
                   download_upload_time_table(ftp_data) + \
-                  generate_graph_1(result_data, x_axis, graph_path=reports_root) + \
-                  generate_graph_2(result_data, x_axis, graph_path=reports_root) + \
-                  generate_graph_3(result_data, x_axis, graph_path=reports_root) + \
-                  generate_graph_4(result_data, x_axis, graph_path=reports_root) + \
-                  generate_graph_5(result_data, x_axis, graph_path=reports_root) + \
-                  generate_graph_6(result_data, x_axis, graph_path=reports_root) + \
-                  generate_graph_7(result_data, x_axis, graph_path=reports_root) + \
-                  generate_graph_8(result_data, x_axis, graph_path=reports_root) + \
-                  generate_graph_9(result_data, x_axis, graph_path=reports_root) + \
+                  generate_graph_1(ftp_data, x_axis, graph_path=reports_root) + \
+                  generate_graph_2(ftp_data, x_axis, graph_path=reports_root) + \
+                  generate_graph_3(ftp_data, x_axis, graph_path=reports_root) + \
+                  generate_graph_4(ftp_data, x_axis, graph_path=reports_root) + \
+                  generate_graph_5(ftp_data, x_axis, graph_path=reports_root) + \
+                  generate_graph_6(ftp_data, x_axis, graph_path=reports_root) + \
+                  generate_graph_7(ftp_data, x_axis, graph_path=reports_root) + \
+                  generate_graph_8(ftp_data, x_axis, graph_path=reports_root) + \
+                  generate_graph_9(ftp_data, x_axis, graph_path=reports_root) + \
                   input_setup_info_table(input_setup_info)
 
 
