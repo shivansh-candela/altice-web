@@ -1,13 +1,13 @@
-"""ftp_test.py will create stations and endpoints to generate and verify layer-4 traffic over an ftp connection.
-find out download/upload time according to file size.
-This script will monitor the bytes-rd attribute of the endpoints.
+""" ftp_test.py will create stations and endpoints to generate and verify layer-4 traffic over an ftp connection.
+    find out download/upload time according to file size.
+    This script will monitor the bytes-rd attribute of the endpoints.
 
-Use './ftp_test.py --help' to see command line usage and options
-Copyright 2021 Candela Technologies Inc
-License: Free to distribute and modify. LANforge systems must be licensed.
+    Use './ftp_test.py --help' to see command line usage and options
+    -Jitendrakumar Kushavah
+    Copyright 2021 Candela Technologies Inc
+    License: Free to distribute and modify. LANforge systems must be licensed.
 """
 import sys
-#import datetime
 from ftp_html import *
 import paramiko
 if sys.version_info[0] != 3:
@@ -51,7 +51,6 @@ class ftp_test(LFCliBase):
         self.port_util = realm.PortUtils(self.local_realm)
         self.cx_profile.requests_per_ten = self.requests_per_ten
 
-
         print("Test is Initialized")
 
     def set_values(self):
@@ -60,6 +59,8 @@ class ftp_test(LFCliBase):
         if self.band == "5G":
             self.radio = ["wiphy0"]
             if self.file_size == "200MB":
+
+                #providing time duration for Pass or fail criteria
                 self.duration = self.convert_min_in_time(13)
             elif self.file_size == "500MB":
                 self.duration = self.convert_min_in_time(30)
@@ -91,19 +92,25 @@ class ftp_test(LFCliBase):
         elif self.file_size == "1000MB" :
             self.file_size = 1000000000
 
-
     def precleanup(self):
         self.count=0
+
+        #delete everything in the GUI before starting the script
+        try:
+            self.local_realm.load("BLANK")
+        except:
+            print("Couldn't load 'BLANK' Test configurations")
+
         for rad in self.radio:
             if rad == "wiphy0":
 
-                #select an mode
+                #select mode
                 self.station_profile.mode = 10
                 self.count=self.count+1
 
             elif rad == "wiphy1":
 
-                # select an mode
+                # select mode
                 self.station_profile.mode = 6
                 self.count = self.count + 1
 
@@ -132,7 +139,7 @@ class ftp_test(LFCliBase):
                                                        radio=rad)
 
             #cleans stations
-            self.station_profile.cleanup(self.station_list , debug_=self.debug)
+            self.station_profile.cleanup(self.station_list , delay=1, debug_=self.debug)
             LFUtils.wait_until_ports_disappear(base_url=self.lfclient_url,
                                                port_list=self.station_list,
                                                debug=self.debug)
@@ -207,7 +214,7 @@ class ftp_test(LFCliBase):
                                            user="lanforge", passwd="lanforge",
                                            source="", upload_name=client_list[client_num])
 
-            # check Both band present then build stations with another station list
+            #check Both band present then build stations with another station list
             if self.count == 2:
                 self.station_list = self.station_list1
                 self.station_profile.mode = 6
@@ -221,14 +228,12 @@ class ftp_test(LFCliBase):
 
 
     def stop(self):
-        #for rad in self.radio:
         self.cx_profile.stop_cx()
         self.station_profile.admin_down()
 
     def postcleanup(self):
-        #for rad in self.radio:
         self.cx_profile.cleanup()
-        self.station_profile.cleanup()
+        self.station_profile.cleanup(self.station_profile.station_names, delay=1, debug_=self.debug)
         LFUtils.wait_until_ports_disappear(base_url=self.lfclient_url, port_list=self.station_profile.station_names,
                                    debug=self.debug)
 
