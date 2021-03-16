@@ -295,7 +295,7 @@ def bar_plot(ax, data, colors=None, total_width=0.8, single_width=1, legend=True
 
     # Draw legend if we need
     if legend:
-        ax.legend(bars, data.keys(),loc='upper right')
+        ax.legend(bars, data.keys(), bbox_to_anchor=(1.1,1.05), loc='upper right')
     ax.set_ylabel('Time in seconds')
     ax.set_xlabel("Stations")
 
@@ -633,7 +633,7 @@ def generate_report(ftp_data=None,
     input_setup_info = input_setup_info
     test_setup_data = test_setup_info
     x_axis = []
-    for i in range(1, 41, 1):
+    for i in range(40):
         x_axis.append(i)
 
     reports_root = graph_path + "/" + str(date)
