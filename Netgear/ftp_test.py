@@ -104,13 +104,13 @@ class ftp_test(LFCliBase):
         for rad in self.radio:
             if rad == "wiphy0":
 
-                #select mode
+                #select mode(All stations will connects to 5G)
                 self.station_profile.mode = 10
                 self.count=self.count+1
 
             elif rad == "wiphy1":
 
-                # select mode
+                # select mode(All stations will connects to 2.4G)
                 self.station_profile.mode = 6
                 self.count = self.count + 1
 
@@ -118,6 +118,8 @@ class ftp_test(LFCliBase):
             if self.count == 2:
                 self.sta_start_id = self.num_sta
                 self.num_sta = 2 * (self.num_sta)
+
+                #if Both band then first 20 stations will connects to 5G
                 self.station_profile.mode = 10
                 self.cx_profile.cleanup()
 
@@ -217,6 +219,8 @@ class ftp_test(LFCliBase):
             #check Both band present then build stations with another station list
             if self.count == 2:
                 self.station_list = self.station_list1
+
+                # if Both band then another 20 stations will connects to 2.4G
                 self.station_profile.mode = 6
         print("Test Build done")
 
