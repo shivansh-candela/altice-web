@@ -383,9 +383,9 @@ def main():
     #parser.add_argument('--radios',nargs="+",help='--radio to use on LANforge for 5G and 2G', default=["wiphy0","wiphy1"])
     
     # Test variables
-    parser.add_argument('--bands', nargs="+", help='--bands', default=["5G","2.4G","Both"])
-    parser.add_argument('--directions', nargs="+",help='--List with Upload and Download Options', default=["Download","Upload"])
-    parser.add_argument('--file_sizes', nargs="+",help='--File Size defaults ["200MB","500MB","1000MB"]', default=["200MB","500MB","1000MB"])
+    parser.add_argument('--bands', nargs="+", help='--bands defaults ["5G","2.4G","Both"]', default=["5G","2.4G","Both"])
+    parser.add_argument('--directions', nargs="+", help='--directions defaults ["Download","Upload"]', default=["Download","Upload"])
+    parser.add_argument('--file_sizes', nargs="+", help='--File Size defaults ["200MB","500MB","1000MB"]', default=["200MB","500MB","1000MB"])
     parser.add_argument('--num_stations', type=int, help='--num_client is number of stations', default=40)
     
     args = parser.parse_args()
