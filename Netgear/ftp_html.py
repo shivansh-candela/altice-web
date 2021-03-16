@@ -15,7 +15,7 @@ def report_banner(date):
                     <meta name='viewport' content='width=device-width, initial-scale=1' />
                     <title>LANforge Report</title>                        
                     </head>
-                    <title>DFS TEST </title></head>
+                    <title>FTP Test </title></head>
                     <body>
                     <div class='Section report_banner-1000x205' style='background-image:url("/home/lanforge/LANforgeGUI_5.4.3/images/report_banner-1000x205.jpg");background-repeat:no-repeat;padding:0;margin:0;min-width:1000px; min-height:205px;width:1000px; height:205px;max-width:1000px; max-height:205px;'>                
                     <br>
@@ -230,12 +230,12 @@ def download_upload_time_table(result_data):
                       </tr>
                       <tr>
                         <th></th>
-                        <th>Download</th>
-                        <th>Upload</th>
-                          <th>Download</th>
-                        <th>Upload</th>
-                          <th>Download</th>
-                        <th>Upload</th>
+                        <th>Download<br>(sec)</br></th>
+                        <th>Upload<br>(sec)</br></th>
+                          <th>Download<br>(sec)</br></th>
+                        <th>Upload<br>(sec)</br></th>
+                          <th>Download<br>(sec)</br></th>
+                        <th>Upload<br>(sec)</br></th>
                       </tr>
                       <tr>
                         """ + var1 + """
@@ -295,7 +295,7 @@ def bar_plot(ax, data, colors=None, total_width=0.8, single_width=1, legend=True
 
     # Draw legend if we need
     if legend:
-        ax.legend(bars, data.keys())
+        ax.legend(bars, data.keys(),loc='upper right')
     ax.set_ylabel('Time in seconds')
     ax.set_xlabel("Stations")
 
