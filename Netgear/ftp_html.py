@@ -63,211 +63,151 @@ def test_setup_information(test_setup_data=None):
                         <br>
                         """
     return str(setup_information)
-def add_pass_fail_table(result_data):
-    var1="<th>40 Clients-2.4GHz</th>"
-    var2="<th>40 Clients-5GHz</th>"
-    var3=" <th>20+20 Clients-2.4GHz+5GHz</th>"
-
-    for size in [200000000,500000000,1000000000]:
-        for d in ["Download","Upload"]:
-            c=0
-            for data in result_data.values():
-                if data["band"] == "2.4G" and data["direction"] == d and data["file_size"] == size :
-                    c=c+1
-                    if data["result"] == "Pass":
-                        var1 = var1 + "<td style='background-color:Green'>Pass</td>"
-                    elif data["result"] == "Fail":
-                        var1 = var1 + "<td style='background-color:Red'>Fail</td>"
-            if c==0:
-                var1 = var1 + "<td>N/A</td>"
-
-    for size in [200000000,500000000,1000000000]:
-        for d in ["Download","Upload"]:
-            c=0
-            for data in result_data.values():
-                if data["band"] == "5G" and data["direction"] == d and data["file_size"] == size :
-                    c=c+1
-                    if data["result"] == "Pass":
-                        var2 = var2 + "<td style='background-color:Green'>Pass</td>"
-                    elif data["result"] == "Fail":
-                        var2 = var2 + "<td style='background-color:Red'>Fail</td>"
-            if c==0:
-                var2 = var2 + "<td>N/A</td>"
 
 
-    for size in [200000000,500000000,1000000000]:
-        for d in ["Download","Upload"]:
-            c=0
-            for data in result_data.values():
-                if data["band"] == "Both" and data["direction"] == d and data["file_size"] == size :
-                    c=c+1
-                    if data["result"] == "Pass":
-                        var3 = var3 + "<td style='background-color:Green'>Pass</td>"
-                    elif data["result"] == "Fail":
-                        var3 = var3 + "<td style='background-color:Red'>Fail</td>"
-            if c==0:
-                var3 = var3 + "<td>N/A</td>"
+def pass_fail_description(data=" This Table will give Pass/Fail results. "):
+    pass_fail_info = """
+                        <!-- Radar Detect status -->
+                        <h3 align='left'>PASS/FAIL Results</h3> 
+                        <p align='left' width='900'>""" + str(data) + """</p>
+                        <br>
+                    """
+    return str(pass_fail_info)
 
 
-
-
-    table_info="""
-                <table border="1" width="1000px" cellpadding="2" cellspacing="0">
-                     <th style="width:1000px;background-color:grey">PASS/FAIL Results</th>
-                    </table>
+def download_upload_time_description(data=" This Table will FTP Download/Upload Time of Clients."):
+    download_upload_time= """
+                    <!-- Radar Detect status -->
+                    <h3 align='left'>File Download/Upload Time (sec)</h3> 
+                    <p align='left' width='900'>""" + str(data) + """</p>
                     <br>
-                    <!-- Table information -->
-                    <p align='left' width='900'>This Table will give Pass/Fail Results.</p>
-                    <br>
-                    <table border="1" width="1000px" cellpadding="2" cellspacing="0">
-                     <tr>
-                        <th></th>
-                        <th colspan="2">Small File (200MB)</th>
-                        <th colspan="2">Medium File (500MB)</th>
-                        <th colspan="2">Big File (1000MB)</th>
-                      </tr>
-                      <tr>
-                        <th></th>
-                        <th>Download</th>
-                        <th>Upload</th>
-                          <th>Download</th>
-                        <th>Upload</th>
-                          <th>Download</th>
-                        <th>Upload</th>
-                      </tr>
-                      <tr>
-                        """+ var1 +"""
-                        
-                     </tr>
-                      <tr>
-                        """+ var2 +"""
-                         
-                     </tr>
-                       <tr>
-                        """+ var3 +"""
-                         
-                     </tr>
-                    </table>
-                    <br>
-    
                 """
-    return str(table_info)
+    return str(download_upload_time)
 
 
-def download_upload_time_table(result_data):
-    var1 = "<th>40 Clients-2.4GHz</th>"
-    var2 = "<th>40 Clients-5GHz</th>"
-    var3 = " <th>20+20 Clients-2.4GHz+5GHz</th>"
+def add_pass_fail_table(result_data, row_head_list, col_head_list):
+    var_row = "<th></th>"
+    for row in col_head_list:
+        var_row = var_row + "<th>" + str(row) + "</th>"
+    list_data = []
+    dict_data = {}
+    bands = result_data[1]["bands"]
+    file_sizes = result_data[1]["file_sizes"]
+    directions = result_data[1]["directions"]
+    for b in bands:
+        final_data = ""
+        for size in file_sizes:
+            for d in directions:
+                for data in result_data.values():
+                    if data["band"] == b and data["direction"] == d and data["file_size"] == size:
+                        if data["result"] == "Pass":
+                            final_data = final_data + "<td style='background-color:Green'>Pass</td>"
+                        elif data["result"] == "Fail":
+                            final_data = final_data + "<td style='background-color:Red'>Fail</td>"
 
-    for size in [200000000,500000000,1000000000]:
-        for d in ["Download", "Upload"]:
-            c = 0
-            for data in result_data.values():
-                data_time = data['time']
-                Min = min(data_time)
-                Max = max(data_time)
-                Sum = sum(data_time)
-                Len = len(data_time)
-                Avg = Sum // Len
-                string_data = "<span style='font-weight:bolder'>Min=</span>" + str(Min)+"<br>" + "<span style='font-weight:bolder'>Max=</span>" + str(Max)+"<br>" + "<span style='font-weight:bolder'>Avg=</span>" + str(Avg)
+        list_data.append(final_data)
 
-                if data["band"] == "2.4G" and data["direction"] == d and data["file_size"] == size:
-                    c = c + 1
-                    var1 = var1 + """<td style='text-align:center'>""" + string_data + """</td>"""
-            if c == 0:
-                var1 = var1 + "<td style='text-align:center'><span style='font-weight:bolder'>Min</span>=N/A<br><span style='font-weight:bolder'>Max</span>=N/A<br><span style='font-weight:bolder'>Avg</span>=N/A</td>"
+    print(list_data)
+    j = 0
+    for i in row_head_list:
+        dict_data[i] = list_data[j]
+        j = j + 1
+    print(dict_data)
+    var_col = ""
+    for col in row_head_list:
+        var_col = var_col + "<tr><td>" + str(col) + "</td><!-- Add Variable Here -->" + str(
+            dict_data[col]) + "</tr>"
 
-    for size in [200000000,500000000,1000000000]:
-        for d in ["Download", "Upload"]:
-            c = 0
-            for data in result_data.values():
-                data_time = data['time']
-                Min = min(data_time)
-                Max = max(data_time)
-                Sum = sum(data_time)
-                Len = len(data_time)
-                Avg = Sum // Len
-                string_data = "<span style='font-weight:bolder'>Min=</span>" + str(Min)+"<br>" + "<span style='font-weight:bolder'>Max=</span>" + str(Max)+"<br>" + "<span style='font-weight:bolder'>Avg=</span>" + str(Avg)
+    pass_fail_table = """
+                      <!--  Radar Detected Table -->
+                      <table width='1000px' border='1' cellpadding='2' cellspacing='0' >
 
-                if data["band"] == "5G" and data["direction"] == d and data["file_size"] == size:
-                    c = c + 1
-                    var2 = var2 + """<td style='text-align:center'>""" + string_data + """</td>"""
-            if c == 0:
-                var2 = var2 + "<td style='text-align:center'><span style='font-weight:bolder'>Min</span>=N/A<br><span style='font-weight:bolder'>Max</span>=N/A<br><span style='font-weight:bolder'>Avg</span>=N/A</td>"
-
-    for size in [200000000,500000000,1000000000]:
-        for d in ["Download", "Upload"]:
-            c = 0
-            for data in result_data.values():
-                data_time = data['time']
-                Min = min(data_time)
-                Max = max(data_time)
-                Sum = sum(data_time)
-                Len = len(data_time)
-                Avg = Sum // Len
-                string_data = "<span style='font-weight:bolder'>Min=</span>" + str(Min)+"<br>" + "<span style='font-weight:bolder'>Max=</span>" + str(Max)+"<br>" + "<span style='font-weight:bolder'>Avg=</span>" + str(Avg)
-
-                if data["band"] == "Both" and data["direction"] == d and data["file_size"] == size:
-                    c = c + 1
-                    var3 = var3 + """<td style='text-align:center'>""" + string_data + """</td>"""
-            if c == 0:
-                var3 = var3 + "<td style='text-align:center'><span style='font-weight:bolder'>Min</span>=N/A<br><span style='font-weight:bolder'>Max</span>=N/A<br><span style='font-weight:bolder'>Avg</span>=N/A</td>"
-
-    time_table = """
-                   <table border="1" width="1000px" cellpadding="2" cellspacing="0">
-                     <th style="width:1000px;background-color:grey">File Download/Upload Time (sec)</th>
-                    </table>
-                    <br>
-                    <!-- Table information -->
-                    <p align='left' width='900'>This Table will give  FTP Download/Upload Time of Clients.</p>
-                    <br>
-                    <table border="1" width="1000px" cellpadding="2" cellspacing="0">
-                     <tr>
-                        <th></th>
-                        <th colspan="2">Small File (200MB)</th>
-                        <th colspan="2">Medium File (500MB)</th>
-                        <th colspan="2">Big File (1000MB)</th>
-                      </tr>
-                      <tr>
-                        <th></th>
-                        <th>Download<br>(sec)</br></th>
-                        <th>Upload<br>(sec)</br></th>
-                          <th>Download<br>(sec)</br></th>
-                        <th>Upload<br>(sec)</br></th>
-                          <th>Download<br>(sec)</br></th>
-                        <th>Upload<br>(sec)</br></th>
-                      </tr>
-                      <tr>
-                        """ + var1 + """
-
-                     </tr>
-                      <tr>
-                        """ + var2 + """
-
-                     </tr>
-                       <tr>
-                        """ + var3 + """
-
-                     </tr>
-                    </table>
-                    <br> 
+                        <table width='1000px' border='1' >
+                          <tr>
+                              """ + str(var_row) + """
+                          </tr>
+                          """ + str(var_col) + """
+                       </table>
+                      </table>
+                      <br><br><br><br><br><br><br>
+                      """
+    return pass_fail_table
 
 
+def download_upload_time_table(result_data, row_head_list, col_head_list):
+    var_row = "<th></th>"
+    for row in col_head_list:
+        var_row = var_row + "<th>" + str(row) + "</th>"
+    list_data = []
+    dict_data = {}
+    bands = result_data[1]["bands"]
+    file_sizes = result_data[1]["file_sizes"]
+    directions = result_data[1]["directions"]
+    for b in bands:
+        final_data = ""
+        for size in file_sizes:
+            for d in directions:
+                for data in result_data.values():
+                    data_time = data['time']
+                    if data_time.count(0) == 0:
+                        Min = min(data_time)
+                        Max = max(data_time)
+                        Sum = sum(data_time)
+                        Len = len(data_time)
+                        Avg = Sum // Len
+                    elif data_time.count(0) == len(data_time):
+                        Min = "-"
+                        Max = "-"
+                        Avg = "-"
+                    else:
+                        data_time = [i for i in data_time if i != 0]
+                        Min = min(data_time)
+                        Max = max(data_time)
+                        Sum = sum(data_time)
+                        Len = len(data_time)
+                        Avg = Sum // Len
+                    string_data = "Min=" + str(Min) + ",Max=" + str(Max) + ",Avg=" + str(Avg) + " (sec)"
+                    if data["band"] == b and data["direction"] == d and data["file_size"] == size:
+                        final_data = final_data + """<td>""" + string_data + """</td>"""
 
-    """
+        list_data.append(final_data)
 
-    return str(time_table)
+    print(list_data)
+    j = 0
+    for i in row_head_list:
+        dict_data[i] = list_data[j]
+        j = j + 1
+    print(dict_data)
+    var_col = ""
+    for col in row_head_list:
+        var_col = var_col + "<tr><td>" + str(col) + "</td><!-- Add Variable Here -->" + str(
+            dict_data[col]) + "</tr>"
 
-def graph_html(graph_path="",graph_name=""):
+    download_upload_table = """
+                        <!--  Radar Detected Table -->
+                        <table width='1000px' border='1' cellpadding='2' cellspacing='0' >
+
+                          <table width='1000px' border='1' >
+                            <tr>
+                                """ + str(var_row) + """
+                            </tr>
+                            """ + str(var_col) + """
+                         </table>
+                        </table>
+                        <br><br><br><br><br><br><br>
+                        """
+    return download_upload_table
+def graph_html(graph_path="",graph_name="",graph_description=""):
     graph_html_obj = """
     <h3>""" +graph_name+ """</h3> 
+    <p>""" +graph_description+ """</p>
       <img align='center' style='padding:15;margin:5;width:1000px;' src=""" + graph_path + """ border='1' />
     <br><br>
     """
     return str(graph_html_obj)
 
 
-def bar_plot(ax, data, colors=None, total_width=0.8, single_width=1, legend=True):
+def bar_plot(ax,x_axis, data, colors=None, total_width=0.8, single_width=1, legend=True):
     # Check if colors where provided, otherwhise use the default color cycle
     if colors is None:
         colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
@@ -295,308 +235,55 @@ def bar_plot(ax, data, colors=None, total_width=0.8, single_width=1, legend=True
 
     # Draw legend if we need
     if legend:
-        ax.legend(bars, data.keys(), bbox_to_anchor=(1.1,1.05), loc='upper right')
+        ax.legend(bars, data.keys(),bbox_to_anchor=(1.1,1.05),loc='upper right')
     ax.set_ylabel('Time in seconds')
-    ax.set_xlabel("Stations")
+    ax.set_xlabel("stations")
+    x_data = x_axis
+    idx = np.asarray([i for i in range(len(x_data))])
+    ax.set_xticks(idx)
 
-def generate_graph_1(result_data, x_axis, graph_path):
+    ax.set_xticklabels(x_data)
+
+def generate_graph(result_data, x_axis,band,size,graph_path):
+    # bands = result_data[1]["bands"]
+    # file_sizes = result_data[1]["file_sizes"]
+    num_stations = result_data[1]["num_stations"]
+    # for b in bands:
+    #     for size in file_sizes:
+
     dict_of_graph = {}
     color = []
     graph_name = ""
+    graph_description=""
     count = 0
-
     for data in result_data.values():
-        if data["band"] == "2.4G" and data["file_size"] == 200000000 and data["direction"] == "Download":
+        if data["band"] == band and data["file_size"] == size and data["direction"] == "Download":
             dict_of_graph["Download"] = data["time"]
             color.append("Orange")
-            graph_name = "Small File Size (200MB) 40 Clients 2.4G-File Download Times(secs)"
+            graph_name = "File size "+ size +" " + str(num_stations) + " Clients " +band+ "-File Download Times(secs)"
+            graph_description =  "Out of "+ str(data["num_stations"])+ " clients, "+ str(data["num_stations"] - data["time"].count(0))+ " are able to download " + "within " + str(data["duration"]) + " min."
             count = count + 1
-        if data["band"] == "2.4G" and data["file_size"] == 200000000 and data["direction"] == "Upload":
+        if data["band"] == band and data["file_size"] == size and data["direction"] == "Upload":
             dict_of_graph["Upload"] = data["time"]
             color.append("Blue")
-            graph_name = "Small File Size (200MB) 40 Clients 2.4G-File Upload Times(secs)"
+            graph_name = "File size "+ size +" " + str(num_stations) + " Clients " +band+ "-File Upload Times(secs)"
+            graph_description = graph_description + "Out of " + str(data["num_stations"]) + " clients, " + str(
+                data["num_stations"] - data["time"].count(0)) + " are able to upload " + "within " +str(data["duration"]) + " min."
             count = count + 1
     if count == 2:
-        graph_name = "Small File Size (200MB) 40 Clients 2.4G-File Download and Upload Times(secs)"
+        graph_name = "File size "+ size +" " + str(num_stations) + " Clients " +band+ "-File Download and Upload Times(secs)"
     if len(dict_of_graph) != 0:
         fig, ax = plt.subplots()
-        bar_plot(ax, dict_of_graph, total_width=.8, single_width=.9, colors=color)
+        bar_plot(ax, x_axis, dict_of_graph, total_width=.8, single_width=.9, colors=color)
         my_dpi = 96
         figure = plt.gcf()  # get current figure
         figure.set_size_inches(18, 6)
 
         # when saving, specify the DPI
-        str(datetime.now()).split(",")[0].replace(" ", "-").split(".")[0]
-        plt.savefig(graph_path + "/image_1.png", dpi=my_dpi)
-        return str(graph_html(graph_path + "/image_1.png", graph_name))
+        plt.savefig(graph_path + "/image"+band+size+".png", dpi=my_dpi)
+        return str(graph_html(graph_path + "/image"+band+size+".png", graph_name,graph_description))
     else:
         return ""
-
-
-def generate_graph_2(result_data, x_axis, graph_path):
-    dict_of_graph = {}
-    color = []
-    graph_name = ""
-    count = 0
-    for data in result_data.values():
-        if data["band"] == "2.4G" and data["file_size"] == 500000000 and data["direction"] == "Download":
-            dict_of_graph["Download"] = data["time"]
-            color.append("Orange")
-            graph_name = "Medium File Size (500MB) 40 Clients 2.4G-File Download Times(secs)"
-            count = count + 1
-        if data["band"] == "2.4G" and data["file_size"] == 500000000 and data["direction"] == "Upload":
-            dict_of_graph["Upload"] = data["time"]
-            color.append("Blue")
-            graph_name = "Medium File Size (500MB) 40 Clients 2.4G-File Upload Times(secs)"
-            count = count + 1
-    if count == 2:
-        graph_name = "Medium File Size (500MB) 40 Clients 2.4G-File Download and Upload Times(secs)"
-    if len(dict_of_graph) != 0:
-        fig, ax = plt.subplots()
-        bar_plot(ax, dict_of_graph, total_width=.8, single_width=.9, colors=color)
-        my_dpi = 96
-        figure = plt.gcf()  # get current figure
-        figure.set_size_inches(18, 6)
-
-        # when saving, specify the DPI
-        str(datetime.now()).split(",")[0].replace(" ", "-").split(".")[0]
-        plt.savefig(graph_path + "/image_2.png", dpi=my_dpi)
-        return str(graph_html(graph_path + "/image_2.png", graph_name))
-    else:
-        return ""
-
-
-def generate_graph_3(result_data, x_axis, graph_path):
-    dict_of_graph = {}
-    color = []
-    graph_name = ""
-    count = 0
-    for data in result_data.values():
-        if data["band"] == "2.4G" and data["file_size"] == 1000000000 and data["direction"] == "Download":
-            dict_of_graph["Download"] = data["time"]
-            color.append("Orange")
-            graph_name = "Big File Size (1000MB) 40 Clients 2.4G-File Download Times(secs)"
-            count = count + 1
-        if data["band"] == "2.4G" and data["file_size"] == 1000000000 and data["direction"] == "Upload":
-            dict_of_graph["Upload"] = data["time"]
-            color.append("Blue")
-            graph_name = "Big  File Size (1000MB) 40 Clients 2.4G-File Upload Times(secs)"
-            count = count + 1
-    if count == 2:
-        graph_name = "Big  File Size (1000MB) 40 Clients 2.4G-File Download and Upload Times(secs)"
-    if len(dict_of_graph) != 0:
-        fig, ax = plt.subplots()
-        bar_plot(ax, dict_of_graph, total_width=.8, single_width=.9, colors=color)
-        my_dpi = 96
-        figure = plt.gcf()  # get current figure
-        figure.set_size_inches(18, 6)
-
-        # when saving, specify the DPI
-        str(datetime.now()).split(",")[0].replace(" ", "-").split(".")[0]
-        plt.savefig(graph_path + "/image_3.png", dpi=my_dpi)
-        return str(graph_html(graph_path + "/image_3.png", graph_name))
-
-    else:
-        return ""
-
-
-def generate_graph_4(result_data, x_axis, graph_path):
-    dict_of_graph = {}
-    color = []
-    graph_name = ""
-    count = 0
-    for data in result_data.values():
-        if data["band"] == "5G" and data["file_size"] == 200000000 and data["direction"] == "Download":
-            dict_of_graph["Download"] = data["time"]
-            color.append("Orange")
-            graph_name = "Small File Size (200MB) 40 Clients 5G-File Download Times(secs)"
-            count = count + 1
-        if data["band"] == "5G" and data["file_size"] == 200000000 and data["direction"] == "Upload":
-            dict_of_graph["Upload"] = data["time"]
-            color.append("Blue")
-            graph_name = "Small File Size (200MB) 40 Clients 5G-File Upload Times(secs)"
-            count = count + 1
-    if count == 2:
-        graph_name = "Small File Size (200MB) 40 Clients 5G-File Download and Upload Times(secs)"
-    if len(dict_of_graph) != 0:
-        fig, ax = plt.subplots()
-        bar_plot(ax, dict_of_graph, total_width=.8, single_width=.9, colors=color)
-        my_dpi = 96
-        figure = plt.gcf()  # get current figure
-        figure.set_size_inches(18, 6)
-
-        # when saving, specify the DPI
-        str(datetime.now()).split(",")[0].replace(" ", "-").split(".")[0]
-        plt.savefig(graph_path + "/image_4.png", dpi=my_dpi)
-        return str(graph_html(graph_path + "/image_4.png", graph_name))
-    else:
-        return ""
-
-
-def generate_graph_5(result_data, x_axis, graph_path):
-    dict_of_graph = {}
-    color = []
-    graph_name = ""
-    count = 0
-    for data in result_data.values():
-        if data["band"] == "5G" and data["file_size"] == 500000000 and data["direction"] == "Download":
-            dict_of_graph["Download"] = data["time"]
-            color.append("Orange")
-            graph_name = "Medium File Size (500MB) 40 Clients 5G-File Download Times(secs)"
-            count = count + 1
-        if data["band"] == "5G" and data["file_size"] == 500000000 and data["direction"] == "Upload":
-            dict_of_graph["Upload"] = data["time"]
-            color.append("Blue")
-            graph_name = "Medium File Size (500MB) 40 Clients 5G-File Upload Times(secs)"
-            count = count + 1
-    if count == 2:
-        graph_name = "Medium File Size (500MB) 40 Clients 5G-File Download and Upload Times(secs)"
-    if len(dict_of_graph) != 0:
-        fig, ax = plt.subplots()
-        bar_plot(ax, dict_of_graph, total_width=.8, single_width=.9, colors=color)
-        my_dpi = 96
-        figure = plt.gcf()  # get current figure
-        figure.set_size_inches(18, 6)
-
-        # when saving, specify the DPI
-        str(datetime.now()).split(",")[0].replace(" ", "-").split(".")[0]
-        plt.savefig(graph_path + "/image_5.png", dpi=my_dpi)
-        return str(graph_html(graph_path + "/image_5.png", graph_name))
-    else:
-        return ""
-
-
-def generate_graph_6(result_data, x_axis, graph_path):
-    dict_of_graph = {}
-    color = []
-    graph_name = ""
-    count = 0
-    for data in result_data.values():
-        if data["band"] == "5G" and data["file_size"] == 1000000000 and data["direction"] == "Download":
-            dict_of_graph["Download"] = data["time"]
-            color.append("Orange")
-            graph_name = "Big File Size (1000MB) 40 Clients 5G-File Download Times(secs)"
-            count = count + 1
-        if data["band"] == "5G" and data["file_size"] == 1000000000 and data["direction"] == "Upload":
-            dict_of_graph["Upload"] = data["time"]
-            color.append("Blue")
-            graph_name = "Big File Size (1000MB) 40 Clients 5G-File Upload Times(secs)"
-            count = count + 1
-    if count == 2:
-        graph_name = "Big File Size (1000MB) 40 Clients 5G-File Download and Upload Times(secs)"
-    if len(dict_of_graph) != 0:
-        fig, ax = plt.subplots()
-        bar_plot(ax, dict_of_graph, total_width=.8, single_width=.9, colors=color)
-        my_dpi = 96
-        figure = plt.gcf()  # get current figure
-        figure.set_size_inches(18, 6)
-
-        # when saving, specify the DPI
-        str(datetime.now()).split(",")[0].replace(" ", "-").split(".")[0]
-        plt.savefig(graph_path + "/image_6.png", dpi=my_dpi)
-        return str(graph_html(graph_path + "/image_6.png", graph_name))
-    else:
-        return ""
-
-
-def generate_graph_7(result_data, x_axis, graph_path):
-    dict_of_graph = {}
-    color = []
-    graph_name = ""
-    count = 0
-    for data in result_data.values():
-        if data["band"] == "Both" and data["file_size"] == 200000000 and data["direction"] == "Download":
-            dict_of_graph["Download"] = data["time"]
-            color.append("Orange")
-            graph_name = "Small File Size (200MB) 40 Clients Both-File Download Times(secs)"
-            count = count + 1
-        if data["band"] == "Both" and data["file_size"] == 200000000 and data["direction"] == "Upload":
-            dict_of_graph["Upload"] = data["time"]
-            color.append("Blue")
-            graph_name = "Small File Size (200MB) 40 Clients Both-File Upload Times(secs)"
-            count = count + 1
-    if count == 2:
-        graph_name = "Small File Size (200MB) 40 Clients Both-File Download and Upload Times(secs)"
-    if len(dict_of_graph) != 0:
-        fig, ax = plt.subplots()
-        bar_plot(ax, dict_of_graph, total_width=.8, single_width=.9, colors=color)
-        my_dpi = 96
-        figure = plt.gcf()  # get current figure
-        figure.set_size_inches(18, 6)
-
-        # when saving, specify the DPI
-        str(datetime.now()).split(",")[0].replace(" ", "-").split(".")[0]
-        plt.savefig(graph_path + "/image_7.png", dpi=my_dpi)
-        return str(graph_html(graph_path + "/image_7.png", graph_name))
-    else:
-        return ""
-
-
-def generate_graph_8(result_data, x_axis, graph_path):
-    dict_of_graph = {}
-    color = []
-    graph_name = ""
-    count = 0
-    for data in result_data.values():
-        if data["band"] == "Both" and data["file_size"] == 500000000 and data["direction"] == "Download":
-            dict_of_graph["Download"] = data["time"]
-            color.append("Orange")
-            graph_name = "Medium File Size (500MB) 40 Clients Both-File Download Times(secs)"
-            count = count + 1
-        if data["band"] == "Both" and data["file_size"] == 500000000 and data["direction"] == "Upload":
-            dict_of_graph["Upload"] = data["time"]
-            color.append("Blue")
-            graph_name = "Medium File Size (500MB) 40 Clients Both-File Upload Times(secs)"
-            count = count + 1
-    if count == 2:
-        graph_name = "Medium File Size (500MB) 40 Clients Both-File Download and Upload Times(secs)"
-    if len(dict_of_graph) != 0:
-        fig, ax = plt.subplots()
-        bar_plot(ax, dict_of_graph, total_width=.8, single_width=.9, colors=color)
-        my_dpi = 96
-        figure = plt.gcf()  # get current figure
-        figure.set_size_inches(18, 6)
-
-        # when saving, specify the DPI
-        str(datetime.now()).split(",")[0].replace(" ", "-").split(".")[0]
-        plt.savefig(graph_path + "/image_8.png", dpi=my_dpi)
-        return str(graph_html(graph_path + "/image_8.png", graph_name))
-    else:
-        return ""
-
-
-def generate_graph_9(result_data, x_axis, graph_path):
-    dict_of_graph = {}
-    color = []
-    graph_name = ""
-    count = 0
-    for data in result_data.values():
-        if data["band"] == "Both" and data["file_size"] == 1000000000 and data["direction"] == "Download":
-            dict_of_graph["Download"] = data["time"]
-            color.append("Orange")
-            graph_name = "Big File Size (1000MB) 40 Clients Both-File Download Times(secs)"
-            count = count + 1
-        if data["band"] == "Both" and data["file_size"] == 1000000000 and data["direction"] == "Upload":
-            dict_of_graph["Upload"] = data["time"]
-            color.append("Blue")
-            graph_name = "Big File Size (1000MB) 40 Clients Both-File Upload Times(secs)"
-            count = count + 1
-    if count == 2:
-        graph_name = "Big File Size (1000MB) 40 Clients Both-File Download and Upload Times(secs)"
-    if len(dict_of_graph) != 0:
-        fig, ax = plt.subplots()
-        bar_plot(ax, dict_of_graph, total_width=.8, single_width=.9, colors=color)
-        my_dpi = 96
-        figure = plt.gcf()  # get current figure
-        figure.set_size_inches(18, 6)
-
-        # when saving, specify the DPI
-        str(datetime.now()).split(",")[0].replace(" ", "-").split(".")[0]
-        plt.savefig(graph_path + "/image_9.png", dpi=my_dpi)
-        return str(graph_html(graph_path + "/image_9.png", graph_name))
-    else:
-        return ""
-
 def input_setup_info_table(input_setup_info=None):
     if input_setup_info is None:
         return None
@@ -624,17 +311,33 @@ def input_setup_info_table(input_setup_info=None):
                         """
     return str(setup_information)
 
-def generate_report(ftp_data=None,
+
+def generate_report(result_data=None,
                     date=None,
                     test_setup_info={},
-                    input_setup_info = {},
+                    input_setup_info={},
                     graph_path="/home/lanforge/html-reports/FTP-Test"):
     # Need to pass this to test_setup_information()
     input_setup_info = input_setup_info
     test_setup_data = test_setup_info
     x_axis = []
-    for i in range(40):
+    num_stations = result_data[1]["num_stations"]
+    for i in range(1, num_stations + 1, 1):
         x_axis.append(i)
+    column_head = []
+    rows_head = []
+    bands = result_data[1]["bands"]
+    file_sizes = result_data[1]["file_sizes"]
+    directions = result_data[1]["directions"]
+
+    for size in file_sizes:
+        for direction in directions:
+            column_head.append(size + " " + direction)
+    for band in bands:
+        if band != "Both":
+            rows_head.append(str(num_stations) + " Clients-" + band)
+        else:
+            rows_head.append(str(num_stations // 2) + "+" + str(num_stations // 2) + " Clients-2.4G+5G")
 
     reports_root = graph_path + "/" + str(date)
     if path.exists(graph_path):
@@ -650,21 +353,17 @@ def generate_report(ftp_data=None,
     html_report = report_banner(date) + \
                   test_setup_information(test_setup_data) + \
                   test_objective() + \
-                  add_pass_fail_table(ftp_data) + \
-                  download_upload_time_table(ftp_data) + \
-                  generate_graph_1(ftp_data, x_axis, graph_path=reports_root) + \
-                  generate_graph_2(ftp_data, x_axis, graph_path=reports_root) + \
-                  generate_graph_3(ftp_data, x_axis, graph_path=reports_root) + \
-                  generate_graph_4(ftp_data, x_axis, graph_path=reports_root) + \
-                  generate_graph_5(ftp_data, x_axis, graph_path=reports_root) + \
-                  generate_graph_6(ftp_data, x_axis, graph_path=reports_root) + \
-                  generate_graph_7(ftp_data, x_axis, graph_path=reports_root) + \
-                  generate_graph_8(ftp_data, x_axis, graph_path=reports_root) + \
-                  generate_graph_9(ftp_data, x_axis, graph_path=reports_root) + \
-                  input_setup_info_table(input_setup_info)
+                  pass_fail_description() + \
+                  add_pass_fail_table(result_data, rows_head, column_head) + \
+                  download_upload_time_description() + \
+                  download_upload_time_table(result_data, rows_head, column_head)
 
+    for b in bands:
+        for size in file_sizes:
+            html_report = html_report + \
+                          generate_graph(result_data, x_axis, b, size, graph_path=reports_root)
 
-
+    html_report = html_report + input_setup_info_table(input_setup_info)
 
     # write the html_report into a file in /home/lanforge/html_reports in a directory named FTP-Test and html_report name should be having a timesnap with it
     f = open(reports_root + "/report.html", "a")
