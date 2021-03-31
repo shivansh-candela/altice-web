@@ -107,12 +107,12 @@ def add_pass_fail_table(result_data, row_head_list, col_head_list):
 
         list_data.append(final_data)
 
-    print(list_data)
+    #print(list_data)
     j = 0
     for i in row_head_list:
         dict_data[i] = list_data[j]
         j = j + 1
-    print(dict_data)
+    #print(dict_data)
     var_col = ""
     for col in row_head_list:
         var_col = var_col + "<tr><td>" + str(col) + "</td><!-- Add Variable Here -->" + str(
@@ -152,9 +152,9 @@ def download_upload_time_table(result_data, row_head_list, col_head_list):
                     if data_time.count(0) == 0:
                         Min = min(data_time)
                         Max = max(data_time)
-                        Sum = sum(data_time)
+                        Sum = int(sum(data_time))
                         Len = len(data_time)
-                        Avg = Sum // Len
+                        Avg = Sum / Len
                     elif data_time.count(0) == len(data_time):
                         Min = "-"
                         Max = "-"
@@ -163,21 +163,21 @@ def download_upload_time_table(result_data, row_head_list, col_head_list):
                         data_time = [i for i in data_time if i != 0]
                         Min = min(data_time)
                         Max = max(data_time)
-                        Sum = sum(data_time)
+                        Sum = int(sum(data_time))
                         Len = len(data_time)
-                        Avg = Sum // Len
+                        Avg = Sum / Len
                     string_data = "Min=" + str(Min) + ",Max=" + str(Max) + ",Avg=" + str(Avg) + " (sec)"
                     if data["band"] == b and data["direction"] == d and data["file_size"] == size:
                         final_data = final_data + """<td>""" + string_data + """</td>"""
 
         list_data.append(final_data)
 
-    print(list_data)
+    #print(list_data)
     j = 0
     for i in row_head_list:
         dict_data[i] = list_data[j]
         j = j + 1
-    print(dict_data)
+    #print(dict_data)
     var_col = ""
     for col in row_head_list:
         var_col = var_col + "<tr><td>" + str(col) + "</td><!-- Add Variable Here -->" + str(
