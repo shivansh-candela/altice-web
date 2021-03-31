@@ -154,7 +154,7 @@ def download_upload_time_table(result_data, row_head_list, col_head_list):
                         Max = max(data_time)
                         Sum = int(sum(data_time))
                         Len = len(data_time)
-                        Avg = Sum / Len
+                        Avg = round(Sum / Len,2)
                     elif data_time.count(0) == len(data_time):
                         Min = "-"
                         Max = "-"
@@ -165,7 +165,7 @@ def download_upload_time_table(result_data, row_head_list, col_head_list):
                         Max = max(data_time)
                         Sum = int(sum(data_time))
                         Len = len(data_time)
-                        Avg = Sum / Len
+                        Avg = round(Sum / Len,2)
                     string_data = "Min=" + str(Min) + ",Max=" + str(Max) + ",Avg=" + str(Avg) + " (sec)"
                     if data["band"] == b and data["direction"] == d and data["file_size"] == size:
                         final_data = final_data + """<td>""" + string_data + """</td>"""
