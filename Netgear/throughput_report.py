@@ -14,15 +14,25 @@ def thrp_rept(util, sta_num, bps_rx_a,bps_rx_b, tbl_title, grp_title):
         'Rx-bytes': ["min = 2 | max = 4 | avg = 2", 'min = 2 | max = 4 | avg = 2', 'min = 2 | max = 4 | avg = 2',
                      'min = 2 | max = 4 | avg = 2'],
     })'''
+    rx_a = []
+    rx_b = []
+    for a,b in bps_rx_a,bps_rx_b:
+        rx_a.append([f'min: {min(a.values())} | max: {max(a.values())} | avg: {sum(a.values())/len(a.values())}'])
+        rx_b.append([f'min: {min(b.values())} | max: {max(b.values())} | avg: {sum(b.values())/len(b.values())}'])
 
 
-    dataframe = pd.DataFrame({
-        'Utilization (%)': util,"no.of.clients": [len(sta_num)]*len(util),
-        'Bps-rx-a(bps)': bps_rx_a,
-        'Bps-rx-b (bps)': bps_rx_a})
-    print(dataframe)
-        #"Bps-rx-a (bps)": [f"min = {} | max = {bps_rx_a[1]} | avg = {bps_rx_a[2]}"],
-        #"Bps-rx-b (bps)": [f"min = {bps_rx_b[0]} | max = {bps_rx_b[1]} | avg = {bps_rx_b[2]}"],
+    overall_tab = pd.DataFrame({
+            'Channel Utilization (%)': util,"no.of.clients": [len(sta_num)]*len(util),
+            'Bps-rx-a(mbps)': rx_a,
+            'Bps-rx-b (mbps)': rx_b
+    })
+    print(overall_tab)
+
+    passfail_tab = pd.DataFrame({
+        'Channel Utilization (%)': util,
+        'Upload': rx_a,
+        'Download': rx_b
+    })
 
     report = lf_report()
     report.set_title(tbl_title) #report.title = ""
@@ -39,7 +49,7 @@ def thrp_rept(util, sta_num, bps_rx_a,bps_rx_b, tbl_title, grp_title):
     '''report.set_table_title("Title Two")
     report.build_table_title()'''
 
-    report.set_table_dataframe(dataframe)
+    report.set_table_dataframe(overall_tab)
     report.build_table()
 
     # test lf_graph in report
