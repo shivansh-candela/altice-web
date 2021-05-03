@@ -202,18 +202,21 @@ class IPV4VariableTime(Realm):
     def throughput(self, util, sta_list):
         bps_rx_a = {}
         bps_rx_b = {}
+        pass_fail = []
+        print(self.cx_profile.created_cx,"\n#############################\n",self.cx_profile.side_a_min_bps,self.cx_profile.side_b_min_bps)
         for sta in sta_list:
             eid = "Thrp{}-{}".format(sta[4:],int(sta[9:]))#self.name_to_eid(sta)
 
             if self.cx_profile.side_a_min_bps:
-                bps_rx_a[sta] = list((self.json_get("/cx/%s?fields=bps+rx+a" % (eid))).values())[2]['bps rx a']
+                bps_rx_a[sta] = list((self.json_get("/cx/%s?fields=bps+rx+a" % (eid))).values())[2]['bps rx a']*(10^-6)
                 #avg_thrp_a = sum(bps_rx_a.values()) / len(sta_list)
 
             if self.cx_profile.side_b_min_bps:
-                bps_rx_b[sta] = list((self.json_get("/cx/%s?fields=bps+rx+b" % (eid))).values())[2]['bps rx b']
+                bps_rx_b[sta] = list((self.json_get("/cx/%s?fields=bps+rx+b" % (eid))).values())[2]['bps rx b']*(10^-6)
                 #avg_thrp_b = sum(bps_rx_b.values()) / len(sta_list)
-
-        print("bps_rx_a:---{}\nbps_rx_b:---{}".format(bps_rx_a,bps_rx_b))
+        thrp = self.cx_profile.side_a_min_bps*len(sta_list)
+        print("bps_rx_a:{}\nbps_rx_b:{}\ndata-rate (100%){}\ndata-rate ({}%)".format(bps_rx_a,bps_rx_b,thrp,100-util,(thrp/100)*(100-util)))
+        if self.cx_profile.side_a_min_bps and (thrp/100)*(100-util):
 
         '''throughput_report.thrp_rept(util = util,       sta_num = len(sta_list),          min = min(rx_bytes.values()),         
                                     max = max(rx_bytes.values()),  avg = avg_thrp,    tbl_title = "Throughput", 
@@ -223,9 +226,9 @@ class IPV4VariableTime(Realm):
                                     tbl_title = "Throughput",grp_title = "Throughput")
         #, "\navarage rx_bytes",  avg_thrp,"\nmin rx_bytes",min(rx_bytes.values()),"\nmax rx_bytes",max(rx_bytes.values()))
         '''
-        return {"min":min(bps_rx_a.values()), "max":max(bps_rx_a.values()), "avg":sum(bps_rx_a.values())/len(sta_list)},\
-               {"min":min(bps_rx_b.values()), "max":max(bps_rx_b.values()), "avg":sum(bps_rx_b.values()) /len(sta_list)}
-
+        '''return {"min":min(bps_rx_a.values()), "max":max(bps_rx_a.values()), "avg":sum(bps_rx_a.values())/len(sta_list)},\
+               {"min":min(bps_rx_b.values()), "max":max(bps_rx_b.values()), "avg":sum(bps_rx_b.values()) /len(sta_list)}'''
+        return bps_rx_a,bps_rx_b
     def re_run_traff(self, adj_trf_rate, add_sub_rate):
         print("Re-run the traffic...")
         self.cx_profile.cleanup_prefix()
@@ -243,7 +246,8 @@ class IPV4VariableTime(Realm):
         print(f"-------side_a_min_bps  {self.cx_profile.side_a_min_bps}\n-------side_b_min_bps  {self.cx_profile.side_b_min_bps}")
         #return self.cx_profile.side_a_min_bps, self.cx_profile.side_b_min_bps
 
-    def check_util(self,real_cli_obj = None, util_list = None, real_cli = None, ssh_root = None, ssh_passwd = None ):
+    def check_util(self,real_cli_obj = None, util_list = None, real_cli = None, ssh_root = None, ssh_passwd = None,):
+                   #upload = 2000000, download = 2000000):
         bps_rx_a,bps_rx_b = [],[]   #min, max, avg = [], [], []
         sta_create = 1
         #iter = 0
@@ -255,10 +259,9 @@ class IPV4VariableTime(Realm):
             elif 25 < util <= 45:
                 self.cx_profile.side_a_min_bps, self.cx_profile.side_b_min_bps = 25000000, 25000000
             elif 45 < util <= 65:
-                self.cx_profile.side_a_min_bps, self.cx_profile.side_b_min_bps = 60000000, 60000000
+                self.cx_profile.side_a_min_bps, self.cx_profile.side_b_min_bps = 65000000, 65000000
             elif 65 < util <= 85:
                 self.cx_profile.side_a_min_bps, self.cx_profile.side_b_min_bps = 80000000, 80000000
-            #self.cx_profile.start_cx()
 
             util_flag = 1
 
@@ -317,8 +320,8 @@ def main():
     optional = []
     optional.append({'name': '--mode', 'help': 'Used to force mode of stations'})
     optional.append({'name': '--ap', 'help': 'Used to force a connection to a particular AP'})
-    optional.append({'name': '--upload', 'help': '--a_min bps rate minimum for side_a', 'default': 2500000})
-    optional.append({'name': '--download', 'help': '--b_min bps rate minimum for side_b', 'default': 2500000})
+    #optional.append({'name': '--upload', 'help': '--a_min bps rate minimum for side_a', 'default': 2500000})
+    #optional.append({'name': '--download', 'help': '--b_min bps rate minimum for side_b', 'default': 2500000})
     optional.append({'name': '--test_duration', 'help': '--test_duration sets the duration of the test', 'default': "2m"})
     '''optional.append({'name': '--port_mgr_cols', 'help': 'Columns wished to be monitored from port manager tab',
                      'default': ['ap', 'ip', 'parent dev']})
@@ -389,15 +392,17 @@ python3 ./throughput.py
     print(station_list)
     # no.of vap name list
     vap_list = LFUtils.port_name_series(prefix="vap", start_id=0, end_id= int(args.num_vaps) - 1, padding_number=10000, radio=args.vap_radio)
-    print(vap_list,type(args.util),args.util)
-
+    print(vap_list)
+    # traffic data rate for stations under vap
+    vap_sta_upload = 2500000
+    vap_sta_download = 2500000
     # create stations and run traffic under VAP
     ip_var_test = IPV4VariableTime(host=args.mgr,           port=args.mgr_port,         number_template="0000",
                                    sta_list=station_list,   name_prefix="VT",           upstream="1.1."+vap_list[0],
                                    ssid=args.ssid,          password=args.passwd,       radio=args.radio,
                                    security=args.security,  test_duration=args.test_duration,
-                                   use_ht160=False,         side_a_min_rate= args.upload,
-                                   side_b_min_rate=args.download,
+                                   use_ht160=False,         side_a_min_rate= vap_sta_upload,
+                                   side_b_min_rate=vap_sta_download,
                                    mode=args.mode,          ap=args.ap,                 _debug_on=args.debug,
                                    _vap_list = vap_list[0], _vap_radio = args.vap_radio, _dhcp = False)
 
@@ -432,7 +437,8 @@ python3 ./throughput.py
     # check the channel utilization
     ip_var_test.check_util(real_cli_obj = ip_var_test1, util_list = util_list,
                            real_cli = station_list1,
-                           ssh_root = args.ip_ntgr, ssh_passwd = args.ssh_passwd)
+                           ssh_root = args.ip_ntgr, ssh_passwd = args.ssh_passwd,)
+                           #upload = vap_sta_upload, download = vap_sta_download)
 
     #ip_var_test.stop()
     #ip_var_test1.stop()
