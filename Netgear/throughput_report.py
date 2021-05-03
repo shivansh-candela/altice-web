@@ -14,8 +14,7 @@ def thrp_rept(util, sta_num, bps_rx_a,bps_rx_b, tbl_title, grp_title):
         'Rx-bytes': ["min = 2 | max = 4 | avg = 2", 'min = 2 | max = 4 | avg = 2', 'min = 2 | max = 4 | avg = 2',
                      'min = 2 | max = 4 | avg = 2'],
     })'''
-    #bps_rx_a,bps_rx_b = [],[]
-    #for _min,_max,_avg in min,max,avg:
+
 
     dataframe = pd.DataFrame({
         'Utilization (%)': util,"no.of.clients": [len(sta_num)]*len(util),
@@ -47,7 +46,7 @@ def thrp_rept(util, sta_num, bps_rx_a,bps_rx_b, tbl_title, grp_title):
     dataset_a = [list(i.values()) for i in bps_rx_a]
     dataset = [[i[0] for i in dataset_a],[i[1] for i in dataset_a], [i[2] for i in dataset_a]]
     #dataset = [[min],[max],[avg]]
-    x_axis_values = [1]
+    x_axis_values = [util]
 
     report.set_graph_title(tbl_title)
     report.build_graph_title()
@@ -67,7 +66,6 @@ def thrp_rept(util, sta_num, bps_rx_a,bps_rx_b, tbl_title, grp_title):
 
     report.set_graph_image(graph_png)
     report.move_graph_image()
-
     report.build_graph()
 
     #report.build_all()
