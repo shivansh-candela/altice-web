@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 
-"""throughput.py will create stations and layer-3 traffic to measure the throughput of AP.
+"""throughput.py will create stations and layer-3 traffic to calculate the throughput of AP.
 
-This script will create a VAP and apply some load by creating stations of AP's channel under VAP in order to make the channel
+This script will create a VAP and apply some load by creating stations in AP's channel under VAP in order to make the channel
 utilized after the channel utilized to specific level again create specific number of stations each with their own set of cross-connects and endpoints.
 It will then create layer 3 traffic over a specified amount of time, testing for increased traffic at regular intervals.
 This test will pass if all stations increase traffic over the full test duration.
@@ -110,9 +110,11 @@ class IPV4VariableTime(Realm):
             self.exit_fail()
         self.cx_profile.start_cx()
 
-    def stop(self):
-        self.cx_profile.stop_cx()
-        self.station_profile.admin_down()
+    def stop(self,trf = True, ad_dwn = True):
+        if trf:
+            self.cx_profile.stop_cx()
+        if ad_dwn:
+            self.station_profile.admin_down()
 
     def pre_cleanup(self):
         print("clearing...")
@@ -200,23 +202,28 @@ class IPV4VariableTime(Realm):
 
     # Rx-bytes of No.of clients is listed
     def throughput(self, util, sta_list):
-        bps_rx_a = {}
-        bps_rx_b = {}
-        pass_fail = []
+        bps_rx_a, bps_rx_b = [],[]
+        #pass_fail = []
         print(self.cx_profile.created_cx,"\n#############################\n",self.cx_profile.side_a_min_bps,self.cx_profile.side_b_min_bps)
-        for sta in sta_list:
-            eid = "Thrp{}-{}".format(sta[4:],int(sta[9:]))#self.name_to_eid(sta)
-
-            if self.cx_profile.side_a_min_bps:
-                bps_rx_a[sta] = list((self.json_get("/cx/%s?fields=bps+rx+a" % (eid))).values())[2]['bps rx a']*(10^-6)
+        for sta in self.cx_profile.created_cx.keys():
+        #for sta in sta_list:
+            #eid = "Thrp{}-{}".format(sta[4:],int(sta[9:]))#self.name_to_eid(sta)
+            #eid = sta
+            if self.cx_profile.side_a_min_bps != '0':
+                bps_rx_b.append(list((self.json_get("/cx/%s?fields=bps+rx+b" % (sta))).values())[2]['bps rx b']/(1000000))
                 #avg_thrp_a = sum(bps_rx_a.values()) / len(sta_list)
 
-            if self.cx_profile.side_b_min_bps:
-                bps_rx_b[sta] = list((self.json_get("/cx/%s?fields=bps+rx+b" % (eid))).values())[2]['bps rx b']*(10^-6)
+            if self.cx_profile.side_b_min_bps != '0':
+                bps_rx_a.append(list((self.json_get("/cx/%s?fields=bps+rx+a" % (sta))).values())[2]['bps rx a']/(100000))
                 #avg_thrp_b = sum(bps_rx_b.values()) / len(sta_list)
-        thrp = self.cx_profile.side_a_min_bps*len(sta_list)
-        print("bps_rx_a:{}\nbps_rx_b:{}\ndata-rate (100%){}\ndata-rate ({}%)".format(bps_rx_a,bps_rx_b,thrp,100-util,(thrp/100)*(100-util)))
-        if self.cx_profile.side_a_min_bps and (thrp/100)*(100-util):
+        #thrp_a = self.cx_profile.side_a_min_bps*len(sta_list)
+        #thrp_b = self.cx_profile.side_b_min_bps*len(sta_list)
+        print(f"bps_rx_a:{bps_rx_a}\nbps_rx_b:{bps_rx_b}")
+        '''\ndata-rate-a (100%){}\ndata-rate-a ({}%){}"
+              "\ndata-rate-b (100%){}\ndata-rate-b ({}%){}".format(
+            bps_rx_a, bps_rx_b, thrp_a,100-util,(thrp_a/100)*(100-util),thrp_b,100-util,(thrp_b/100)*(100-util)))'''
+
+        #if self.cx_profile.side_a_min_bps and (thrp/100)*(100-util):
 
         '''throughput_report.thrp_rept(util = util,       sta_num = len(sta_list),          min = min(rx_bytes.values()),         
                                     max = max(rx_bytes.values()),  avg = avg_thrp,    tbl_title = "Throughput", 
@@ -229,6 +236,7 @@ class IPV4VariableTime(Realm):
         '''return {"min":min(bps_rx_a.values()), "max":max(bps_rx_a.values()), "avg":sum(bps_rx_a.values())/len(sta_list)},\
                {"min":min(bps_rx_b.values()), "max":max(bps_rx_b.values()), "avg":sum(bps_rx_b.values()) /len(sta_list)}'''
         return bps_rx_a,bps_rx_b
+
     def re_run_traff(self, adj_trf_rate, add_sub_rate):
         print("Re-run the traffic...")
         self.cx_profile.cleanup_prefix()
@@ -273,15 +281,11 @@ class IPV4VariableTime(Realm):
                         sta_create = 0
                         real_cli_obj.build()
                     real_cli_obj.start(False, False)
-                    time.sleep(60)
+                    time.sleep(20)
                     _bps_rx_a, _bps_rx_b = real_cli_obj.throughput(util,real_cli)
                     bps_rx_a.append(_bps_rx_a)
                     bps_rx_b.append(_bps_rx_b)
-                    '''_min,_max,_avg = real_cli_obj.throughput(util,real_cli)
-                    min.append(_min)
-                    max.append(_max)
-                    avg.append(_avg)'''
-                    real_cli_obj.stop()
+                    real_cli_obj.stop(trf=True,ad_dwn=False)
                 else:
                     if util_val < (util - 3):
                         print("less than {}% util...".format(util))
@@ -313,7 +317,10 @@ class IPV4VariableTime(Realm):
         throughput_report.thrp_rept(util = util_list, sta_num = real_cli,
                                     bps_rx_a = bps_rx_a, bps_rx_b= bps_rx_b,
                                     tbl_title = "Throughput",
-                                    grp_title = "Throughput")
+                                    grp_title = "Throughput",
+                                    upload = int(real_cli_obj.cx_profile.side_a_min_bps),
+                                    download = int(real_cli_obj.cx_profile.side_b_min_bps),
+                                    )
 
 
 def main():
@@ -332,7 +339,7 @@ def main():
     optional.append({'name':'--num_vaps', 'help':'Number of VAPs to Create', 'default': 1})
     optional.append({'name':'--vap_radio', 'help':'Number of VAPs to Create', 'default': "wiphy3"})
     optional.append({'name':'--util', 'help':'channel utilization','default': "20,40"})
-    optional.append({'name':'--num_sta_ntgr', 'help':'number of clients to connect under real AP','default': 10})
+    optional.append({'name':'--num_sta_ntgr', 'help':'number of clients to connect under real AP','default': 50})
     optional.append({'name':'--ssid_ntgr', 'help':'Ssid for real AP', 'default':"channel1"})
     optional.append({'name':'--ip_ntgr','help':"IP of netgear AP", 'default': '192.168.208.22'})
     optional.append({'name':'--ssh_passwd','help':'ssh password', 'default': 'Password@123xzsawq@!'})
