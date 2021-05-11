@@ -176,10 +176,20 @@ class ftp_test(LFCliBase):
             #building layer4
             self.cx_profile.direction ="dl"
             self.cx_profile.dest = "/dev/null"
-            print('DIRECTION',self.direction)
+            print('Direction:',self.direction)
 
             if self.direction == "Download":
-                self.cx_profile.create(ports=self.station_profile.station_names, ftp_ip="192.168.212.17/Netgear.txt",
+                
+                #data from GUI for find out ip addr of upstream port
+                data = self.json_get("ports/list?fields=IP")
+
+                for i in data["interfaces"]:
+                    for j in i:
+                        if "1.1." + self.upstream == j:
+                            ip_upstream = i["1.1." + self.upstream]['ip']
+            
+
+                self.cx_profile.create(ports=self.station_profile.station_names, ftp_ip = ip_upstream + "/Netgear.txt",
                                         sleep_time=.5,debug_=self.debug,suppress_related_commands_=True, ftp=True, user="lanforge",
                                         passwd="lanforge", source="")
 
@@ -372,18 +382,19 @@ class ftp_test(LFCliBase):
 
 def main():
     # This has --mgr, --mgr_port and --debug
-    parser = LFCliBase.create_bare_argparse(prog="netgear-ftp", formatter_class=argparse.RawTextHelpFormatter, epilog="About This Script")
+    parser = LFCliBase.create_bare_argparse(prog="ftp_test.py", formatter_class=argparse.RawTextHelpFormatter, epilog="About This Script")
     # Adding More Arguments for custom use
     parser.add_argument('--ssid',type=str, help='--ssid', default="TestAP-Jitendra")
     parser.add_argument('--passwd',type=str, help='--passwd', default="BLANK")
     parser.add_argument('--security', type=str, help='--security', default="open")
-    #parser.add_argument('--radios',nargs="+",help='--radio to use on LANforge for 5G and 2G', default=["wiphy0","wiphy1"])
+    parser.add_argument('--ap_name', type=str, help='--ap_name', default="R7800")
+    parser.add_argument('--ap_ip', type=str, help='--ap_ip', default="192.168.213.90")
     
     # Test variables
     parser.add_argument('--bands', nargs="+", help='--bands defaults ["5G","2.4G","Both"]', default=["5G","2.4G","Both"])
     parser.add_argument('--directions', nargs="+", help='--directions defaults ["Download","Upload"]', default=["Download","Upload"])
     parser.add_argument('--file_sizes', nargs="+", help='--File Size defaults ["2MB","500MB","1000MB"]', default=["2MB","500MB","1000MB"])
-    parser.add_argument('--num_stations', type=int, help='--num_client is number of stations', default=40)
+    parser.add_argument('--num_stations', type=int, help='--num_stations is number of stations', default=40)
     
     args = parser.parse_args()
 
@@ -409,7 +420,7 @@ def main():
                     num_sta= args.num_stations,
                     band=band,
                     file_size=file_size,
-                    direction=direction                      
+                    direction=direction
                    )
 
                 iteraration_num=iteraration_num+1
@@ -446,19 +457,18 @@ def main():
     #total time for test duration
     test_duration = str(time_stamp2 - time_stamp1)[:-7]
 
-    print("FTP Test Data", ftp_data)
 
     date = str(datetime.now()).split(",")[0].replace(" ", "-").split(".")[0]
 
     test_setup_info = {
-        "AP Name": "R7800",
+        "AP Name": args.ap_name,
         "SSID": args.ssid,
         "Number of Stations": args.num_stations,
         "Test Duration": test_duration
     }
 
     input_setup_info = {
-        "IP": "192.168.213.190" ,
+        "IP": args.ap_ip ,
         "user": "root",
         "Contact": "support@candelatech.com"
     }

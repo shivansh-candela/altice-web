@@ -1,0 +1,26 @@
+{
+
+  "repete" : "how many times config. should repete",
+  "roam interval": "time in sec",
+
+  "ssid" : "roam",
+  "passwd" : "BLANK",
+  "security" : "open",
+
+  "2.4G client" : 5,
+  "2.4G radio" : "wiphy0",
+  "2.4G channel" : 6,
+
+  "5G client" : 6,
+  "5G radio" : "wiphy1",
+  "5G channel" : 36,
+
+  "roaming_configuration":
+  [
+    [ 0, 5, "2.4G", 0],
+    [ 3, 5, "5G", 4],
+    [ 3, 7, "2.4G", 1],
+    [ 8, 9, "5G", 4]
+  ]
+}
+
