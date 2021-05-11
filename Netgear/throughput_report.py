@@ -1,5 +1,9 @@
-#!/usr/bin/env python3
-
+'''
+------------------------------------------------------------------------------------
+Throughput report generation when the clients are created under channel utilization,
+the channel is utilized by creating VAP along with some stations
+------------------------------------------------------------------------------------
+'''
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import numpy as np
@@ -8,113 +12,113 @@ import pdfkit
 from lf_report import lf_report
 from lf_graph import lf_bar_graph
 
-def thrp_rept(util, sta_num, bps_rx_a,bps_rx_b, tbl_title, grp_title, upload = 1000000, download = 1000000):
-    '''dataframe = pd.DataFrame({
-        'Utilization (%)': [20, 40, 60, 80],
-        'Rx-bytes': ["min = 2 | max = 4 | avg = 2", 'min = 2 | max = 4 | avg = 2', 'min = 2 | max = 4 | avg = 2',
-                     'min = 2 | max = 4 | avg = 2'],
-    })'''
+def table(report,title,data):
+    # creating table
+    report.set_table_title(title)
+    report.build_table_title()
+    report.set_table_dataframe(data)
+    report.build_table()
 
+def grph(report, data_set = None, xaxis_name = "stations", yaxis_name = "Throughput 2 (Mbps)",
+          xaxis_categories = None, label = None, graph_image_name = ""):
+    # creating bar graph
+    report.set_graph_title(graph_image_name)
+    report.build_graph_title()
+    graph = lf_bar_graph(_data_set = data_set,
+                         _xaxis_name = xaxis_name,
+                         _yaxis_name = yaxis_name,
+                         _xaxis_categories = xaxis_categories,
+                         _graph_image_name = graph_image_name,
+                         _label = label,
+                         _color=None,
+                         _color_edge='red')
+    graph_png = graph.build_bar_graph()
+    print("graph name {}".format(graph_png))
+    report.set_graph_image(graph_png)
+    report.move_graph_image()
+    report.build_graph()
+
+def thrp_rept(util, sta_num, bps_rx_a,bps_rx_b, tbl_title, grp_title, upload = 1000000, download = 1000000):
+    # report generation main function
     rx_a = []
     rx_b = []
     pas_fail_up = []
     pas_fail_down = []
-    thrp_a = upload * len(sta_num)
-    # else:
-    thrp_b = download * len(sta_num)
-    #index = -1
-    for a,b,util in bps_rx_a,bps_rx_b,util:
-        #index += 1
-        try:
-            rx_a.append([f'min: {min(a)} | max: {max(a)} | avg: {sum(a)/len(a)}'])
-            rx_b.append([f'min: {min(b)} | max: {max(b)} | avg: {sum(b)/len(b)}'])
-        except ValueError as e:
-            if len(a) == 0:
-                rx_a.append(0)
-            if len(b) == 0:
-                rx_b.append(0)
-        if upload:
-            if (thrp_a /100)*(100 - int(util)) <= a * len(sta_num):
-                pas_fail_up.append("PASS")
-            else:
-                pas_fail_up.append("FAIL")
-        if download:
-            if (thrp_b / 100) * (100 - int(util)) <= b * len(sta_num):
-                pas_fail_down.append("PASS")
-            else:
-                pas_fail_down.append("FAIL")
-    if upload == 0 and len(pas_fail_up) == 0:
-        pas_fail_up = ['NA'] * util
-    if download == 0 and len(pas_fail_down) == 0:
-        pas_fail_down = ['NA'] * util
+    thrp_b = upload * len(sta_num)  # get overall upload values
+    thrp_a = download * len(sta_num)    ## get overall download values
+    print(f"given upload--{thrp_b} and download--{thrp_a} values")
+    index = -1
+    for a in bps_rx_a:
+        index += 1
+        if len(a):
+            rx_a.append(f'min: {min(a)} | max: {max(a)} | avg: {sum(a)/len(a)}')
+            if thrp_a:
+                print(f"getting overall download values '{index}'----- {sum(a)} \n {(thrp_a/100)*(100 - int(util[index]))}")
+                if (thrp_a /100)*(100 - int(util[index])) <= sum(a):
+                    pas_fail_down.append("PASS")
+                else:
+                    pas_fail_down.append("FAIL")
+        else:
+            pas_fail_down.append("NA")
+            rx_a.append(0)
 
+        if len(bps_rx_b[index]):
+            rx_b.append(f'min: {min(bps_rx_b[index])} | max: {max(bps_rx_b[index])} | '
+                         f'avg: {(sum(bps_rx_b[index])/len(bps_rx_b[index])):.2f}')
+
+            if thrp_b:
+                print(f"getting overall upload values '{index}'----- {sum(bps_rx_b[index])} \n {(thrp_b / 100) * (100 - int(util[index]))}")
+                if (thrp_b / 100) * (100 - int(util[index])) <= sum(bps_rx_b[index]):
+                    pas_fail_up.append("PASS")
+                else:
+                    pas_fail_up.append("FAIL")
+        else:
+            pas_fail_up.append("NA")
+            rx_b.append(0)
+
+        util[index] = f'{util[index]}%' #append % to the util values
 
     overall_tab = pd.DataFrame({
-            'Channel Utilization (%)': util,"no.of.clients": [len(sta_num)]*len(util),
-            'Bps-rx-a(mbps)': rx_a,
-            'Bps-rx-b (mbps)': rx_b
+            'Channel Utilization (%)': util,"No.of.clients": [len(sta_num)]*len(util),
+            'Speed (mbps)': [f'upload: {upload} | download: {download}']*len(util),
+            'Upload (mbps)': rx_b,    'Download (mbps)': rx_a
     })
-    print(overall_tab)
+    print(f"overall table \n{overall_tab}")
 
     pasfail_tab = pd.DataFrame({
         'Channel Utilization (%)': util,
         'Upload': pas_fail_up,
         'Download': pas_fail_down
     })
-    print(pasfail_tab)
+    print(f"pass-fail table \n {pasfail_tab}")
+
     report = lf_report()
-    report.set_title(tbl_title) #report.title = ""
+    report.set_title(tbl_title)
     report.build_banner()
-    #report.set_title("Banner Title Two")
-    #report.build_banner()
 
-    report.set_table_title("Overall throughput")
-    report.build_table_title()
-    report.set_table_dataframe(overall_tab)
-    report.build_table()
-    report.set_table_title("Throughput Pass/Fail")
-    report.build_table_title()
-    report.set_table_dataframe(pasfail_tab)
-    report.build_table()
+    table(report,"Overall throughput",overall_tab)
+    table(report,"Throughput Pass/Fail",pasfail_tab)
 
-    # test lf_graph in report
-    #dataset_a = [i for i in bps_rx_a]
-    dataset = [[i[0] for i in bps_rx_a],[i[1] for i in bps_rx_a], [i[2] for i in bps_rx_a]]
-    x_axis_values = [util]
-    report.set_graph_title(tbl_title)
-    report.build_graph_title()
-    graph = lf_bar_graph(_data_set=dataset,
-                        _xaxis_name="stations",
-                        _yaxis_name="Throughput 2 (Mbps)",
-                        _xaxis_categories=x_axis_values,
-                        _graph_image_name="client-Throughput_5GHz",#"Bi-single_radio_2.4GHz",
-                        _label=["min", "max",'avg'],
-                        _color=None,
-                        _color_edge='red')
-    for i in util:
-        dataset = [bps_rx_a]
-        x_axis_values = [i[4:] for i in sta_num]
-        report.set_graph_title(f"{i}% utilization")
-        report.build_graph_title()
-        graph = lf_bar_graph(_data_set=dataset,
-                             _xaxis_name="stations",
-                             _yaxis_name="Throughput 2 (Mbps)",
-                             _xaxis_categories=x_axis_values,
-                             _graph_image_name="client-Throughput_5GHz",  # "Bi-single_radio_2.4GHz",
-                             _label=["throughput"],
-                             _color=None,
-                             _color_edge='red')
+    if download:
+        grph(report,
+         data_set=[[min(i) for i in bps_rx_a],[max(i) for i in bps_rx_a], [sum(i)/len(i) for i in bps_rx_a]],
+          xaxis_name="Utilizations", yaxis_name="Throughput (Mbps)",
+          xaxis_categories=util, label=["min", "max", 'avg'], graph_image_name="Throughput_download")
+    if upload:
+        grph(report,
+         data_set=[[min(i) for i in bps_rx_b], [max(i) for i in bps_rx_b], [sum(i) / len(i) for i in bps_rx_b]],
+         xaxis_name="Utilizations", yaxis_name="Throughput (Mbps)",
+         xaxis_categories=util, label=["min", "max", 'avg'], graph_image_name="Throughput_upload")
 
-
-    graph_png = graph.build_bar_graph()
-
-    print("graph name {}".format(graph_png))
-
-    report.set_graph_image(graph_png)
-    report.move_graph_image()
-    report.build_graph()
-
-    #report.build_all()
+    for i in range(len(util)):
+        if download:
+            grph(report, data_set=[bps_rx_a[i]], xaxis_name="stations",
+                 yaxis_name="Throughput (Mbps)", xaxis_categories = range(0,len(sta_num)),
+                 label=[util[i]], graph_image_name=f"client-Throughput-download_{i}")
+        if upload:
+            grph(report, data_set=[bps_rx_b[i]], xaxis_name="stations",
+                 yaxis_name="Throughput (Mbps)", xaxis_categories = range(0,len(sta_num)),
+                 label=[util[i]], graph_image_name=f"client-Throughput-upload_{i}")
 
     html_file = report.write_html()
     print("returned file {}".format(html_file))
