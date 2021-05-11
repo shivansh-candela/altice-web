@@ -3,17 +3,17 @@
   "repete" : "how many times config. should repete",
   "roam interval": "time in sec",
 
-  "ssid" : "NETGEAR",
-  "passwd" : "Pass1",
-  "security" : "WPA2",
+  "ssid" : "roam",
+  "passwd" : "BLANK",
+  "security" : "open",
 
-  "2.4G client" : 10,
-  "2.4G Radio" : "wiphy0",
+  "2.4G client" : 5,
+  "2.4G radio" : "wiphy0",
   "2.4G channel" : 6,
 
-  "5G clients" : 20,
-  "2.4G channel" : 6,
-  "5G channel" : "wiphy1",
+  "5G client" : 6,
+  "5G radio" : "wiphy1",
+  "5G channel" : 36,
 
   "roaming_configuration":
   [

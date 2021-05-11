@@ -20,16 +20,14 @@ import datetime
 
 
 class roam_test(LFCliBase):
-    def __init__(self, lfclient_host="localhost", lfclient_port=8080, radio="wiphy0", sta_prefix="sta", start_id=0,
-                 num_sta=None,
-                 dut_ssid=None, dut_security=None, dut_passwd=None, bssid=None, roam_num1=None, band=None,
-                 upstream="eth1", _debug_on=False, _exit_on_error=False, _exit_on_fail=False):
+    def __init__(self, lfclient_host="localhost", lfclient_port=8080, radio=None, sta_prefix=None, start_id=0,
+                 num_sta=None,  dut_ssid=None, dut_security=None, dut_passwd=None, band = None, channel = None,
+                upstream="eth1", _debug_on=False, _exit_on_error=False, _exit_on_fail=False):
         super().__init__(lfclient_host, lfclient_port, _debug=_debug_on, _exit_on_fail=_exit_on_fail)
         print("Test is about to start")
         self.host = lfclient_host
         self.port = lfclient_port
         self.radio = radio
-        self.band = band
         self.upstream = upstream
         self.sta_prefix = sta_prefix
         self.sta_start_id = start_id
@@ -37,8 +35,8 @@ class roam_test(LFCliBase):
         self.ssid = dut_ssid
         self.security = dut_security
         self.password = dut_passwd
-        self.bssid = bssid
-        self.roam_num1 = roam_num1
+        self.band = band
+        self.channel = channel
         self.local_realm = realm.Realm(lfclient_host=self.host, lfclient_port=self.port)
         self.station_profile = self.local_realm.new_station_profile()
 
@@ -50,13 +48,14 @@ class roam_test(LFCliBase):
             self.count = self.count + 1
 
             if self.count == 2:
-                self.sta_start_id = self.num_sta
-                self.num_sta = 2 * (self.num_sta)
+                #self.sta_start_id = self.num_sta
+                #self.num_sta = self.num_sta[1]
+                self.sta_prefix = "5G_sta"
                 self.station_list1 = LFUtils.portNameSeries(prefix_=self.sta_prefix, start_id_=self.sta_start_id,
-                                                            end_id_=self.num_sta - 1, padding_number_=10000,
+                                                            end_id_=self.num_sta[1] - 1, padding_number_=10000,
                                                             radio=rad)
 
-                # cleanup station list which started sta_id 20
+                # cleanup station list of 5G band when stations created in 2.4G band as well as 5G band at a time
                 self.station_profile.cleanup(self.station_list1, delay=1, debug_=self.debug)
                 LFUtils.wait_until_ports_disappear(base_url=self.lfclient_url,
                                                    port_list=self.station_list1,
@@ -65,7 +64,7 @@ class roam_test(LFCliBase):
                 return
 
             self.station_list = LFUtils.portNameSeries(prefix_=self.sta_prefix, start_id_=self.sta_start_id,
-                                                       end_id_=self.num_sta - 1, padding_number_=10000,
+                                                       end_id_=self.num_sta[0] - 1, padding_number_=10000,
                                                        radio=rad)
 
             # cleans stations
@@ -89,7 +88,7 @@ class roam_test(LFCliBase):
             self.station_profile.set_command_param("set_port", "report_timer", 1500)
 
             # connect station to particular bssid
-            self.station_profile.set_command_param("add_sta", "ap", self.bssid[0])
+            #self.station_profile.set_command_param("add_sta", "ap", self.bssid[0])
             print(self.bssid[0])
             self.station_profile.set_command_flag("set_port", "rpt_timer", 1)
             self.station_profile.create(radio=rad, sta_names_=self.station_list, debug=self.debug)
@@ -101,8 +100,9 @@ class roam_test(LFCliBase):
                 self._fail("Stations failed to get IPs")
                 exit(1)
             if self.count == 2:
+                self.station_list_2G = self.station_list
+                self.station_list_5G = self.station_list1
                 self.station_list = self.station_list1
-                self.bssid[0] = self.bssid[1]
         print("Test Build done")
 
     def roam(self):
@@ -204,16 +204,18 @@ class roam_test(LFCliBase):
                                            debug=self.debug)
 
     def set_values(self):
-        if self.band == "Both":
-            self.num_sta = self.num_sta // 2
-        print(self.num_sta)
+        if self.band[0] == "2.4G":
+            self.sta_prefix = "2.4G_sta"
+        elif self.band[0] == "5G":
+            self.sta_prefix = "5G_sta"
+        print(self.band[0])
 
 
 def main():
     # This has --mgr, --mgr_port and --debug
-    '''parser = LFCliBase.create_bare_argparse(prog="roam_test.py", formatter_class=argparse.RawTextHelpFormatter,
+    parser = LFCliBase.create_bare_argparse(prog="roam_test.py", formatter_class=argparse.RawTextHelpFormatter,
                                             epilog="About This Script")
-    # Adding More Arguments for custom use
+    '''# Adding More Arguments for custom use
     parser.add_argument('--ssid', type=str, help='--ssid', default="roam")
     parser.add_argument('--passwd', type=str, help='--passwd', default="BLANK")
     parser.add_argument('--security', type=str, help='--security', default="open")
@@ -223,35 +225,60 @@ def main():
     parser.add_argument("--bssids", nargs="+",help='DUT BSSID to which we expect to connect e.g. ["bssid of 2.4G band","bssid of 5G band"]')
     parser.add_argument("--bands", nargs="+", help='Bands e.g.["5G","2.4G","Both"]', default=["2.4G", "5G", "Both"])
     parser.add_argument("--roam_num1", nargs="+", help='list of data e.g:-[[bssids],[frequencies]]',
-                        default=[['ac:86:74:8c:ea:42', 'ac:86:74:a4:61:82'], [2412, 2412]])
+                        default=[['ac:86:74:8c:ea:42', 'ac:86:74:a4:61:82'], [2412, 2412]])'''
 
-    args = parser.parse_args()'''
+    args = parser.parse_args()
 
     #Taking input from json file
+    radios = []
+    channels = []
+    num_of_stations = []
+    bands = []
     with open('roam_config.json') as f:
-      data = json.load(f)
+      file_data = json.load(f)
+    print(list(file_data.keys()))
+    print(file_data["2.4G client"])
+    for i in list(file_data.keys()):
+      if i == "2.4G client":
+        num_of_stations.append(file_data["2.4G client"])
+        bands.append("2.4G")
+      if i == "5G client":
+        num_of_stations.append(file_data["5G client"])
+        bands.append("5G")
+      if i == "2.4G radio":
+        radios.append(file_data["2.4G radio"])
+      if i == "5G radio":
+        radios.append(file_data["5G radio"])
+      if i == "2.4G channel":
+        channels.append(file_data["2.4G channel"])
+      if i == "5G channel":
+        channels.append(file_data["5G channel"])
 
-    for band in args.bands:
-        obj = roam_test(lfclient_host=args.mgr,
-                        lfclient_port=args.mgr_port,
-                        radio=args.radio,
-                        dut_ssid=args.ssid,
-                        dut_passwd=args.passwd,
-                        dut_security=args.security,
-                        num_sta=args.num_stations,
-                        bssid=args.bssids,
-                        roam_num1=args.roam_num1,
-                        band=band,
-                        )
+    print("bands:",bands)
+    print("channels:",channels)
+    print("num_stations:",num_of_stations)
+    print("radios:",radios)
+    exit(1)
+    #for num_stations in num_of_stations:
+    obj = roam_test(lfclient_host = args.mgr,
+                    lfclient_port = args.mgr_port,
+                    radio = radios,
+                    dut_ssid = file_data["ssid"],
+                    dut_passwd = file_data["passwd"],
+                    dut_security = file_data["security"],
+                    num_sta = num_of_stations,
+                    band = bands,
+                    channel = channels
+                    )
 
-        obj.set_values()
-        obj.precleanup()
-        obj.build()
-        obj.start(False, False)
-        obj.roam()
-        time.sleep(60)
-        obj.stop()
-        obj.postcleanup()
+    obj.set_values()
+    obj.precleanup()
+    obj.build()
+    obj.start(False, False)
+    #obj.roam()
+    #time.sleep(60)
+    #obj.stop()
+    #obj.postcleanup()
 
 
 if __name__ == "__main__":
