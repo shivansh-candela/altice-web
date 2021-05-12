@@ -35,7 +35,6 @@ import pdfkit
 from lf_report import lf_report
 from lf_graph import lf_bar_graph
 
-
 class IperfTest(LFCliBase):
     def __init__(self, host, port, _local_realm, ssid, security, passwd, radio="wiphy0", macvlan_type = "iperf3_serv", sta_type = "iperf3", num_ports=1, macvlan_parent=None,
                  dhcp=False,port_list=[], sta_list=[],sta_list2=[],sta_list3 =[],  tx_rate = "10000", run_time = "60",
@@ -82,10 +81,11 @@ class IperfTest(LFCliBase):
         self._pass("PASS: MACVLAN build finished")
         self.generic_endps_profile.create(ports=self.mvlan_profile.created_macvlans, sleep_time=.5)
 
-    def mvlan_cleanup(self):
+    def gen_cleanup(self):
         self.generic_endps_profile.cleanup()
-        self.mvlan_profile.cleanup()
 
+    def macvlan_cleanup(self):
+        self.mvlan_profile.cleanup()
     def generic_cleanup(self):
         print("Cleaning up cxs and endpoints")
         for cx_name in self.created_cx_cl:
@@ -366,7 +366,7 @@ def main():
                                          radio=args.radio0)
 
     # list of stations
-    def station_list(rad,start,end):
+    def station_list(rad, start, end):
         sta_list = LFUtils.port_name_series(prefix="sta" + "#", start_id=start,
                                                      end_id=end, padding_number=100000,
                                                      radio=rad)
@@ -467,10 +467,10 @@ def main():
             time.sleep(2)
             up = ip_test.uplink
             # save all data in list to present in summary table
-            up_all_avg_value.append(round(float(ip_test.avg_up / int(num_ports)), 2))
+            up_all_avg_value.append(round(float(ip_test.avg_up), 2))
             up_min_value.append(round(float(min(up)), 2))
             up_max_value.append(round(float(max(up)), 2))
-            overall_throughput = round(float(ip_test.avg_up / int(num_ports)), 2)
+            overall_throughput = round(float(ip_test.avg_up), 2)
             aggregate.append(round(float(overall_throughput) / num_ports, 2))
             ip_test.generic_cleanup()
         else:
@@ -499,10 +499,10 @@ def main():
             ip_test.get_rx_data()
             time.sleep(2)
             dw = ip_test.downlink
-            dw_all_avg_value.append(round(float(ip_test.avg_dw / int(num_ports)), 2))
+            dw_all_avg_value.append(round(float(ip_test.avg_dw), 2))
             dw_min_value.append(round(float(min(dw)), 2))
             dw_max_value.append(round(float(max(dw)), 2))
-            overall_throughput = round(float(ip_test.avg_dw / int(num_ports)), 2)
+            overall_throughput = round(float(ip_test.avg_dw), 2)
             aggregate.append(round(float(overall_throughput) / num_ports, 2))
             ip_test.generic_cleanup()
 
@@ -516,15 +516,15 @@ def main():
             # create and run layer 3 to store all data for uplink and downlink
             ip_test.layer3_creation(station_list_both)
             print("Finish Bi-Directional Test")
-            bi_all_avg_value.append(round(float(ip_test.avg_bi_dw / int(num_ports)), 2))
-            bi_all_avg_value.append(round(float(ip_test.avg_bi_up / int(num_ports)), 2))
+            bi_all_avg_value.append(round(float(ip_test.avg_bi_dw), 2))
+            bi_all_avg_value.append(round(float(ip_test.avg_bi_up), 2))
             bi_min_value.append(round(float(min(ip_test.bi_downlink)), 2))
             bi_min_value.append(round(float(min(ip_test.bi_uplink)), 2))
             bi_max_value.append(round(float(max(ip_test.bi_downlink)), 2))
             bi_max_value.append(round(float(max(ip_test.bi_uplink)), 2))
-            overall_throughput = round(float(ip_test.avg_bi_dw / int(num_ports)), 2)
+            overall_throughput = round(float(ip_test.avg_bi_dw), 2)
             aggregate.append(round(float(overall_throughput) / num_ports, 2))
-            overall_throughput = round(float(ip_test.avg_bi_up / int(num_ports)), 2)
+            overall_throughput = round(float(ip_test.avg_bi_up), 2)
             aggregate.append(round(float(overall_throughput) / num_ports, 2))
 
         else:
@@ -628,7 +628,7 @@ def main():
         station_list_both = station_list(args.radio0, 0, num_ports - 1)
         station_list_rad0 = station_list(args.radio0, 0, int(num_ports / 2) - 1)
         station_list_rad1 = station_list(args.radio1, int(num_ports / 2), num_ports - 1)
-        ip_test = IperfTest(args.mgr, args.mgr_port, ssid=args.ssid, _local_realm=None,
+        ip_test2 = IperfTest(args.mgr, args.mgr_port, ssid=args.ssid, _local_realm=None,
                             passwd=args.passwd,
                             security=args.security, port_list=port_list, sta_list=station_list_rad0,
                             sta_list2=station_list_rad1,
@@ -640,7 +640,7 @@ def main():
         station_list_both = station_list(args.radio0, 0, num_ports - 1)
         station_list_rad0 = station_list(args.radio0, 0, int(num_ports / 2) - 1)
         station_list_rad1 = station_list(args.radio1, int(num_ports / 2), num_ports - 1)
-        ip_test = IperfTest(args.mgr, args.mgr_port, ssid=args.ssid, _local_realm=None,
+        ip_test3 = IperfTest(args.mgr, args.mgr_port, ssid=args.ssid, _local_realm=None,
                             passwd=args.passwd,
                             security=args.security, port_list=port_list, sta_list=station_list_rad0,
                             sta_list2=station_list_rad1,
@@ -665,7 +665,7 @@ def main():
             station_list_both = station_list(args.radio0, 0, num_ports - 1)
             station_list_rad0 = station_list(args.radio0, 0, int(num_ports / 2) - 1)
             station_list_rad1 = station_list(args.radio1, int(num_ports / 2), num_ports - 1)
-            ip_test = IperfTest(args.mgr, args.mgr_port, ssid=args.ssid, _local_realm=None,
+            ip_test4 = IperfTest(args.mgr, args.mgr_port, ssid=args.ssid, _local_realm=None,
                                 passwd=args.passwd,
                                 security=args.security, port_list=port_list, sta_list=station_list_rad0,
                                 sta_list2=station_list_rad1,
@@ -683,7 +683,7 @@ def main():
             station_list_both = station_list(args.radio0, 0, num_ports - 1)
             station_list_rad0 = station_list(args.radio0, 0, int(num_ports / 2) - 1)
             station_list_rad1 = station_list(args.radio1, int(num_ports / 2), num_ports - 1)
-            ip_test = IperfTest(args.mgr, args.mgr_port, ssid=args.ssid, _local_realm=None,
+            ip_test5 = IperfTest(args.mgr, args.mgr_port, ssid=args.ssid, _local_realm=None,
                                 passwd=args.passwd,
                                 security=args.security, port_list=port_list, sta_list=station_list_rad0,
                                 sta_list2=station_list_rad1,
@@ -703,7 +703,8 @@ def main():
     if ((args.all_test_up is not None) or (args.all_test_dw is not None) or (args.test_2G_up is not None) or
         (args.test_2G_dw is not None) or (args.test_5G_up is not None) or (args.test_5G_dw is not None) or
             (args.test_both_up is not None) or (args.test_both_dw is not None)):
-        ip_test.mvlan_cleanup()
+        ip_test.gen_cleanup()
+    ip_test.macvlan_cleanup()
     ip_test.cleanup(station_list_both)
     ip_test.cleanup(station_list_rad0)
     ip_test.cleanup(station_list_rad1)
