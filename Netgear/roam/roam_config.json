@@ -3,17 +3,17 @@
   "repete" : "how many times config. should repete",
   "roam interval": "time in sec",
 
-  "ssid" : "roam",
+  "ssid" : "ASUSAP",
   "passwd" : "BLANK",
   "security" : "open",
 
   "2.4G client" : 5,
   "2.4G radio" : "wiphy0",
-  "2.4G channel" : 6,
+  "2.4G channel" : 4,
 
   "5G client" : 6,
   "5G radio" : "wiphy1",
-  "5G channel" : 36,
+  "5G channel" : 149,
 
   "roaming_configuration":
   [

@@ -80,6 +80,22 @@ class roam_test(LFCliBase):
         # station build
         for rad in self.radio:
 
+            #channel selection
+            host = "192.168.200.71"
+            base_url = "http://%s:8080" % host
+            resource_id = 1  # typically you're using resource 1 in stand alone realm
+            lf_r = LFRequest.LFRequest(base_url + "/cli-json/set_wifi_radio")
+            lf_r.addPostData({
+                "shelf": 1,
+                "resource": resource_id,
+                "radio": rad,
+                "mode": 8,
+                "channel": self.channel[0],
+            })
+            lf_r.jsonPost()
+            print("done")
+            time.sleep(10)
+
             self.station_profile.use_security(self.security, self.ssid, self.password)
             self.station_profile.set_number_template("00")
 
@@ -89,7 +105,7 @@ class roam_test(LFCliBase):
 
             # connect station to particular bssid
             #self.station_profile.set_command_param("add_sta", "ap", self.bssid[0])
-            print(self.bssid[0])
+
             self.station_profile.set_command_flag("set_port", "rpt_timer", 1)
             self.station_profile.create(radio=rad, sta_names_=self.station_list, debug=self.debug)
             self.local_realm.wait_until_ports_appear(sta_list=self.station_list)
@@ -103,6 +119,8 @@ class roam_test(LFCliBase):
                 self.station_list_2G = self.station_list
                 self.station_list_5G = self.station_list1
                 self.station_list = self.station_list1
+                self.channel[0] = self.channel[1]
+
         print("Test Build done")
 
     def roam(self):
@@ -258,7 +276,7 @@ def main():
     print("channels:",channels)
     print("num_stations:",num_of_stations)
     print("radios:",radios)
-    exit(1)
+
     #for num_stations in num_of_stations:
     obj = roam_test(lfclient_host = args.mgr,
                     lfclient_port = args.mgr_port,
