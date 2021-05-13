@@ -1,8 +1,5 @@
-""" ftp_test.py will create stations and endpoints to generate and verify layer-4 traffic over an ftp connection.
-    find out download/upload time of each client according to file size.
-    This script will monitor the bytes-rd attribute of the endpoints.
-    Use './ftp_test.py --help' to see command line usage and options
-    -Jitendrakumar Kushavah
+""" ftp_test.py will verify that N clients connected on specified band and can simultaneously download/upload some amount of file from FTP server and measuring the time taken by client to download/upload the file.
+    cli- python3 ftp_test.py --mgr localhost --mgr_port 8080 --ssid Netgear --security open --passwd BLANK --ap_name WAC505 --ap_ip 192.168.213.90 --bands 2.4G --directions Download --file_size 2MB --num_stations 40
     Copyright 2021 Candela Technologies Inc
     License: Free to distribute and modify. LANforge systems must be licensed.
 """
@@ -384,11 +381,11 @@ def main():
     # This has --mgr, --mgr_port and --debug
     parser = LFCliBase.create_bare_argparse(prog="ftp_test.py", formatter_class=argparse.RawTextHelpFormatter, epilog="About This Script")
     # Adding More Arguments for custom use
-    parser.add_argument('--ssid',type=str, help='--ssid', default="TestAP-Jitendra")
-    parser.add_argument('--passwd',type=str, help='--passwd', default="BLANK")
-    parser.add_argument('--security', type=str, help='--security', default="open")
-    parser.add_argument('--ap_name', type=str, help='--ap_name', default="R7800")
-    parser.add_argument('--ap_ip', type=str, help='--ap_ip', default="192.168.213.90")
+    parser.add_argument('--ssid',type=str, help='--ssid')
+    parser.add_argument('--passwd',type=str, help='--passwd')
+    parser.add_argument('--security', type=str, help='--security')
+    parser.add_argument('--ap_name', type=str, help='--ap_name')
+    parser.add_argument('--ap_ip', type=str, help='--ap_ip')
     
     # Test variables
     parser.add_argument('--bands', nargs="+", help='--bands defaults ["5G","2.4G","Both"]', default=["5G","2.4G","Both"])
