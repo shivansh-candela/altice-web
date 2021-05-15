@@ -20,7 +20,8 @@ def table(report,title,data):
     report.build_table()
 
 def grph(report, data_set = None, xaxis_name = "stations", yaxis_name = "Throughput 2 (Mbps)",
-          xaxis_categories = None, label = None, graph_image_name = ""):
+          xaxis_categories = None, label = None, graph_image_name = "",
+            ):
     # creating bar graph
     report.set_graph_title(graph_image_name)
     report.build_graph_title()
@@ -28,10 +29,12 @@ def grph(report, data_set = None, xaxis_name = "stations", yaxis_name = "Through
                          _xaxis_name = xaxis_name,
                          _yaxis_name = yaxis_name,
                          _xaxis_categories = xaxis_categories,
-                         _graph_image_name = graph_image_name,
+                         _graph_image_name = graph_image_name.replace(" ","_"),
                          _label = label,
-                         _color=None,
-                         _color_edge='red')
+                         _color = ['cyan','lime','pink'],
+                         _color_edge = 'blue',
+                         _bar_width = 0.25,
+                         _figsize = (18, 6))
     graph_png = graph.build_bar_graph()
     print("graph name {}".format(graph_png))
     report.set_graph_image(graph_png)
@@ -51,7 +54,7 @@ def thrp_rept(util, sta_num, bps_rx_a,bps_rx_b, tbl_title, grp_title, upload = 1
     for a in bps_rx_a:
         index += 1
         if len(a):
-            rx_a.append(f'min: {min(a)} | max: {max(a)} | avg: {sum(a)/len(a)}')
+            rx_a.append(f'min: {min(a)} \n max: {max(a)} | avg: {(sum(a)/len(a)):.2f}')
             if thrp_a:
                 print(f"getting overall download values '{index}'----- {sum(a)} \n {(thrp_a/100)*(100 - int(util[index]))}")
                 if (thrp_a /100)*(100 - int(util[index])) <= sum(a):
@@ -95,7 +98,10 @@ def thrp_rept(util, sta_num, bps_rx_a,bps_rx_b, tbl_title, grp_title, upload = 1
     report = lf_report()
     report.set_title(tbl_title)
     report.build_banner()
-
+    report.set_obj_html(_obj_title="Objective",
+                        _obj = "Through this test we will calculate the throughput of 40 client when the channel "
+                                   "was already utilized")
+    report.build_objective()
     table(report,"Overall throughput",overall_tab)
     table(report,"Throughput Pass/Fail",pasfail_tab)
 
@@ -103,22 +109,22 @@ def thrp_rept(util, sta_num, bps_rx_a,bps_rx_b, tbl_title, grp_title, upload = 1
         grph(report,
          data_set=[[min(i) for i in bps_rx_a],[max(i) for i in bps_rx_a], [sum(i)/len(i) for i in bps_rx_a]],
           xaxis_name="Utilizations", yaxis_name="Throughput (Mbps)",
-          xaxis_categories=util, label=["min", "max", 'avg'], graph_image_name="Throughput_download")
+          xaxis_categories=util, label=["min", "max", 'avg'], graph_image_name="Overall Throughput download")
     if upload:
         grph(report,
          data_set=[[min(i) for i in bps_rx_b], [max(i) for i in bps_rx_b], [sum(i) / len(i) for i in bps_rx_b]],
          xaxis_name="Utilizations", yaxis_name="Throughput (Mbps)",
-         xaxis_categories=util, label=["min", "max", 'avg'], graph_image_name="Throughput_upload")
+         xaxis_categories=util, label=["min", "max", 'avg'], graph_image_name="Overall Throughput upload")
 
     for i in range(len(util)):
         if download:
             grph(report, data_set=[bps_rx_a[i]], xaxis_name="stations",
                  yaxis_name="Throughput (Mbps)", xaxis_categories = range(0,len(sta_num)),
-                 label=[util[i]], graph_image_name=f"client-Throughput-download_{i}")
+                 label=[util[i]], graph_image_name=f"Throughput download {util[i]}")
         if upload:
             grph(report, data_set=[bps_rx_b[i]], xaxis_name="stations",
                  yaxis_name="Throughput (Mbps)", xaxis_categories = range(0,len(sta_num)),
-                 label=[util[i]], graph_image_name=f"client-Throughput-upload_{i}")
+                 label=[util[i]], graph_image_name=f"Throughput upload {util[i]}")
 
     html_file = report.write_html()
     print("returned file {}".format(html_file))

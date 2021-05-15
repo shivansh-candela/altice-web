@@ -171,7 +171,7 @@ class IPV4VariableTime(Realm):
             ssh = paramiko.SSHClient()
             ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
             ssh.connect(ssh_root, 22, 'root', ssh_passwd)
-            time.sleep(10)
+            time.sleep(20)
             stdout = ssh.exec_command(cmd)
             stdout = (((stdout[1].readlines())[0].split(':'))[1].split(' '))[0]
             print(stdout, "----- channel utilization")
@@ -179,7 +179,6 @@ class IPV4VariableTime(Realm):
         except paramiko.ssh_exception.NoValidConnectionsError as e:
             print("####", e, "####")
             exit(1)
-            #return None
         except TimeoutError as e:
             print("####", e, "####")
             exit(1)
@@ -299,8 +298,8 @@ def main():
     optional.append({'name':'--num_vaps', 'help':'Number of VAPs to Create', 'default': 1})
     required.append({'name':'--vap_radio', 'help':'VAP radio', 'default': "wiphy3"})
     optional.append({'name':'--util', 'help':'channel utilization','default': "20,40"})
-    required.append({'name':'--ip_ntgr','help':"IP of netgear AP", 'default': '192.168.208.13'})
-    required.append({'name':'--ssh_passwd','help':'ssh password', 'default': 'Password@123xzsawq@!'})
+    required.append({'name':'--ip_ntgr','help':"IP of netgear AP"})
+    required.append({'name':'--ssh_passwd','help':'ssh password'})
     optional.append({'name': '--upload_ntgr', 'help': '--a_min bps rate minimum for side_a of netgear', 'default': 10000000})
     optional.append({'name': '--download_ntgr', 'help': '--b_min bps rate minimum for side_b of netgear', 'default': 10000000})
     parser = Realm.create_basic_argparse(
@@ -326,7 +325,7 @@ python3 ./throughput.py
     --test_duration 2m (default)
     --upload_ntgr 3000000
     --download_ntgr 1000000
-    --util 20,40,60
+    --util 20,40
     --ip_ntgr 192.168.208.22
     --ssh_passwd Password@123xzsawq@!
     --debug
