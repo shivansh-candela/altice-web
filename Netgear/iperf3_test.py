@@ -429,50 +429,50 @@ def main():
     report.build_table()
     aggregate = []
     # method to run all scenario test
-    def run_scenarios(radio_frq, radio1, radio2, mode, up_scenario, dw_scenario, bi_scenario):
+    def run_scenarios(test, radio_frq, radio1, radio2, mode, up_scenario, dw_scenario, bi_scenario):
         # clean all stations
-        ip_test.cleanup(station_list_both)
-        ip_test.cleanup(station_list_rad0)
-        ip_test.cleanup(station_list_rad1)
+        test.cleanup(station_list_both)
+        test.cleanup(station_list_rad0)
+        test.cleanup(station_list_rad1)
         # run uplink test
         if radio2 is not None:
             # create stations for dual radio
-            ip_test.create_station(args.radio0, station_list_rad0, args.mode0)
+            test.create_station(args.radio0, station_list_rad0, args.mode0)
             time.sleep(10)
-            ip_test.create_station(args.radio1, station_list_rad1, args.mode1)
+            test.create_station(args.radio1, station_list_rad1, args.mode1)
             time.sleep(10)
             if (up_scenario is not None) or (up_scenario is None and dw_scenario is None and bi_scenario is None):
                 print("Starting Uplink Test")
                 # create Generic station on transmit side for uploading
-                ip_test.create_gen_for_client(station_list_rad0, args.time, args.tx_rate, target_ip_rad0,"iperf_tx", valid = False)
+                test.create_gen_for_client(station_list_rad0, args.time, args.tx_rate, target_ip_rad0,"iperf_tx", valid = False)
                 time.sleep(10)
-                ip_test.create_gen_for_client(station_list_rad1, args.time, args.tx_rate, target_ip_rad1,"iperf_tx", valid = True)
+                test.create_gen_for_client(station_list_rad1, args.time, args.tx_rate, target_ip_rad1,"iperf_tx", valid = True)
         else:
             # create stations for single radio
-            ip_test.create_station(radio1, station_list_both, mode)
+            test.create_station(radio1, station_list_both, mode)
             time.sleep(10)
             if (up_scenario is not None) or (up_scenario is None and dw_scenario is None and bi_scenario is None):
                 print("Starting Uplink Test")
                 # create Generic station on transmit side for uploading
-                ip_test.create_gen_for_client(station_list_both, args.time, args.tx_rate, target_ip_both, "iperf_tx", valid = False)
+                test.create_gen_for_client(station_list_both, args.time, args.tx_rate, target_ip_both, "iperf_tx", valid = False)
         if (up_scenario is not None) or (up_scenario is None and dw_scenario is None and bi_scenario is None):
             time.sleep(10)
             # run generic test
-            ip_test.generic_cx()
+            test.generic_cx()
             time.sleep(int(args.time))
-            ip_test.generic_endps_profile.stop_cx()
+            test.generic_endps_profile.stop_cx()
             print("Finish Uplink Test")
             # store all uplink data
-            ip_test.get_tx_data()
+            test.get_tx_data()
             time.sleep(2)
-            up = ip_test.uplink
+            up = test.uplink
             # save all data in list to present in summary table
-            up_all_avg_value.append(round(float(ip_test.avg_up), 2))
+            up_all_avg_value.append(round(float(test.avg_up), 2))
             up_min_value.append(round(float(min(up)), 2))
             up_max_value.append(round(float(max(up)), 2))
-            overall_throughput = round(float(ip_test.avg_up), 2)
+            overall_throughput = round(float(test.avg_up), 2)
             aggregate.append(round(float(overall_throughput) / num_ports, 2))
-            ip_test.generic_cleanup()
+            test.generic_cleanup()
         else:
             up_all_avg_value.append("NA")
             up_min_value.append("NA")
@@ -483,28 +483,28 @@ def main():
             time.sleep(2)
             if radio2 is not None:
                 # create Generic station on rx side for downloading (single radio)
-                ip_test.create_gen_for_client(station_list_rad0, args.time, args.tx_rate, target_ip_rad0, "iperf_rx", valid=False)
+                test.create_gen_for_client(station_list_rad0, args.time, args.tx_rate, target_ip_rad0, "iperf_rx", valid=False)
                 time.sleep(10)
-                ip_test.create_gen_for_client(station_list_rad1, args.time, args.tx_rate, target_ip_rad1, "iperf_rx", valid=True)
+                test.create_gen_for_client(station_list_rad1, args.time, args.tx_rate, target_ip_rad1, "iperf_rx", valid=True)
             else:
                 # create Generic station on rx side for downloading (dual radio)
-                ip_test.create_gen_for_client(station_list_both, args.time, args.tx_rate, target_ip_both, "iperf_rx", valid=False)
+                test.create_gen_for_client(station_list_both, args.time, args.tx_rate, target_ip_both, "iperf_rx", valid=False)
             time.sleep(10)
             # run generc test
-            ip_test.generic_cx()
+            test.generic_cx()
             time.sleep(int(args.time))
-            ip_test.generic_endps_profile.stop_cx()
+            test.generic_endps_profile.stop_cx()
             print("Finish Downlink Test")
             # store all downlink data
-            ip_test.get_rx_data()
+            test.get_rx_data()
             time.sleep(2)
-            dw = ip_test.downlink
-            dw_all_avg_value.append(round(float(ip_test.avg_dw), 2))
+            dw = test.downlink
+            dw_all_avg_value.append(round(float(test.avg_dw), 2))
             dw_min_value.append(round(float(min(dw)), 2))
             dw_max_value.append(round(float(max(dw)), 2))
-            overall_throughput = round(float(ip_test.avg_dw), 2)
+            overall_throughput = round(float(test.avg_dw), 2)
             aggregate.append(round(float(overall_throughput) / num_ports, 2))
-            ip_test.generic_cleanup()
+            test.generic_cleanup()
 
         else:
             dw_all_avg_value.append("NA")
@@ -514,17 +514,17 @@ def main():
         if (bi_scenario is not None) or (up_scenario is None and dw_scenario is None and bi_scenario is None):
             print("Starting Bi-Directional Test")
             # create and run layer 3 to store all data for uplink and downlink
-            ip_test.layer3_creation(station_list_both)
+            test.layer3_creation(station_list_both)
             print("Finish Bi-Directional Test")
-            bi_all_avg_value.append(round(float(ip_test.avg_bi_dw), 2))
-            bi_all_avg_value.append(round(float(ip_test.avg_bi_up), 2))
-            bi_min_value.append(round(float(min(ip_test.bi_downlink)), 2))
-            bi_min_value.append(round(float(min(ip_test.bi_uplink)), 2))
-            bi_max_value.append(round(float(max(ip_test.bi_downlink)), 2))
-            bi_max_value.append(round(float(max(ip_test.bi_uplink)), 2))
-            overall_throughput = round(float(ip_test.avg_bi_dw), 2)
+            bi_all_avg_value.append(round(float(test.avg_bi_dw), 2))
+            bi_all_avg_value.append(round(float(test.avg_bi_up), 2))
+            bi_min_value.append(round(float(min(test.bi_downlink)), 2))
+            bi_min_value.append(round(float(min(test.bi_uplink)), 2))
+            bi_max_value.append(round(float(max(test.bi_downlink)), 2))
+            bi_max_value.append(round(float(max(test.bi_uplink)), 2))
+            overall_throughput = round(float(test.avg_bi_dw), 2)
             aggregate.append(round(float(overall_throughput) / num_ports, 2))
-            overall_throughput = round(float(ip_test.avg_bi_up), 2)
+            overall_throughput = round(float(test.avg_bi_up), 2)
             aggregate.append(round(float(overall_throughput) / num_ports, 2))
 
         else:
@@ -587,7 +587,7 @@ def main():
                                 "The scenerio gives the result of BiDirectional test for %s clients connected on %s GHz" % (num_ports,
                                                                                                                            radio_frq))
             report.build_objective()
-            graph = lf_bar_graph(_data_set=[ip_test.bi_downlink, ip_test.bi_uplink],
+            graph = lf_bar_graph(_data_set=[test.bi_downlink, test.bi_uplink],
                                  _xaxis_name="stations",
                                  _yaxis_name="Throughput (Mbps)",
                                  _xaxis_categories=x_axis,
@@ -623,7 +623,7 @@ def main():
     if args.all_test is not None:
         # run all scenarios
         print("*******************************************Start test for single radio (2.4 GHz)*****************************************")
-        run_scenarios("2.4", args.radio0, None,  "6", args.all_test_up, args.all_test_dw, args.all_test_bi)
+        run_scenarios(ip_test, "2.4", args.radio0, None,  "6", args.all_test_up, args.all_test_dw, args.all_test_bi)
         print("*************************************************Finish test for single radio (2.4 GHz)**************************************************")
         station_list_both = station_list(args.radio0, 0, num_ports - 1)
         station_list_rad0 = station_list(args.radio0, 0, int(num_ports / 2) - 1)
@@ -635,7 +635,7 @@ def main():
                             sta_list3=station_list_both, side_a_speed=args.side_a_min_speed, side_b_speed=args.side_b_min_speed,_debug_on=args.debug, macvlan_parent=args.macvlan_parent,
                             dhcp=True, num_ports=args.num_ports, tx_rate=args.tx_rate, run_time=args.time)
         print("************************Start test for single radio (5 GHz)********************************************")
-        run_scenarios("5", args.radio1, None, "10", args.all_test_up, args.all_test_dw, args.all_test_bi)
+        run_scenarios(ip_test2, "5", args.radio1, None, "10", args.all_test_up, args.all_test_dw, args.all_test_bi)
         print("************************************Finish test for single radio (5 GHz)********************************************")
         station_list_both = station_list(args.radio0, 0, num_ports - 1)
         station_list_rad0 = station_list(args.radio0, 0, int(num_ports / 2) - 1)
@@ -650,13 +650,13 @@ def main():
 
         # This scenerio is for dual radio uploading and downloading
         print("*****************************Start test for single radio (2.4 + 5GHz)******************************************************")
-        run_scenarios("both", args.radio0, args.radio1, "10", args.all_test_up, args.all_test_dw, args.all_test_bi)
+        run_scenarios(ip_test3, "both", args.radio0, args.radio1, "10", args.all_test_up, args.all_test_dw, args.all_test_bi)
         print("******************************************Finish test for single radio (2.4 + 5GHz)**************************************************")
     else:
         # run 2.4 GHz scenario
         if args.test_2G is not None:
             print("*******************************************Start test for single radio (2.4 GHz)*****************************************")
-            run_scenarios("2.4", args.radio0, None, "6", args.test_2G_up, args.test_2G_dw, args.test_2G_bi)
+            run_scenarios(ip_test, "2.4", args.radio0, None, "6", args.test_2G_up, args.test_2G_dw, args.test_2G_bi)
             print("*************************************************Finish test for single radio (2.4 GHz)***************************")
         else:
             store_data()
@@ -674,7 +674,7 @@ def main():
                                 macvlan_parent=args.macvlan_parent,
                                 dhcp=True, num_ports=args.num_ports, tx_rate=args.tx_rate, run_time=args.time)
             print("************************Start test for single radio (5 GHz)********************************************")
-            run_scenarios("5", args.radio1, None, "10", args.test_5G_up, args.test_5G_dw, args.test_5G_bi)
+            run_scenarios(ip_test4, "5", args.radio1, None, "10", args.test_5G_up, args.test_5G_dw, args.test_5G_bi)
             print("************************************Finish test for single radio (5 GHz)********************************************")
         else:
             store_data()
@@ -694,16 +694,16 @@ def main():
 
             # This scenerio is for dual radio uploading and downloading
             print("*****************************Start test for single radio (2.4 + 5GHz)******************************************************")
-            run_scenarios("both", args.radio0, args.radio1, "10", args.test_both_up, args.test_both_dw, args.test_both_bi)
+            run_scenarios(ip_test5, "both", args.radio0, args.radio1, "10", args.test_both_up, args.test_both_dw, args.test_both_bi)
             print("******************************************Finish test for single radio (2.4 + 5GHz)**************************************************")
         else:
             store_data()
 
     # clean all list from GUI
-    if ((args.all_test_up is not None) or (args.all_test_dw is not None) or (args.test_2G_up is not None) or
+    """if ((args.all_test_up is not None) or (args.all_test_dw is not None) or (args.test_2G_up is not None) or
         (args.test_2G_dw is not None) or (args.test_5G_up is not None) or (args.test_5G_dw is not None) or
-            (args.test_both_up is not None) or (args.test_both_dw is not None)):
-        ip_test.gen_cleanup()
+            (args.test_both_up is not None) or (args.test_both_dw is not None)):"""
+    ip_test.gen_cleanup()
     ip_test.macvlan_cleanup()
     ip_test.cleanup(station_list_both)
     ip_test.cleanup(station_list_rad0)
