@@ -14,7 +14,6 @@ License: Free to distribute and modify. LANforge systems must be licensed.
 
 import sys
 import os, paramiko, pprint
-
 if sys.version_info[0] != 3:
     print("This script requires Python 3")
     exit(1)
@@ -31,7 +30,7 @@ from LANforge import set_port
 import throughput_report
 #import create_vap
 import time
-import datetime
+from datetime import datetime
 
 # this class create VAP, station, and traffic
 class IPV4VariableTime(Realm):
@@ -59,6 +58,7 @@ class IPV4VariableTime(Realm):
         self.test_duration = test_duration
         self._dhcp = _dhcp
 
+
         # initializing station profile
         self.station_profile = StationProfile(lfclient_url=self.lfclient_url,   local_realm=super(), debug_=self.debug,     up=False,
                                               dhcp = self._dhcp,                ssid = self.ssid,    ssid_pass = self.password,
@@ -67,8 +67,7 @@ class IPV4VariableTime(Realm):
         if self.station_profile.use_ht160:
             self.station_profile.mode = 9
         self.station_profile.mode = mode
-        if self.ap is not None:
-            self.station_profile.set_command_param("add_sta", "ap", self.ap)
+
 
         # initializing VAP profile
         self.vap_profile = self.new_vap_profile()
@@ -76,6 +75,7 @@ class IPV4VariableTime(Realm):
         self.vap_profile.ssid = self.ssid
         self.vap_profile.security = self.security
         self.vap_profile.ssid_pass = self.password
+        self.vap_profile.mode = self.mode
         if self.debug:
             print("----- VAP List ----- ----- ----- ----- ----- ----- \n")
             pprint.pprint(self.vap_list)
@@ -124,7 +124,7 @@ class IPV4VariableTime(Realm):
         LFUtils.wait_until_ports_disappear(base_url=self.lfclient_url, port_list=self.station_profile.station_names,
                                            debug=self.debug)
 
-    def build_vaps(self):
+    def build_vaps(self,chn = 36):
         # create VAPs with static IP_addr, netmask, gateway_IP
         self.vap_profile.use_security(self.security, self.ssid, passwd=self.password)
         self.vap_profile.set_command_param("set_port", "ip_addr", "192.168.0.1")
@@ -134,7 +134,7 @@ class IPV4VariableTime(Realm):
         self.vap_profile.set_command_param("set_port", "gateway", "192.168.0.1")
         self.vap_profile.set_command_flag("set_port", "ip_gateway", 1)
         print("Creating VAPs")
-        self.vap_profile.create(resource = 1,   radio = self.vap_radio,     channel = 36,       up_ = True,     debug = False,
+        self.vap_profile.create(resource = 1,   radio = self.vap_radio,     channel = int(chn),       up_ = True,     debug = False,
                                 suppress_related_commands_ = True,          use_radius = True,  hs20_enable = False)
         self._pass("PASS: VAP build finished")
 
@@ -192,7 +192,7 @@ class IPV4VariableTime(Realm):
                 bps_rx_b.append(float(f"{list((self.json_get('/cx/%s?fields=bps+rx+b' % (sta))).values())[2]['bps rx b']/(1000000):.2f}"))
 
             if self.cx_profile.side_b_min_bps != '0':
-                bps_rx_a.append(float(f"{list((self.json_get('/cx/%s?fields=bps+rx+a' % (sta))).values())[2]['bps rx a']/(100000):.2f}"))
+                bps_rx_a.append(float(f"{list((self.json_get('/cx/%s?fields=bps+rx+a' % (sta))).values())[2]['bps rx a']/(1000000):.2f}"))
 
         print(f"bps_rx_a:{bps_rx_a}\nbps_rx_b:{bps_rx_b}")
         '''\ndata-rate-a (100%){}\ndata-rate-a ({}%){}"
@@ -220,20 +220,22 @@ class IPV4VariableTime(Realm):
         print(f"-------side_a_min_bps  {self.cx_profile.side_a_min_bps}\n-------side_b_min_bps  {self.cx_profile.side_b_min_bps}")
 
 
-    def check_util(self,real_cli_obj = None, util_list = None, real_cli = None, ssh_root = None, ssh_passwd = None,):
+    def check_util(self,real_cli_obj = None, util_list = None, real_cli = None,
+                   ssh_root = None, ssh_passwd = None,test_time = 0):
         # check the utilization and run the traffic
         bps_rx_a,bps_rx_b = [],[]
         sta_create = 1
+
         for util in util_list:  #  get throughput for every utilization values
             util = int(util)
             if util <= 25:
-                self.cx_profile.side_a_min_bps, self.cx_profile.side_b_min_bps = 3000000, 3000000
+                self.cx_profile.side_a_min_bps, self.cx_profile.side_b_min_bps = 2000000, 2000000
             elif 25 < util <= 45:
-                self.cx_profile.side_a_min_bps, self.cx_profile.side_b_min_bps = 25000000, 25000000
+                self.cx_profile.side_a_min_bps, self.cx_profile.side_b_min_bps = 10000000, 10000000
             elif 45 < util <= 65:
-                self.cx_profile.side_a_min_bps, self.cx_profile.side_b_min_bps = 65000000, 65000000
+                self.cx_profile.side_a_min_bps, self.cx_profile.side_b_min_bps = 25000000, 25000000
             elif 65 < util <= 85:
-                self.cx_profile.side_a_min_bps, self.cx_profile.side_b_min_bps = 80000000, 80000000
+                self.cx_profile.side_a_min_bps, self.cx_profile.side_b_min_bps = 40000000, 40000000
 
             util_flag = 1
             while util_flag:    #loop until the expected channel utilization will get
@@ -244,7 +246,7 @@ class IPV4VariableTime(Realm):
                         sta_create = 0
                         real_cli_obj.build()    # create specified no.of clients once
                     real_cli_obj.start(False, False)
-                    time.sleep(60)
+                    time.sleep(float(self.test_duration) * 60)
                     _bps_rx_a, _bps_rx_b = real_cli_obj.throughput(util,real_cli)
                     bps_rx_a.append(_bps_rx_a)
                     bps_rx_b.append(_bps_rx_b)
@@ -255,13 +257,13 @@ class IPV4VariableTime(Realm):
                         print("less than {}% util...".format(util))
                         if ((util ) - util_val) <= 4:
                             self.re_run_traff(500000, "add")
-                        elif ((util ) - util_val) <= 7:
+                        elif ((util ) - util_val) <= 8:
                             self.re_run_traff(1000000, "add")
-                        elif ((util ) - util_val) <= 10:
+                        elif ((util ) - util_val) <= 12:
                             self.re_run_traff(1500000, "add")
-                        elif (util ) - util_val <= 14:
+                        elif (util ) - util_val <= 16:
                             self.re_run_traff(3000000, "add")
-                        elif (util ) - util_val > 14:
+                        elif (util ) - util_val > 16:
                             self.re_run_traff(5000000, "add")
 
                     # channel utilization is less than the expected utilization value
@@ -269,16 +271,29 @@ class IPV4VariableTime(Realm):
                         print("greater than {}% util...".format(util))
                         if (util_val - (util )) <= 4:
                             self.re_run_traff(500000, "sub")
-                        elif (util_val - (util )) <= 7:
+                        elif (util_val - (util )) <= 8:
                             self.re_run_traff(1000000, "sub")
-                        elif (util_val - (util )) <= 10:
+                        elif (util_val - (util )) <= 12:
                             self.re_run_traff(1500000, "sub")
-                        elif util_val - (util ) <= 14:
+                        elif util_val - (util ) <= 16:
                             self.re_run_traff(3000000, "sub")
-                        elif util_val - (util ) > 14:
+                        elif util_val - (util ) > 16:
                             self.re_run_traff(5000000, "sub")
 
         print("bps_rx_a ,bps_rx_b",bps_rx_a,bps_rx_b)
+
+        test_end = datetime.now().strftime("%b %d %H:%M:%S")
+        print("Test ended at ", test_end)
+
+        test_setup_info = {
+            "AP Name": self.ap,
+            "SSID": self.ssid,
+            "Test Duration": datetime.strptime(test_end, '%b %d %H:%M:%S') - datetime.strptime(test_time, '%b %d %H:%M:%S')
+        }
+
+        input_setup_info = {
+            "Contact": "support@candelatech.com"
+        }
         # send all the collected data to genarate report
         throughput_report.thrp_rept(util = util_list, sta_num = real_cli,
                                     bps_rx_a = bps_rx_a, bps_rx_b= bps_rx_b,
@@ -286,22 +301,23 @@ class IPV4VariableTime(Realm):
                                     grp_title = "Throughput",
                                     upload = int(real_cli_obj.cx_profile.side_a_min_bps)/1000000,
                                     download = int(real_cli_obj.cx_profile.side_b_min_bps)/1000000,
-                                    )
+                                    test_setup_info = test_setup_info,input_setup_info = input_setup_info)
 
 
 def main():
     optional = []
     required = []
-    optional.append({'name': '--mode', 'help': 'Used to force mode of stations'})
-    optional.append({'name': '--ap', 'help': 'Used to force a connection to a particular AP'})
-    optional.append({'name': '--test_duration', 'help': '--test_duration sets the duration of the test', 'default': "2m"})
+    optional.append({'name': '--mode', 'help': 'Used to force mode of stations','default': 9})
+    optional.append({'name': '--ap_name', 'help': 'AP name'})
+    required.append({'name': '--ap_ip', 'help': 'IP of AP which was connected'})
+    optional.append({'name': '--test_duration', 'help': 'sets the duration of the test in minutes', 'default': 1})
     optional.append({'name':'--num_vaps', 'help':'Number of VAPs to Create', 'default': 1})
+    optional.append({'name':'--vap_channel', 'help':'VAP channel to create', 'default': 36})
     required.append({'name':'--vap_radio', 'help':'VAP radio', 'default': "wiphy3"})
     optional.append({'name':'--util', 'help':'channel utilization','default': "20,40"})
-    required.append({'name':'--ip_ntgr','help':"IP of netgear AP"})
-    required.append({'name':'--ssh_passwd','help':'ssh password'})
-    optional.append({'name': '--upload_ntgr', 'help': '--a_min bps rate minimum for side_a of netgear', 'default': 10000000})
-    optional.append({'name': '--download_ntgr', 'help': '--b_min bps rate minimum for side_b of netgear', 'default': 10000000})
+    required.append({'name':'--ap_password','help':'password for AP'})
+    optional.append({'name': '--upload', 'help': '--a_min bps rate minimum for side_a of netgear', 'default': 10000000})
+    optional.append({'name': '--download', 'help': '--b_min bps rate minimum for side_b of netgear', 'default': 10000000})
     parser = Realm.create_basic_argparse(
         prog='throughput.py',
         formatter_class=argparse.RawTextHelpFormatter,
@@ -314,20 +330,36 @@ throughput.py:
 Generic command layout:
 
 python3 ./throughput.py
+    --mode 1 {"auto"   : "0",
+        "a"      : "1",
+        "b"      : "2",
+        "g"      : "3",
+        "abg"    : "4",
+        "abgn"   : "5",
+        "bgn"    : "6",
+        "bg"     : "7",
+        "abgnAC" : "8",
+        "anAC"   : "9",
+        "an"     : "10",
+        "bgnAC"  : "11",
+        "abgnAX" : "12",
+        "bgnAX"  : "13"}
     --upstream_port eth1
     --vap_radio wiphy0
+    --vap_channel 36
     --radio wiphy1
-    --num_stations 32
+    --num_stations 40
     --num_vaps 1
     --security {open|wep|wpa|wpa2|wpa3}
     --ssid netgear
     --password admin123
-    --test_duration 2m (default)
-    --upload_ntgr 3000000
-    --download_ntgr 1000000
+    --test_duration 1 (default)
+    --upload 3000000
+    --download 1000000
     --util 20,40
-    --ip_ntgr 192.168.208.22
-    --ssh_passwd Password@123xzsawq@!
+    --ap_ip 192.168.208.22
+    --ap_name WAC505
+    --ap_password Password@123xzsawq@!
     --debug
 ===============================================================================
     ''', more_optional=optional, more_required = required)
@@ -344,7 +376,7 @@ python3 ./throughput.py
     vap_list = LFUtils.port_name_series(prefix="vap", start_id=0, end_id= int(args.num_vaps) - 1, padding_number=10000, radio=args.vap_radio)
     print(station_list,'\n',vap_list)
     # traffic data rate for stations under vap
-    vap_sta_upload, vap_sta_download = 3000000, 3000000
+    vap_sta_upload, vap_sta_download = 2000000, 2000000
 
     # create stations and run traffic under VAP
     ip_var_test = IPV4VariableTime(host=args.mgr,           port=args.mgr_port,         number_template="0000",
@@ -353,12 +385,15 @@ python3 ./throughput.py
                                    security='open',         test_duration=args.test_duration,
                                    use_ht160=False,         side_a_min_rate= vap_sta_upload,
                                    side_b_min_rate=vap_sta_download,
-                                   mode=args.mode,          ap=args.ap,                 _debug_on=args.debug,
+                                   mode=args.mode,          ap=args.ap_name,                 _debug_on=args.debug,
                                    _vap_list = vap_list[0], _vap_radio = args.vap_radio, _dhcp = False)
 
     # ip_var_test.stop()
     # time.sleep(30)
-    ip_var_test.build_vaps()  # create VAPs
+    test_time = datetime.now().strftime("%b %d %H:%M:%S")
+    print("Test started at ", test_time)
+
+    ip_var_test.build_vaps(chn = args.vap_channel)  # create VAPs
     ip_var_test.pre_cleanup() # clear existing clients
     ip_var_test.build()     # create Stations and traffic
 
@@ -379,15 +414,15 @@ python3 ./throughput.py
     ip_var_test1 = IPV4VariableTime(host=args.mgr,          port=args.mgr_port,         number_template="0000",
                                     sta_list=station_list1, name_prefix="Thrp",         upstream=args.upstream_port,
                                     ssid= args.ssid,   password=args.passwd,       radio=args.radio,
-                                    security=args.security,                        test_duration=args.test_duration,
-                                    use_ht160=False,        side_a_min_rate=args.upload_ntgr,    side_b_min_rate=args.download_ntgr,
-                                    mode=args.mode,         ap=args.ap,             _debug_on=args.debug,   _dhcp = True)
+                                    security=args.security,                    test_duration=args.test_duration,
+                                    use_ht160=False,      side_a_min_rate=args.upload,    side_b_min_rate=args.download,
+                                    mode=args.mode,       ap=args.ap_name,             _debug_on=args.debug,   _dhcp = True)
 
     ip_var_test1.pre_cleanup()  # clean the existing sta and traffics
     # check the channel utilization
     ip_var_test.check_util(real_cli_obj = ip_var_test1, util_list = util_list,
-                           real_cli = station_list1,
-                           ssh_root = args.ip_ntgr, ssh_passwd = args.ssh_passwd,)
+                           real_cli = station_list1, ssh_root = args.ap_ip,
+                           ssh_passwd = args.ap_password,test_time = test_time)
 
 
     #ip_var_test.stop()
