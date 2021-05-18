@@ -1,0 +1,47 @@
+#!/bin/bash
+# set -x
+##----------------------------------------------------------------------------#
+##    Use this script to hand-operate portal-bot.pl. The best way to use      #
+##    and not lose changes is to copy script to a new file and modify the     #
+##    copy.                                                                   #
+##                                                                            #
+##    This script does not have an argument-length restriction like the GUI   #
+##    PortModify window has; copying the evaluation of this script into the   #
+##    PortModify Post IF-UP Script field may get truncated. Click the         #
+##    'Apply/Sync' button to see if it survives intact.                       #
+##                                                                            #
+##    You do not see a --logout switch in this example. The $* parameter      #
+##    will expand any parameters provided on the command-line of this script. #
+##    Example of adding logout: ./portal-bot.bash  --logout                   #
+##    Example to print:         ./portal-bot.bash  --print                    #
+##                                                                            #
+##    Use  --print to see options formatted for the Port->Misc field in GUI   #
+##                                                                            #
+##    Debugging options: PBOT_NOFORK=1 # disables forking behavior of bot     #
+##                      PBOT_DEBUG=1   # enables debug output of bot          #
+##                                                                            #
+##----------------------------------------------------------------------------#
+
+# The lanforge.profile script sets LD_LIBRARY_PATH to use custom curl.        #
+# if you say $HOME instead of /home/lanforge, you will not be able to use     #
+# this script as root.                                                        #
+source /home/lanforge/lanforge.profile
+# http://192.168.208.26:3001/wifidog/login/1?gw_address=192.168.208.26&gw_port=2060&gw_id=8C3BAD8D52EF&ip=192.168.208.36&mac=04:f0:21:c1:91:b9&url=http%3A%2F%2F192.168.200.28%2Flogin.php&wlanindex=1
+
+PBOT_DEBUG=1 PBOT_NOFORK=1 ./portal-bot.pl \
+   -i    sta0000 \
+   -b    bp_net.pm \
+   --ip4 192.168.209.156\
+   --dns 192.168.200.1 \
+   --mgt /dev/null \
+   --delays 0,0,0\
+   -u    "[BLANK]" \
+   -p    "[BLANK]" \
+   -a    "http://192.168.215.49:3001/wifidog/" \
+   -s    "http://www.msftconnecttest.com/redirect" \
+   -n    "login/1" \
+   -o    'portal/2' \
+   -t    "portal/2" \
+   -v $*
+
+# use  --print to format for Port -> Misc field in GUI
