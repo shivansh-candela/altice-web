@@ -38,7 +38,7 @@ class IPV4VariableTime(Realm):
                  radio=None,        host="localhost",    port=8080,       mode=0,        ap=None,            side_a_min_rate= 56,
                  side_a_max_rate=0, side_b_min_rate=56,  side_b_max_rate=0,              number_template="00000",
                  test_duration="5m", use_ht160=False,    _debug_on=False,                _exit_on_error=False,
-                 _exit_on_fail=False, _vap_radio=None,   _vap_list = '1.1.vap0000', _dhcp = True ):
+                 _exit_on_fail=False, _vap_radio=None,   _vap_list = 'vap0000', _dhcp = True ):
         super().__init__(lfclient_host=host, lfclient_port=port),
         self.upstream = upstream
         self.host = host
@@ -135,7 +135,8 @@ class IPV4VariableTime(Realm):
         self.vap_profile.set_command_flag("set_port", "ip_gateway", 1)
         print("Creating VAPs")
         self.vap_profile.create(resource = 1,   radio = self.vap_radio,     channel = int(chn),       up_ = True,     debug = False,
-                                suppress_related_commands_ = True,          use_radius = True,  hs20_enable = False)
+                                suppress_related_commands_ = True,          use_radius = True,  hs20_enable = False,
+                                create_bridge = False)
         self._pass("PASS: VAP build finished")
 
     def build(self):
@@ -297,8 +298,7 @@ class IPV4VariableTime(Realm):
         # send all the collected data to genarate report
         throughput_report.thrp_rept(util = util_list, sta_num = real_cli,
                                     bps_rx_a = bps_rx_a, bps_rx_b= bps_rx_b,
-                                    tbl_title = "Throughput",
-                                    grp_title = "Throughput",
+                                    rep_title = "Throughput Under Channel Load",
                                     upload = int(real_cli_obj.cx_profile.side_a_min_bps)/1000000,
                                     download = int(real_cli_obj.cx_profile.side_b_min_bps)/1000000,
                                     test_setup_info = test_setup_info,input_setup_info = input_setup_info)
@@ -311,7 +311,6 @@ def main():
     optional.append({'name': '--ap_name', 'help': 'AP name'})
     required.append({'name': '--ap_ip', 'help': 'IP of AP which was connected'})
     optional.append({'name': '--test_duration', 'help': 'sets the duration of the test in minutes', 'default': 1})
-    optional.append({'name':'--num_vaps', 'help':'Number of VAPs to Create', 'default': 1})
     optional.append({'name':'--vap_channel', 'help':'VAP channel to create', 'default': 36})
     required.append({'name':'--vap_radio', 'help':'VAP radio', 'default': "wiphy3"})
     optional.append({'name':'--util', 'help':'channel utilization','default': "20,40"})
@@ -349,7 +348,6 @@ python3 ./throughput.py
     --vap_channel 36
     --radio wiphy1
     --num_stations 40
-    --num_vaps 1
     --security {open|wep|wpa|wpa2|wpa3}
     --ssid netgear
     --password admin123
@@ -372,21 +370,21 @@ python3 ./throughput.py
 
     # 4 stations created under VAP by default
     station_list = LFUtils.portNameSeries(prefix_="sta", start_id_=0, end_id_= 3 , padding_number_=10000, radio=args.radio)
-    # no.of vap name list
-    vap_list = LFUtils.port_name_series(prefix="vap", start_id=0, end_id= int(args.num_vaps) - 1, padding_number=10000, radio=args.vap_radio)
-    print(station_list,'\n',vap_list)
+    # vap name
+    vap_name = 'vap0000'
+    print(station_list,'\n',vap_name)
     # traffic data rate for stations under vap
     vap_sta_upload, vap_sta_download = 2000000, 2000000
 
     # create stations and run traffic under VAP
     ip_var_test = IPV4VariableTime(host=args.mgr,           port=args.mgr_port,         number_template="0000",
-                                   sta_list=station_list,   name_prefix="VT",           upstream="1.1."+vap_list[0],
+                                   sta_list=station_list,   name_prefix="VT",           upstream=vap_name,
                                    ssid="testchannel",          password='[BLANK]',       radio=args.radio,
                                    security='open',         test_duration=args.test_duration,
                                    use_ht160=False,         side_a_min_rate= vap_sta_upload,
                                    side_b_min_rate=vap_sta_download,
                                    mode=args.mode,          ap=args.ap_name,                 _debug_on=args.debug,
-                                   _vap_list = vap_list[0], _vap_radio = args.vap_radio, _dhcp = False)
+                                   _vap_list = vap_name, _vap_radio = args.vap_radio, _dhcp = False)
 
     # ip_var_test.stop()
     # time.sleep(30)

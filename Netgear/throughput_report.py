@@ -8,7 +8,9 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 import numpy as np
 import pandas as pd
-import pdfkit
+import pdfkit,sys,os
+if 'lf_report' not in sys.path:
+    sys.path.append(os.path.abspath('..'))
 from lf_report import lf_report
 from lf_graph import lf_bar_graph
 
@@ -93,6 +95,11 @@ def grph(report,dis = "", data_set = None, xaxis_name = "stations", yaxis_name =
     report.build_graph()
 
 def test_setup_information(test_setup_data=None):
+    '''test_setup_info = {
+        "AP Name": self.ap,
+        "SSID": self.ssid,
+        "Test Duration": datetime.strptime(test_end, '%b %d %H:%M:%S') - datetime.strptime(test_time, '%b %d %H:%M:%S')
+    }'''
     if test_setup_data is None:
         return None
     else:
@@ -147,7 +154,7 @@ def input_setup_info_table(input_setup_info=None):
                         """
     return str(setup_information)
 
-def thrp_rept(util, sta_num, bps_rx_a,bps_rx_b, tbl_title, grp_title, upload = 1000000, download = 1000000,
+def thrp_rept(util, sta_num, bps_rx_a,bps_rx_b, rep_title, upload = 1000000, download = 1000000,
               test_setup_info = None,input_setup_info = None):
     # report generation main function
     rx_a = []
@@ -190,8 +197,8 @@ def thrp_rept(util, sta_num, bps_rx_a,bps_rx_b, tbl_title, grp_title, upload = 1
 
     overall_tab = pd.DataFrame({
             'Channel Utilization (%)': util,"No.of.clients": [len(sta_num)]*len(util),
-            'Speed (mbps)': [f'upload: {upload} | download: {download}']*len(util),
-            'Upload (mbps)': rx_b,    'Download (mbps)': rx_a
+            'Intended Throughput(Mbps)': [f'upload: {upload} | download: {download}']*len(util),
+            'Achieved Upload Throughput(Mbps)': rx_b,    'Achieved Download Throughput(Mbps)': rx_a
     })
     print(f"overall table \n{overall_tab}")
 
@@ -203,22 +210,22 @@ def thrp_rept(util, sta_num, bps_rx_a,bps_rx_b, tbl_title, grp_title, upload = 1
     print(f"pass-fail table \n {pasfail_tab}")
 
     report = lf_report()
-    report.set_title(tbl_title)
+    report.set_title(rep_title)
     report.build_banner()
     report.set_obj_html(_obj_title="Objective",
-                        _obj = "This test is designed to measure the throughput of N (Number of client) "
-                               "when the channel was utilized with different amount")
+                        _obj = f"This test is designed to measure the throughput of {len(sta_num)} clients connected on 5GHz"
+                               " radio when the channel was already utilized with different percentage")
     report.build_objective()
-    table(report,"Overall throughput",overall_tab,dis = "The below table gives the information about Min, Max, and Avg speed "
-                                                        "of client with various percentage of channel utilization ")
-    table(report,"Throughput Pass/Fail",pasfail_tab,dis = f"This table breif about Pass/Fail criteria  "
-                                                          f"for {' '.join(util)} channel throughput")
+    table(report,"Min, Max, Avg Throughput",overall_tab,dis=f"The below table gives the information about Min, Max, and Avg throughput "
+                                                        f"for the clients when channel utilized with {', '.join(util)}")
+    table(report,"Pass/Fail Criteria",pasfail_tab,dis = f"This table breif about Pass/Fail criteria  "
+                                                          f"for {', '.join(util)} channel throughput")
 
     if download:
         grph(report,
          data_set=[[min(i) for i in bps_rx_a],[max(i) for i in bps_rx_a], [sum(i)/len(i) for i in bps_rx_a]],
-         dis="This graph represents the overall minimum, maximum and average throughput for all the connected "
-             "stations with different channel utilizations for download traffic",
+         dis=f"This graph represents the minimum, maximum and average throughput of "
+             f"stations when channel was utilized with {', '.join(util)} for download traffic",
           xaxis_name="Utilizations", yaxis_name="Throughput (Mbps)",
           xaxis_categories=util, label=["min", "max", 'avg'],
              graph_image_name="Download Throughput for all channel utilizations",
@@ -226,8 +233,8 @@ def thrp_rept(util, sta_num, bps_rx_a,bps_rx_b, tbl_title, grp_title, upload = 1
     if upload:
         grph(report,
          data_set=[[min(i) for i in bps_rx_b], [max(i) for i in bps_rx_b], [sum(i) / len(i) for i in bps_rx_b]],
-         dis="This graph represents the overall minimum, maximum and average throughput for all the connected "
-             "stations with different channel utilizations for upload traffic",
+         dis=f"This graph represents the minimum, maximum and average throughput of "
+             f"stations when channel was utilized with {', '.join(util)} for upload traffic",
          xaxis_name="Utilizations", yaxis_name="Throughput (Mbps)",
          xaxis_categories=util, label=["min", "max", 'avg'],
          graph_image_name="Upload Throughput for all channel utilization",
@@ -236,16 +243,16 @@ def thrp_rept(util, sta_num, bps_rx_a,bps_rx_b, tbl_title, grp_title, upload = 1
     for i in range(len(util)):
         if download:
             grph(report, data_set=[bps_rx_a[i]],
-                 dis=f"The graph shows the individual throughput for all the connected station when channel"
-                     f" was utilized with {util[i]} in download traffic",
-                 xaxis_name="stations",
+                 dis=f"The graph shows the individual throughput for all the connected stations on 5GHz radio "
+                     f"when channel was utilized with {util[i]} in download traffic",
+                 xaxis_name="Stations",
                  yaxis_name="Throughput (Mbps)", xaxis_categories = range(0,len(sta_num)),
                  label=[util[i]], graph_image_name=f"Individual download throughput - CH{util[i]}",
                  xticks_font = 6)
         if upload:
             grph(report, data_set=[bps_rx_b[i]],
-                 dis=f"The graph shows the individual throughput for all the connected station when channel"
-                     f" was utilized with {util[i]} in upload traffic",
+                 dis=f"The graph shows the individual throughput for all the connected stations on 5GHz radio "
+                     f"when channel was utilized with {util[i]} in upload traffic",
                  xaxis_name="stations",
                  yaxis_name="Throughput (Mbps)", xaxis_categories = range(0,len(sta_num)),
                  label=[util[i]], graph_image_name=f"Individual upload throughput - CH{util[i]}"
