@@ -1,5 +1,5 @@
 """ ftp_test.py will verify that N clients connected on specified band and can simultaneously download/upload some amount of file from FTP server and measuring the time taken by client to download/upload the file.
-    cli- python3 ftp_test.py --mgr localhost --mgr_port 8080 --ssid Netgear --security open --passwd BLANK --ap_name WAC505 --ap_ip 192.168.213.90 --bands 2.4G --directions Download --file_size 2MB --num_stations 40
+    cli- python3 ftp_test.py --mgr localhost --mgr_port 8080 --ssid Netgear --security open --passwd BLANK --ap_name WAC505 --ap_ip 192.168.213.90 --bands Both --directions Download --twog_radio wiphy1 --fiveg_radio wiphy0 --file_size 2MB --num_stations 40
     Copyright 2021 Candela Technologies Inc
     License: Free to distribute and modify. LANforge systems must be licensed.
 """
@@ -23,8 +23,8 @@ import os
 
 class ftp_test(LFCliBase):
     def __init__(self, lfclient_host="localhost", lfclient_port=8080, sta_prefix="sta", start_id=0, num_sta= None,
-                 dut_ssid=None,dut_security=None, dut_passwd=None, file_size=None, band=None,
-                 upstream="eth1",_debug_on=False, _exit_on_error=False,  _exit_on_fail=False, direction= None):
+                 dut_ssid=None, dut_security=None, dut_passwd=None, file_size=None, band=None, twog_radio=None,
+                 fiveg_radio=None, upstream="eth1", _debug_on=False, _exit_on_error=False,  _exit_on_fail=False, direction= None):
         super().__init__(lfclient_host, lfclient_port, _debug=_debug_on, _exit_on_fail=_exit_on_fail)
         print("Test is about to start")
         self.host = lfclient_host
@@ -38,9 +38,11 @@ class ftp_test(LFCliBase):
         self.security = dut_security
         self.password = dut_passwd
         self.requests_per_ten = 1
-        self.band=band
-        self.file_size=file_size
-        self.direction=direction
+        self.band = band
+        self.file_size = file_size
+        self.direction = direction
+        self.twog_radio = twog_radio
+        self.fiveg_radio = fiveg_radio
         self.local_realm = realm.Realm(lfclient_host=self.host, lfclient_port=self.port)
         self.station_profile = self.local_realm.new_station_profile()
         self.cx_profile = self.local_realm.new_http_profile()
@@ -53,7 +55,7 @@ class ftp_test(LFCliBase):
         #This method will set values according user input
 
         if self.band == "5G":
-            self.radio = ["wiphy0"]
+            self.radio = [self.fiveg_radio]
             if self.file_size == "2MB":
 
                 #providing time duration for Pass or fail criteria
@@ -65,7 +67,7 @@ class ftp_test(LFCliBase):
             else:
                 self.duration = self.convert_min_in_time(10)
         elif self.band == "2.4G":
-            self.radio = ["wiphy1"]
+            self.radio = [self.twog_radio]
             if self.file_size == "2MB":
                 self.duration = self.convert_min_in_time(2)
             elif self.file_size == "500MB":
@@ -75,7 +77,7 @@ class ftp_test(LFCliBase):
             else:
                  self.duration = self.convert_min_in_time(10)
         elif self.band == "Both":
-            self.radio = ["wiphy0", "wiphy1"]
+            self.radio = [self.fiveg_radio,self.twog_radio]
 
             #if Both then number of stations are half for 2.4G and half for 5G
             self.num_sta = self.num_sta // 2
@@ -102,13 +104,13 @@ class ftp_test(LFCliBase):
             print("Couldn't load 'BLANK' Test configurations")
 
         for rad in self.radio:
-            if rad == "wiphy0":
+            if rad == self.fiveg_radio:
 
                 #select mode(All stations will connects to 5G)
                 self.station_profile.mode = 10
                 self.count=self.count+1
 
-            elif rad == "wiphy1":
+            elif rad == self.twog_radio:
 
                 # select mode(All stations will connects to 2.4G)
                 self.station_profile.mode = 6
@@ -239,7 +241,6 @@ class ftp_test(LFCliBase):
             self.cx_profile.start_cx()
 
         print("Test Started")
-
 
     def stop(self):
         self.cx_profile.stop_cx()
@@ -381,11 +382,13 @@ def main():
     # This has --mgr, --mgr_port and --debug
     parser = LFCliBase.create_bare_argparse(prog="ftp_test.py", formatter_class=argparse.RawTextHelpFormatter, epilog="About This Script")
     # Adding More Arguments for custom use
-    parser.add_argument('--ssid',type=str, help='--ssid')
-    parser.add_argument('--passwd',type=str, help='--passwd')
+    parser.add_argument('--ssid', type=str, help='--ssid')
+    parser.add_argument('--passwd', type=str, help='--passwd')
     parser.add_argument('--security', type=str, help='--security')
     parser.add_argument('--ap_name', type=str, help='--ap_name')
     parser.add_argument('--ap_ip', type=str, help='--ap_ip')
+    parser.add_argument('--twog_radio', type=str, help='specify radio for 2.4G clients', default='wiphy1')
+    parser.add_argument('--fiveg_radio', type=str, help='specify radio for 5G client', default='wiphy0')
     
     # Test variables
     parser.add_argument('--bands', nargs="+", help='--bands defaults ["5G","2.4G","Both"]', default=["5G","2.4G","Both"])
@@ -414,10 +417,12 @@ def main():
                     dut_ssid=args.ssid,
                     dut_passwd=args.passwd,
                     dut_security=args.security,
-                    num_sta= args.num_stations,
+                    num_sta=args.num_stations,
                     band=band,
                     file_size=file_size,
-                    direction=direction
+                    direction=direction,
+                    twog_radio=args.twog_radio,
+                    fiveg_radio=args.fiveg_radio
                    )
 
                 iteraration_num=iteraration_num+1
