@@ -182,13 +182,9 @@ def add_utilization_table(information_dict):
         var_row = var_row + "<th>" + row + "</th>"
     html_data = """
                         <table width='1000px' border='1' cellpadding='2' cellspacing='0' >
-                        <th style="width:1000px;background-color:grey">Channel Utilization TABLE DESCRIPTION</th>
+                        <th style="width:1000px;background-color:grey">Channel Utilization Table Description</th>
                                 </table>
-                                <p align='left' width='900'>The Channel Utilization Test table provides you information regarding "
-                                              "set threshold , measured channel utiliszation from the AP "
-                                              "which is used to decide the PASS/ FAIL criteria, if the measured utilization "
-                                              "is equal or within the range of 5% increase or 5% decrease of the threshold value "
-                                              "then it's a PASS criteria else FAIL criteria.</p>
+                                <p align='left' width='900'>The Channel Utilization Test table provides you information regarding set threshold , measured channel utilization from the AP which is used to decide the PASS/ FAIL criteria, if the measured utilization is equal or within the range of 5% increase or 5% decrease of the threshold value then it's a PASS criteria else FAIL criteria.</p>
                                 <table width='1000px' border='1' cellpadding='2' cellspacing='0' >
                           <tr>
                             <th colspan='2'>Channel Utilization Table</th>
@@ -246,12 +242,9 @@ def add_client_table(information_dict):
         var_row = var_row + "<th>" + row + "</th>"
     html_data = """
                             <table width='1000px' border='1' cellpadding='2' cellspacing='0' >
-                            <th style="width:1000px;background-color:grey">Max Client Connect TABLE DESCRIPTION</th>
+                            <th style="width:1000px;background-color:grey">Max Client Connect Table Description</th>
                                 </table>
-                                <p align='left' width='900'>TThe max client connect Test table provides you information regarding "
-                                     "set threshold , measured max client value from the AP  which can be used to "
-                                     "decide the PASS/ FAIL criteria, if the measured max client value is equal to threshold "
-                                     "value it's a PASS criteria else FAIL criteria.</p>
+                                <p align='left' width='900'>The max client connect Test table provides you information regarding set threshold , measured max client value from the AP  which can be used to decide the PASS/ FAIL criteria, if the measured max client value is equal to threshold value it's a PASS criteria else FAIL criteria.</p>
                               <tr>
                                 <th colspan='2'>Max Client Connect Table</th>
                               </tr>
@@ -308,11 +301,9 @@ def add_rssi_table(information_dict):
         var_row = var_row + "<th>" + row + "</th>"
     html_data = """
                                 <table border="1" width="1000px" cellpadding="2" cellspacing="0">
-                                <th style="width:1000px;background-color:grey">RSSI TABLE DESCRIPTION</th>
+                                <th style="width:1000px;background-color:grey">RSSI Table Description</th>
                                 </table>
-                                <p align='left' width='900'>The RSSI Test table provides you information regarding set threshold , measured rssi value from the AP which can be
-                                        used to decide the PASS/ FAIL criteria, if the measured rssi value is within the range of 1dbm increase or 1dbm decrease
-                                        of the threshold valueor is equal to threshold value it's a PASS criteria else FAIL criteria.</p>
+                                <p align='left' width='900'>The RSSI Test table provides you information regarding set threshold , measured rssi value from the AP which can be used to decide the PASS/ FAIL criteria, if the measured rssi value is within the range of 1dbm increase or 1dbm decrease of the threshold valueor is equal to threshold value it's a PASS criteria else FAIL criteria.</p>
                                 <table width='1000px' border='1' cellpadding='2' cellspacing='0' >
                             <tr>
                                 <th colspan='2'>RSSI TABLE </th>
@@ -433,3 +424,5 @@ def generate_report(date = None,
 # test blocks from here
 if __name__ == '__main__':
     generate_report()
+
+
