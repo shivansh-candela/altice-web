@@ -1,26 +1,25 @@
 {
 
-  "repete" : "how many times config. should repete",
-  "roam interval": "time in sec",
+  "repeat" :1000,
+  "roam interval": 10,
+  "ap name" : "WAC505 , WAC505",
 
-  "ssid" : "ASUSAP",
+  "ssid" : "roam",
   "passwd" : "BLANK",
   "security" : "open",
 
-  "2.4G client" : 5,
+  "2.4G client" : 20,
   "2.4G radio" : "wiphy0",
-  "2.4G channel" : 4,
-
-  "5G client" : 6,
+  "2.4G channel" : 1,
+  "5G client" : 20,
   "5G radio" : "wiphy1",
-  "5G channel" : 149,
+  "5G channel" : 36,
+
 
   "roaming_configuration":
   [
-    [ 0, 5, "2.4G", 0],
-    [ 3, 5, "5G", 4],
-    [ 3, 7, "2.4G", 1],
-    [ 8, 9, "5G", 4]
+    [ 0, 19, "2.4G", "ac:86:74:8c:ea:42","ac:86:74:a4:61:82"],
+    [ 0, 19, "5G", "ac:86:74:8c:ea:50","ac:86:74:a4:61:90"]
   ]
 }
 
