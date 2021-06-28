@@ -11,12 +11,8 @@ from LANforge.LFUtils import *
 import realm
 from realm import Realm
 from realm import PortUtils
-import argparse
-import datetime
+import argparse, time, os, paramiko, datetime
 #from datetime import datetime
-import time
-import os
-import paramiko
 from itertools import groupby
 #from webpage_report import *
 import matplotlib.pyplot as plt
@@ -24,7 +20,7 @@ import pandas as pd
 import numpy as np
 from lf_report import lf_report
 #from lf_graph import lf_bar_graph, lf_scatter_graph, lf_stacked_graph, lf_horizontal_stacked_graph
-
+import random
 class VideoStreaming(Realm):
     def __init__(self, lfclient_host, lfclient_port, upstream, num_sta, security, ssid, password, url,
                  target_per_ten, max_speed,file_size, bands,start_id=0, _debug_on=False, _exit_on_error=False,
@@ -82,7 +78,8 @@ class VideoStreaming(Realm):
     def precleanup(self):
         self.count = 0
         try:
-            self.local_realm.load("BLANK")
+            pass
+            #self.local_realm.load("BLANK")
         except:
             print("couldn't load 'BLANK' Test Configuration")
 
@@ -248,26 +245,6 @@ class VideoStreaming(Realm):
         print("rx rate values are ", rx_rate)
         return rx_rate
 
-    """def my_monitor(self):
-        # data in json format
-        data1 = []
-        #for j in range(3600):
-
-        data = self.local_realm.json_get("layer4/list?fields=rx rate")
-
-        for i in range(len(data['endpoint'])):
-            data1.append(str(list(data['endpoint'][i]))[2:-2])
-        time.sleep(1)
-        print("only data", data1)
-        data2 = []
-        for i in range(self.num_sta):
-            data = self.local_realm.json_get("layer4/list?fields=rx rate")
-            #print(type(data['endpoint'][i][data1[i]]['uc-avg']))
-            data2.append((data['endpoint'][i][data1[i]]['rx rate']))
-
-        print(data2)
-        #print("downloading time for all clients", data2)
-        return data2"""
     def postcleanup(self):
         # for rad in self.radio
         self.http_profile.cleanup()
@@ -329,8 +306,9 @@ def grph_build(data_set = None,         xaxis_name = "stations",    yaxis_name =
             i = i + 1
     plt.xlabel(xaxis_name, fontweight='bold', fontsize=15)
     plt.ylabel(yaxis_name, fontweight='bold', fontsize=15)
+    #plt.xticks(np.arange(0, len(self.xaxis_categories), step=5))
     plt.xticks([r + bar_width for r in range(len(data_set[0]))],
-               xaxis_categories,fontsize = xticks_font)
+               xaxis_categories,fontsize = xticks_font,)
     plt.legend(bbox_to_anchor=(1.12,0.5),prop={'size':7})
     plt.title(grp_title)
     fig = plt.gcf()
@@ -340,36 +318,76 @@ def grph_build(data_set = None,         xaxis_name = "stations",    yaxis_name =
 
     return "%s.png" % graph_image_name
 
-def custom_title(set_title):
-    title = """
-                <html lang='en'>
-                <head>
-                <meta charset='UTF-8'>
-                <meta name='viewport' content='width=device-width, initial-scale=1' />
-                <div class='HeaderStyle'>
-                <h3 class='TitleFontPrint' style='color:darkgreen;'>""" + str(set_title) + """</h3>
-                """
-    return title
-def report(buffer):
+def test_setup_information(test_setup_data=None,colmn="Setup Information"):
+    '''test_setup_info = {
+        "AP Name": self.ap,
+        "SSID": self.ssid,
+        "Test Duration": datetime.strptime(test_end, '%b %d %H:%M:%S') - datetime.strptime(test_time, '%b %d %H:%M:%S')
+    }'''
+    if test_setup_data is None:
+        return None
+    else:
+        var = ""
+        for i in test_setup_data:
+            var = var + "<tr><td>" + i + "</td><td colspan='3'>" + str(test_setup_data[i]) + "</td></tr>"
+    setup_information = """
+                        <!-- Test Setup Information -->
+                        <br><br>
+                        <table width='700px' border='1' cellpadding='2' cellspacing='0' style='border-top-color: gray; border-top-style: solid; border-top-width: 1px; border-right-color: gray; border-right-style: solid; border-right-width: 1px; border-bottom-color: gray; border-bottom-style: solid; border-bottom-width: 1px; border-left-color: gray; border-left-style: solid; border-left-width: 1px'>
+                            <tr>
+                              <th colspan='2'> Test Setup Information </th>
+                            </tr>
+                            <tr>
+                              <td>""" + colmn + """</td>
+                              <td>
+                                <table width='100%' border='0' cellpadding='2' cellspacing='0' style='border-top-color: gray; border-top-style: solid; border-top-width: 1px; border-right-color: gray; border-right-style: solid; border-right-width: 1px; border-bottom-color: gray; border-bottom-style: solid; border-bottom-width: 1px; border-left-color: gray; border-left-style: solid; border-left-width: 1px'>
+                                  """ + str(var) + """
+                                </table>
+                              </td>
+                            </tr>
+                        </table>
+                        <br><br>
+                        """
+    return str(setup_information)
+
+def input_setup_info_table(input_setup_info=None):
+    if input_setup_info is None:
+        return None
+    else:
+        var = ""
+        for i in input_setup_info:
+            var = var + "<tr><td>" + i + "</td><td colspan='3'>" + str(input_setup_info[i]) + "</td></tr>"
+
+    setup_information = """
+                        <!-- Test Setup Information -->
+                        <br><br>
+                        <table width='700px' border='1' cellpadding='2' cellspacing='0' style='border-top-color: gray; border-top-style: solid; border-top-width: 1px; border-right-color: gray; border-right-style: solid; border-right-width: 1px; border-bottom-color: gray; border-bottom-style: solid; border-bottom-width: 1px; border-left-color: gray; border-left-style: solid; border-left-width: 1px'>
+                            <tr>
+                              <th colspan='2'>Input Setup Information</th>
+                            </tr>
+                            <tr>
+                              <td>Information</td>
+                              <td>
+                                <table width='100%' border='0' cellpadding='2' cellspacing='0' style='border-top-color: gray; border-top-style: solid; border-top-width: 1px; border-right-color: gray; border-right-style: solid; border-right-width: 1px; border-bottom-color: gray; border-bottom-style: solid; border-bottom-width: 1px; border-left-color: gray; border-left-style: solid; border-left-width: 1px'>
+                                  """ + str(var) + """
+                                </table>
+                              </td>
+                            </tr>
+                        </table>
+                        <br>
+                        """
+    return str(setup_information)
+
+def report(buffer1,test_setup_info,input_setup_info,threshold,duration,bands):
+    #print(buffer1)
+    buffer = {}
+    for i in range(len(bands)):
+        buffer[bands[i]] = buffer1[i]
+    #bands = list(buffer.keys())
     print(buffer)
-    bands = list(buffer.keys())
     speeds = list(buffer[bands[0]].keys())
-    #list(map(lambda i : speed.extend(list(buffer[i].keys())),bands))#
-    #pd.DataFrame({'speed': list(d.keys()) * len(list(d.values())[0].values()), 'buffer': list(d.values())[0].values()})
-    '''speed.append([i] * num_sta for i in speed)
-    print(speed)
-    dataframe = pd.DataFrame({
-        'speed': [speed] ,
-        'Rx-rate': list(buffer.values())[0].values()
-    })
-    print(dataframe)'''
+
     report = lf_report(_results_dir_name = "Video_streaming")
-    '''report_path = report.get_path()
-    report_path_date_time = report.get_path_date_time()
-
-    print("path: {}".format(report_path))
-    print("path_date_time: {}".format(report_path_date_time))'''
-
     report.set_title("Video Streaming")
     report.build_banner()
     report.set_obj_html(_obj_title="Objective",
@@ -378,38 +396,37 @@ def report(buffer):
                              f"individual stations"
                              )
     report.build_objective()
-    '''report.set_table_title("Rx-rate")
-    report.build_table_title()
-    report.set_table_dataframe(dataframe)
-    report.build_table()'''
+    report.set_custom_html(_custom_html=test_setup_information(test_setup_data=test_setup_info,
+                                                               colmn = "Device Under Test"))
+    report.build_custom()
+
 
     #plotting graph
     for band in bands:
-        '''report.set_obj_html(_obj_title="", _obj=f"The below shown graphs are under {band} ")
-        report.set_graph_title(f"40 bgn ac clients Band-{band}")
-        report.build_graph_title()
-        report.build_objective()'''
         for speed in speeds:
             report.set_obj_html(_obj_title="", _obj=f"The below graph shows number of connected clients on X-axis and "
-                                                    f"number of buffers on Y-axis, when threshold is 70%")
+                                                    f"number of video stalls on Y-axis, when threshold is {threshold}% "
+                                                    f"for duration {duration} minutes")
                 #f"stations when channel was utilized with {int(speed)/1000000}Mbps for download traffic")
             #report.set_custom_html(_custom_html=custom_title(set_title=f"40 bgn ac clients with max speed-{speed}"))
             #report.build_custom()
-            report.set_graph_title(f"{len(buffer[band][speed])} clients with max speed-{int(speed)/1000000}Mbps "
+            report.set_graph_title(f"{len(buffer[band][speed].values())} clients with max speed-{int(speed)/1000000}Mbps "
                                    f"of {band}")
             report.build_graph_title()
             report.build_objective()
             data_set = list(buffer[band][speed].values())
             label = f"{int(speed)/1000000}Mbps"
-            graph_png = grph_build(data_set=[data_set], xaxis_name="Stations", yaxis_name="No.of.buffers",
+            graph_png = grph_build(data_set=[data_set], xaxis_name="Stations", yaxis_name="No.of video stalls",
                                    xaxis_categories=range(1,len(buffer[band][speed])+1), label=[label],
-                                   graph_image_name=f"40-clients-with-max-speed-{speed}-{band}",
-                                   xticks_font=7,grp_title = "No.of buffers for each clients")
+                                   graph_image_name=f"{len(buffer[band][speed].values())}-clients-with-max-speed-{speed}-{band}",
+                                   xticks_font=7,grp_title = "No.of stalls for each clients")
             print("graph name {}".format(graph_png))
             report.set_graph_image(graph_png)
             report.move_graph_image()
             report.build_graph()
 
+    report.set_custom_html(_custom_html=test_setup_information(test_setup_data=input_setup_info,colmn = "Information"))
+    report.build_custom()
     html_file = report.write_html()
     print("returned file {}".format(html_file))
     print(html_file)
@@ -418,7 +435,11 @@ def report(buffer):
     #report.generate_report()
 
 def main():
-    parser = argparse.ArgumentParser(description="Netgear Video streaming Test Script")
+    parser = argparse.ArgumentParser(description="Netgear Video streaming Test Script \n"
+                                     "sudo python3 video_stream.py --mgr localhost --mgr_port 8080 --upstream_port eth1 "
+                                     "--num_stations 40 --security open --ssid testchannel --passwd [BLANK] "
+                                     "--url 192.168.208.92/video.txt --max_speed 1 2 --bands_with_radio 5G-wiphy0 2.4G-wiphy1 Both-wiphy0,wiphy1"
+                                     " --threshold 70 --file_size 30Mb --duration 2 --ap_name WAC505 --buffer_interval 5")
     optional = parser.add_argument_group('optional arguments')
     required = parser.add_argument_group('required arguments')
     optional.add_argument('--mgr', help='hostname for where LANforge GUI is running', default='localhost')
@@ -428,37 +449,38 @@ def main():
     required.add_argument('--security', help='WiFi Security protocol: {open|wep|wpa2|wpa3')
     required.add_argument('--ssid', help='WiFi SSID for script object to associate to')
     required.add_argument('--passwd', help='WiFi passphrase/password/key')
-    required.add_argument('--url', type=str, help='url on which you want to test HTTP')
+    required.add_argument('--url', type=str, help='url on eth1 to test HTTP')
     optional.add_argument('--target_per_ten', help='number of request per 10 minutes', default=100)
     optional.add_argument('--max_speed', nargs="+", help='provide the maximum speed in Mbps',
                         default=[1, 2, 3, 4, 5])
     required.add_argument('--bands_with_radio', nargs="+",
                         help='eg:5G-wiphy0 2.4G-wiphy1 Both-wiphy0,wiphy1 -- for "Both" provide 5G '
-                             'radio and 2.4G radio')#, default=["5G-wiphy",  "Both"])
+                             'radio and 2.4G radio')
     optional.add_argument('--file_size',type=str, help='specify the size of file you want to download', default='30Mb')
     optional.add_argument('--duration', type=str, help='mention the time interval you want to check the '
                                                      'values for cx in minutes', default=2)
-    optional.add_argument('--ap_ip', type=str, help="mention th AP ip for ssh ", default="192.168.208.201")
-    optional.add_argument('--user', type=str, help='credentials ap login/username', default='root')
-    optional.add_argument( '--pswd', type=str, help='credential password', default='Password@123xzsawq@!')
+    optional.add_argument('--ap_name', type=str, help="mention th AP name ", default="Access Point")
     optional.add_argument( '--buffer_interval', type=int, help='buffer size', default=5)
     optional.add_argument( '--threshold', type=int, help='threshold in percentage', default=70)
 
     args = parser.parse_args()
 
-    ap = AP_automate(args.ap_ip, args.user, args.pswd)
+    #ap = AP_automate(args.ap_ip, args.user, args.pswd)
     print(args.bands_with_radio)
     band_rad = [b.split("-") for b in args.bands_with_radio]
     vs_bands, vs_radio = [],[]
     list(map(lambda b : (vs_bands.append(b[0].title()),vs_radio.append(b[1])),band_rad))
-    band_dict = {}
+    band_dict = []
     print(args.max_speed)
 
-    speed_dict = dict.fromkeys(args.max_speed)
-    print("speed-----",speed_dict)
     band_type = ['5G','2.4G','Both']
     num = lambda ars : ars if ars % 2 == 0 else ars + 1
+
+    test_time = datetime.datetime.now().strftime("%b %d %H:%M:%S")
+    print("Test started at ", test_time)
+
     for bands in vs_bands:
+        speed_dict = {}
         print("bands--",bands)
         num_stas = args.num_stations
         if bands == '5G':
@@ -480,7 +502,8 @@ def main():
                                     file_size=args.file_size,bands=bands, _debug_on=True, _radio = radio)
             # calculate threshold
             number = speed
-            print('speed-----' ,number,"70% percent of given speed------", int(0.7 * float(number)))
+            print('speed-----' ,number,f"{args.threshold}% percent of given speed------",
+                  int((args.threshold/100) * float(number)))
             threshold = int((args.threshold/100) * float(number))
             print("threshold is-----", threshold)
 
@@ -507,19 +530,8 @@ def main():
                                    col_names=['rx rate'],
                                    created_cx=layer4connections,
                                    iterations=0)
-            rx_rate = [1005140,1,    1005140,197,    88,     258,    212,    157,1005015,1004524,
-                       1007393,2,    1005154,997,1005140,1004315,1004132,1005212,1005257,1005015,
-                       1005140,3,    1005140,997,1005388,1005258,1005212,1005257,1005015,1004524,
-                       1007393,4,   1005154,997,1005140,1004315,1004132,1005212,1005257,1005015,
-                       1005140,5,    1005140,997,1005388,1005258,1005212,1005257,1005015,1004524,
-                       1007393,6,   1005154,997,1005140,1004315,1004132,1005212,1005257,1005015,
-                       1005140, 7, 1005140, 197, 88, 258, 212, 157, 1005015, 1004524,
-                       1007393, 8, 1005154, 997, 1005140, 1004315, 1004132, 1005212, 1005257, 1005015,
-                       1005140, 9, 1005140, 997, 1005388, 1005258, 1005212, 1005257, 1005015, 1004524,
-                       1007393, 10, 1005154, 997, 1005140, 1004315, 1004132, 1005212, 1005257, 1005015,
-                       1005140, 11, 1005140, 997, 1005388, 1005258, 1005212, 1005257, 1005015, 1004524,
-                       1007393, 12, 1005154, 997, 1005140, 1004315, 1004132, 1005212, 1005257, 1005015
-                       ]
+            #rx_rate = random.sample(range(0,1000000),120)
+
             # divide the list into number of endpoints, Yield successive n-sized chunks from l.
             #print("list of rx rate", rx_rate)
             def divide_chunks(l, n):
@@ -572,14 +584,15 @@ def main():
                     if iter >= len(endp_dict[k]):
                         break
                     try:
+                        #threshold = 700000
                         if min(endp_dict[k]) > threshold:
                             break
-                        if min(endp_dict[k][iter:iter + args.buffer_size]) > threshold:
-                            iter += args.buffer_size
+                        if min(endp_dict[k][iter:iter + args.buffer_interval]) > threshold:
+                            iter += args.buffer_interval
                         if endp_dict[k][iter] < threshold :
                             iter += 1
-                            tmp = endp_dict[k][iter:iter + (args.buffer_size - 1)]
-                            if len(tmp) < (args.buffer_size - 1):
+                            tmp = endp_dict[k][iter:iter + (args.buffer_interval - 1)]
+                            if len(tmp) < (args.buffer_interval - 1):
                                 break
                             for j in tmp:
                                 iter += 1
@@ -587,7 +600,7 @@ def main():
                                     flg += 1
                                 else:
                                     break
-                            if flg == (args.buffer_size - 1):    # add buffer
+                            if flg == (args.buffer_interval - 1):    # add buffer
                                 flag += 1
                         else:
                             iter += 1
@@ -596,32 +609,43 @@ def main():
                         break
 
                 final_data[k] = flag
-                '''grouped_L = [(k, sum(1 for i in g)) for k, g in groupby(endp_dict[k])]
-                flag = 0
-                for i in grouped_L:  #
-                    if i[0]:
-                        if i[1] >= threshold:
-                            # print(i)
-                            # print(i[1]/5)
-                            flag += i[1] / 5  # flag = flag + i[1]/5
-                            # print(flag)
-                final_data[k] = int(flag)
-                # print(flag)'''
+
             print("number of buffers in all endpoints",final_data)
 
             speed_dict[speed] = final_data
         print(speed_dict)
-        band_dict[bands] = speed_dict
-        print(band_dict)
-    #report(band_dict)#.values(),args.max_speed,num_sta)
+        band_dict.append(speed_dict)
+    print(band_dict)
+    test_end = datetime.datetime.now().strftime("%b %d %H:%M:%S")
+    print("Test ended at ", test_end)
+    test_setup_info = {
+        "AP Name": args.ap_name,
+        "SSID": args.ssid,
+        "Buffer interval": args.buffer_interval,
+        "File size": args.file_size,
+        "Test Duration": datetime.datetime.strptime(test_end, '%b %d %H:%M:%S') - datetime.datetime.strptime(test_time, '%b %d %H:%M:%S')
+    }
 
+    input_setup_info = {
+        "Contact": "support@candelatech.com"
+    }
+    report(band_dict,test_setup_info,input_setup_info,args.threshold,args.duration,vs_bands)
 
 
 if __name__ == '__main__':
     main()
-    '''band_dict = {'5G': {'1000000': {'endp0': 23, 'endp1': 23, 'endp2': 23, 'endp3': 23, 'endp4': 23}},
-    '2.4G': {'1000000': {'endp0': 23, 'endp1': 23, 'endp2': 23, 'endp3': 23, 'endp4': 23}},
-    'Both': {'1000000': {'endp0': 23, 'endp1': 23, 'endp2': 23, 'endp3': 23, 'endp4': 23}}}
-    report(band_dict)'''
+
+    '''band_dict = [{'1000000': {'endp0': 23, 'endp1': 23, 'endp2': 23, 'endp3': 23, 'endp4': 23}},
+                {'1000000': {'endp0': 23, 'endp1': 23, 'endp2': 23, 'endp3': 23, 'endp4': 23}},
+                {'1000000': {'endp0': 23, 'endp1': 23, 'endp2': 23, 'endp3': 23, 'endp4': 23}}]
+    test_setup_info = {
+        "AP Name": "access point",
+        "SSID": "test",
+        "Test Duration": "sample"#datetime.strptime(test_end, '%b %d %H:%M:%S') - datetime.strptime(test_time, '%b %d %H:%M:%S')
+    }
+    input_setup_info = {
+        "Contact": "support@candelatech.com"
+    }
+    report(band_dict, test_setup_info, input_setup_info,70,5,['5G','2.4G','Both'])'''
 
 
