@@ -2,7 +2,7 @@
 
   "repeat" :1000,
   "roam interval": 10,
-  "ap name" : "WAC505 , WAC505",
+  "ap name" : "AP1 , AP2",
 
   "ssid" : "roam",
   "passwd" : "BLANK",
@@ -18,8 +18,8 @@
 
   "roaming_configuration":
   [
-    [ 0, 19, "2.4G", "ac:86:74:8c:ea:42","ac:86:74:a4:61:82"],
-    [ 0, 19, "5G", "ac:86:74:8c:ea:50","ac:86:74:a4:61:90"]
+    [ 1, 20, "2.4G", "ac:86:74:8c:ea:42","ac:86:74:a4:61:82"],
+    [ 1, 20, "5G", "ac:86:74:8c:ea:50","ac:86:74:a4:61:90"]
   ]
 }
 
