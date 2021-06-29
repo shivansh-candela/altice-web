@@ -218,10 +218,10 @@ class roam_test(LFCliBase):
                 continue
 
             elif self.roam_configuration[0][2] == "2.4G":
-                station_list = self.station_list_2G[self.roam_configuration[0][0]:self.roam_configuration[0][1]+1]
+                station_list = self.station_list_2G[self.roam_configuration[0][0] - 1:self.roam_configuration[0][1]]
                 bssid_list = self.roam_configuration[0][3:]
             elif self.roam_configuration[0][2] == "5G":
-                station_list = self.station_list_5G[self.roam_configuration[0][0]:self.roam_configuration[0][1] + 1]
+                station_list = self.station_list_5G[self.roam_configuration[0][0] - 1:self.roam_configuration[0][1]]
                 bssid_list = self.roam_configuration[0][3:]
 
             #check first bssid is same as station already connected
@@ -242,7 +242,7 @@ class roam_test(LFCliBase):
                 for k in station_list:
                     self.wifi_cli_cmd_data["wpa_cli_cmd"] = 'roam ' + j
                     self.wifi_cli_cmd_data["port"] = k[4:]
-                    print(self.wifi_cli_cmd_data)
+                    #print(self.wifi_cli_cmd_data)
                     self.json_post("/cli-json/wifi_cli_cmd", self.wifi_cli_cmd_data, suppress_related_commands_=True)
                 time.sleep(2)
                 self.display(station_list, j,self.roam_configuration[0][2])
@@ -252,7 +252,7 @@ class roam_test(LFCliBase):
         for i in self.roam_configuration:
             if i[2] == "2.4G":
                 bssid_list_2G = i[3:]
-                station_list1 = self.station_list_2G[i[0]:i[1]+1]
+                station_list1 = self.station_list_2G[i[0] - 1:i[1]]
 
                 # check first bssid is same as station already connected
                 bssid = self.json_get("/port/1/1/2G_sta0000")["interface"]["ap"]
@@ -262,7 +262,7 @@ class roam_test(LFCliBase):
                     bssid_list_2G.append(bssids[0])
             elif i[2] == "5G":
                 bssid_list_5G = i[3:]
-                station_list2 = self.station_list_5G[i[0]:i[1]+1]
+                station_list2 = self.station_list_5G[i[0] - 1:i[1]]
                 bssid = self.json_get("/port/1/1/5G_sta0000")["interface"]["ap"]
                 if bssid.lower() == bssid_list_5G[0].lower():
                     bssids = bssid_list_5G.copy()
@@ -276,7 +276,7 @@ class roam_test(LFCliBase):
             l.append(bssid_list_2G[i])
             l.append(bssid_list_5G[i])
             bssid_list_both.append(l)
-        print("bssid list",bssid_list_both)
+
         for i in bssid_list_both:
 
             #roam 2.4G stations
@@ -286,7 +286,6 @@ class roam_test(LFCliBase):
             for k in station_list1:
                 self.wifi_cli_cmd_data["wpa_cli_cmd"] = 'roam ' + i[0]
                 self.wifi_cli_cmd_data["port"] = k[4:]
-                print(self.wifi_cli_cmd_data)
                 self.json_post("/cli-json/wifi_cli_cmd", self.wifi_cli_cmd_data, suppress_related_commands_=True)
 
             #roam 5G stations
@@ -296,7 +295,6 @@ class roam_test(LFCliBase):
             for k in station_list2:
                 self.wifi_cli_cmd_data["wpa_cli_cmd"] = 'roam ' + i[1]
                 self.wifi_cli_cmd_data["port"] = k[4:]
-                print(self.wifi_cli_cmd_data)
                 self.json_post("/cli-json/wifi_cli_cmd", self.wifi_cli_cmd_data, suppress_related_commands_=True)
 
             time.sleep(2)
@@ -523,8 +521,8 @@ def main():
     whole_data_dict[num] = total_roam
     if twog_station_data["band"] == "2.4G":
         x_axis = []
-        for i in range(len(twog_station_data["stations"])):
-            x_axis.append(i)
+        for i in range(1, len(twog_station_data["stations"])+1):
+            x_axis.append(str(i))
         twog_station_data["x_axis"] = x_axis
         twog_station_data["x_axis_name"] = "Stations"
         twog_station_data["y_axis_name"] = "Amount"
@@ -543,8 +541,8 @@ def main():
         whole_data_dict[num] = twog_bssid_data
     if fiveg_station_data["band"] == "5G":
         x_axis = []
-        for i in range(len(fiveg_station_data["stations"])):
-            x_axis.append(i)
+        for i in range(1, len(fiveg_station_data["stations"])+1):
+            x_axis.append(str(i))
         fiveg_station_data["x_axis"] = x_axis
         fiveg_station_data["x_axis_name"] = "Stations"
         fiveg_station_data["y_axis_name"] = "Amount"
@@ -561,7 +559,7 @@ def main():
         fiveg_bssid_data["objective"] = "The below graph shows how many roams succeeded and fail on all 5Ghz BSSID's."
         num = num + 1
         whole_data_dict[num] = fiveg_bssid_data
-    print("whole data:",whole_data_dict)
+    #print("whole data:",whole_data_dict)
     for i in whole_data_dict:
 
         success = whole_data_dict[i]["pass"]
@@ -582,8 +580,8 @@ def main():
                              _graph_image_name=whole_data_dict[i]["image_name"],
                              _figsize=(18, 6),
                              _color=["g", "r"],
-                             _display_value=True,
-                             _step=None,
+                             _show_bar_value=True,
+                             _xaxis_step=None,
                              _color_edge=None)
 
         graph_png = graph.build_bar_graph()
@@ -596,7 +594,7 @@ def main():
 
         report.build_graph()
 
-    '''input_setup = pd.DataFrame({
+    input_setup = pd.DataFrame({
         'Information': [],
         "Contact support@candelatech.com": []
 
@@ -605,7 +603,7 @@ def main():
     report.build_table_title()
 
     report.set_table_dataframe(input_setup)
-    report.build_table()'''
+    report.build_table()
 
     html_file = report.write_html()
     print("returned file {}".format(html_file))
