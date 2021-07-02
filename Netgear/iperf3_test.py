@@ -6,11 +6,11 @@ Step 2 - Create generic layer to run downlink and uplink test
 step 3 - Create layer 3 to run bi-direction test
 """
 
-
-#!/usr/bin/env python3
+# !/usr/bin/env python3
 
 import sys
 import pprint
+
 if sys.version_info[0] != 3:
     print("This script requires Python 3")
     exit(1)
@@ -35,11 +35,14 @@ import pdfkit
 from lf_report import lf_report
 from lf_graph import lf_bar_graph
 
+
 class IperfTest(LFCliBase):
-    def __init__(self, host, port, _local_realm, ssid, security, passwd, radio="wiphy0", macvlan_type = "iperf3_serv", sta_type = "iperf3", num_ports=1, macvlan_parent=None,
-                 dhcp=False,port_list=[], sta_list=[],sta_list2=[],sta_list3 =[],  tx_rate = "10000", run_time = "60",
-                 side_a_speed="0M", side_b_speed="10M", _debug_on=False,_exit_on_error=False,_exit_on_fail=False):
-        super().__init__(host, port,_local_realm=realm.Realm(host,port), _debug=_debug_on, _exit_on_fail=_exit_on_fail)
+    def __init__(self, host, port, _local_realm, ssid, security, resource, passwd, radio="wiphy0",
+                 macvlan_type="iperf3_serv", sta_type="iperf3", num_ports=1, macvlan_parent=None,
+                 dhcp=False, port_list=[], sta_list=[], sta_list2=[], sta_list3=[], tx_rate="10000", run_time="60",
+                 side_a_speed="0M", side_b_speed="10M", _debug_on=False, _exit_on_error=False, _exit_on_fail=False):
+        super().__init__(host, port, _local_realm=realm.Realm(host, port), _debug=_debug_on,
+                         _exit_on_fail=_exit_on_fail)
         self.port = port
         self.port_list = port_list
         self.host = host
@@ -51,6 +54,7 @@ class IperfTest(LFCliBase):
         self.security = security
         self.passwd = passwd
         self.ssid = ssid
+        self.resource = resource
         self.resulting_endpoints = {}
         self.runtime = run_time
         if macvlan_parent is not None:
@@ -61,9 +65,11 @@ class IperfTest(LFCliBase):
         self.mvlan_profile.desired_macvlans = self.port_list
         self.mvlan_profile.macvlan_parent = self.macvlan_parent
         self.mvlan_profile.dhcp = dhcp
+        self.mvlan_profile.resource = self.resource
         self.generic_endps_profile = self.local_realm.new_generic_endp_profile()
         self.generic_endps_profile.type = macvlan_type
         self.station_profile = self.local_realm.new_station_profile()
+        self.station_profile.resource = self.resource
         self._local_realm = _local_realm
         self.name_prefix = "generic"
         self.cx_profile = self.local_realm.new_l3_cx_profile()
@@ -86,6 +92,7 @@ class IperfTest(LFCliBase):
 
     def macvlan_cleanup(self):
         self.mvlan_profile.cleanup()
+
     def generic_cleanup(self):
         print("Cleaning up cxs and endpoints")
         for cx_name in self.created_cx_cl:
@@ -103,10 +110,10 @@ class IperfTest(LFCliBase):
             }
             self.json_post(req_url, data)
 
-    def create_station(self, radio, sta_list, mode):
+    def create_station(self, radio, sta_list, mode, res):
         self.station_profile.mode = mode
         self.station_profile.use_security(self.security, self.ssid, self.passwd)
-        self.station_profile.create(radio=radio, sta_names_=sta_list, debug=self.debug)
+        self.station_profile.create(radio=radio, sta_names_=sta_list, debug=self.debug, resource=res)
         self.station_profile.admin_up()
 
     def collect_endp_stats(self, endp_map):
@@ -117,23 +124,20 @@ class IperfTest(LFCliBase):
         for cx_name in endp_map:
             bi_rx_up = self.json_get("/cx/" + cx_name).get(cx_name).get('bps rx a')
             bi_rx_dw = self.json_get("/cx/" + cx_name).get(cx_name).get('bps rx b')
-            rx_data_up_mbps = int(bi_rx_up)/1000000
+            rx_data_up_mbps = int(bi_rx_up) / 1000000
             rx_data_dw_mbps = int(bi_rx_dw) / 1000000
             self.bi_uplink.append(rx_data_up_mbps)
             self.bi_downlink.append(rx_data_dw_mbps)
 
-            self.avg_bi_dw = self.avg_bi_dw +rx_data_dw_mbps
+            self.avg_bi_dw = self.avg_bi_dw + rx_data_dw_mbps
             self.avg_bi_up = self.avg_bi_up + rx_data_up_mbps
 
-
     def layer3_creation(self, sta_list):
-        self.cx_profile.create(endp_type="lf_udp", side_a="eth1",side_b=sta_list,sleep_time=0)
+        self.cx_profile.create(endp_type="lf_udp", side_a="eth1", side_b=sta_list, sleep_time=0)
         self.cx_profile.start_cx()
         time.sleep(int(self.runtime))
         self.collect_endp_stats(self.cx_profile.created_cx.keys())
         self.cx_profile.cleanup()
-
-
 
     def set_flags(self, endp_name, flag_name, val):
         data = {
@@ -143,13 +147,14 @@ class IperfTest(LFCliBase):
         }
         self.json_post("cli-json/set_endp_flag", data, debug_=self.debug)
 
-    def cleanup(self, station_list):
-        #self.generic_cleanup()
-        self.station_profile.cleanup(station_list)
-        LFUtils.wait_until_ports_disappear(base_url=self.lfclient_url, port_list=station_list, debug=self.debug)
+    def cleanup(self, station_names):
+        # self.generic_cleanup()
+        self.station_profile.cleanup(station_names)
+        LFUtils.wait_until_ports_disappear(base_url=self.lfclient_url, port_list=station_names, debug=self.debug)
         time.sleep(1)
 
-    def create_gen_for_client(self, gen_sta_list, run_time, tx_rate, dest,gen_type, suppress_related_commands_=None, valid=None):
+    def create_gen_for_client(self, gen_sta_list, run_time, tx_rate, dest, gen_type, suppress_related_commands_=None,
+                              valid=None):
         if valid == False:
             self.created_cx_cl = []
             self.created_endp_cl = []
@@ -159,12 +164,12 @@ class IperfTest(LFCliBase):
         for port_name in gen_sta_list:
             port_info = self.local_realm.name_to_eid(port_name)
             if len(port_info) == 2:
-                resource = 1
+                resource = self.resource
                 shelf = port_info[0]
                 name = port_info[-1]
             elif len(port_info) == 4:
-                resource = port_info[0]
-                shelf = port_info[1]
+                resource = port_info[1]
+                shelf = port_info[0]
                 name = port_info[2]
             else:
                 raise ValueError("Unexpected name for port_name %s" % port_name)
@@ -203,10 +208,12 @@ class IperfTest(LFCliBase):
             gen_name_a = endp_tpl[3]
             if gen_type == "iperf_tx":
                 self.cmd = "iperf3 --forceflush --format k --precision 4 -c %s -t %s --tos 0 -b %sK --bind_dev %s -i 1 " \
-                           "--pidfile /tmp/lf_helper_iperf3_%s.pid" % (dest[server_ip], run_time, tx_rate, name, gen_name_a)
+                           "--pidfile /tmp/lf_helper_iperf3_%s.pid" % (
+                           dest[server_ip], run_time, tx_rate, name, gen_name_a)
             elif gen_type == "iperf_rx":
                 self.cmd = "iperf3 --forceflush --format k --precision 4 -c %s -t %s -R --tos 0 -b %sK --bind_dev %s -i 1 " \
-                           "--pidfile /tmp/lf_helper_iperf3_%s.pid" % (dest[server_ip], run_time, tx_rate, name, gen_name_a)
+                           "--pidfile /tmp/lf_helper_iperf3_%s.pid" % (
+                           dest[server_ip], run_time, tx_rate, name, gen_name_a)
             data_cmd = {
                 "name": gen_name_a,
                 "command": self.cmd
@@ -238,7 +245,8 @@ class IperfTest(LFCliBase):
             url = "/cli-json/add_cx"
             if self.debug:
                 pprint(data)
-            self.local_realm.json_post(url, data, debug_=self.debug, suppress_related_commands_=suppress_related_commands_)
+            self.local_realm.json_post(url, data, debug_=self.debug,
+                                       suppress_related_commands_=suppress_related_commands_)
             time.sleep(2)
         time.sleep(0.5)
         for data in post_data:
@@ -258,12 +266,11 @@ class IperfTest(LFCliBase):
             get_rxbps_data = (endp_json['endpoint']['bps rx'])
             get_rxbps = get_rxbps_data.split()
             if get_rxbps[1].startswith("K"):
-                get_rxbps[0] = float(get_rxbps[0])/10000
+                get_rxbps[0] = float(get_rxbps[0]) / 10000
             elif get_rxbps[1].startswith("b"):
                 get_rxbps[0] = float(get_rxbps[0]) / 1000000
-            self.avg_dw = self.avg_dw+float(get_rxbps[0])
+            self.avg_dw = self.avg_dw + float(get_rxbps[0])
             self.downlink.append(float(get_rxbps[0]))
-
 
     def get_tx_data(self):
         self.uplink = []
@@ -275,14 +282,14 @@ class IperfTest(LFCliBase):
             get_txbps_data = (endp_json['endpoint']['bps tx'])
             get_txbps = get_txbps_data.split()
             if get_txbps[1].startswith("K"):
-                get_txbps[0] = float(get_txbps[0])/10000
+                get_txbps[0] = float(get_txbps[0]) / 10000
             elif get_txbps[1].startswith("b"):
                 get_txbps[0] = float(get_txbps[0]) / 1000000
             self.avg_up = self.avg_up + float(get_txbps[0])
             self.uplink.append(float(get_txbps[0]))
 
     def generic_cx(self):
-        self.generic_endps_profile.start_cx()
+        # self.generic_endps_profile.start_cx()
         time.sleep(10)
         for cx_name in self.created_cx_cl:
             self.json_post("/cli-json/set_cx_state", {
@@ -294,8 +301,8 @@ class IperfTest(LFCliBase):
         print("")
         time.sleep(10)
 
-def main():
 
+def main():
     parser = LFCliBase.create_bare_argparse(
         prog='iperf3_test.py',
         # formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -324,7 +331,7 @@ def main():
                         default="0M")
     parser.add_argument('--side_b_min_speed', help='--speed you want to monitor traffic with (max is 10G)',
                         default="10M")
-    parser.add_argument('--all_test', help='--run all scenario',default=None)
+    parser.add_argument('--all_test', help='--run all scenario', default=None)
     parser.add_argument('--all_test_up', help='--run uplink test for all scenario', default=None)
     parser.add_argument('--all_test_dw', help='--run downlink test for all scenario', default=None)
     parser.add_argument('--all_test_bi', help='--run bi-directional test for all scenario', default=None)
@@ -342,6 +349,7 @@ def main():
     parser.add_argument('--test_both_bi', help='--run bi-directional for 2+5 GHz scenario', default=None)
     parser.add_argument('--ap_ip', help='--Enter the AP Ip Address', default="192.168.215.49")
     parser.add_argument('--user', help='--Enter the username', default="admin")
+    parser.add_argument('--resource', help='--Enter the resource', default=1)
 
     args = parser.parse_args()
     time_stamp1 = datetime.now()
@@ -368,22 +376,24 @@ def main():
     # list of stations
     def station_list(rad, start, end):
         sta_list = LFUtils.port_name_series(prefix="sta" + "#", start_id=start,
-                                                     end_id=end, padding_number=100000,
-                                                     radio=rad)
+                                            end_id=end, padding_number=100000,
+                                            radio=rad, resource=int(args.resource))
         return sta_list
+
     # Three different station list for 2.4,5,both GHz
-    station_list_rad0 = station_list(args.radio0, 0, int(num_ports/2)-1)
-    station_list_rad1 = station_list(args.radio1, int(num_ports/2), num_ports-1)
-    station_list_both = station_list(args.radio0, 0, num_ports-1)
+    station_list_rad0 = station_list(args.radio0, 0, int(num_ports / 2) - 1)
+    station_list_rad1 = station_list(args.radio1, int(num_ports / 2), num_ports - 1)
+    station_list_both = station_list(args.radio0, 0, num_ports - 1)
 
+    ip_test = IperfTest(args.mgr, args.mgr_port, ssid=args.ssid, _local_realm=None,
+                        passwd=args.passwd, resource=int(args.resource),
+                        security=args.security, port_list=port_list, sta_list=station_list_rad0,
+                        sta_list2=station_list_rad1,
+                        sta_list3=station_list_both, side_a_speed=args.side_a_min_speed,
+                        side_b_speed=args.side_b_min_speed, _debug_on=args.debug, macvlan_parent=args.macvlan_parent,
+                        dhcp=True, num_ports=args.num_ports, tx_rate=args.tx_rate, run_time=args.time)
 
-    ip_test = IperfTest(args.mgr, args.mgr_port, ssid=args.ssid,_local_realm = None,
-                        passwd=args.passwd,
-                        security=args.security,  port_list=port_list,sta_list=station_list_rad0, sta_list2=station_list_rad1,
-                        sta_list3 =station_list_both, side_a_speed=args.side_a_min_speed, side_b_speed=args.side_b_min_speed,_debug_on=args.debug, macvlan_parent=args.macvlan_parent,
-                        dhcp=True, num_ports=args.num_ports, tx_rate = args.tx_rate, run_time = args.time)
-
-    ip_test.build() # create mac vlan and generic mac vlan
+    ip_test.build()  # create mac vlan and generic mac vlan
 
     num_macvlan = 0
     target_ip_rad0 = []
@@ -392,13 +402,13 @@ def main():
 
     # store target(mvlan ip address) to particular client in generic
     while True:
-        if(num_macvlan < int(num_ports/2)):
-            macvlan_ip_list = ip_test.json_get("/port/1/1/eth1#%s?field=ip"% (num_macvlan))
+        if (num_macvlan < int(num_ports / 2)):
+            macvlan_ip_list = ip_test.json_get("/port/1/%s/eth1#%s?field=ip" % (int(args.resource), num_macvlan))
             get_ip = (macvlan_ip_list['interface']['ip'])
             target_ip_rad0.append(get_ip)
         else:
-            if(num_macvlan < num_ports):
-                macvlan_ip_list = ip_test.json_get("/port/1/1/eth1#%s?field=ip" % (num_macvlan))
+            if (num_macvlan < num_ports):
+                macvlan_ip_list = ip_test.json_get("/port/1/%s/eth1#%s?field=ip" % (int(args.resource), num_macvlan))
                 get_ip = (macvlan_ip_list['interface']['ip'])
                 target_ip_rad1.append(get_ip)
             else:
@@ -428,6 +438,7 @@ def main():
     report.set_table_dataframe(test_setup)
     report.build_table()
     aggregate = []
+
     # method to run all scenario test
     def run_scenarios(test, radio_frq, radio1, radio2, mode, up_scenario, dw_scenario, bi_scenario):
         # clean all stations
@@ -437,27 +448,31 @@ def main():
         # run uplink test
         if radio2 is not None:
             # create stations for dual radio
-            test.create_station(args.radio0, station_list_rad0, args.mode0)
+            test.create_station(args.radio0, station_list_rad0, args.mode0, int(args.resource))
             time.sleep(10)
-            test.create_station(args.radio1, station_list_rad1, args.mode1)
+            test.create_station(args.radio1, station_list_rad1, args.mode1, int(args.resource))
             time.sleep(10)
             if (up_scenario is not None) or (up_scenario is None and dw_scenario is None and bi_scenario is None):
                 print("Starting Uplink Test")
                 # create Generic station on transmit side for uploading
-                test.create_gen_for_client(station_list_rad0, args.time, args.tx_rate, target_ip_rad0,"iperf_tx", valid = False)
+                test.create_gen_for_client(station_list_rad0, args.time, args.tx_rate, target_ip_rad0, "iperf_tx",
+                                           valid=False)
                 time.sleep(10)
-                test.create_gen_for_client(station_list_rad1, args.time, args.tx_rate, target_ip_rad1,"iperf_tx", valid = True)
+                test.create_gen_for_client(station_list_rad1, args.time, args.tx_rate, target_ip_rad1, "iperf_tx",
+                                           valid=True)
         else:
             # create stations for single radio
-            test.create_station(radio1, station_list_both, mode)
+            test.create_station(radio1, station_list_both, mode, int(args.resource))
             time.sleep(10)
             if (up_scenario is not None) or (up_scenario is None and dw_scenario is None and bi_scenario is None):
                 print("Starting Uplink Test")
                 # create Generic station on transmit side for uploading
-                test.create_gen_for_client(station_list_both, args.time, args.tx_rate, target_ip_both, "iperf_tx", valid = False)
+                test.create_gen_for_client(station_list_both, args.time, args.tx_rate, target_ip_both, "iperf_tx",
+                                           valid=False)
         if (up_scenario is not None) or (up_scenario is None and dw_scenario is None and bi_scenario is None):
             time.sleep(10)
             # run generic test
+            ip_test.generic_endps_profile.start_cx()
             test.generic_cx()
             time.sleep(int(args.time))
             test.generic_endps_profile.stop_cx()
@@ -483,14 +498,18 @@ def main():
             time.sleep(2)
             if radio2 is not None:
                 # create Generic station on rx side for downloading (single radio)
-                test.create_gen_for_client(station_list_rad0, args.time, args.tx_rate, target_ip_rad0, "iperf_rx", valid=False)
+                test.create_gen_for_client(station_list_rad0, args.time, args.tx_rate, target_ip_rad0, "iperf_rx",
+                                           valid=False)
                 time.sleep(10)
-                test.create_gen_for_client(station_list_rad1, args.time, args.tx_rate, target_ip_rad1, "iperf_rx", valid=True)
+                test.create_gen_for_client(station_list_rad1, args.time, args.tx_rate, target_ip_rad1, "iperf_rx",
+                                           valid=True)
             else:
                 # create Generic station on rx side for downloading (dual radio)
-                test.create_gen_for_client(station_list_both, args.time, args.tx_rate, target_ip_both, "iperf_rx", valid=False)
+                test.create_gen_for_client(station_list_both, args.time, args.tx_rate, target_ip_both, "iperf_rx",
+                                           valid=False)
             time.sleep(10)
             # run generc test
+            ip_test.generic_endps_profile.start_cx()
             test.generic_cx()
             time.sleep(int(args.time))
             test.generic_endps_profile.stop_cx()
@@ -542,9 +561,10 @@ def main():
             sta_count.append(sta)
         x_axis = sta_count
         # generate downlink graph
-        if (dw_scenario is not None)or (up_scenario is None and dw_scenario is None and bi_scenario is None):
+        if (dw_scenario is not None) or (up_scenario is None and dw_scenario is None and bi_scenario is None):
             report.set_obj_html("Download-Single Radio (%s GHz)" % (radio_frq),
-                                "The scenerio gives the result of downlink test for %s clients connected on %s GHz" % (num_ports, radio_frq))
+                                "The scenerio gives the result of downlink test for %s clients connected on %s GHz" % (
+                                num_ports, radio_frq))
             report.build_objective()
 
             graph = lf_bar_graph(_data_set=[dw],
@@ -563,7 +583,7 @@ def main():
             report.build_graph()
         # generate uplink graph
         if (up_scenario is not None) or (up_scenario is None and dw_scenario is None and bi_scenario is None):
-            report.set_obj_html("Upload-Single Radio (%s GHz)"% (radio_frq),
+            report.set_obj_html("Upload-Single Radio (%s GHz)" % (radio_frq),
                                 "The scenerio gives the result of Uplink test for %s clients connected on %s GHz" % (
                                     num_ports, radio_frq))
             report.build_objective()
@@ -584,8 +604,9 @@ def main():
         # generate bi directional graph
         if (bi_scenario is not None) or (up_scenario is None and dw_scenario is None and bi_scenario is None):
             report.set_obj_html("L3-BiDirectional-Single Radio(%s GHz)" % (radio_frq),
-                                "The scenerio gives the result of BiDirectional test for %s clients connected on %s GHz" % (num_ports,
-                                                                                                                           radio_frq))
+                                "The scenerio gives the result of BiDirectional test for %s clients connected on %s GHz" % (
+                                num_ports,
+                                radio_frq))
             report.build_objective()
             graph = lf_bar_graph(_data_set=[test.bi_downlink, test.bi_uplink],
                                  _xaxis_name="stations",
@@ -601,6 +622,7 @@ def main():
             report.set_graph_image(graph_png)
             report.move_graph_image()
             report.build_graph()
+
     # save NA value if scenario is not running
     def store_data():
         up_min_value.append("NA")
@@ -622,42 +644,53 @@ def main():
 
     if args.all_test is not None:
         # run all scenarios
-        print("*******************************************Start test for single radio (2.4 GHz)*****************************************")
-        run_scenarios(ip_test, "2.4", args.radio0, None,  "6", args.all_test_up, args.all_test_dw, args.all_test_bi)
-        print("*************************************************Finish test for single radio (2.4 GHz)**************************************************")
+        print(
+            "*******************************************Start test for single radio (2.4 GHz)*****************************************")
+        run_scenarios(ip_test, "2.4", args.radio0, None, "6", args.all_test_up, args.all_test_dw, args.all_test_bi)
+        print(
+            "*************************************************Finish test for single radio (2.4 GHz)**************************************************")
         station_list_both = station_list(args.radio0, 0, num_ports - 1)
         station_list_rad0 = station_list(args.radio0, 0, int(num_ports / 2) - 1)
         station_list_rad1 = station_list(args.radio1, int(num_ports / 2), num_ports - 1)
         ip_test2 = IperfTest(args.mgr, args.mgr_port, ssid=args.ssid, _local_realm=None,
-                            passwd=args.passwd,
-                            security=args.security, port_list=port_list, sta_list=station_list_rad0,
-                            sta_list2=station_list_rad1,
-                            sta_list3=station_list_both, side_a_speed=args.side_a_min_speed, side_b_speed=args.side_b_min_speed,_debug_on=args.debug, macvlan_parent=args.macvlan_parent,
-                            dhcp=True, num_ports=args.num_ports, tx_rate=args.tx_rate, run_time=args.time)
+                             passwd=args.passwd, resource=int(args.resource),
+                             security=args.security, port_list=port_list, sta_list=station_list_rad0,
+                             sta_list2=station_list_rad1,
+                             sta_list3=station_list_both, side_a_speed=args.side_a_min_speed,
+                             side_b_speed=args.side_b_min_speed, _debug_on=args.debug,
+                             macvlan_parent=args.macvlan_parent,
+                             dhcp=True, num_ports=args.num_ports, tx_rate=args.tx_rate, run_time=args.time)
         print("************************Start test for single radio (5 GHz)********************************************")
         run_scenarios(ip_test2, "5", args.radio1, None, "10", args.all_test_up, args.all_test_dw, args.all_test_bi)
-        print("************************************Finish test for single radio (5 GHz)********************************************")
+        print(
+            "************************************Finish test for single radio (5 GHz)********************************************")
         station_list_both = station_list(args.radio0, 0, num_ports - 1)
         station_list_rad0 = station_list(args.radio0, 0, int(num_ports / 2) - 1)
         station_list_rad1 = station_list(args.radio1, int(num_ports / 2), num_ports - 1)
         ip_test3 = IperfTest(args.mgr, args.mgr_port, ssid=args.ssid, _local_realm=None,
-                            passwd=args.passwd,
-                            security=args.security, port_list=port_list, sta_list=station_list_rad0,
-                            sta_list2=station_list_rad1,
-                            sta_list3=station_list_both, side_a_speed=args.side_a_min_speed,
-                            side_b_speed=args.side_b_min_speed, _debug_on=args.debug, macvlan_parent=args.macvlan_parent,
-                            dhcp=True, num_ports=args.num_ports, tx_rate=args.tx_rate, run_time=args.time)
+                             passwd=args.passwd, resource=int(args.resource),
+                             security=args.security, port_list=port_list, sta_list=station_list_rad0,
+                             sta_list2=station_list_rad1,
+                             sta_list3=station_list_both, side_a_speed=args.side_a_min_speed,
+                             side_b_speed=args.side_b_min_speed, _debug_on=args.debug,
+                             macvlan_parent=args.macvlan_parent,
+                             dhcp=True, num_ports=args.num_ports, tx_rate=args.tx_rate, run_time=args.time)
 
         # This scenerio is for dual radio uploading and downloading
-        print("*****************************Start test for single radio (2.4 + 5GHz)******************************************************")
-        run_scenarios(ip_test3, "both", args.radio0, args.radio1, "10", args.all_test_up, args.all_test_dw, args.all_test_bi)
-        print("******************************************Finish test for single radio (2.4 + 5GHz)**************************************************")
+        print(
+            "*****************************Start test for single radio (2.4 + 5GHz)******************************************************")
+        run_scenarios(ip_test3, "both", args.radio0, args.radio1, "10", args.all_test_up, args.all_test_dw,
+                      args.all_test_bi)
+        print(
+            "******************************************Finish test for single radio (2.4 + 5GHz)**************************************************")
     else:
         # run 2.4 GHz scenario
         if args.test_2G is not None:
-            print("*******************************************Start test for single radio (2.4 GHz)*****************************************")
+            print(
+                "*******************************************Start test for single radio (2.4 GHz)*****************************************")
             run_scenarios(ip_test, "2.4", args.radio0, None, "6", args.test_2G_up, args.test_2G_dw, args.test_2G_bi)
-            print("*************************************************Finish test for single radio (2.4 GHz)***************************")
+            print(
+                "*************************************************Finish test for single radio (2.4 GHz)***************************")
         else:
             store_data()
         # run 5 GHz scenario
@@ -666,16 +699,18 @@ def main():
             station_list_rad0 = station_list(args.radio0, 0, int(num_ports / 2) - 1)
             station_list_rad1 = station_list(args.radio1, int(num_ports / 2), num_ports - 1)
             ip_test4 = IperfTest(args.mgr, args.mgr_port, ssid=args.ssid, _local_realm=None,
-                                passwd=args.passwd,
-                                security=args.security, port_list=port_list, sta_list=station_list_rad0,
-                                sta_list2=station_list_rad1,
-                                sta_list3=station_list_both, side_a_speed=args.side_a_min_speed,
-                                side_b_speed=args.side_b_min_speed, _debug_on=args.debug,
-                                macvlan_parent=args.macvlan_parent,
-                                dhcp=True, num_ports=args.num_ports, tx_rate=args.tx_rate, run_time=args.time)
-            print("************************Start test for single radio (5 GHz)********************************************")
+                                 passwd=args.passwd, resource=int(args.resource),
+                                 security=args.security, port_list=port_list, sta_list=station_list_rad0,
+                                 sta_list2=station_list_rad1,
+                                 sta_list3=station_list_both, side_a_speed=args.side_a_min_speed,
+                                 side_b_speed=args.side_b_min_speed, _debug_on=args.debug,
+                                 macvlan_parent=args.macvlan_parent,
+                                 dhcp=True, num_ports=args.num_ports, tx_rate=args.tx_rate, run_time=args.time)
+            print(
+                "************************Start test for single radio (5 GHz)********************************************")
             run_scenarios(ip_test4, "5", args.radio1, None, "10", args.test_5G_up, args.test_5G_dw, args.test_5G_bi)
-            print("************************************Finish test for single radio (5 GHz)********************************************")
+            print(
+                "************************************Finish test for single radio (5 GHz)********************************************")
         else:
             store_data()
         # run 2.4+5 GHz scenario
@@ -684,18 +719,21 @@ def main():
             station_list_rad0 = station_list(args.radio0, 0, int(num_ports / 2) - 1)
             station_list_rad1 = station_list(args.radio1, int(num_ports / 2), num_ports - 1)
             ip_test5 = IperfTest(args.mgr, args.mgr_port, ssid=args.ssid, _local_realm=None,
-                                passwd=args.passwd,
-                                security=args.security, port_list=port_list, sta_list=station_list_rad0,
-                                sta_list2=station_list_rad1,
-                                sta_list3=station_list_both, side_a_speed=args.side_a_min_speed,
-                                side_b_speed=args.side_b_min_speed, _debug_on=args.debug,
-                                macvlan_parent=args.macvlan_parent,
-                                dhcp=True, num_ports=args.num_ports, tx_rate=args.tx_rate, run_time=args.time)
+                                 passwd=args.passwd, resource=int(args.resource),
+                                 security=args.security, port_list=port_list, sta_list=station_list_rad0,
+                                 sta_list2=station_list_rad1,
+                                 sta_list3=station_list_both, side_a_speed=args.side_a_min_speed,
+                                 side_b_speed=args.side_b_min_speed, _debug_on=args.debug,
+                                 macvlan_parent=args.macvlan_parent,
+                                 dhcp=True, num_ports=args.num_ports, tx_rate=args.tx_rate, run_time=args.time)
 
             # This scenerio is for dual radio uploading and downloading
-            print("*****************************Start test for single radio (2.4 + 5GHz)******************************************************")
-            run_scenarios(ip_test5, "both", args.radio0, args.radio1, "10", args.test_both_up, args.test_both_dw, args.test_both_bi)
-            print("******************************************Finish test for single radio (2.4 + 5GHz)**************************************************")
+            print(
+                "*****************************Start test for single radio (2.4 + 5GHz)******************************************************")
+            run_scenarios(ip_test5, "both", args.radio0, args.radio1, "10", args.test_both_up, args.test_both_dw,
+                          args.test_both_bi)
+            print(
+                "******************************************Finish test for single radio (2.4 + 5GHz)**************************************************")
         else:
             store_data()
 
@@ -709,46 +747,60 @@ def main():
     ip_test.cleanup(station_list_rad0)
     ip_test.cleanup(station_list_rad1)
 
-    actual_throughput = int(args.tx_rate)/1000  # give actual throughput value which is passing in generic
-    layer3_actual_thrughput = int(args.side_a_min_speed)/1000000  #give actual throughput value which is passing in layer3
+    actual_throughput = int(args.tx_rate) / 1000  # give actual throughput value which is passing in generic
+    layer3_actual_thrughput = int(
+        args.side_a_min_speed) / 1000000  # give actual throughput value which is passing in layer3
     time_stamp2 = datetime.now()
     test_duration = str(time_stamp2 - time_stamp1)[:-7]  # calculate total run time
-
 
     # generate summary table
 
     summary_data = pd.DataFrame({
         'Sr No.': ["1", "2", "3", "4", "5", "6", "7", "8", "9"],
         'Test Scenario': ["Iperf3-download-Single radio", "Iperf3-Upload-Single radio", "L3-BiDirectional-Single radio",
-                                    "Iperf3-download-Single radio", "Iperf3-Upload-Single radio", "L3-BiDirectional-Single radio",
-                                    "Iperf3-download-dual radio", "Iperf3-Upload-dual radio", "L3-BiDirectional-dual radio"],
-        'Radio': ["2.4 GHz", "2.4 GHz", "2.4 GHz", "5 GHz", "5 GHz", "5 GHz", "2.4 Ghz +5 GHz", "2.4 Ghz +5 GHz", "2.4 Ghz +5 GHz"],
-        'Traffic': ["Uplink", "Downlink", "Downlink,Uplink", "Uplink", "Downlink", "Downlink,Uplink", "Uplink", "Downlink", "Downlink,Uplink"],
-        'No. of Client': ["%s(2.4 GHz)" % (num_ports),"%s(2.4 GHz)" % (num_ports),"%s(2.4 GHz)" % (num_ports),
-                         "%s(5 GHz)" % (num_ports),"%s(5 GHz)" % (num_ports),"%s(5 GHz)" % (num_ports),
-                         "%s(2.4 GHz)+%s(5 GHz)" % (int(num_ports)/2,int(num_ports)/2),"%s(2.4 GHz)+%s(5 GHz)" % (int(num_ports)/2,int(num_ports)/2),
-                         "%s(2.4 GHz)+%s(5 GHz)" % (int(num_ports) / 2, int(num_ports) / 2)],
-        "Intended Throughput/Client": ["%s Mbps" % (actual_throughput),"%s Mbps" % (actual_throughput),"%s Mbps,%s Mbps" % (layer3_actual_thrughput, layer3_actual_thrughput),
-                                "%s Mbps" % (actual_throughput),
-                                "%s Mbps" % (actual_throughput),"%s Mbps,%s Mbps" % (layer3_actual_thrughput, layer3_actual_thrughput), "%s Mbps" % (actual_throughput),
-                                "%s Mbps" % (actual_throughput),"%s Mbps,%s Mbps" % (layer3_actual_thrughput, layer3_actual_thrughput)],
-        "Aggregate Throughput(Min)/Client": [str(up_min_value[0]),str(dw_min_value[0]),"%s,%s" % (bi_min_value[0],bi_min_value[1]),
-                                    str(up_min_value[1]),str(dw_min_value[1]), "%s,%s" % (bi_min_value[2],bi_min_value[3]),
+                          "Iperf3-download-Single radio", "Iperf3-Upload-Single radio", "L3-BiDirectional-Single radio",
+                          "Iperf3-download-dual radio", "Iperf3-Upload-dual radio", "L3-BiDirectional-dual radio"],
+        'Radio': ["2.4 GHz", "2.4 GHz", "2.4 GHz", "5 GHz", "5 GHz", "5 GHz", "2.4 Ghz +5 GHz", "2.4 Ghz +5 GHz",
+                  "2.4 Ghz +5 GHz"],
+        'Traffic': ["Uplink", "Downlink", "Downlink,Uplink", "Uplink", "Downlink", "Downlink,Uplink", "Uplink",
+                    "Downlink", "Downlink,Uplink"],
+        'No. of Client': ["%s(2.4 GHz)" % (num_ports), "%s(2.4 GHz)" % (num_ports), "%s(2.4 GHz)" % (num_ports),
+                          "%s(5 GHz)" % (num_ports), "%s(5 GHz)" % (num_ports), "%s(5 GHz)" % (num_ports),
+                          "%s(2.4 GHz)+%s(5 GHz)" % (int(num_ports) / 2, int(num_ports) / 2),
+                          "%s(2.4 GHz)+%s(5 GHz)" % (int(num_ports) / 2, int(num_ports) / 2),
+                          "%s(2.4 GHz)+%s(5 GHz)" % (int(num_ports) / 2, int(num_ports) / 2)],
+        "Intended Throughput/Client": ["%s Mbps" % (actual_throughput), "%s Mbps" % (actual_throughput),
+                                       "%s Mbps,%s Mbps" % (layer3_actual_thrughput, layer3_actual_thrughput),
+                                       "%s Mbps" % (actual_throughput),
+                                       "%s Mbps" % (actual_throughput),
+                                       "%s Mbps,%s Mbps" % (layer3_actual_thrughput, layer3_actual_thrughput),
+                                       "%s Mbps" % (actual_throughput),
+                                       "%s Mbps" % (actual_throughput),
+                                       "%s Mbps,%s Mbps" % (layer3_actual_thrughput, layer3_actual_thrughput)],
+        "Aggregate Throughput(Min)/Client": [str(up_min_value[0]), str(dw_min_value[0]),
+                                             "%s,%s" % (bi_min_value[0], bi_min_value[1]),
+                                             str(up_min_value[1]), str(dw_min_value[1]),
+                                             "%s,%s" % (bi_min_value[2], bi_min_value[3]),
                                              str(up_min_value[2]),
-                                    str(dw_min_value[2]), "%s,%s" % (bi_min_value[4],bi_min_value[5])],
-        "Aggregate Throughput(Max)/Client": [str(up_max_value[0]), str(dw_max_value[0]), "%s,%s" % (bi_max_value[0],bi_max_value[1]),
-                                    str(up_max_value[1]), str(dw_max_value[1]), "%s,%s" % (bi_max_value[2],bi_max_value[3]),
+                                             str(dw_min_value[2]), "%s,%s" % (bi_min_value[4], bi_min_value[5])],
+        "Aggregate Throughput(Max)/Client": [str(up_max_value[0]), str(dw_max_value[0]),
+                                             "%s,%s" % (bi_max_value[0], bi_max_value[1]),
+                                             str(up_max_value[1]), str(dw_max_value[1]),
+                                             "%s,%s" % (bi_max_value[2], bi_max_value[3]),
                                              str(up_max_value[2]),
-                                    str(dw_max_value[2]), "%s,%s" % (bi_max_value[4],bi_max_value[5])],
-        "Overall Thrughput": [str(up_all_avg_value[0]), str(dw_all_avg_value[0]),"%s,%s" % (bi_all_avg_value[0],bi_all_avg_value[1]),
-                              str(up_all_avg_value[1]),str(dw_all_avg_value[1]),"%s,%s" % (bi_all_avg_value[2],bi_all_avg_value[3]),
-                                    str(up_all_avg_value[2]), str(dw_all_avg_value[2]), "%s,%s" % (bi_all_avg_value[4],bi_all_avg_value[5])],
+                                             str(dw_max_value[2]), "%s,%s" % (bi_max_value[4], bi_max_value[5])],
+        "Overall Thrughput": [str(up_all_avg_value[0]), str(dw_all_avg_value[0]),
+                              "%s,%s" % (bi_all_avg_value[0], bi_all_avg_value[1]),
+                              str(up_all_avg_value[1]), str(dw_all_avg_value[1]),
+                              "%s,%s" % (bi_all_avg_value[2], bi_all_avg_value[3]),
+                              str(up_all_avg_value[2]), str(dw_all_avg_value[2]),
+                              "%s,%s" % (bi_all_avg_value[4], bi_all_avg_value[5])],
         "Aggregate Throughput(Avg)": [str(aggregate[0]), str(aggregate[1]),
                                       "%s,%s" % (aggregate[2], aggregate[3]),
                                       str(aggregate[4]), str(aggregate[5]),
                                       "%s,%s" % (aggregate[6], aggregate[7]),
                                       str(aggregate[8]), str(aggregate[9]),
-                                    "%s,%s" % (aggregate[10], aggregate[11])]})
+                                      "%s,%s" % (aggregate[10], aggregate[11])]})
     report.set_obj_html("",
                         "Total Test Duration : %s" % (str(test_duration)))
     report.build_objective()
