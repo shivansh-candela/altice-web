@@ -419,6 +419,7 @@ class ThroughputQOS(Realm):
                                  _color_edge='black',
                                  _bar_width=0.15,
                                  _dpi=96,
+                                 _show_bar_value=True,
                                  _enable_csv=True,
                                  _color_name=['orangered', 'olivedrab', 'steelblue', 'blueviolet'])
             graph_png = graph.build_bar_graph()
@@ -452,6 +453,7 @@ class ThroughputQOS(Realm):
                                  _color_edge='black',
                                  _bar_width=0.15,
                                  _dpi=96,
+                                 _show_bar_value=True,
                                  _enable_csv=True,
                                  _color_name=['orangered', 'olivedrab', 'steelblue', 'blueviolet'])
             graph_png = graph.build_bar_graph()
