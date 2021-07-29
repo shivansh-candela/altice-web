@@ -165,12 +165,7 @@ class VideoStreaming(Realm):
             pass
         print("Test Started")
 
-    def monitor(self,
-                duration_sec,
-                monitor_interval,
-                created_cx,
-                col_names,
-                iterations):
+    def monitor(self, duration_sec, monitor_interval, created_cx, col_names, iterations):
 
         try:
             duration_sec = Realm.parse_time(duration_sec).seconds
@@ -222,7 +217,7 @@ class VideoStreaming(Realm):
 
     def postcleanup(self):
         # for rad in self.radio
-        exist_sta = list(filter(lambda c: True if c[0:3] =='sta' else False,
+        exist_sta = list(filter(lambda c: True if 'sta' in c or c.startswith('wlan') else False,
                 [i[list(i.keys())[0]]['alias'] for i in self.json_get("/port/?fields=alias")['interfaces']]))
 
         exist_l4 = self.json_get("/layer4/?fields=name")
@@ -250,23 +245,67 @@ class VideoStreaming(Realm):
         print("File creation done", self.file_size)
         os.chdir(change_path)
 
-class AP_automate:
-    def __init__(self, ap_ip, user, pswd):
-            self.ap_ip = ap_ip
-            self.user = user
-            self.pswd = pswd
+    def buffer_calculation(self,endp_dict,sta_avg,threshold,buffer_interval,final_data):
+        for k in endp_dict.keys():
+            sta_avg.append(float(f"{((sum(endp_dict[k]) / 1000000) / len(endp_dict[k])):.2f}"))
+            iter, flag = 0, 0
+            while True:
+                flg = 0
+                if iter >= len(endp_dict[k]):
+                    break
+                try:
+                    # threshold = 700000 #for example
+                    if min(endp_dict[k]) > threshold:
+                        break
+                    if min(endp_dict[k][iter:iter + buffer_interval]) > threshold:
+                        iter += buffer_interval
+                    if endp_dict[k][iter] < threshold:
+                        iter += 1
+                        tmp = endp_dict[k][iter:iter + (buffer_interval - 1)]
+                        if len(tmp) < (buffer_interval - 1):
+                            break
+                        for j in tmp:
+                            iter += 1
+                            if j < threshold:
+                                flg += 1
+                            else:
+                                break
+                        if flg == (buffer_interval - 1):  # add buffer
+                            flag += 1
+                    else:
+                        iter += 1
+                except IndexError as e:
+                    print(e)
+                    break
+            final_data[k] = flag
 
-    def get_ap_model(self, ap_ip, user, pswd):
-        self.ap_ip = ap_ip
-        self.user = user
-        self.pswd = pswd
-        ssh = paramiko.SSHClient()  # creating shh client object we use this object to connect to router
-        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())  # automatically adds the missing host key
-        ssh.connect(ap_ip, port=22, username=user, password=pswd)
-        stdin, stdout, stderr = ssh.exec_command('printmd')
-        output = stdout.readlines()
-        ssh.close()
-        return output
+# getting video emulation rate from user to convert to mbps
+def emu_rate_from_usr(emulation_rate,max_speed):
+    for i in emulation_rate:
+        if i in ["Disabled", "disabled", "DISABLED"]:
+            max_speed.append(0)
+        elif i in ["216 p4", "216 P4"]:
+            max_speed.append(300e-3)
+        elif i in ["240 p4", "240 P4"]:
+            max_speed.append(500e-3)
+        elif i in ["SD 360p", "sd 360p", "SD 360P", "sd 360P"]:
+            max_speed.append(700e-3)
+        elif i in ["SD 480p", "sd 480p", "SD 480P", "sd 480P"]:
+            max_speed.append(1.1)
+        elif i in ["HD 720p", "hd 720p", "HD 720P", "hd 720P"]:
+            max_speed.append(2.5)
+        elif i in ["HD 1080p", "hd 1080p", "HD 1080P", "hd 1080P"]:
+            max_speed.append(5)
+        elif i in ["4K", "4k"]:
+            max_speed.append(20)
+        else:
+            try:
+                max_speed.append(float(i))
+            except Exception as e:
+                print(
+                    f"###{e}###\n provide correct video emulation rate with help command \n user's value: {emulation_rate}")
+                exit(1)
+
 
 def grph_commn(graph_ob,report_ob):
     graph_png = graph_ob.build_bar_graph()
@@ -355,7 +394,7 @@ def report(buffer1,test_setup_info,input_setup_info,threshold,duration,bands,exp
         'Description': pas_fail_disp})
     print("Pass/fail",pasfail_tab)
 
-    report = lf_report(_results_dir_name = "Video_Streaming",_alt_path = "")
+    report = lf_report(_results_dir_name = "Video_Streaming",_output_html="video_stream.html", _output_pdf="video_stream.pdf")
     report.set_title("Video Streaming")
     report.build_banner()
     report.set_obj_html(_obj_title="Objective", _obj=f"This test is designed to measure video streaming quality of experience on connected "
@@ -365,7 +404,6 @@ def report(buffer1,test_setup_info,input_setup_info,threshold,duration,bands,exp
     report.set_table_title("Test Setup Information")
     report.build_table_title()
     report.test_setup_table(test_setup_data=test_setup_info, value = "Device Under Test")
-    #report.build_custom()
     report.set_obj_html(_obj_title="", _obj=f"This table briefs about overall Pass/Fail criteria of stations where "
                         f"the no.of video stalls of {sta_cnt} stations should be less than or equal to expected stall {expt_stal} "
                         f"then it is considered to be as a Pass. If one or more stations got video stall greater than the expected stall "
@@ -388,40 +426,38 @@ def report(buffer1,test_setup_info,input_setup_info,threshold,duration,bands,exp
         i = -1
         for speed in speeds:
             i += 1
-            report.set_obj_html(_obj_title="", _obj=f"The below graph explains, how many stalls the individual station "
-                                                    f"is experiencing when the traffic is running for {duration} "
-                                                    f"minutes with expected stalls and threshold is {expt_stal} and {threshold}% "
-                                                    f"per station respectively. The X-axis represents the number of stations,"
-                                                    f" Y-axis represents stall count")
             label = f"{data_rate[i]}"
-            report.set_graph_title(f"{band}-Stations Emulation rate {label} per Station")
-            report.build_graph_title()
+            report.set_obj_html(_obj_title=f"{band}-Stations Emulation rate {label} per Station",
+                                _obj=f"The below graph explains, how many stalls the individual station is experiencing when the "
+                                     f"traffic is running for {duration} minutes with expected stalls and threshold is {expt_stal} "
+                                     f"and {threshold}% per station respectively. The X-axis represents the number of stations,"
+                                     f" Y-axis represents stall count.")
             report.build_objective()
             graph = lf_bar_graph(_data_set=[list(buffer[band][speed].values())], _xaxis_name="Stations",
                      _yaxis_name="No.of video stalls",
                      _xaxis_categories=range(1,sta_cnt+1,step), _label=["buffer"], _xticks_font=8,
                      _graph_image_name=f"{band.replace('/','-')}-Stations-Emulation-rate-{label.replace(' ','-')}-per-Station",
                      _color=['forestgreen', 'darkorange', 'blueviolet'], _color_edge='black', _figsize=(18, 6),
-                     _grp_title="No.of stalls for each clients", _xaxis_step = step,_show_bar_value=True, _text_font=8, _text_rotation=45)
+                     _grp_title="No.of stalls for each clients", _xaxis_step = step,_show_bar_value=True, _text_font=8, _text_rotation=45,
+                     _legend_handles=None, _legend_loc="best", _legend_box=(1.0,0.5), _legend_ncol=2, _legend_fontsize=10)
             grph_commn(graph_ob = graph,report_ob = report)
-            report.set_obj_html(_obj_title="", _obj=f"The below graph shows the number of connected stations on the X-axis and "
-                                                    f"the average throughput of each station on the Y-axis, with a traffic duration "
-                                                    f"of {duration} minutes when the threshold is {threshold}% ")
-            report.set_graph_title(f"Throughput for {band}-Stations of speed {label} per Station")
-            report.build_graph_title()
+            report.set_obj_html(_obj_title=f"Throughput for {band}-Stations of speed {label} per Station",
+                                _obj=f"The below graph shows the number of connected stations on the X-axis and  the average throughput "
+                                 f"of each station on the Y-axis, with a traffic duration of {duration} minutes when the threshold is {threshold}%")
             report.build_objective()
             graph = lf_bar_graph(_data_set=[avg_rxrate[band][speed]], _xaxis_name="Stations",
-                     _yaxis_name="Throughput (Mbps)",_xaxis_categories=range(1, sta_cnt+1,step),
+                     _yaxis_name="Throughput(Mbps)",_xaxis_categories=range(1, sta_cnt+1,step),
                      _label=["rx-rate"],_xticks_font=8,_figsize=(18, 6),
                      _graph_image_name=f"Rx-rate-{band.replace('/','-')}-Stations-Max-speed-{label.replace(' ','-')}-per-Station",
                      _color=['blueviolet', 'darkorange', 'forestgreen'], _color_edge='black',
-                     _grp_title="Throughput for each clients", _xaxis_step=step, _show_bar_value=True,_text_font=8,_text_rotation=45)
+                     _grp_title="Throughput for each clients", _xaxis_step=step, _show_bar_value=True,_text_font=8,_text_rotation=45,
+                     _legend_handles=None, _legend_loc="best", _legend_box=(1.0,0.5), _legend_ncol=2, _legend_fontsize=10)
             grph_commn(graph_ob = graph,report_ob = report)
 
     report.set_table_title("Input Setup Information")
     report.build_table_title()
     report.test_setup_table(test_setup_data =input_setup_info, value = "Information")
-    #report.build_custom()
+    report.build_footer()
     html_file = report.write_html()
     print("returned file {}".format(html_file))
     print(html_file)
@@ -473,30 +509,7 @@ def main():
     band_type = ['5G','2.4G','5G/2.4G']
     num = lambda ars : ars if ars % 2 == 0 else ars + 1
     max_speed = []
-    for i in args.emulation_rate:
-        if i in ["Disabled", "disabled" , "DISABLED"]:
-            max_speed.append(0)
-        elif i in ["216 p4" , "216 P4"]:
-            max_speed.append(300e-3)
-        elif i in ["240 p4" , "240 P4"]:
-            max_speed.append(500e-3)
-        elif i in ["SD 360p" , "sd 360p" , "SD 360P" , "sd 360P"]:
-            max_speed.append(700e-3)
-        elif i in ["SD 480p" , "sd 480p" , "SD 480P" , "sd 480P"]:
-            max_speed.append(1.1)
-        elif i in ["HD 720p" , "hd 720p" , "HD 720P" , "hd 720P"]:
-            max_speed.append(2.5)
-        elif i in ["HD 1080p" , "hd 1080p" , "HD 1080P" , "hd 1080P"]:
-            max_speed.append(5)
-        elif i in ["4K" , "4k"]:
-            max_speed.append(20)
-        else:
-            try:
-                max_speed.append(float(i))
-            except Exception as e:
-                print(f"###{e}###\n provide correct video emulation rate with help command \n user's value: {args.emulation_rate}")
-                exit(1)
-
+    emu_rate_from_usr(args.emulation_rate,max_speed)
     print("video emulation rate in Mbps", max_speed)
     test_time = datetime.datetime.now().strftime("%b %d %H:%M:%S")
     print("Test started at ", test_time)
@@ -523,7 +536,7 @@ def main():
                                     ssid=args.ssid, password=args.passwd,
                                     url=args.url, target_per_ten=args.target_per_ten, max_speed=speed,
                                     file_size=args.file_size,bands=bands, _debug_on=False, _radio = radio)
-            http.postcleanup()
+            '''http.postcleanup()
 
             # calculate threshold
             number = speed
@@ -533,10 +546,8 @@ def main():
             print("threshold is-----", threshold)
 
             http.file_create()
-            #http.set_values()
             http.precleanup()
 
-            #time.sleep(6)
             http.build() #build stations and traffic
             time.sleep(2)
             http.start() # start running
@@ -553,8 +564,8 @@ def main():
                                    monitor_interval=1,
                                    col_names=['rx rate'],
                                    created_cx=layer4connections,
-                                   iterations=0)
-            #rx_rate = random.sample(range(0,1000000),int((float(args.duration) * 60) * num_stas)) #sample data
+                                   iterations=0)'''
+            rx_rate = random.sample(range(0,1000000),int((float(args.duration) * 60) * num_stas)) #sample data
             while "" in rx_rate:
                 rx_rate.pop(rx_rate.index(""))
             # divide the list into number of endpoints, Yield successive n-sized chunks from l.
@@ -589,11 +600,9 @@ def main():
             print(endp_dict)
             for i in endp_dict:
                 endp_dict[i] = []
-            #try:
             for i in divided_list:
                 for index, key in enumerate(endp_dict):
                         endp_dict[key].append(i[index])
-            #except Exception as e:
 
             print("endp_dict----",endp_dict)
 
@@ -606,12 +615,14 @@ def main():
             # 'endp7': [157, 1005212, 1005257, 1005212, 1005257, 1005212],
             # 'endp8': [1005015, 1005257, 1005015, 1005257, 1005015, 1005257],
             # 'endp9': [1004524, 1005015, 1004524, 1005015, 1004524, 1005015]}
-            loop = True
+            #loop = True
             sta_avg = []
-            for k in endp_dict.keys():
+            threshold = 700000
+            http.buffer_calculation(endp_dict,sta_avg,threshold,args.buffer_interval,final_data)
+            '''for k in endp_dict.keys():
                 sta_avg.append(float(f"{((sum(endp_dict[k])/1000000)/len(endp_dict[k])):.2f}"))
                 iter,flag = 0,0
-                while loop:
+                while True:
                     flg = 0
                     if iter >= len(endp_dict[k]):
                         break
@@ -639,7 +650,7 @@ def main():
                     except IndexError as e:
                         print(e)
                         break
-                final_data[k] = flag
+                final_data[k] = flag'''
             print("number of buffers in all endpoints",final_data)
             speed_dict[speed] = final_data
             avg_rxrate_speed[speed] = sta_avg
@@ -649,13 +660,14 @@ def main():
     print(band_dict,"\n avarage-with-bands",avg_rxrate_bands)
     test_end = datetime.datetime.now().strftime("%b %d %H:%M:%S")
     print("Test ended at ", test_end)
-    http.postcleanup()
+    #http.postcleanup()
+
     test_setup_info = {
         "AP Name": args.ap_name,
         "SSID": args.ssid,
         "No.of stations": args.num_stations,
         "Buffer interval": args.buffer_interval,
-        "File size": args.file_size,
+        "File size": args.file_size.upper(),
         "Expected stalls" : args.expected_stalls,
         "Total Test Duration": datetime.datetime.strptime(test_end, '%b %d %H:%M:%S') - datetime.datetime.strptime(test_time, '%b %d %H:%M:%S')
     }
