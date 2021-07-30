@@ -59,14 +59,9 @@ class VideoStreaming(Realm):
         self.created_cx = {}
 
 
-    def precleanup(self):
+    def create_sta_list(self):
+        # create different list of stations depending upon bands
         self.count = 0
-        try:
-            pass
-            #self.local_realm.load("BLANK") #no need to load
-        except:
-            print("couldn't load 'BLANK' Test Configuration")
-
         for rad in self.radio:
             if self.bands == "5G":
                 # select an mode
@@ -80,66 +75,57 @@ class VideoStreaming(Realm):
                 if self.count == 2:
                     self.sta_start_id = self.num_sta
                     self.num_sta = 2 * (self.num_sta)
-                    self.http_profile.cleanup()
+                    #self.http_profile.cleanup()
                     # create station list with sta_id 20
 
                     self.station_list1 = LFUtils.portNameSeries(prefix_="sta", start_id_=self.sta_start_id,
                                                                 end_id_=self.num_sta - 1, padding_number_=10000,
                                                                 radio=rad)
                     # cleanup station list which started sta_id 20
-                    self.station_profile.cleanup(self.station_list1, debug_=self.local_realm.debug)
-                    LFUtils.wait_until_ports_disappear(base_url=self.local_realm.lfclient_url,
+                    #self.station_profile.cleanup(self.station_list1, debug_=self.local_realm.debug)
+                    '''LFUtils.wait_until_ports_disappear(base_url=self.local_realm.lfclient_url,
                                                        port_list=self.station_list1,
-                                                       debug=self.local_realm.debug)
+                                                       debug=self.local_realm.debug)'''
                     return
                 else:
                     self.station_profile.mode = 9
             # clean dlayer4 ftp traffic
-            self.http_profile.cleanup()
+            #self.http_profile.cleanup()
             self.station_list = LFUtils.portNameSeries(prefix_="sta", start_id_=self.sta_start_id,
                                                        end_id_=self.num_sta - 1, padding_number_=10000,
                                                        radio=rad)
             # cleans stations
-            self.station_profile.cleanup(self.station_list, delay=1, debug_=self.local_realm.debug)
+            '''self.station_profile.cleanup(self.station_list, delay=1, debug_=self.local_realm.debug)
             LFUtils.wait_until_ports_disappear(base_url=self.local_realm.lfclient_url,
                                                port_list=self.station_list,
-                                               debug=self.local_realm.debug)
-            time.sleep(1)
-        print("precleanup done")
+                                               debug=self.local_realm.debug)'''
+            #time.sleep(1)
+        #print("precleanup done")
 
-    def build(self):
+    def build(self,clear_station = True, clear_traffic = True):
         self.port_util.set_http(port_name=self.local_realm.name_to_eid(self.upstream)[2], resource=1, on=True)
-        '''data = {
-            "shelf": 1,
-            "resource": 1,
-            "port": "eth1",
-            "current_flags": 2147483648,
-            "interest": 16384
-        }
-        url = "/cli-json/set_port"
-        self.local_realm.json_post(url, data, debug_=True)
-        time.sleep(5)'''
-
         for rad in self.radio:
-            # station build
-            self.station_profile.use_security(self.security, self.ssid, self.password)
-            self.station_profile.set_command_flag("add_sta", "create_admin_down", 1)
-            self.station_profile.set_command_param("set_port", "report_timer", 1500)
-            self.station_profile.set_command_flag("set_port", "rpt_timer", 1)
-            self.station_profile.create(radio=rad, sta_names_=self.station_list, debug=self.local_realm.debug)
-            self.local_realm.wait_until_ports_appear(sta_list=self.station_list)
-            self.station_profile.admin_up()
-            if self.local_realm.wait_for_ip(self.station_list):
-                self.local_realm._pass("All stations got IPs")
-            else:
-                self.local_realm._fail("Stations failed to get IPs")
-            # building layer4
-            self.http_profile.direction = 'dl'
-            self.http_profile.dest = '/dev/null'
-            self.http_profile.create(ports=self.station_list,
-                                     sleep_time=.5,
-                                     suppress_related_commands_=None, http=True,
-                                     http_ip=self.url)
+            if clear_station:
+                # station build
+                self.station_profile.use_security(self.security, self.ssid, self.password)
+                self.station_profile.set_command_flag("add_sta", "create_admin_down", 1)
+                self.station_profile.set_command_param("set_port", "report_timer", 1500)
+                self.station_profile.set_command_flag("set_port", "rpt_timer", 1)
+                self.station_profile.create(radio=rad, sta_names_=self.station_list, debug=self.local_realm.debug)
+                self.local_realm.wait_until_ports_appear(sta_list=self.station_list)
+                self.station_profile.admin_up()
+                if self.local_realm.wait_for_ip(self.station_list):
+                    self.local_realm._pass("All stations got IPs")
+                else:
+                    self.local_realm._fail("Stations failed to get IPs")
+            if clear_traffic:
+                # building layer4
+                self.http_profile.direction = 'dl'
+                self.http_profile.dest = '/dev/null'
+                self.http_profile.create(ports=self.station_list,
+                                         sleep_time=.5,
+                                         suppress_related_commands_=None, http=True,
+                                         http_ip=self.url)
 
             if self.count == 2:
                 self.station_profile.mode = 11
@@ -215,25 +201,24 @@ class VideoStreaming(Realm):
         print("rx rate values are ", rx_rate)
         return rx_rate
 
-    def postcleanup(self):
-        # for rad in self.radio
-        exist_sta = list(filter(lambda c: True if 'sta' in c or c.startswith('wlan') else False,
-                [i[list(i.keys())[0]]['alias'] for i in self.json_get("/port/?fields=alias")['interfaces']]))
-
-        exist_l4 = self.json_get("/layer4/?fields=name")
-        if 'endpoint' in list(exist_l4.keys()):
-            self.http_profile.created_cx = {}
-            if len(exist_l4['endpoint']) > 1:
-                for i in exist_l4['endpoint']:
-                    self.http_profile.created_cx[list(i.keys())[0]] = 'CX_'+i[list(i.keys())[0]]['name']
-            else:
-                self.http_profile.created_cx[exist_l4['endpoint']['name']] = 'CX_'+exist_l4['endpoint']['name']
-
-        self.http_profile.cleanup()
-        self.station_profile.cleanup(desired_stations = exist_sta)
-        #LFUtils.wait_until_ports_disappear(base_url=self.lfclient_url, port_list=exist_sta,
-        #                                   debug=self.debug)
-        self.http_profile.created_cx.clear()
+    def postcleanup(self,clear_station = True, clear_traffic = True):
+        # clear existing stations
+        if clear_station:
+            exist_sta = list(filter(lambda c: True if 'sta' in c or c.startswith('wlan') else False,
+                    [i[list(i.keys())[0]]['alias'] for i in self.json_get("/port/?fields=alias")['interfaces']]))
+            self.station_profile.cleanup(desired_stations = exist_sta)
+        # clear existing l4-7 traffic
+        if clear_traffic:
+            exist_l4 = self.json_get("/layer4/?fields=name")
+            if 'endpoint' in list(exist_l4.keys()):
+                self.http_profile.created_cx = {}
+                if len(exist_l4['endpoint']) > 1:
+                    for i in exist_l4['endpoint']:
+                        self.http_profile.created_cx[list(i.keys())[0]] = 'CX_'+i[list(i.keys())[0]]['name']
+                else:
+                    self.http_profile.created_cx[exist_l4['endpoint']['name']] = 'CX_'+exist_l4['endpoint']['name']
+            self.http_profile.cleanup()
+            self.http_profile.created_cx.clear()
 
     def file_create(self):
         change_path = os.path.dirname(os.path.abspath(__file__))
@@ -475,7 +460,8 @@ def main():
     optional.add_argument('--mgr', help='hostname for where LANforge GUI is running', default='localhost')
     optional.add_argument('--mgr_port', help='port LANforge GUI HTTP service is running on', default=8080)
     optional.add_argument('--upstream_port', help='non-station port that generates traffic: eg: eth1', default='eth1')
-    optional.add_argument('--num_stations', type=int, help='number of stations to create', default=40)
+    optional.add_argument('--num_stations', type=int, help='number of stations to create if num_stations is odd and band is 5G/2.4G'
+                                                           'then script will automatically convert to even', default=40)
     required.add_argument('--security', help='WiFi Security protocol: {open|wep|wpa2|wpa3')
     required.add_argument('--ssid', help='WiFi SSID for script object to associate to')
     required.add_argument('--passwd', help='WiFi passphrase/password/key')
@@ -486,10 +472,10 @@ def main():
                          ' "SD 480p" = 1.1 Mbps  || "HD 720p" = 2.5 Mbps  ||  "HD 1080p" = 5 Mbps  ||  "4K" = 20 Mbps',
                         default=['HD 720p', '4K', '3', '4', '5'])
     required.add_argument('-b_r','--bands_with_radio', nargs="+",
-                        help='eg:5G-wiphy0 2.4G-wiphy1 5G/2.4G-wiphy0,wiphy1 -- for Both provide 5G '
-                             'radio and 2.4G radio')
-    optional.add_argument('--file_size',type=str, help='specify the size of file you want to download', default='30Mb')
-    optional.add_argument('--duration', type=str, help='mention the time interval you want to check the '
+                        help='eg:5G-wiphy0 2.4G-wiphy1 5G/2.4G-wiphy0,wiphy1 -- for 5G/2.4G provide 5G '
+                             'radio before 2.4G radio')
+    optional.add_argument('--file_size',type=str, help='Specify the size of file you want to download', default='30Mb')
+    optional.add_argument('--duration', type=str, help='Mention the time interval you want to check the '
                                                      'values for cx in minutes', default=2)
     optional.add_argument('--ap_name', type=str, help="mention th AP name ", default="Access Point")
     optional.add_argument( '-bi','--buffer_interval', type=int, help='buffer size', default=5)
@@ -497,22 +483,18 @@ def main():
     optional.add_argument( '-s','--expected_stalls', type=int, help='expected no.of stalls per station', default=6)
 
     args = parser.parse_args()
-    #ap = AP_automate(args.ap_ip, args.user, args.pswd) #needed when automate the AP
-    print(args.bands_with_radio)
-    band_rad = [b.split("-") for b in args.bands_with_radio]
-    vs_bands, vs_radio = [],[]
-    list(map(lambda b : (vs_bands.append(b[0].title()),vs_radio.append(b[1])),band_rad))
-    band_dict = []
-    avg_rxrate_bands = {}
-    print(f"Video Emulation rate {args.emulation_rate}")
 
+    print(args.bands_with_radio)
+    band_rad = [b.split("-") for b in args.bands_with_radio]    # split the band and radio separately
+    vs_bands, vs_radio, max_speed = [], [], []
+    list(map(lambda b : (vs_bands.append(b[0].title()),vs_radio.append(b[1])),band_rad))
+    band_dict, avg_rxrate_bands = [], {}
+    print(f"Video Emulation rate {args.emulation_rate}")
     band_type = ['5G','2.4G','5G/2.4G']
     num = lambda ars : ars if ars % 2 == 0 else ars + 1
-    max_speed = []
     emu_rate_from_usr(args.emulation_rate,max_speed)
-    print("video emulation rate in Mbps", max_speed)
     test_time = datetime.datetime.now().strftime("%b %d %H:%M:%S")
-    print("Test started at ", test_time)
+    print("video emulation rate in Mbps", max_speed,"\nTest started at ", test_time)
 
     for bands in vs_bands:
         speed_dict = {}
@@ -527,28 +509,26 @@ def main():
             num_stas = num(args.num_stations) // 2
             radio = vs_radio[vs_bands.index(bands)].split(",")
         if bands not in band_type:
-            raise ValueError("--bands_with_radio should be like 5G-wiphy0 2.4G-wiphy1 5G/2.4G-wiphy0,wiphy1")
+            raise ValueError("--bands_with_radio should be like 5G-wiphy0 2.4G-wiphy1 5G/2.4G-wiphy0,wiphy1\n but user input like",args.bands_with_radio)
+        clear_station, clear_traffic = True, True
         for speed in max_speed:
-            speed = int(speed * 1000000) #from mbps convert to bps
+            speed = int(speed * 1e6) #from mbps convert to bps
             http = VideoStreaming(lfclient_host=args.mgr, lfclient_port=args.mgr_port,
                                     upstream=args.upstream_port, num_sta=num_stas,
                                     security=args.security,
                                     ssid=args.ssid, password=args.passwd,
                                     url=args.url, target_per_ten=args.target_per_ten, max_speed=speed,
                                     file_size=args.file_size,bands=bands, _debug_on=False, _radio = radio)
-            '''http.postcleanup()
-
+            #clear stations when the band changes otherwise clear traffic for different speeds
+            http.postcleanup(clear_station = clear_station, clear_traffic = clear_traffic)
             # calculate threshold
             number = speed
-            print('speed-----' ,number,f"{args.threshold}% percent of given speed------",
-                  int((args.threshold/100) * float(number)))
             threshold = int((args.threshold/100) * float(number))
-            print("threshold is-----", threshold)
-
+            print('speed-----' ,number,f"and {args.threshold}% percent threshold of given speed is-----", threshold)
             http.file_create()
-            http.precleanup()
-
-            http.build() #build stations and traffic
+            http.create_sta_list()
+            http.build(clear_station = clear_station, clear_traffic = clear_traffic) #build stations and traffic
+            clear_station = False
             time.sleep(2)
             http.start() # start running
             time.sleep(20)
@@ -564,7 +544,7 @@ def main():
                                    monitor_interval=1,
                                    col_names=['rx rate'],
                                    created_cx=layer4connections,
-                                   iterations=0)'''
+                                   iterations=0)
             rx_rate = random.sample(range(0,1000000),int((float(args.duration) * 60) * num_stas)) #sample data
             while "" in rx_rate:
                 rx_rate.pop(rx_rate.index(""))
@@ -617,7 +597,7 @@ def main():
             # 'endp9': [1004524, 1005015, 1004524, 1005015, 1004524, 1005015]}
             #loop = True
             sta_avg = []
-            threshold = 700000
+            #threshold = 700000
             http.buffer_calculation(endp_dict,sta_avg,threshold,args.buffer_interval,final_data)
             '''for k in endp_dict.keys():
                 sta_avg.append(float(f"{((sum(endp_dict[k])/1000000)/len(endp_dict[k])):.2f}"))
@@ -660,7 +640,7 @@ def main():
     print(band_dict,"\n avarage-with-bands",avg_rxrate_bands)
     test_end = datetime.datetime.now().strftime("%b %d %H:%M:%S")
     print("Test ended at ", test_end)
-    #http.postcleanup()
+    http.postcleanup()
 
     test_setup_info = {
         "AP Name": args.ap_name,
