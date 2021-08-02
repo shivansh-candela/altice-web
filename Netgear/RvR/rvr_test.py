@@ -35,30 +35,14 @@ import time
 import datetime
 
 
-class rvr_test(Realm):
-    def __init__(self,
-                 ssid=None,
-                 security=None,
-                 password=None,
-                 create_sta=True,
-                 sta_list=None,
-                 name_prefix=None,
-                 upstream=None,
-                 radio="wiphy0",
-                 host="localhost",
-                 port=8080,
-                 mode=0,
-                 ap_model="",
-                 traffic_type=None,
-                 side_a_min_rate=56, side_a_max_rate=0,
-                 side_b_min_rate=56, side_b_max_rate=0,
-                 number_template="00000",
-                 test_duration="2m",
-                 use_ht160=False,
-                 _debug_on=False,
-                 _exit_on_error=False,
-                 _exit_on_fail=False):
-        super.__init__(lfclient_host=host, lfclilent_port=port),
+class RvR(Realm):
+    def __init__(self, ssid=None, security=None, password=None, create_sta=True, sta_list=None, name_prefix=None,
+                 upstream=None, radio="wiphy0", host="localhost", port=8080, mode=0, ap_model="Test", values="",
+                 traffic_type="lf_udp, lf_tcp", traffic_direction="upload, download", serial_number='2222', indices="",
+                 side_a_min_rate=56, side_a_max_rate=0, side_b_min_rate=56, side_b_max_rate=0, number_template="00000",
+                 num_stations=10,
+                 test_duration="2m", use_ht160=False, _debug_on=False, _exit_on_error=False, _exit_on_fail=False):
+        super().__init__(self, lfclient_host=host, lfclilent_port=port),
         self.upstream = upstream
         self.host = host
         self.port = port
@@ -67,18 +51,21 @@ class rvr_test(Realm):
         self.password = password
         self.sta_list = sta_list
         self.create_sta = create_sta
+        self.num_stations = num_stations
         self.radio = radio
         self.mode = mode
         self.upload = side_a_min_rate
         self.download = side_b_min_rate
         self.ap_model = ap_model
-        self.traffic_type = traffic_type
+        self.traffic_type = traffic_type.split(',')
+        self.traffic_direction = traffic_direction.split(',')
         self.number_template = number_template
         self.debug = _debug_on
         self.name_prefix = name_prefix
         self.test_duration = test_duration
+
+        # initialize station profile
         self.station_profile = self.new_station_profile()
-        self.cx_profile = self.new_l3_cx_profile()
         self.station_profile.lfclient_url = self.lfclient_url
         self.station_profile.ssid = self.ssid
         self.station_profile.ssid_pass = self.password
@@ -89,6 +76,9 @@ class rvr_test(Realm):
         if self.station_profile.use_ht160:
             self.station_profile.mode = 9
         self.station_profile.mode = mode
+
+        # initialize connection profile
+        self.cx_profile = self.new_l3_cx_profile()
         self.cx_profile.host = self.host
         self.cx_profile.port = self.port
         self.cx_profile.name_prefix = self.name_prefix
@@ -97,12 +87,38 @@ class rvr_test(Realm):
         self.cx_profile.side_b_min_bps = side_b_min_rate
         self.cx_profile.side_b_max_bps = side_b_max_rate
 
-    def start(self, print_pass=False, print_fail=False):
+        # initialize attenuator profile
+        self.attenuator_profile = self.new_attenuator_profile()
+        self.serial_number = serial_number
+        self.indices = indices.split(',')
+        self.values = values.split(',')
+        self.initialize_attenuator()
+
+    def initialize_attenuator(self):
+        self.attenuator_profile.atten_serno = self.serial_number
+        self.attenuator_profile.atten_idx = "all"
+        self.attenuator_profile.atten_val = '0'
+        self.attenuator_profile.mode = None
+        self.attenuator_profile.pulse_width_us5 = None
+        self.attenuator_profile.pulse_interval_ms = None,
+        self.attenuator_profile.pulse_count = None,
+        self.attenuator_profile.pulse_time_ms = None
+        self.attenuator_profile.create()
+        self.attenuator_profile.show()
+
+    def start_l3(self, print_pass=False, print_fail=False):
         self.cx_profile.start_cx()
 
-    def stop(self):
+    def stop_l3(self):
         self.cx_profile.stop_cx()
         self.station_profile.admin_down()
+
+    def clean_cx_lists(self):
+        # Clean out our local lists, this by itself does NOT remove anything from LANforge manager.
+        # but, if you are trying to modify existing connections, then clearing these arrays and
+        # re-calling 'create' will do the trick.
+        self.cx_profile.created_cx.clear()
+        self.cx_profile.created_endp.clear()
 
     def pre_cleanup(self):
         self.cx_profile.cleanup_prefix()
@@ -118,24 +134,32 @@ class rvr_test(Realm):
                                                port_list=self.station_profile.station_names,
                                                debug=self.debug)
 
-    def build(self):
-        self.station_profile.use_security(self.security,
-                                          self.ssid,
-                                          self.password)
-        self.station_profile.set_number_template(self.number_template)
-        print("Creating stations")
-        self.station_profile.set_command_flag("add_sta", "create_admin_down", 1)
-        self.station_profile.set_command_param("set_port", "report_timer", 1500)
-        self.station_profile.set_command_flag("set_port", "rpt_timer", 1)
-        self.station_profile.create(radio=self.radio,
-                                    sta_names_=self.sta_list,
-                                    debug=self.debug)
-        self.cx_profile.create(endp_type="lf_udp",
-                               side_a=self.station_profile.station_names,
-                               side_b=self.upstream,
-                               sleep_time=0)
+    def start_stations(self):
+        self.station_profile.admin_up()
+        # check here if upstream port got IP
+        temp_stations = self.station_profile.station_names.copy()
+        if self.wait_for_ip(temp_stations):
+            self._pass("All stations got IPs")
+        else:
+            self._fail("Stations failed to get IPs")
+            self.exit_fail()
         self._pass("PASS: Station build finished")
 
+    def build(self):
+        for i in len(self.traffic_type):
+            self.station_profile.use_security(self.security, self.ssid, self.password)
+            self.station_profile.set_number_template(self.number_template)
+            print("Creating stations")
+            self.station_profile.set_command_flag("add_sta", "create_admin_down", 1)
+            self.station_profile.set_command_param("set_port", "report_timer", 1500)
+            self.station_profile.set_command_flag("set_port", "rpt_timer", 1)
+            self.station_profile.create(radio=self.radio, sta_names_=self.sta_list, debug=self.debug)
+            self.start_stations()
+            self.cx_profile.create(endp_type="lf_udp", side_a=self.station_profile.station_names, side_b=self.upstream,
+                                   sleep_time=0)
+            self.start_l3()
+            time.sleep(60)
+            self.stop_l3()
 
 def main():
     parser = Realm.create_basic_argparse(
@@ -166,42 +190,67 @@ python3 ./rvr_test.py
     --create_sta False          (False, means it will not create stations and use the sta_names specified below)
     --sta_names sta000,sta001,sta002 (used if --create_sta is False, comma separated names of stations)
     ''')
+    optional = parser.add_argument_group('optional arguments')
+    required = parser.add_argument_group('required arguments')
     parser.add_argument('--mode', help='Used to force mode of stations', default="0")
+    parser.add_argument('--radio', help='radio to use for creating clients', default="0")
     parser.add_argument('--traffic_type', help='Select the Traffic Type [lf_udp, lf_tcp]', required=True)
-    parser.add_argument('--upload', help='--upload bps rate minimum for endpoint_a (upload rate) ', default=256000)
-    parser.add_argument('--download', help='--download bps rate minimum for endpoint_b (download rate)', default=256000)
-    parser.add_argument('--test_duration', help='--test_duration sets the duration of the test', default="2m")
+    parser.add_argument('--traffic_direction', help='Traffic direction i.e uplink or down link or bidirectional', required=True)
+    parser.add_argument('--upload', help='sets bps rate minimum for endpoint_a (upload rate) ', default=256000)
+    parser.add_argument('--download', help='sets bps rate minimum for endpoint_b (download rate)', default=256000)
+    parser.add_argument('--test_duration', help='test_duration sets the duration of the test', default="2m")
     parser.add_argument('--create_sta', help='Used to force a connection to a particular AP', default=True)
     parser.add_argument('--sta_names', help='Used to force a connection to a particular AP', default="sta0000")
     parser.add_argument('--ap_name', help="AP Model Name", default="Test-AP")
+    parser.add_argument('--num_stations', type=int, help='number of stations to create', default=10)
+    optional.add_argument('-as', '--atten_serno', help='Serial number for requested Attenuator', default='2222')
+    optional.add_argument('-ai', '--atten_idx',
+                          help='Attenuator index eg. For module 1 = 0,module 2 = 1 --> --atten_idx 0,1',
+                          default='all')
+    optional.add_argument('-av', '--atten_val',
+                          help='Requested attenuation in 1/10ths of dB (ddB) ex:--> --atten_val 0, 10', default='0, 10')
     args = parser.parse_args()
+    test_time = datetime.now().strftime("%b %d %H:%M:%S")
+
+    print(parser.parse_args())
+    if args.test_duration.endswith('s') or args.test_duration.endswith('S'):
+        test_dur = int(args.test_duration[0:-1])
+    elif args.test_duration.endswith('m') or args.test_duration.endswith('M'):
+        test_dur = int(args.test_duration[0:-1]) * 60
+    elif args.test_duration.endswith('h') or args.test_duration.endswith('H'):
+        test_dur = int(args.test_duration[0:-1]) * 60 * 60
+    elif args.test_duration.endswith(''):
+        test_dur = int(args.test_duration)
 
     if args.create_sta:
         station_list = LFUtils.portNameSeries(prefix_="sta", start_id_=0, end_id_=int(args.num_stations) - 1,
                                               padding_number_=10000,
-                                              radio=args.radio_5g)
+                                              radio=args.radio)
     else:
         station_list = args.sta_names.split(",")
 
-    rvrTest = rvr_test(host=args.mgr,
-                       port=args.mgr_port,
-                       number_template="0000",
-                       sta_list=station_list,
-                       create_sta=args.create_sta,
-                       name_prefix="TOS-",
-                       upstream=args.upstream_port,
-                       ssid=args.ssid,
-                       password=args.passwd,
-                       security=args.security,
-                       test_duration=args.test_duration,
-                       use_ht160=False,
-                       side_a_min_rate=args.upload,
-                       side_b_min_rate=args.download,
-                       mode=args.mode,
-                       traffic_type=args.traffic_type,
-                       _debug_on=args.debug)
+    rvr_obj = RvR(host=args.mgr,
+                  port=args.mgr_port,
+                  number_template="0000",
+                  sta_list=station_list,
+                  create_sta=args.create_sta,
+                  num_stations=int(args.num_stations),
+                  name_prefix="RvR-",
+                  upstream=args.upstream_port,
+                  radio=args.radio,
+                  ssid=args.ssid,
+                  password=args.passwd,
+                  security=args.security,
+                  test_duration=args.test_duration,
+                  use_ht160=False,
+                  side_a_min_rate=args.upload,
+                  side_b_min_rate=args.download,
+                  mode=args.mode,
+                  traffic_type=args.traffic_type,
+                  traffic_direction=args.traffic_direction,
+                  _debug_on=args.debug)
 
-    rvrTest.pre_cleanup()
-    rvrTest.build()
-    rvrTest.start()
-    rvrTest.cleanup()
+    rvr_obj.pre_cleanup()
+    rvr_obj.build()
+    rvr_obj.start()
+    rvr_obj.cleanup()
