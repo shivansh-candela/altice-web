@@ -20,6 +20,7 @@ License: Free to distribute and modify. LANforge systems must be licensed.
 
 import sys
 import os
+import pandas as pd
 
 if sys.version_info[0] != 3:
     print("This script requires Python 3")
@@ -31,6 +32,8 @@ if 'py-json' not in sys.path:
 import argparse
 from LANforge import LFUtils
 from realm import Realm
+from lf_report import lf_report
+from lf_graph import lf_bar_graph
 import time
 from datetime import datetime
 
@@ -38,7 +41,8 @@ from datetime import datetime
 class RvR(Realm):
     def __init__(self, ssid=None, security=None, password=None, create_sta=True, sta_list=None, name_prefix=None,
                  upstream=None, radio="wiphy0", host="localhost", port=8080, mode=0, ap_model="Test", values="0",
-                 traffic_type="lf_udp, lf_tcp", serial_number='2222', indices="all", load=500, traffic_direction="download",
+                 traffic_type="lf_udp, lf_tcp", serial_number='2222', indices="all", load=500,
+                 traffic_direction="download",
                  side_a_min_rate=56, side_a_max_rate=0, side_b_min_rate=56, side_b_max_rate=0, number_template="00000",
                  num_stations=10,
                  test_duration='2m', use_ht160=False, _debug_on=False, _exit_on_error=False, _exit_on_fail=False):
@@ -76,7 +80,7 @@ class RvR(Realm):
             self.station_profile.mode = 9
         self.station_profile.mode = mode
 
-        # initialize connection profile
+        # initialize l3 profile
         self.cx_profile = self.new_l3_cx_profile()
         self.cx_profile.host = self.host
         self.cx_profile.port = self.port
@@ -91,7 +95,6 @@ class RvR(Realm):
         self.serial_number = serial_number
         self.indices = indices.split(',')
         self.values = values
-        self.initialize_attenuator()
 
     def initialize_attenuator(self):
         self.attenuator_profile.atten_serno = self.serial_number
@@ -112,7 +115,7 @@ class RvR(Realm):
         self.attenuator_profile.create()
         self.attenuator_profile.show()
 
-    def start_l3(self, print_pass=False, print_fail=False):
+    def start_l3(self):
         self.cx_profile.start_cx()
 
     def stop_l3(self):
@@ -153,8 +156,13 @@ class RvR(Realm):
 
     def build(self):
         throughput = {}
-        self.station_profile.use_security(self.security, self.ssid, self.password)
+        print("---------")
+        print(self.station_profile.ssid_pass)
+        print("---------")
         self.station_profile.set_number_template(self.number_template)
+        self.station_profile.use_security(security_type=self.station_profile.security,
+                                          ssid=self.station_profile.ssid,
+                                          passwd=self.station_profile.ssid_pass)
         print("Creating stations")
         self.station_profile.set_command_flag("add_sta", "create_admin_down", 1)
         self.station_profile.set_command_param("set_port", "report_timer", 1500)
@@ -162,23 +170,128 @@ class RvR(Realm):
         self.station_profile.create(radio=self.radio, sta_names_=self.station_names, debug=self.debug)
         self.start_stations()
         self.initialize_attenuator()
-        for i in range(len(self.traffic_type)):
-            self.cx_profile.create(endp_type=self.traffic_type[i], side_a=self.station_profile.station_names,
-                                   side_b=self.upstream,
-                                   sleep_time=0)
-            self.start_l3()
-            time.sleep(int(self.test_duration))
-            self.stop_l3()
-            throughput[''.join(i)] = self.get_rx_values()
-            self.clean_cx_lists()
-            self.set_attenuation(self.values[0])
+        for traffic in self.traffic_type:
+            for val in self.values:
+                self.cx_profile.create(endp_type=traffic, side_a=self.station_profile.station_names,
+                                       side_b=self.upstream,
+                                       sleep_time=0)
+                self.start_l3()
+                time.sleep(int(self.test_duration))
+                self.stop_l3()
+                throughput[''.join(traffic)] = self.get_rx_values()
+                print(throughput)
+                self.clean_cx_lists()
+                self.set_attenuation(value=val)
 
     def get_rx_values(self):
         throughput = {'upload': [], 'download': []}
         for sta in self.cx_profile.created_cx.keys():
-            throughput['upload'].append(float(f"{list((self.json_get('/cx/%s?fields=bps+rx+a' % sta)).values())[2]['bps rx a'] / 1000000:.2f}"))
-            throughput['download'].append(float(f"{list((self.json_get('/cx/%s?fields=bps+rx+b' % sta)).values())[2]['bps rx b'] / 1000000:.2f}"))
+            throughput['upload'].append(
+                float(f"{list((self.json_get('/cx/%s?fields=bps+rx+a' % sta)).values())[2]['bps rx a'] / 1000000:.2f}"))
+            throughput['download'].append(
+                float(f"{list((self.json_get('/cx/%s?fields=bps+rx+b' % sta)).values())[2]['bps rx b'] / 1000000:.2f}"))
         return throughput
+
+    def monitor(self, duration_sec, monitor_interval, created_cx, col_names, iterations):
+        duration_sec = Realm.parse_time(duration_sec).seconds
+        if (duration_sec is None) or (duration_sec <= 1):
+            raise ValueError("L3CXProfile::monitor wants duration_sec > 1 second")
+        if duration_sec <= monitor_interval:
+            raise ValueError("L3CXProfile::monitor wants duration_sec > monitor_interval")
+        if created_cx is None:
+            raise ValueError("Monitor needs a list of Layer 4 connections")
+        if (monitor_interval is None) or (monitor_interval < 1):
+            raise ValueError("L3CXProfile::monitor wants monitor_interval >= 1 second")
+
+        # assign column names
+        if col_names is not None and len(col_names) > 0:
+            print(col_names)
+            header_row = col_names
+        else:
+            col_names = list((list(self.json_get("/cx/all")['endpoint'][0].values())[0].keys()))
+
+        # monitor columns
+        start_time = datetime.now()
+        end_time = start_time + datetime.timedelta(seconds=duration_sec)
+
+        rx_rate = []
+        for test in range(1 + iterations):
+            while datetime.now() < end_time:
+                if col_names is None:
+                    response = self.json_get("/layer4/all")
+                else:
+                    fields = ",".join(col_names)
+                    created_cx_ = ",".join(created_cx)
+
+                    response = self.json_get("/layer4/%s?fields=%s" % (created_cx_, fields))
+                    endpt = response['endpoint']
+                    if len(self.station_list) > 1:
+                        for i in endpt:
+                            name = list(i.keys())[0]
+                            rx_rate.append(i[name]['rx rate'])
+                    else:
+                        rx_rate.append(endpt['rx rate'])
+                time.sleep(monitor_interval)
+
+        # rx_rate list is calculated
+        print("rx rate values are ", rx_rate)
+        return rx_rate
+
+    def generate_report(self, data, test_setup_info, input_setup_info):
+        res = self.set_report_data(data)
+        report = lf_report(_output_pdf="rvr_test.pdf", _output_html="rvr_test.html")
+        report_path = report.get_path()
+        report_path_date_time = report.get_path_date_time()
+        print("path: {}".format(report_path))
+        print("path_date_time: {}".format(report_path_date_time))
+        report.set_title("Throughput QOS")
+        report.build_banner()
+        # objective title and description
+        report.set_obj_html(_obj_title="Objective",
+                            _obj="will measure the performance of stations over a certain distance of the DUT. Distance is emulated"
+                                 "using programmable attenuators and throughput test is run at each distance/RSSI step.")
+        report.build_objective()
+        report.test_setup_table(test_setup_data=test_setup_info, value="Device Under Test")
+        report.set_table_title(
+            "Overall download Throughput for all TOS i.e BK | BE | Video (VI) | Voice (VO)")
+        report.build_table_title()
+        df_throughput = pd.DataFrame()
+        report.set_table_dataframe(df_throughput)
+        report.build_table()
+        graph = lf_bar_graph(_data_set=[30,40,50],
+                             _xaxis_name="stations",
+                             _yaxis_name="Throughput 2 (Mbps)",
+                             _xaxis_categories=[1,2,3],
+                             _graph_image_name="Bi-single_radio_2.4GHz",
+                             _label=["bi-downlink", "bi-uplink", 'uplink'],
+                             _color=['darkorange', 'forestgreen', 'blueviolet'],
+                             _color_edge='red',
+                             _grp_title="Throughput for each clients",
+                             _xaxis_step=5,
+                             _show_bar_value=True,
+                             _text_font=7,
+                             _text_rotation=45,
+                             _xticks_font=7,
+                             _legend_loc="best",
+                             _legend_box=(1, 1),
+                             _legend_ncol=1,
+                             _enable_csv=True,
+                             _legend_fontsize=None)
+
+        graph_png = graph.build_bar_graph()
+
+        print("graph name {}".format(graph_png))
+
+        report.set_graph_image(graph_png)
+        # need to move the graph image to the results
+        report.move_graph_image()
+
+        report.build_graph()
+        report.test_setup_table(test_setup_data=input_setup_info, value="Information")
+        report.build_custom()
+        report.build_footer()
+        report.write_html()
+        report.write_pdf()
 
 
 def main():
@@ -200,13 +313,16 @@ def main():
     required.add_argument('--radio', help='radio to use for creating clients', default="wiphy0")
     required.add_argument('--ssid', help="ssid for client association with Access Point")
     required.add_argument('--security', help="security type of ssid")
-    required.add_argument('--passwd', help="password of ssid")
+    required.add_argument('--password', help="password of ssid", default="[BLANK]")
     required.add_argument('--traffic_type', help='provide the traffic Type lf_udp, lf_tcp', default='lf_udp')
-    optional.add_argument('--traffic_direction', help='Traffic direction i.e upload or download or bidirectional', default="download")
+    optional.add_argument('--traffic_direction', help='Traffic direction i.e upload or download or bidirectional',
+                          default="download")
     required.add_argument('--load', help='traffic (load) to be created for each client in layer 3', default=500)
     required.add_argument('--test_duration', help='test_duration sets the duration of the test', default="2m")
     optional.add_argument('--create_sta', help='Used to force a connection to a particular AP', default=True)
-    optional.add_argument('--sta_names', help='Used to force a connection to a particular AP', default="sta0000")
+    optional.add_argument('--sta_names',
+                          help='Used to force a connection to a particular AP, create_sta should be False',
+                          default="sta0000")
     optional.add_argument('--ap_name', help="AP Model Name", default="Test-AP")
     required.add_argument('--num_stations', help='number of stations to create', default=10)
     optional.add_argument('-as', '--atten_serno', help='Serial number for requested Attenuator', default='2222')
@@ -221,13 +337,13 @@ def main():
     print("Test started at ", test_start_time)
     print(parser.parse_args())
     if args.test_duration.endswith('s') or args.test_duration.endswith('S'):
-        args.test_duration = args.test_duration[0:-1]
+        args.test_duration = int(args.test_duration[0:-1])
     elif args.test_duration.endswith('m') or args.test_duration.endswith('M'):
-        args.test_duration = (args.test_duration[0:-1]) * 60
+        args.test_duration = int(args.test_duration[0:-1]) * 60
     elif args.test_duration.endswith('h') or args.test_duration.endswith('H'):
-        args.test_duration = (args.test_duration[0:-1]) * 60 * 60
+        args.test_duration = int(args.test_duration[0:-1]) * 60 * 60
     elif args.test_duration.endswith(''):
-        args.test_duration = args.test_duration
+        args.test_duration = int(args.test_duration)
 
     if args.atten_val:
         args.atten_val = args.atten_val.split(',')
@@ -259,7 +375,7 @@ def main():
                   upstream=args.upstream,
                   radio=args.radio,
                   ssid=args.ssid,
-                  password=args.passwd,
+                  password=args.password,
                   security=args.security,
                   test_duration=args.test_duration,
                   use_ht160=False,
@@ -276,7 +392,6 @@ def main():
 
     rvr_obj.pre_cleanup()
     rvr_obj.build()
-    rvr_obj.start()
     rvr_obj.cleanup()
 
     test_end_time = datetime.now().strftime("%b %d %H:%M:%S")
