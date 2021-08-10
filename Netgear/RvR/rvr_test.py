@@ -117,6 +117,20 @@ class RvR(Realm):
 
     def start_l3(self):
         self.cx_profile.start_cx()
+        try:
+            for i in self.cx_profile.created_cx.keys():
+                while self.json_get("/cx/" + i).get(i).get('state') != 'Run':
+                    continue
+        except Exception as e:
+            pass
+        for cx_name in self.cx_profile.created_cx.keys():
+            req_url = "cli-json/set_endp_report_timer"
+            data = {
+                "endp_name": cx_name,
+                "milliseconds": 1000
+            }
+            self.json_post(req_url, data)
+        print("Test Started")
 
     def stop_l3(self):
         self.cx_profile.stop_cx()
@@ -185,57 +199,41 @@ class RvR(Realm):
 
     def get_rx_values(self):
         throughput = {'upload': [], 'download': []}
-        for sta in self.cx_profile.created_cx.keys():
+        self.monitor()
+        for conn in self.cx_profile.created_cx.keys():
             throughput['upload'].append(
-                float(f"{list((self.json_get('/cx/%s?fields=bps+rx+a' % sta)).values())[2]['bps rx a'] / 1000000:.2f}"))
+                float(f"{list((self.json_get('/cx/%s?fields=bps+rx+a' % conn)).values())[2]['bps rx a'] / 1000000:.2f}"))
             throughput['download'].append(
-                float(f"{list((self.json_get('/cx/%s?fields=bps+rx+b' % sta)).values())[2]['bps rx b'] / 1000000:.2f}"))
+                float(f"{list((self.json_get('/cx/%s?fields=bps+rx+b' % conn)).values())[2]['bps rx b'] / 1000000:.2f}"))
         return throughput
 
-    def monitor(self, duration_sec, monitor_interval, created_cx, col_names, iterations):
-        duration_sec = Realm.parse_time(duration_sec).seconds
-        if (duration_sec is None) or (duration_sec <= 1):
-            raise ValueError("L3CXProfile::monitor wants duration_sec > 1 second")
-        if duration_sec <= monitor_interval:
-            raise ValueError("L3CXProfile::monitor wants duration_sec > monitor_interval")
-        if created_cx is None:
-            raise ValueError("Monitor needs a list of Layer 4 connections")
-        if (monitor_interval is None) or (monitor_interval < 1):
-            raise ValueError("L3CXProfile::monitor wants monitor_interval >= 1 second")
+    def monitor(self):
+        throughput ={}
+        if (self.test_duration is None) or (self.test_duration <= 1):
+            raise ValueError("L3CXProfile::monitor wants test duration > 1 second")
 
-        # assign column names
-        if col_names is not None and len(col_names) > 0:
-            print(col_names)
-            header_row = col_names
-        else:
-            col_names = list((list(self.json_get("/cx/all")['endpoint'][0].values())[0].keys()))
+        if self.cx_profile.created_cx is None:
+            raise ValueError("Monitor needs a list of Layer 3 connections")
 
         # monitor columns
         start_time = datetime.now()
-        end_time = start_time + datetime.timedelta(seconds=duration_sec)
+        end_time = start_time + datetime.timedelta(seconds=self.test_duration)
 
-        rx_rate = []
-        for test in range(1 + iterations):
-            while datetime.now() < end_time:
-                if col_names is None:
-                    response = self.json_get("/layer4/all")
-                else:
-                    fields = ",".join(col_names)
-                    created_cx_ = ",".join(created_cx)
-
-                    response = self.json_get("/layer4/%s?fields=%s" % (created_cx_, fields))
-                    endpt = response['endpoint']
-                    if len(self.station_list) > 1:
-                        for i in endpt:
-                            name = list(i.keys())[0]
-                            rx_rate.append(i[name]['rx rate'])
-                    else:
-                        rx_rate.append(endpt['rx rate'])
-                time.sleep(monitor_interval)
-
-        # rx_rate list is calculated
-        print("rx rate values are ", rx_rate)
-        return rx_rate
+        bps_rx_a = []
+        bps_rx_b = []
+        keys = dict.fromkeys(list(self.cx_profile.created_cx.keys()), {})
+        for i in range(int(self.test_duration)):
+            for key in keys:
+                throughput[key]['upload'].append(
+                    float(
+                        f"{list((self.json_get('/cx/%s?fields=bps+rx+a' % key)).values())[2]['bps rx a'] / 1000000:.2f}"))
+                throughput[key]['download'].append(
+                    float(
+                        f"{list((self.json_get('/cx/%s?fields=bps+rx+b' % key)).values())[2]['bps rx b'] / 1000000:.2f}"))
+            time.sleep(1)
+        # # rx_rate list is calculated
+        print("rx values are %s and %s", bps_rx_a, bps_rx_b)
+        return bps_rx_a, bps_rx_b
 
     def generate_report(self, data, test_setup_info, input_setup_info):
         res = self.set_report_data(data)
