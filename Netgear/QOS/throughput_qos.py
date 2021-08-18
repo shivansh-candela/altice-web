@@ -34,7 +34,7 @@ import argparse
 from LANforge import LFUtils
 from realm import Realm
 import time
-import datetime
+from datetime import datetime, timedelta
 
 
 class ThroughputQOS(Realm):
@@ -60,7 +60,7 @@ class ThroughputQOS(Realm):
                  mode=0,
                  ap_name="",
                  traffic_type=None,
-                 side_a_min_rate=56, side_a_max_rate=0,
+                 side_a_min_rate=0, side_a_max_rate=0,
                  side_b_min_rate=56, side_b_max_rate=0,
                  number_template="00000",
                  test_duration="2m",
@@ -216,7 +216,43 @@ class ThroughputQOS(Realm):
                                    sleep_time=0, tos=ip_tos)
         print("cross connections with TOS type created.")
 
-    def evaluate_qos(self):
+    def monitor(self):
+        throughput = {'download': {}, 'upload': {}}
+        if (self.test_duration is None) or (int(self.test_duration) <= 1):
+            raise ValueError("L3CXProfile::monitor wants test duration > 1 second")
+        if self.cx_profile.created_cx is None:
+            raise ValueError("Monitor needs a list of Layer 3 connections")
+        # monitor columns
+        start_time = datetime.now()
+        end_time = start_time + timedelta(seconds=int(self.test_duration))
+        bps_rx_a = []
+        bps_rx_b = []
+        keys = dict.fromkeys(list(self.cx_profile.created_cx.keys()), [])
+        throughput['download'] = keys.copy()
+        throughput['upload'] = keys.copy()
+        print(throughput['download'])
+        # for conn in self.cx_profile.created_cx.keys():
+        #     req_url = "cli-json/set_endp_report_timer"
+        #     data = {
+        #         "endp_name": conn,
+        #         "milliseconds": 1000
+        #     }
+        #     self.json_post(req_url, data)
+        for i in range(int(self.test_duration)):
+            for key in keys:
+                throughput['download'][key].append(
+                    float(
+                        f"{list((self.json_get('/cx/%s?fields=bps+rx+a' % key)).values())[2]['bps rx a'] / 1000000:.2f}"))
+                throughput['upload'][key].append(
+                    float(
+                        f"{list((self.json_get('/cx/%s?fields=bps+rx+b' % key)).values())[2]['bps rx b'] / 1000000:.2f}"))
+            time.sleep(1)
+        # # rx_rate list is calculated
+        print("rx values are %s and %s", throughput['upload'], throughput['download'])
+        return throughput['upload'], throughput['download']
+
+    def evaluate_qos(self, download):
+        print(download)
         case = ""
         tos_download = {'video': [], 'voice': [], 'bk': [], 'be': []}
         tx_b = {'bk': [], 'be': [], 'video': [], 'voice': []}
@@ -419,8 +455,8 @@ class ThroughputQOS(Realm):
                                  _color=['orangered', 'olivedrab', 'steelblue', 'blueviolet'],
                                  _color_edge='black',
                                  _bar_width=0.15,
-                                 _legend_loc="upper right",
-                                 _legend_box=(1.05, 1.1),
+                                 # _legend_loc="upper right",
+                                 # _legend_box=(1.05, 1.1),
                                  _dpi=96,
                                  _show_bar_value=True,
                                  _enable_csv=True,
@@ -456,8 +492,8 @@ class ThroughputQOS(Realm):
                                  _color_edge='black',
                                  _bar_width=0.15,
                                  _dpi=96,
-                                 _legend_loc="upper right",
-                                 _legend_box=(1.05, 1.1),
+                                 # _legend_loc="upper right",
+                                 # _legend_box=(1.05, 1.1),
                                  _show_bar_value=True,
                                  _enable_csv=True,
                                  _color_name=['orangered', 'olivedrab', 'steelblue', 'blueviolet'])
@@ -494,8 +530,8 @@ class ThroughputQOS(Realm):
                                  _bar_width=0.15,
                                  _dpi=96,
                                  _enable_csv=True,
-                                 _legend_loc="upper right",
-                                 _legend_box=(1.05, 1.1),
+                                 # _legend_loc="upper right",
+                                 # _legend_box=(1.05, 1.1),
                                  _color_name=['orangered', 'olivedrab', 'steelblue', 'blueviolet'])
             graph_png = graph.build_bar_graph()
 
@@ -539,8 +575,8 @@ class ThroughputQOS(Realm):
                                              key),
                                          _title_size=16,
                                          _bar_width=0.15,
-                                         _legend_loc="upper right",
-                                         _legend_box=(1.05, 1.1),
+                                         # _legend_loc="upper right",
+                                         # _legend_box=(1.05, 1.1),
                                          _color_name=['orangered'],
                                          _show_bar_value=True,
                                          _enable_csv=True,
@@ -571,8 +607,8 @@ class ThroughputQOS(Realm):
                                              key),
                                          _title_size=16,
                                          _bar_width=0.15,
-                                         _legend_loc="upper right",
-                                         _legend_box=(1.05, 1.1),
+                                         # _legend_loc="upper right",
+                                         # _legend_box=(1.05, 1.1),
                                          _color_name=['olivedrab'],
                                          _show_bar_value=True,
                                          _enable_csv=True,
@@ -603,8 +639,8 @@ class ThroughputQOS(Realm):
                                              key),
                                          _title_size=16,
                                          _bar_width=0.15,
-                                         _legend_loc="upper right",
-                                         _legend_box=(1.05, 1.1),
+                                         # _legend_loc="upper right",
+                                         # _legend_box=(1.05, 1.1),
                                          _show_bar_value=True,
                                          _color_name=['steelblue'],
                                          _enable_csv=True,
@@ -636,8 +672,8 @@ class ThroughputQOS(Realm):
                                              key),
                                          _title_size=16,
                                          _bar_width=0.15,
-                                         _legend_loc="upper right",
-                                         _legend_box=(1.05, 1.1),
+                                         # _legend_loc="upper right",
+                                         # _legend_box=(1.05, 1.1),
                                          _show_bar_value=True,
                                          _color_name=['blueviolet'],
                                          _enable_csv=True,
@@ -670,8 +706,8 @@ class ThroughputQOS(Realm):
                                              key),
                                          _title_size=16,
                                          _bar_width=0.15,
-                                         _legend_loc="upper right",
-                                         _legend_box=(1.05, 1.1),
+                                         # _legend_loc="upper right",
+                                         # _legend_box=(1.05, 1.1),
                                          _show_bar_value=True,
                                          _color_name=['blueviolet'],
                                          _enable_csv=True,
@@ -762,10 +798,16 @@ python3 ./throughput_QOS.py
     if args.bands is not None:
         bands = args.bands.split(',')
 
-    if args.test_duration is not None:
-        args.test_duration = args.test_duration.strip('m')
+    if args.test_duration.endswith('s') or args.test_duration.endswith('S'):
+        args.test_duration = int(args.test_duration[0:-1])
+    elif args.test_duration.endswith('m') or args.test_duration.endswith('M'):
+        args.test_duration = int(args.test_duration[0:-1]) * 60
+    elif args.test_duration.endswith('h') or args.test_duration.endswith('H'):
+        args.test_duration = int(args.test_duration[0:-1]) * 60 * 60
+    elif args.test_duration.endswith(''):
+        args.test_duration = int(args.test_duration)
 
-    test_start_time = datetime.datetime.now().strftime("%b %d %H:%M:%S")
+    test_start_time = datetime.now().strftime("%b %d %H:%M:%S")
     print("Test started at: ", test_start_time)
 
     for i in range(len(bands)):
@@ -843,15 +885,16 @@ python3 ./throughput_QOS.py
             throughput_qos.pre_cleanup()
             throughput_qos.build()
 
-            if args.create_sta:
-                if not throughput_qos.passes():
-                    print(throughput_qos.get_fail_message())
-                    throughput_qos.exit_fail()
+            # if args.create_sta:
+            #     if not throughput_qos.passes():
+            #         print(throughput_qos.get_fail_message())
+            #         throughput_qos.exit_fail()
 
             throughput_qos.start(False, False)
-            time.sleep(int(args.test_duration) * 60)
+            time.sleep(10)
+            upload, download = throughput_qos.monitor()
             throughput_qos.stop()
-            test_results.update(throughput_qos.evaluate_qos())
+            test_results.update(throughput_qos.evaluate_qos(download))
             data.update({bands[i]: test_results})
             if args.create_sta:
                 if not throughput_qos.passes():
@@ -862,14 +905,14 @@ python3 ./throughput_QOS.py
                     throughput_qos.success()
                 throughput_qos.cleanup()
 
-    test_end_time = datetime.datetime.now().strftime("%b %d %H:%M:%S")
+    test_end_time = datetime.now().strftime("%b %d %H:%M:%S")
     print("Test ended at: ", test_end_time)
     test_setup_info = {
         "AP Model": throughput_qos.ap_name,
         "SSID": throughput_qos.ssid,
         "SSID - 2.4 Ghz": throughput_qos.ssid_2g,
         "SSID - 5 Ghz": throughput_qos.ssid_5g,
-        "Test Duration": datetime.datetime.strptime(test_end_time, "%b %d %H:%M:%S") - datetime.datetime.strptime(
+        "Test Duration": datetime.strptime(test_end_time, "%b %d %H:%M:%S") - datetime.strptime(
             test_start_time, "%b %d %H:%M:%S")
     }
     if throughput_qos.ssid is None:
