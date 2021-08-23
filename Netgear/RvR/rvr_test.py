@@ -35,7 +35,7 @@ from realm import Realm
 from lf_report import lf_report
 from lf_graph import lf_bar_graph
 import time
-from datetime import datetime
+from datetime import datetime, timedelta
 
 
 class RvR(Realm):
@@ -208,32 +208,36 @@ class RvR(Realm):
         return throughput
 
     def monitor(self):
-        throughput ={}
-        if (self.test_duration is None) or (self.test_duration <= 1):
+        throughput, download, bps_rx_a = {'download': {}}, [], []
+        if (self.test_duration is None) or (int(self.test_duration) <= 1):
             raise ValueError("L3CXProfile::monitor wants test duration > 1 second")
-
         if self.cx_profile.created_cx is None:
             raise ValueError("Monitor needs a list of Layer 3 connections")
-
         # monitor columns
         start_time = datetime.now()
-        end_time = start_time + datetime.timedelta(seconds=self.test_duration)
-
-        bps_rx_a = []
-        bps_rx_b = []
-        keys = dict.fromkeys(list(self.cx_profile.created_cx.keys()), {})
-        for i in range(int(self.test_duration)):
-            for key in keys:
-                throughput[key]['upload'].append(
-                    float(
-                        f"{list((self.json_get('/cx/%s?fields=bps+rx+a' % key)).values())[2]['bps rx a'] / 1000000:.2f}"))
-                throughput[key]['download'].append(
-                    float(
-                        f"{list((self.json_get('/cx/%s?fields=bps+rx+b' % key)).values())[2]['bps rx b'] / 1000000:.2f}"))
+        end_time = start_time + timedelta(seconds=int(self.test_duration))
+        index = -1
+        connections = dict.fromkeys(list(self.cx_profile.created_cx.keys()), float(0))
+        [(bps_rx_a.append([])) for i in range(len(self.cx_profile.created_cx))]
+        while datetime.now() < end_time:
+            index += 1
+            response = list(
+                self.json_get('/cx/%s?fields=%s' % (
+                    ','.join(self.cx_profile.created_cx.keys()), ",".join(['bps rx a']))).values())[2:]
+            throughput['download'][index] = list(
+                map(lambda i: [float(f"{x / 1000000:.2f}") for x in i.values()], response))
             time.sleep(1)
         # # rx_rate list is calculated
-        print("rx values are %s and %s", bps_rx_a, bps_rx_b)
-        return bps_rx_a, bps_rx_b
+        print("rx values are %s", throughput['download'])
+        for index, key in enumerate(throughput['download']):
+            for i in range(len(throughput['download'][key])):
+                bps_rx_a[i].append(throughput['download'][key][i][0])
+        print(f"download: {bps_rx_a}")
+        download = [float(f"{sum(i) / len(i): .2f}") for i in bps_rx_a]
+        keys = list(connections.keys())
+        for i in range(len(download)):
+            connections.update({keys[i]: download[i]})
+        return connections, download
 
     def generate_report(self, data, test_setup_info, input_setup_info):
         res = self.set_report_data(data)
