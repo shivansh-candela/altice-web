@@ -119,6 +119,15 @@ class ThroughputQOS(Realm):
         self.cx_profile.side_b_max_bps = side_b_max_rate
 
     def start(self, print_pass=False, print_fail=False):
+        if len(self.cx_profile.created_cx) > 0:
+            for cx in self.cx_profile.created_cx.keys():
+                req_url = "cli-json/set_cx_report_timer"
+                data = {
+                    "test_mgr": "all",
+                    "cx_name": cx,
+                    "milliseconds": 1000
+                }
+                self.json_post(req_url, data)
         self.cx_profile.start_cx()
 
     def stop(self):
@@ -217,7 +226,7 @@ class ThroughputQOS(Realm):
         print("cross connections with TOS type created.")
 
     def monitor(self):
-        throughput = {'download': {}, 'upload': {}}
+        throughput, download, bps_rx_a = {'download': {}}, [], []
         if (self.test_duration is None) or (int(self.test_duration) <= 1):
             raise ValueError("L3CXProfile::monitor wants test duration > 1 second")
         if self.cx_profile.created_cx is None:
@@ -225,33 +234,30 @@ class ThroughputQOS(Realm):
         # monitor columns
         start_time = datetime.now()
         end_time = start_time + timedelta(seconds=int(self.test_duration))
-        bps_rx_a = []
-        bps_rx_b = []
-        keys = dict.fromkeys(list(self.cx_profile.created_cx.keys()), [])
-        throughput['download'] = keys.copy()
-        throughput['upload'] = keys.copy()
-        print(throughput['download'])
-        # for conn in self.cx_profile.created_cx.keys():
-        #     req_url = "cli-json/set_endp_report_timer"
-        #     data = {
-        #         "endp_name": conn,
-        #         "milliseconds": 1000
-        #     }
-        #     self.json_post(req_url, data)
-        for i in range(int(self.test_duration)):
-            for key in keys:
-                throughput['download'][key].append(
-                    float(
-                        f"{list((self.json_get('/cx/%s?fields=bps+rx+a' % key)).values())[2]['bps rx a'] / 1000000:.2f}"))
-                throughput['upload'][key].append(
-                    float(
-                        f"{list((self.json_get('/cx/%s?fields=bps+rx+b' % key)).values())[2]['bps rx b'] / 1000000:.2f}"))
+        index = -1
+        connections = dict.fromkeys(list(self.cx_profile.created_cx.keys()), float(0))
+        [(bps_rx_a.append([])) for i in range(len(self.cx_profile.created_cx))]
+        while datetime.now() < end_time:
+            index += 1
+            response = list(
+                self.json_get('/cx/%s?fields=%s' % (
+                    ','.join(self.cx_profile.created_cx.keys()), ",".join(['bps rx a']))).values())[2:]
+            throughput['download'][index] = list(
+                map(lambda i: [float(f"{x / 1000000:.2f}") for x in i.values()], response))
             time.sleep(1)
         # # rx_rate list is calculated
-        print("rx values are %s and %s", throughput['upload'], throughput['download'])
-        return throughput['upload'], throughput['download']
+        print("rx values are %s", throughput['download'])
+        for index, key in enumerate(throughput['download']):
+            for i in range(len(throughput['download'][key])):
+                bps_rx_a[i].append(throughput['download'][key][i][0])
+        print(f"download: {bps_rx_a}")
+        download = [float(f"{sum(i) / len(i): .2f}") for i in bps_rx_a]
+        keys = list(connections.keys())
+        for i in range(len(download)):
+            connections.update({keys[i]: float(download[i])})
+        return connections, download
 
-    def evaluate_qos(self, download):
+    def evaluate_qos(self, connections, download):
         print(download)
         case = ""
         tos_download = {'video': [], 'voice': [], 'bk': [], 'be': []}
@@ -278,8 +284,7 @@ class ThroughputQOS(Realm):
                 temp = int(sta[12:])
                 if temp % 4 == 0:
                     if int(self.cx_profile.side_b_min_bps) != 0:
-                        tos_download['bk'].append(float(
-                            f"{list((self.json_get('/cx/%s?fields=bps+rx+a' % sta)).values())[2]['bps rx a'] / 1000000:.2f}"))
+                        tos_download['bk'].append(connections[sta])
                         tx_b['bk'].append(int(f"{tx_endps['%s-B' % sta]['tx pkts ll']}"))
                         rx_a['bk'].append(int(f"{rx_endps['%s-A' % sta]['rx pkts ll']}"))
                         delay['bk'].append(float(f"{rx_endps['%s-A' % sta]['delay'] / 1000:.2f}"))
@@ -290,8 +295,7 @@ class ThroughputQOS(Realm):
                         delay['bk'].append(float(0))
                 elif temp % 4 == 1:
                     if int(self.cx_profile.side_b_min_bps) != 0:
-                        tos_download['be'].append(float(
-                            f"{list((self.json_get('/cx/%s?fields=bps+rx+a' % sta)).values())[2]['bps rx a'] / 1000000:.2f}"))
+                        tos_download['be'].append(connections[sta])
                         tx_b['be'].append(int(f"{tx_endps['%s-B' % sta]['tx pkts ll']}"))
                         rx_a['be'].append(int(f"{rx_endps['%s-A' % sta]['rx pkts ll']}"))
                         delay['be'].append(float(f"{rx_endps['%s-A' % sta]['delay'] / 1000:.2f}"))
@@ -302,8 +306,7 @@ class ThroughputQOS(Realm):
                         delay['be'].append(float(0))
                 elif temp % 4 == 2:
                     if int(self.cx_profile.side_b_min_bps) != 0:
-                        tos_download['voice'].append(float(
-                            f"{list((self.json_get('/cx/%s?fields=bps+rx+a' % sta)).values())[2]['bps rx a'] / 1000000:.2f}"))
+                        tos_download['voice'].append(connections[sta])
                         tx_b['voice'].append(int(f"{tx_endps['%s-B' % sta]['tx pkts ll']}"))
                         rx_a['voice'].append(int(f"{rx_endps['%s-A' % sta]['rx pkts ll']}"))
                         delay['voice'].append(float(f"{rx_endps['%s-A' % sta]['delay'] / 1000:.2f}"))
@@ -314,8 +317,7 @@ class ThroughputQOS(Realm):
                         delay['voice'].append(float(0))
                 elif temp % 4 == 3:
                     if int(self.cx_profile.side_b_min_bps) != 0:
-                        tos_download['video'].append(float(
-                            f"{list((self.json_get('/cx/%s?fields=bps+rx+a' % sta)).values())[2]['bps rx a'] / 1000000:.2f}"))
+                        tos_download['video'].append(connections[sta])
                         tx_b['video'].append(int(f"{tx_endps['%s-B' % sta]['tx pkts ll']}"))
                         rx_a['video'].append(int(f"{rx_endps['%s-A' % sta]['rx pkts ll']}"))
                         delay['video'].append(float(f"{rx_endps['%s-A' % sta]['delay'] / 1000:.2f}"))
@@ -439,7 +441,7 @@ class ThroughputQOS(Realm):
                 _obj="The below graph represents overall download throughput for all "
                      "connected stations running BK, BE, VO, VI traffic with different "
                      "intended loads per station – {}".format(
-                        "".join(str(key) for key in res[key].keys())))
+                    "".join(str(key) for key in res[key].keys())))
             report.build_objective()
 
             graph = lf_bar_graph(_data_set=res["graph_df"][key][0],
@@ -475,7 +477,7 @@ class ThroughputQOS(Realm):
                 _obj_title=f"Overall Packet loss for {len(self.sta_list)} clients for {key} band with different TOS.",
                 _obj="This graph shows the overall packet loss for the connected stations "
                      "for BK,BE,VO,VI traffic with intended load per station – {}".format(
-                        "".join(str(key) for key in res[key].keys())))
+                    "".join(str(key) for key in res[key].keys())))
             report.build_objective()
 
             graph = lf_bar_graph(_data_set=res["graph_df"][key][1],
@@ -511,7 +513,7 @@ class ThroughputQOS(Realm):
                 _obj_title=f"Overall Latency for {len(self.sta_list)} clients  for {key} band with different TOS.",
                 _obj="This graph shows the overall Latency for the connected stations "
                      "for BK,BE,VO,VI traffic with intended load per station – {}".format(
-                      "".join(str(key) for key in res[key].keys())))
+                    "".join(str(key) for key in res[key].keys())))
             report.build_objective()
 
             graph = lf_bar_graph(_data_set=res["graph_df"][key][2],
@@ -892,9 +894,9 @@ python3 ./throughput_QOS.py
 
             throughput_qos.start(False, False)
             time.sleep(10)
-            upload, download = throughput_qos.monitor()
+            connections, download = throughput_qos.monitor()
             throughput_qos.stop()
-            test_results.update(throughput_qos.evaluate_qos(download))
+            test_results.update(throughput_qos.evaluate_qos(connections, download))
             data.update({bands[i]: test_results})
             if args.create_sta:
                 if not throughput_qos.passes():
