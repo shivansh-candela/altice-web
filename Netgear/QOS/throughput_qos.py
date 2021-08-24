@@ -226,6 +226,7 @@ class ThroughputQOS(Realm):
         print("cross connections with TOS type created.")
 
     def monitor(self):
+        print("Monitoring CXs... & Endpoints...")
         throughput, download, bps_rx_a = {'download': {}}, [], []
         if (self.test_duration is None) or (int(self.test_duration) <= 1):
             raise ValueError("L3CXProfile::monitor wants test duration > 1 second")
@@ -245,12 +246,12 @@ class ThroughputQOS(Realm):
             throughput['download'][index] = list(
                 map(lambda i: [float(f"{x / 1000000:.2f}") for x in i.values()], response))
             time.sleep(1)
-        # # rx_rate list is calculated
-        print("rx values are %s", throughput['download'])
+        # rx_values captured into a list
+        print("rx values are: ", throughput['download'])
         for index, key in enumerate(throughput['download']):
             for i in range(len(throughput['download'][key])):
                 bps_rx_a[i].append(throughput['download'][key][i][0])
-        print(f"download: {bps_rx_a}")
+        print(f"overall download throughput values: {bps_rx_a}")
         download = [float(f"{sum(i) / len(i): .2f}") for i in bps_rx_a]
         keys = list(connections.keys())
         for i in range(len(download)):
@@ -258,7 +259,6 @@ class ThroughputQOS(Realm):
         return connections, download
 
     def evaluate_qos(self, connections, download):
-        print(download)
         case = ""
         tos_download = {'video': [], 'voice': [], 'bk': [], 'be': []}
         tx_b = {'bk': [], 'be': [], 'video': [], 'voice': []}
@@ -335,14 +335,28 @@ class ThroughputQOS(Realm):
             tos_download.update({"videoDELAY": float(f"{sum(delay['video']) / 1000:.2f}")})
             tos_download.update({"voiceDELAY": float(f"{sum(delay['voice']) / 1000:.2f}")})
             if sum(tx_b['bk']) != 0 or sum(tx_b['be']) != 0 or sum(tx_b['video']) != 0 or sum(tx_b['voice']) != 0:
-                tos_download.update(
-                    {"bkLOSS": float(f"{((sum(tx_b['bk']) - sum(rx_a['bk'])) / sum(tx_b['bk'])) * 100:.2f}")})
-                tos_download.update(
-                    {"beLOSS": float(f"{((sum(tx_b['be']) - sum(rx_a['be'])) / sum(tx_b['be'])) * 100:.2f}")})
-                tos_download.update({"videoLOSS": float(
-                    f"{((sum(tx_b['video']) - sum(rx_a['video'])) / sum(tx_b['video'])) * 100:.2f}")})
-                tos_download.update({"voiceLOSS": float(
-                    f"{((sum(tx_b['voice']) - sum(rx_a['voice'])) / sum(tx_b['voice'])) * 100:.2f}")})
+                if sum(tx_b['bk']) > sum(rx_a['bk']):
+                    tos_download.update(
+                        {"bkLOSS": float(f"{((sum(tx_b['bk']) - sum(rx_a['bk'])) / sum(tx_b['bk'])) * 100:.2f}")})
+                else:
+                    tos_download.update({"bkLOSS": float(f"{((sum(rx_a['bk']) - sum(tx_b['bk'])) / sum(rx_a['bk'])) * 100:.2f}")})
+                if sum(tx_b['be']) > sum(rx_a['be']):
+                    tos_download.update(
+                        {"beLOSS": float(f"{((sum(tx_b['be']) - sum(rx_a['be'])) / sum(tx_b['be'])) * 100:.2f}")})
+                else:
+                    tos_download.update({"beLOSS": float(f"{((sum(rx_a['be']) - sum(tx_b['be'])) / sum(rx_a['be'])) * 100:.2f}")})
+                if sum(tx_b['video']) > sum(rx_a['video']):
+                    tos_download.update(
+                        {"videoLOSS": float(f"{((sum(tx_b['video']) - sum(rx_a['video'])) / sum(tx_b['video'])) * 100:.2f}")})
+                else:
+                    tos_download.update(
+                        {"videoLOSS": float(f"{((sum(rx_a['video']) - sum(tx_b['video'])) / sum(rx_a['video'])) * 100:.2f}")})
+                if sum(tx_b['voice']) > sum(rx_a['voice']):
+                    tos_download.update(
+                        {"voiceLOSS": float(f"{((sum(tx_b['voice']) - sum(rx_a['voice'])) / sum(tx_b['voice'])) * 100:.2f}")})
+                else:
+                    tos_download.update(
+                        {"voiceLOSS": float(f"{((sum(rx_a['voice']) - sum(tx_b['voice'])) / sum(rx_a['voice'])) * 100:.2f}")})
             tos_download.update({'tx_b': tx_b})
             tos_download.update({'rx_a': rx_a})
             tos_download.update({'delay': delay})
@@ -379,6 +393,8 @@ class ThroughputQOS(Realm):
                     num_stations.append("{} + {}".format(str(len(self.sta_list) // 2), str(len(self.sta_list) // 2)))
                     mode.append("bgn-AC + an-AC")
                 for key in res[case]:
+                    # if case == "both" or case == "BOTH":
+                    #     key
                     throughput.append(
                         "BK : {}, BE : {}, VI: {}, VO: {}".format(res[case][key]["bkQOS"],
                                                                   res[case][key]["beQOS"],
@@ -457,8 +473,9 @@ class ThroughputQOS(Realm):
                                  _color=['orangered', 'olivedrab', 'steelblue', 'blueviolet'],
                                  _color_edge='black',
                                  _bar_width=0.15,
-                                 # _legend_loc="upper right",
-                                 # _legend_box=(1.05, 1.1),
+                                 _figsize=(18, 6),
+                                 _legend_loc="best",
+                                 _legend_box=(1.0, 1.0),
                                  _dpi=96,
                                  _show_bar_value=True,
                                  _enable_csv=True,
@@ -494,8 +511,9 @@ class ThroughputQOS(Realm):
                                  _color_edge='black',
                                  _bar_width=0.15,
                                  _dpi=96,
-                                 # _legend_loc="upper right",
-                                 # _legend_box=(1.05, 1.1),
+                                 _figsize=(18, 6),
+                                 _legend_loc="best",
+                                 _legend_box=(1.0, 1.0),
                                  _show_bar_value=True,
                                  _enable_csv=True,
                                  _color_name=['orangered', 'olivedrab', 'steelblue', 'blueviolet'])
@@ -532,8 +550,9 @@ class ThroughputQOS(Realm):
                                  _bar_width=0.15,
                                  _dpi=96,
                                  _enable_csv=True,
-                                 # _legend_loc="upper right",
-                                 # _legend_box=(1.05, 1.1),
+                                 _figsize=(18, 6),
+                                 _legend_loc="best",
+                                 _legend_box=(1.0, 1.0),
                                  _color_name=['orangered', 'olivedrab', 'steelblue', 'blueviolet'])
             graph_png = graph.build_bar_graph()
 
@@ -577,8 +596,9 @@ class ThroughputQOS(Realm):
                                              key),
                                          _title_size=16,
                                          _bar_width=0.15,
-                                         # _legend_loc="upper right",
-                                         # _legend_box=(1.05, 1.1),
+                                         _figsize= (18, 6),
+                                         _legend_loc="best",
+                                         _legend_box=(1.0, 1.0),
                                          _color_name=['orangered'],
                                          _show_bar_value=True,
                                          _enable_csv=True,
@@ -609,8 +629,9 @@ class ThroughputQOS(Realm):
                                              key),
                                          _title_size=16,
                                          _bar_width=0.15,
-                                         # _legend_loc="upper right",
-                                         # _legend_box=(1.05, 1.1),
+                                         _figsize=(18, 6),
+                                         _legend_loc="best",
+                                         _legend_box=(1.0, 1.0),
                                          _color_name=['olivedrab'],
                                          _show_bar_value=True,
                                          _enable_csv=True,
@@ -641,8 +662,9 @@ class ThroughputQOS(Realm):
                                              key),
                                          _title_size=16,
                                          _bar_width=0.15,
-                                         # _legend_loc="upper right",
-                                         # _legend_box=(1.05, 1.1),
+                                         _figsize=(18, 6),
+                                         _legend_loc="best",
+                                         _legend_box=(1.0, 1.0),
                                          _show_bar_value=True,
                                          _color_name=['steelblue'],
                                          _enable_csv=True,
@@ -674,8 +696,9 @@ class ThroughputQOS(Realm):
                                              key),
                                          _title_size=16,
                                          _bar_width=0.15,
-                                         # _legend_loc="upper right",
-                                         # _legend_box=(1.05, 1.1),
+                                         _figsize=(18, 6),
+                                         _legend_loc="best",
+                                         _legend_box=(1.0, 1.0),
                                          _show_bar_value=True,
                                          _color_name=['blueviolet'],
                                          _enable_csv=True,
@@ -708,8 +731,9 @@ class ThroughputQOS(Realm):
                                              key),
                                          _title_size=16,
                                          _bar_width=0.15,
-                                         # _legend_loc="upper right",
-                                         # _legend_box=(1.05, 1.1),
+                                         _figsize=(18, 6),
+                                         _legend_loc="best",
+                                         _legend_box=(1.0, 1.0),
                                          _show_bar_value=True,
                                          _color_name=['blueviolet'],
                                          _enable_csv=True,
@@ -895,8 +919,8 @@ python3 ./throughput_QOS.py
             throughput_qos.start(False, False)
             time.sleep(10)
             connections, download = throughput_qos.monitor()
-            throughput_qos.stop()
             test_results.update(throughput_qos.evaluate_qos(connections, download))
+            throughput_qos.stop()
             data.update({bands[i]: test_results})
             if args.create_sta:
                 if not throughput_qos.passes():
