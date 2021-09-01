@@ -227,9 +227,9 @@ class ThroughputQOS(Realm):
 
     def monitor(self):
         print("Monitoring CXs... & Endpoints...")
-        throughput, download, bps_rx_a = {'download': {}}, [], []
+        download, throughput, bps_rx_a = {}, [], []
         if (self.test_duration is None) or (int(self.test_duration) <= 1):
-            raise ValueError("L3CXProfile::monitor wants test duration > 1 second")
+            raise ValueError("Monitor test duration should be > 1 second")
         if self.cx_profile.created_cx is None:
             raise ValueError("Monitor needs a list of Layer 3 connections")
         # monitor columns
@@ -243,22 +243,22 @@ class ThroughputQOS(Realm):
             response = list(
                 self.json_get('/cx/%s?fields=%s' % (
                     ','.join(self.cx_profile.created_cx.keys()), ",".join(['bps rx a']))).values())[2:]
-            throughput['download'][index] = list(
-                map(lambda i: [float(f"{x / 1000000:.2f}") for x in i.values()], response))
+            download[index] = list(
+                map(lambda i: [x for x in i.values()], response))
             time.sleep(1)
         # rx_values captured into a list
-        print("rx values are: ", throughput['download'])
-        for index, key in enumerate(throughput['download']):
-            for i in range(len(throughput['download'][key])):
-                bps_rx_a[i].append(throughput['download'][key][i][0])
+        print("rx values are: ", download)
+        for index, key in enumerate(download):
+            for i in range(len(download[key])):
+                bps_rx_a[i].append(download[key][i][0])
         print(f"overall download throughput values: {bps_rx_a}")
-        download = [float(f"{sum(i) / len(i): .2f}") for i in bps_rx_a]
+        throughput = [float(f"{sum(i) / len(i): .2f}") for i in bps_rx_a]
         keys = list(connections.keys())
-        for i in range(len(download)):
-            connections.update({keys[i]: float(download[i])})
-        return connections, download
+        for i in range(len(throughput)):
+            connections.update({keys[i]: float(throughput[i])})
+        return connections, throughput
 
-    def evaluate_qos(self, connections, download):
+    def evaluate_qos(self, connections, throughput):
         case = ""
         tos_download = {'video': [], 'voice': [], 'bk': [], 'be': []}
         tx_b = {'bk': [], 'be': [], 'video': [], 'voice': []}
@@ -306,17 +306,6 @@ class ThroughputQOS(Realm):
                         delay['be'].append(float(0))
                 elif temp % 4 == 2:
                     if int(self.cx_profile.side_b_min_bps) != 0:
-                        tos_download['voice'].append(connections[sta])
-                        tx_b['voice'].append(int(f"{tx_endps['%s-B' % sta]['tx pkts ll']}"))
-                        rx_a['voice'].append(int(f"{rx_endps['%s-A' % sta]['rx pkts ll']}"))
-                        delay['voice'].append(float(f"{rx_endps['%s-A' % sta]['delay'] / 1000:.2f}"))
-                    else:
-                        tos_download['voice'].append(float(0))
-                        tx_b['voice'].append(int(0))
-                        rx_a['voice'].append(int(0))
-                        delay['voice'].append(float(0))
-                elif temp % 4 == 3:
-                    if int(self.cx_profile.side_b_min_bps) != 0:
                         tos_download['video'].append(connections[sta])
                         tx_b['video'].append(int(f"{tx_endps['%s-B' % sta]['tx pkts ll']}"))
                         rx_a['video'].append(int(f"{rx_endps['%s-A' % sta]['rx pkts ll']}"))
@@ -326,6 +315,17 @@ class ThroughputQOS(Realm):
                         tx_b['video'].append(int(0))
                         rx_a['video'].append(int(0))
                         delay['video'].append(float(0))
+                elif temp % 4 == 3:
+                    if int(self.cx_profile.side_b_min_bps) != 0:
+                        tos_download['voice'].append(connections[sta])
+                        tx_b['voice'].append(int(f"{tx_endps['%s-B' % sta]['tx pkts ll']}"))
+                        rx_a['voice'].append(int(f"{rx_endps['%s-A' % sta]['rx pkts ll']}"))
+                        delay['voice'].append(float(f"{rx_endps['%s-A' % sta]['delay'] / 1000:.2f}"))
+                    else:
+                        tos_download['voice'].append(float(0))
+                        tx_b['voice'].append(int(0))
+                        rx_a['voice'].append(int(0))
+                        delay['voice'].append(float(0))
             tos_download.update({"bkQOS": float(f"{sum(tos_download['bk']):.2f}")})
             tos_download.update({"beQOS": float(f"{sum(tos_download['be']):.2f}")})
             tos_download.update({"videoQOS": float(f"{sum(tos_download['video']):.2f}")})
@@ -918,9 +918,10 @@ python3 ./throughput_QOS.py
 
             throughput_qos.start(False, False)
             time.sleep(10)
-            connections, download = throughput_qos.monitor()
-            test_results.update(throughput_qos.evaluate_qos(connections, download))
+            connections, throughput = throughput_qos.monitor()
+            test_results.update(throughput_qos.evaluate_qos(connections, throughput))
             throughput_qos.stop()
+            exit(1)
             data.update({bands[i]: test_results})
             if args.create_sta:
                 if not throughput_qos.passes():
@@ -956,3 +957,4 @@ python3 ./throughput_QOS.py
 
 if __name__ == "__main__":
     main()
+
