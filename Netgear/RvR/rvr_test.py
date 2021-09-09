@@ -8,9 +8,9 @@ PURPOSE: rvr_test.py will measure the performance of stations over a certain dis
 
 EXAMPLE:
 python3 rvr_test.py --mgr 192.168.200.21 --mgr_port 8080 -u eth1 --num_stations 1
---radio wiphy1 --ssid TestAP5-71 --passwd lanforge --security wpa2 --mode 11 --a_min 1000000 --b_min 1000000 --traffic_type lf_udp
+--radio wiphy1 --ssid TestAP5-71 --password lanforge --security wpa2 --mode 11 --a_min 1000000 --b_min 1000000 --traffic_type lf_udp
 
-python3 rvr_test.py --num_stations 1 --radio wiphy1 --ssid ct523c-vap --passwd ct523c-vap --security wpa2 --mode 11 --a_min 1000000 --b_min 1000000 --traffic_type lf_udp
+python3 rvr_test.py --num_stations 1 --radio wiphy1 --ssid ct523c-vap --password ct523c-vap --security wpa2 --mode 11 --a_min 1000000 --b_min 1000000 --traffic_type lf_udp
 
 
 Use './rvr_test.py --help' to see command line usage and options
@@ -39,35 +39,32 @@ from datetime import datetime, timedelta
 
 
 class RvR(Realm):
-    def __init__(self, ssid=None, security=None, password=None, create_sta=True, sta_list=None, name_prefix=None,
-                 upstream=None, radio="wiphy0", host="localhost", port=8080, mode=0, ap_model="Test", values="0",
-                 traffic_type="lf_udp, lf_tcp", serial_number='2222', indices="all", load=500,
-                 traffic_direction="download",
-                 side_a_min_rate=56, side_a_max_rate=0, side_b_min_rate=56, side_b_max_rate=0, number_template="00000",
-                 num_stations=10,
-                 test_duration='2m', use_ht160=False, _debug_on=False, _exit_on_error=False, _exit_on_fail=False):
-        super().__init__(lfclient_host=host, lfclient_port=port),
+    def __init__(self, ssid=None, security=None,password="", create_sta=True, name_prefix=None,upstream=None, host="localhost",port=8080,
+                 mode=0, ap_model="", traffic_type="lf_udp, lf_tcp", traffic_direction="bidirectional", side_a_min_rate=0, side_a_max_rate=0,
+                 sta_list = None, side_b_min_rate=56, side_b_max_rate=0, number_template="00000", test_duration="2m", num_stations=10,
+                 serial_number='2222', indices="all", atten_val="0", load=500, radio="wiphy0",
+                 _debug_on=False, _exit_on_error=False, _exit_on_fail=False):
+        super().__init__(lfclient_host=host,
+                         lfclient_port=port),
         self.upstream = upstream
         self.host = host
         self.port = port
         self.ssid = ssid
         self.security = security
         self.password = password
+        self.radio = radio
+        self.num_stations = num_stations
         self.station_names = sta_list
         self.create_sta = create_sta
-        self.num_stations = num_stations
-        self.radio = radio
         self.mode = mode
         self.ap_model = ap_model
-        self.traffic_type = traffic_type.split(',')
+        self.traffic_type = traffic_type.split(",")
         self.traffic_direction = traffic_direction
         self.load = load
         self.number_template = number_template
         self.debug = _debug_on
         self.name_prefix = name_prefix
         self.test_duration = test_duration
-
-        # initialize station profile
         self.station_profile = self.new_station_profile()
         self.station_profile.lfclient_url = self.lfclient_url
         self.station_profile.ssid = self.ssid
@@ -75,26 +72,38 @@ class RvR(Realm):
         self.station_profile.security = self.security
         self.station_profile.number_template_ = self.number_template
         self.station_profile.debug = self.debug
-        self.station_profile.use_ht160 = use_ht160
-        if self.station_profile.use_ht160:
-            self.station_profile.mode = 9
         self.station_profile.mode = mode
-
-        # initialize l3 profile
         self.cx_profile = self.new_l3_cx_profile()
         self.cx_profile.host = self.host
         self.cx_profile.port = self.port
         self.cx_profile.name_prefix = self.name_prefix
-        self.cx_profile.side_a_min_bps = side_a_min_rate
+        self.cx_profile.side_a_min_bps = side_a_min_rate // self.num_stations
         self.cx_profile.side_a_max_bps = side_a_max_rate
-        self.cx_profile.side_b_min_bps = side_b_min_rate
+        self.cx_profile.side_b_min_bps = side_b_min_rate // self.num_stations
         self.cx_profile.side_b_max_bps = side_b_max_rate
-
-        # initialize attenuator profile
         self.attenuator_profile = self.new_attenuator_profile()
         self.serial_number = serial_number
-        self.indices = indices.split(',')
-        self.values = values
+        self.indices = indices.split(",")
+        self.atten_values = atten_val
+
+    def initialize_attenuator(self):
+        self.attenuator_profile.atten_serno = self.serial_number
+        self.attenuator_profile.atten_idx = "all"
+        self.attenuator_profile.atten_val = '0'
+        self.attenuator_profile.mode = None
+        self.attenuator_profile.pulse_width_us5 = None
+        self.attenuator_profile.pulse_interval_ms = None,
+        self.attenuator_profile.pulse_count = None,
+        self.attenuator_profile.pulse_time_ms = None
+        self.attenuator_profile.create()
+        self.attenuator_profile.show()
+
+    def set_attenuation(self, value):
+        self.attenuator_profile.atten_serno = self.serial_number
+        self.attenuator_profile.atten_idx = "all"
+        self.attenuator_profile.atten_val = value
+        self.attenuator_profile.create()
+        self.attenuator_profile.show()
 
     def initialize_attenuator(self):
         self.attenuator_profile.atten_serno = self.serial_number
@@ -116,25 +125,34 @@ class RvR(Realm):
         self.attenuator_profile.show()
 
     def start_l3(self):
+        if len(self.cx_profile.created_cx) > 0:
+            for cx in self.cx_profile.created_cx.keys():
+                req_url = "cli-json/set_cx_report_timer"
+                data = {
+                    "test_mgr": "all",
+                    "cx_name": cx,
+                    "milliseconds": 1000
+                }
+                self.json_post(req_url, data)
         self.cx_profile.start_cx()
-        try:
-            for i in self.cx_profile.created_cx.keys():
-                while self.json_get("/cx/" + i).get(i).get('state') != 'Run':
-                    continue
-        except Exception as e:
-            pass
-        for cx_name in self.cx_profile.created_cx.keys():
-            req_url = "cli-json/set_endp_report_timer"
-            data = {
-                "endp_name": cx_name,
-                "milliseconds": 1000
-            }
-            self.json_post(req_url, data)
         print("Test Started")
 
     def stop_l3(self):
         self.cx_profile.stop_cx()
         self.station_profile.admin_down()
+
+    def reset_l3(self):
+        if len(self.cx_profile.created_cx) > 0:
+            clear_endp = "cli-json/clear_endp_counters"
+            data = {
+                "endp_name": "all"
+            }
+            self.json_post(clear_endp, data)
+            clear_cx = "cli-json/clear_cx_counters"
+            data = {
+                "cx_name": "all"
+            }
+            self.json_post(clear_cx, data)
 
     def clean_cx_lists(self):
         # Clean out our local lists, this by itself does NOT remove anything from LANforge manager.
@@ -169,7 +187,8 @@ class RvR(Realm):
         self._pass("PASS: Station build finished")
 
     def build(self):
-        throughput = {}
+        throughput_dbm = {}
+        throughput = {'lf_udp': {'upload': {}, 'download': {}}, 'lf_tcp': {'upload': {}, 'download': {}}}
         print("---------")
         print(self.station_profile.ssid_pass)
         print("---------")
@@ -185,32 +204,25 @@ class RvR(Realm):
         self.start_stations()
         self.initialize_attenuator()
         for traffic in self.traffic_type:
-            for val in self.values:
-                self.cx_profile.create(endp_type=traffic, side_a=self.station_profile.station_names,
-                                       side_b=self.upstream,
-                                       sleep_time=0)
-                self.start_l3()
-                time.sleep(int(self.test_duration))
-                self.stop_l3()
-                throughput[''.join(traffic)] = self.get_rx_values()
-                print(throughput)
-                self.clean_cx_lists()
+            self.cx_profile.create(endp_type=traffic, side_a=self.station_profile.station_names,
+                                   side_b=self.upstream,
+                                   sleep_time=0)
+            for val in self.atten_values:
                 self.set_attenuation(value=val)
-
-    def get_rx_values(self):
-        throughput = {'upload': [], 'download': []}
-        self.monitor()
-        for conn in self.cx_profile.created_cx.keys():
-            throughput['upload'].append(
-                float(f"{list((self.json_get('/cx/%s?fields=bps+rx+a' % conn)).values())[2]['bps rx a'] / 1000000:.2f}"))
-            throughput['download'].append(
-                float(f"{list((self.json_get('/cx/%s?fields=bps+rx+b' % conn)).values())[2]['bps rx b'] / 1000000:.2f}"))
-        return throughput
+                self.start_l3()
+                throughput[''.join(traffic)]['upload'], throughput[''.join(traffic)]['download'] = self.monitor()
+                self.stop_l3()
+                # print(throughput)
+                self.reset_l3()
+                throughput_dbm.update({val: throughput})
+            self.cx_profile.cleanup()
+        print(throughput_dbm)
 
     def monitor(self):
-        throughput, download, bps_rx_a = {'download': {}}, [], []
+        throughput, download, upload, bps_rx_a, bps_rx_b = {}, [], [], [], []
+        download_throughput, upload_throughput = [], []
         if (self.test_duration is None) or (int(self.test_duration) <= 1):
-            raise ValueError("L3CXProfile::monitor wants test duration > 1 second")
+            raise ValueError("Monitor test duration should be > 1 second")
         if self.cx_profile.created_cx is None:
             raise ValueError("Monitor needs a list of Layer 3 connections")
         # monitor columns
@@ -218,26 +230,28 @@ class RvR(Realm):
         end_time = start_time + timedelta(seconds=int(self.test_duration))
         index = -1
         connections = dict.fromkeys(list(self.cx_profile.created_cx.keys()), float(0))
-        [(bps_rx_a.append([])) for i in range(len(self.cx_profile.created_cx))]
+        [(upload.append([]), download.append([])) for i in range(len(self.cx_profile.created_cx))]
         while datetime.now() < end_time:
             index += 1
             response = list(
                 self.json_get('/cx/%s?fields=%s' % (
-                    ','.join(self.cx_profile.created_cx.keys()), ",".join(['bps rx a']))).values())[2:]
-            throughput['download'][index] = list(
-                map(lambda i: [float(f"{x / 1000000:.2f}") for x in i.values()], response))
+                    ','.join(self.cx_profile.created_cx.keys()), ",".join(['bps rx a', 'bps rx b']))).values())[2:]
+            throughput[index] = list(
+                map(lambda i: [x for x in i.values()], response))
             time.sleep(1)
         # # rx_rate list is calculated
-        print("rx values are %s", throughput['download'])
-        for index, key in enumerate(throughput['download']):
-            for i in range(len(throughput['download'][key])):
-                bps_rx_a[i].append(throughput['download'][key][i][0])
-        print(f"download: {bps_rx_a}")
-        download = [float(f"{sum(i) / len(i): .2f}") for i in bps_rx_a]
-        keys = list(connections.keys())
-        for i in range(len(download)):
-            connections.update({keys[i]: download[i]})
-        return connections, download
+        print("Total rx values are %s", throughput)
+        for index, key in enumerate(throughput):
+            for i in range(len(throughput[key])):
+                upload[i].append(throughput[key][i][0])
+                download[i].append(throughput[key][i][1])
+        print("Download Values", download)
+        print("Upload values", upload)
+        upload_throughput = [float(f"{sum(i) / len(i): .2f}") for i in upload]
+        download_throughput = [float(f"{sum(i) / len(i): .2f}") for i in download]
+        print("upload: ", upload_throughput)
+        print("download: ", download_throughput)
+        return upload_throughput, download_throughput
 
     def generate_report(self, data, test_setup_info, input_setup_info):
         res = self.set_report_data(data)
@@ -255,20 +269,20 @@ class RvR(Realm):
         report.build_objective()
         report.test_setup_table(test_setup_data=test_setup_info, value="Device Under Test")
         report.set_table_title(
-            "Overall download Throughput for all TOS i.e BK | BE | Video (VI) | Voice (VO)")
+            "Overall download Throughput for different attenuation")
         report.build_table_title()
         df_throughput = pd.DataFrame()
         report.set_table_dataframe(df_throughput)
         report.build_table()
         graph = lf_bar_graph(_data_set=[30,40,50],
                              _xaxis_name="stations",
-                             _yaxis_name="Throughput 2 (Mbps)",
+                             _yaxis_name="Throughput",
                              _xaxis_categories=[1,2,3],
                              _graph_image_name="Bi-single_radio_2.4GHz",
                              _label=["bi-downlink", "bi-uplink", 'uplink'],
                              _color=['darkorange', 'forestgreen', 'blueviolet'],
                              _color_edge='red',
-                             _grp_title="Throughput for each clients",
+                             _grp_title="Throughput for each attenuator",
                              _xaxis_step=5,
                              _show_bar_value=True,
                              _text_font=7,
@@ -303,8 +317,8 @@ def main():
     Generic command layout:
     =====================================================================
     sudo python3 rvr_test.py --mgr localhost --mgr_port 8080 --upstream eth1 --num_stations 40 
-    --security WPA2 --ssid NETGEAR73-5G --passwd fancylotus986 --radio wiphy3 --atten_serno 2222 --atten_idx all
-    --atten_val 10 --test_duration 1m --ap_name WAX610 ''')
+    --security WPA2 --ssid NETGEAR73-5G --password fancylotus986 --radio wiphy3 --atten_serno 2222 --atten_idx all
+    --atten_val 10 --test_duration 1m --ap_name WAX610 ''', allow_abbrev=False)
     optional = parser.add_argument_group('optional arguments')
     required = parser.add_argument_group('required arguments')
     optional.add_argument('--mgr', help='hostname for where LANforge GUI is running', default='localhost')
@@ -313,20 +327,20 @@ def main():
                                              'e.g: 1.eth1', default='eth1')
     optional.add_argument('--mode', help='Used to force mode of stations', default="0")
     required.add_argument('--radio', help='radio to use for creating clients', default="wiphy0")
-    required.add_argument('--ssid', help="ssid for client association with Access Point")
-    required.add_argument('--security', help="security type of ssid")
-    required.add_argument('--password', help="password of ssid", default="[BLANK]")
+    required.add_argument('--ssid', help="ssid for client association with Access Point", required=True)
+    required.add_argument('--security', help="security type of ssid", required=True)
+    required.add_argument('--password', help="password of ssid", required=True)
     required.add_argument('--traffic_type', help='provide the traffic Type lf_udp, lf_tcp', default='lf_udp')
     optional.add_argument('--traffic_direction', help='Traffic direction i.e upload or download or bidirectional',
                           default="download")
-    required.add_argument('--load', help='traffic (load) to be created for each client in layer 3', default=500)
-    required.add_argument('--test_duration', help='test_duration sets the duration of the test', default="2m")
+    required.add_argument('--load', help='traffic (load) to be created for each client in layer 3', required=True)
+    required.add_argument('--test_duration', help='test_duration sets the duration of the test', required=True)
     optional.add_argument('--create_sta', help='Used to force a connection to a particular AP', default=True)
     optional.add_argument('--sta_names',
                           help='Used to force a connection to a particular AP, create_sta should be False',
                           default="sta0000")
     optional.add_argument('--ap_name', help="AP Model Name", default="Test-AP")
-    required.add_argument('--num_stations', help='number of stations to create', default=10)
+    required.add_argument('--num_stations', help='number of stations to create', required=True)
     optional.add_argument('-as', '--atten_serno', help='Serial number for requested Attenuator', default='2222')
     optional.add_argument('-ai', '--atten_idx',
                           help='Attenuator index eg. For module 1 = 0,module 2 = 1 --> --atten_idx 0,1',
@@ -348,8 +362,12 @@ def main():
         args.test_duration = int(args.test_duration)
 
     if args.atten_val:
-        args.atten_val = args.atten_val.split(',')
-
+        if args.atten_val.split(',')[0] != '0':
+            temp = ['0']
+            temp.extend(args.atten_val.split(','))
+            args.atten_val = temp
+        else:
+            args.atten_val = args.atten_val.split(',')
     if args.traffic_direction == "upload":
         side_b = int(args.load) * 1000000
         side_a = 0
@@ -380,14 +398,13 @@ def main():
                   password=args.password,
                   security=args.security,
                   test_duration=args.test_duration,
-                  use_ht160=False,
                   load=args.load,
                   side_a_min_rate=side_a,
                   side_b_min_rate=side_b,
                   mode=args.mode,
                   serial_number=args.atten_serno,
                   indices=args.atten_idx,
-                  values=args.atten_val,
+                  atten_val=args.atten_val,
                   traffic_type=args.traffic_type,
                   traffic_direction=args.traffic_direction,
                   _debug_on=args.debug)
@@ -402,3 +419,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
