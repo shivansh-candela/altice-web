@@ -9,8 +9,6 @@ EXAMPLE:
 python3 throughput_qos.py --mgr 192.168.200.37 --mgr_port 8080 -u eth1 --num_stations 1
 --radio wiphy1 --ssid TestAP5-71 --passwd lanforge --security wpa2 --mode 11 --upload 1000000 --download 1000000 --traffic_type lf_udp
 
-python3 throughput_qos.py --num_stations 1 --radio wiphy1 --ssid ct523c-vap --passwd ct523c-vap --security wpa2 --mode 11 --upload 1000000 --download 1000000 --traffic_type lf_udp
-
 
 Use './throughput_qos.py --help' to see command line usage and options
 Copyright 2021 Candela Technologies Inc
@@ -20,8 +18,6 @@ License: Free to distribute and modify. LANforge systems must be licensed.
 import sys
 import os
 import pandas as pd
-from lf_report import lf_report
-from lf_graph import lf_bar_graph
 
 if sys.version_info[0] != 3:
     print("This script requires Python 3")
@@ -30,10 +26,12 @@ if sys.version_info[0] != 3:
 if 'py-json' not in sys.path:
     sys.path.append(os.path.join(os.path.abspath('..'), 'py-json'))
 
+import time
 import argparse
 from LANforge import LFUtils
 from realm import Realm
-import time
+from lf_report import lf_report
+from lf_graph import lf_bar_graph
 from datetime import datetime, timedelta
 
 
@@ -49,10 +47,11 @@ class ThroughputQOS(Realm):
                  ssid_5g=None,
                  security_5g=None,
                  password_5g=None,
-                 sta_list=[],
                  create_sta=True,
                  name_prefix=None,
                  upstream=None,
+                 num_stations=1,
+                 sta_list=[],
                  radio_2g="wiphy0",
                  radio_5g="wiphy1",
                  host="localhost",
@@ -86,6 +85,7 @@ class ThroughputQOS(Realm):
         self.password_5g = password_5g
         self.radio_2g = radio_2g
         self.radio_5g = radio_5g
+        self.num_stations = num_stations
         self.sta_list = sta_list
         self.create_sta = create_sta
         self.mode = mode
@@ -251,11 +251,11 @@ class ThroughputQOS(Realm):
         for index, key in enumerate(download):
             for i in range(len(download[key])):
                 bps_rx_a[i].append(download[key][i][0])
-        print(f"overall download throughput values: {bps_rx_a}")
-        throughput = [float(f"{sum(i) / len(i): .2f}") for i in bps_rx_a]
+        print("overall download throughput values:", bps_rx_a)
+        throughput = [float(f"{sum(i) / len(i)}") for i in bps_rx_a]
         keys = list(connections.keys())
         for i in range(len(throughput)):
-            connections.update({keys[i]: float(throughput[i])})
+            connections.update({keys[i]: float(f"{(throughput[i] / 1000000):.2f}")})
         return connections, throughput
 
     def evaluate_qos(self, connections, throughput):
@@ -267,9 +267,9 @@ class ThroughputQOS(Realm):
         tx_endps = {}
         rx_endps = {}
         if int(self.cx_profile.side_b_min_bps) != 0:
-            case = str(int(self.cx_profile.side_b_min_bps) // 1000000)
+            case = str(int(self.cx_profile.side_b_min_bps) / 1000000)
         elif int(self.cx_profile.side_a_min_bps) != 0:
-            case = str(int(self.cx_profile.side_a_min_bps) // 1000000)
+            case = str(int(self.cx_profile.side_a_min_bps) / 1000000)
         if len(self.cx_profile.created_cx.keys()) > 0:
             endp_data = self.json_get('endp/all?fields=name,tx+pkts+ll,rx+pkts+ll,delay')
             endp_data.pop("handler")
@@ -282,81 +282,95 @@ class ThroughputQOS(Realm):
                     rx_endps.update(endps[i])
             for sta in self.cx_profile.created_cx.keys():
                 temp = int(sta[12:])
-                if temp % 4 == 0:
+                if temp in range(0, self.num_stations):
                     if int(self.cx_profile.side_b_min_bps) != 0:
                         tos_download['bk'].append(connections[sta])
                         tx_b['bk'].append(int(f"{tx_endps['%s-B' % sta]['tx pkts ll']}"))
                         rx_a['bk'].append(int(f"{rx_endps['%s-A' % sta]['rx pkts ll']}"))
-                        delay['bk'].append(float(f"{rx_endps['%s-A' % sta]['delay'] / 1000:.2f}"))
+                        delay['bk'].append(rx_endps['%s-A' % sta]['delay'])
                     else:
                         tos_download['bk'].append(float(0))
                         tx_b['bk'].append(int(0))
                         rx_a['bk'].append(int(0))
-                        delay['bk'].append(float(0))
-                elif temp % 4 == 1:
+                        delay['bk'].append(int(0))
+                elif temp in range(self.num_stations, 2 * self.num_stations):
                     if int(self.cx_profile.side_b_min_bps) != 0:
                         tos_download['be'].append(connections[sta])
                         tx_b['be'].append(int(f"{tx_endps['%s-B' % sta]['tx pkts ll']}"))
                         rx_a['be'].append(int(f"{rx_endps['%s-A' % sta]['rx pkts ll']}"))
-                        delay['be'].append(float(f"{rx_endps['%s-A' % sta]['delay'] / 1000:.2f}"))
+                        delay['be'].append(rx_endps['%s-A' % sta]['delay'])
                     else:
                         tos_download['be'].append(float(0))
                         tx_b['be'].append(int(0))
                         rx_a['be'].append(int(0))
-                        delay['be'].append(float(0))
-                elif temp % 4 == 2:
+                        delay['be'].append(int(0))
+                elif temp in range(2 * self.num_stations, 3 * self.num_stations):
                     if int(self.cx_profile.side_b_min_bps) != 0:
                         tos_download['video'].append(connections[sta])
                         tx_b['video'].append(int(f"{tx_endps['%s-B' % sta]['tx pkts ll']}"))
                         rx_a['video'].append(int(f"{rx_endps['%s-A' % sta]['rx pkts ll']}"))
-                        delay['video'].append(float(f"{rx_endps['%s-A' % sta]['delay'] / 1000:.2f}"))
+                        delay['video'].append(rx_endps['%s-A' % sta]['delay'])
                     else:
                         tos_download['video'].append(float(0))
                         tx_b['video'].append(int(0))
                         rx_a['video'].append(int(0))
-                        delay['video'].append(float(0))
-                elif temp % 4 == 3:
+                        delay['video'].append(int(0))
+                elif temp in range(3 * self.num_stations, 4 * self.num_stations):
                     if int(self.cx_profile.side_b_min_bps) != 0:
                         tos_download['voice'].append(connections[sta])
                         tx_b['voice'].append(int(f"{tx_endps['%s-B' % sta]['tx pkts ll']}"))
                         rx_a['voice'].append(int(f"{rx_endps['%s-A' % sta]['rx pkts ll']}"))
-                        delay['voice'].append(float(f"{rx_endps['%s-A' % sta]['delay'] / 1000:.2f}"))
+                        delay['voice'].append(rx_endps['%s-A' % sta]['delay'])
                     else:
                         tos_download['voice'].append(float(0))
                         tx_b['voice'].append(int(0))
                         rx_a['voice'].append(int(0))
-                        delay['voice'].append(float(0))
+                        delay['voice'].append(int(0))
             tos_download.update({"bkQOS": float(f"{sum(tos_download['bk']):.2f}")})
             tos_download.update({"beQOS": float(f"{sum(tos_download['be']):.2f}")})
             tos_download.update({"videoQOS": float(f"{sum(tos_download['video']):.2f}")})
             tos_download.update({"voiceQOS": float(f"{sum(tos_download['voice']):.2f}")})
-            tos_download.update({"bkDELAY": float(f"{sum(delay['bk']) / 1000:.2f}")})
-            tos_download.update({"beDELAY": float(f"{sum(delay['be']) / 1000:.2f}")})
-            tos_download.update({"videoDELAY": float(f"{sum(delay['video']) / 1000:.2f}")})
-            tos_download.update({"voiceDELAY": float(f"{sum(delay['voice']) / 1000:.2f}")})
+            tos_download.update({"bkDELAY": sum(delay['bk'])})
+            tos_download.update({"beDELAY": sum(delay['be'])})
+            tos_download.update({"videoDELAY": sum(delay['video'])})
+            tos_download.update({"voiceDELAY": sum(delay['voice'])})
             if sum(tx_b['bk']) != 0 or sum(tx_b['be']) != 0 or sum(tx_b['video']) != 0 or sum(tx_b['voice']) != 0:
                 if sum(tx_b['bk']) > sum(rx_a['bk']):
                     tos_download.update(
                         {"bkLOSS": float(f"{((sum(tx_b['bk']) - sum(rx_a['bk'])) / sum(tx_b['bk'])) * 100:.2f}")})
                 else:
-                    tos_download.update({"bkLOSS": float(f"{((sum(rx_a['bk']) - sum(tx_b['bk'])) / sum(rx_a['bk'])) * 100:.2f}")})
+                    if sum(rx_a['bk']) != 0:
+                        tos_download.update({"bkLOSS": float(f"{((sum(rx_a['bk']) - sum(tx_b['bk'])) / sum(rx_a['bk'])) * 100:.2f}")})
+                    else:
+                        tos_download.update({"bkLOSS": float(0)})
                 if sum(tx_b['be']) > sum(rx_a['be']):
                     tos_download.update(
                         {"beLOSS": float(f"{((sum(tx_b['be']) - sum(rx_a['be'])) / sum(tx_b['be'])) * 100:.2f}")})
                 else:
-                    tos_download.update({"beLOSS": float(f"{((sum(rx_a['be']) - sum(tx_b['be'])) / sum(rx_a['be'])) * 100:.2f}")})
+                    if sum(rx_a['be']) != 0:
+                        tos_download.update(
+                            {"beLOSS": float(f"{((sum(rx_a['be']) - sum(tx_b['be'])) / sum(rx_a['be'])) * 100:.2f}")})
+                    else:
+                        tos_download.update({"beLOSS": float(0)})
                 if sum(tx_b['video']) > sum(rx_a['video']):
                     tos_download.update(
                         {"videoLOSS": float(f"{((sum(tx_b['video']) - sum(rx_a['video'])) / sum(tx_b['video'])) * 100:.2f}")})
                 else:
-                    tos_download.update(
-                        {"videoLOSS": float(f"{((sum(rx_a['video']) - sum(tx_b['video'])) / sum(rx_a['video'])) * 100:.2f}")})
+                    if sum(rx_a['video']) != 0:
+                        tos_download.update(
+                            {"videoLOSS": float(f"{((sum(rx_a['video']) - sum(tx_b['video'])) / sum(rx_a['video'])) * 100:.2f}")})
+                    else:
+                        tos_download.update({"videoLOSS": float(0)})
                 if sum(tx_b['voice']) > sum(rx_a['voice']):
                     tos_download.update(
                         {"voiceLOSS": float(f"{((sum(tx_b['voice']) - sum(rx_a['voice'])) / sum(tx_b['voice'])) * 100:.2f}")})
                 else:
-                    tos_download.update(
-                        {"voiceLOSS": float(f"{((sum(rx_a['voice']) - sum(tx_b['voice'])) / sum(rx_a['voice'])) * 100:.2f}")})
+                    if sum(rx_a['voice']) != 0:
+                        tos_download.update(
+                            {"voiceLOSS": float(
+                                f"{((sum(rx_a['voice']) - sum(tx_b['voice'])) / sum(rx_a['voice'])) * 100:.2f}")})
+                    else:
+                        tos_download.update({"voiceLOSS": float(0)})
             tos_download.update({'tx_b': tx_b})
             tos_download.update({'rx_a': rx_a})
             tos_download.update({'delay': delay})
@@ -536,7 +550,7 @@ class ThroughputQOS(Realm):
 
             graph = lf_bar_graph(_data_set=res["graph_df"][key][2],
                                  _xaxis_name="Load per Type of Service",
-                                 _yaxis_name="Average Latency (in seconds)",
+                                 _yaxis_name="Average Latency (in milli seconds)",
                                  _xaxis_categories=[str(key) for key in res[key].keys()],
                                  _xaxis_label=['1 Mbps', '2 Mbps', '3 Mbps', '4 Mbps', '5 Mbps'],
                                  _graph_image_name=f"latency_{key}Hz",
@@ -651,7 +665,7 @@ class ThroughputQOS(Realm):
                              f"(WiFi) traffic.  X- axis shows “number of clients” and Y-axis shows "
                              f"“Throughput in Mbps”.")
                     report.build_objective()
-                    graph = lf_bar_graph(_data_set=[res[key][load]['video']], _xaxis_name="Clients running - VI",
+                    graph = lf_bar_graph(_data_set=[res[key][load]['video']], _xaxis_name="Number of clients",
                                          _yaxis_name="Throughput in Mbps",
                                          _xaxis_categories=[i + 1 for i in range(len(self.sta_list))],
                                          _xaxis_label=[i + 1 for i in range(len(self.sta_list))],
@@ -717,11 +731,11 @@ class ThroughputQOS(Realm):
                         _obj_title=f"Individual download average latency with intended load {load}/station for traffic VO(WiFi).",
                         _obj=f"The below graph represents individual avg latency for {len(self.sta_list)} clients running VO "
                              f"(WiFi) traffic.  X- axis shows “Number of Clients” and Y-axis shows "
-                             f"“Avg Latency in seconds”.")
+                             f"“Avg Latency in milli seconds”.")
                     report.build_objective()
                     graph = lf_bar_graph(_data_set=[res[key][load]['delay']['voice']],
                                          _xaxis_name="Number of clients",
-                                         _yaxis_name="Average Latency in seconds",
+                                         _yaxis_name="Average Latency in milli seconds(ms)",
                                          _xaxis_categories=[i + 1 for i in range(len(self.sta_list))],
                                          _xaxis_label=[i + 1 for i in range(len(self.sta_list))],
                                          _label=['Voice'],
@@ -763,29 +777,12 @@ def main():
 throughput_QOS.py:
 --------------------
 Generic command layout:
-
-python3 ./throughput_QOS.py
-    --upstream_port eth1
-    --radio_2g wiphy0
-    --radio_5g wiphy1
-    --num_stations 32
-    --security {open|wep|wpa|wpa2|wpa3}
-    --ssid netgear
-    --password admin123
-    --upload 3000
-    --download 1000
-    --debug
-    --ap_name Netgear RC6700
-    --upstream_port eth1        (upstream Port)
-    --traffic_type lf_udp       (traffic type, lf_udp | lf_tcp)
-    --test_duration 5m          (duration to run traffic 5m --> 5 Minutes)
-    --create_sta False          (False, means it will not create stations and use the sta_names specified below)
-    --sta_names sta000,sta001,sta002 (used if --create_sta is False, comma separated names of stations)
-    ''')
+-----------------------
+python3 throughput_qos.py --num_stations 1 --radio wiphy1 --ssid ct523c-vap --passwd ct523c-vap --security wpa2 --mode 11 --upload 1000000 --download 1000000 --traffic_type lf_udp
+''')
     parser.add_argument('--mode', help='Used to force mode of stations', default="0")
     parser.add_argument('--traffic_type', help='Select the Traffic Type [lf_udp, lf_tcp]', required=True)
-    parser.add_argument('--upload', help='--upload bps rate minimum for endpoint_a (upload rate) ', default=256000)
-    parser.add_argument('--download', help='--download bps rate minimum for endpoint_b (download rate)', default=256000)
+    parser.add_argument('--download', help='--download traffic load per connection (download rate)', default=256000)
     parser.add_argument('--test_duration', help='--test_duration sets the duration of the test', default="2m")
     parser.add_argument('--create_sta', help='Used to force a connection to a particular AP', default=True)
     parser.add_argument('--sta_names', help='Used to force a connection to a particular AP', default="sta0000")
@@ -811,15 +808,12 @@ python3 ./throughput_QOS.py
     station_list = []
     data = {}
 
-    if (args.upload is not None) and (args.download is not None):
-        if (type(args.upload) is not int) and (type(args.download) is not int):
-            args.upload = args.upload.split(',')
-            args.download = args.download.split(',')
-            loads = {"upload": args.upload, "download": args.download}
-        else:
-            args.upload = str(args.upload).split(",")
-            args.download = str(args.download).split(",")
-            loads = {"upload": args.upload, "download": args.download}
+    if args.download is not None:
+        loads = {'upload': [], 'download': str(args.download).split(",")}
+        for i in range(len(args.download)):
+            loads['upload'].append(0)
+    else:
+        raise "Download traffic is required."
 
     if args.bands is not None:
         bands = args.bands.split(',')
@@ -874,15 +868,13 @@ python3 ./throughput_QOS.py
         else:
             print("Band " + bands[i] + " Not Exist")
             exit(1)
-        print("------------------------")
-        print(args.bands)
-        print("------------------------")
         # ---------------------------------------#
         for index in range(len(loads["download"])):
             throughput_qos = ThroughputQOS(host=args.mgr,
                                            port=args.mgr_port,
                                            number_template="0000",
                                            ap_name=args.ap_name,
+                                           num_stations=int(args.num_stations),
                                            sta_list=station_list,
                                            create_sta=args.create_sta,
                                            name_prefix="TOS-",
@@ -919,9 +911,9 @@ python3 ./throughput_QOS.py
             throughput_qos.start(False, False)
             time.sleep(10)
             connections, throughput = throughput_qos.monitor()
-            test_results.update(throughput_qos.evaluate_qos(connections, throughput))
             throughput_qos.stop()
-            exit(1)
+            time.sleep(5)
+            test_results.update(throughput_qos.evaluate_qos(connections, throughput))
             data.update({bands[i]: test_results})
             if args.create_sta:
                 if not throughput_qos.passes():
