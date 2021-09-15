@@ -39,10 +39,13 @@ from datetime import datetime, timedelta
 
 
 class RvR(Realm):
-    def __init__(self, ssid=None, security=None,password="", create_sta=True, name_prefix=None,upstream=None, host="localhost",port=8080,
-                 mode=0, ap_model="", traffic_type="lf_udp, lf_tcp", traffic_direction="bidirectional", side_a_min_rate=0, side_a_max_rate=0,
-                 sta_list = None, side_b_min_rate=56, side_b_max_rate=0, number_template="00000", test_duration="2m", num_stations=10,
-                 serial_number='2222', indices="all", atten_val="0", load=500, radio="wiphy0",
+    def __init__(self, ssid=None, security=None, password="", create_sta=True, name_prefix=None, upstream=None,
+                 host="localhost", port=8080,
+                 mode=0, ap_model="", traffic_type="lf_tcp,lf_udp", traffic_direction="bidirectional",
+                 side_a_min_rate=0, side_a_max_rate=0,
+                 sta_list=None, side_b_min_rate=56, side_b_max_rate=0, number_template="00000", test_duration="2m",
+                 num_stations=10,
+                 serial_number='2222', indices="all", atten_val="0", traffic=500, radio="wiphy0",
                  _debug_on=False, _exit_on_error=False, _exit_on_fail=False):
         super().__init__(lfclient_host=host,
                          lfclient_port=port),
@@ -60,7 +63,7 @@ class RvR(Realm):
         self.ap_model = ap_model
         self.traffic_type = traffic_type.split(",")
         self.traffic_direction = traffic_direction
-        self.load = load
+        self.traffic = traffic
         self.number_template = number_template
         self.debug = _debug_on
         self.name_prefix = name_prefix
@@ -96,33 +99,14 @@ class RvR(Realm):
         self.attenuator_profile.pulse_count = None,
         self.attenuator_profile.pulse_time_ms = None
         self.attenuator_profile.create()
-        self.attenuator_profile.show()
+        # self.attenuator_profile.show()
 
     def set_attenuation(self, value):
         self.attenuator_profile.atten_serno = self.serial_number
         self.attenuator_profile.atten_idx = "all"
-        self.attenuator_profile.atten_val = value
+        self.attenuator_profile.atten_val = str(int(value) * 10)
         self.attenuator_profile.create()
-        self.attenuator_profile.show()
-
-    def initialize_attenuator(self):
-        self.attenuator_profile.atten_serno = self.serial_number
-        self.attenuator_profile.atten_idx = "all"
-        self.attenuator_profile.atten_val = '0'
-        self.attenuator_profile.mode = None
-        self.attenuator_profile.pulse_width_us5 = None
-        self.attenuator_profile.pulse_interval_ms = None,
-        self.attenuator_profile.pulse_count = None,
-        self.attenuator_profile.pulse_time_ms = None
-        self.attenuator_profile.create()
-        self.attenuator_profile.show()
-
-    def set_attenuation(self, value):
-        self.attenuator_profile.atten_serno = self.serial_number
-        self.attenuator_profile.atten_idx = "all"
-        self.attenuator_profile.atten_val = value
-        self.attenuator_profile.create()
-        self.attenuator_profile.show()
+        # self.attenuator_profile.show()
 
     def start_l3(self):
         if len(self.cx_profile.created_cx) > 0:
@@ -135,11 +119,11 @@ class RvR(Realm):
                 }
                 self.json_post(req_url, data)
         self.cx_profile.start_cx()
-        print("Test Started")
+        print("Monitoring CX's & Endpoints")
 
     def stop_l3(self):
         self.cx_profile.stop_cx()
-        self.station_profile.admin_down()
+        # self.station_profile.admin_down()
 
     def reset_l3(self):
         if len(self.cx_profile.created_cx) > 0:
@@ -153,13 +137,6 @@ class RvR(Realm):
                 "cx_name": "all"
             }
             self.json_post(clear_cx, data)
-
-    def clean_cx_lists(self):
-        # Clean out our local lists, this by itself does NOT remove anything from LANforge manager.
-        # but, if you are trying to modify existing connections, then clearing these arrays and
-        # re-calling 'create' will do the trick.
-        self.cx_profile.created_cx.clear()
-        self.cx_profile.created_endp.clear()
 
     def pre_cleanup(self):
         self.cx_profile.cleanup_prefix()
@@ -188,10 +165,11 @@ class RvR(Realm):
 
     def build(self):
         throughput_dbm = {}
-        throughput = {'lf_udp': {'upload': {}, 'download': {}}, 'lf_tcp': {'upload': {}, 'download': {}}}
-        print("---------")
-        print(self.station_profile.ssid_pass)
-        print("---------")
+        if len(self.traffic_type) == 2:
+            throughput_dbm = {f"{self.traffic_type[0]}": {}, f"{self.traffic_type[1]}": {}}
+        elif len(self.traffic_type) == 1:
+            throughput_dbm = {f"{self.traffic_type[0]}": {}}
+        upload, download = [], []
         self.station_profile.set_number_template(self.number_template)
         self.station_profile.use_security(security_type=self.station_profile.security,
                                           ssid=self.station_profile.ssid,
@@ -202,25 +180,27 @@ class RvR(Realm):
         self.station_profile.set_command_flag("set_port", "rpt_timer", 1)
         self.station_profile.create(radio=self.radio, sta_names_=self.station_names, debug=self.debug)
         self.start_stations()
-        self.initialize_attenuator()
         for traffic in self.traffic_type:
             self.cx_profile.create(endp_type=traffic, side_a=self.station_profile.station_names,
                                    side_b=self.upstream,
                                    sleep_time=0)
+            self.initialize_attenuator()
             for val in self.atten_values:
+                throughput = {'upload': [], 'download': []}
                 self.set_attenuation(value=val)
                 self.start_l3()
-                throughput[''.join(traffic)]['upload'], throughput[''.join(traffic)]['download'] = self.monitor()
-                self.stop_l3()
-                # print(throughput)
+                upload, download = self.monitor()
+                # self.stop_l3()
                 self.reset_l3()
-                throughput_dbm.update({val: throughput})
+                throughput['upload'] = upload
+                throughput['download'] = download
+                throughput_dbm[''.join(traffic)][f"{val} dB"] = throughput
             self.cx_profile.cleanup()
         print(throughput_dbm)
+        return throughput_dbm
 
     def monitor(self):
-        throughput, download, upload, bps_rx_a, bps_rx_b = {}, [], [], [], []
-        download_throughput, upload_throughput = [], []
+        throughput, upload, download = {}, [], []
         if (self.test_duration is None) or (int(self.test_duration) <= 1):
             raise ValueError("Monitor test duration should be > 1 second")
         if self.cx_profile.created_cx is None:
@@ -240,18 +220,66 @@ class RvR(Realm):
                 map(lambda i: [x for x in i.values()], response))
             time.sleep(1)
         # # rx_rate list is calculated
-        print("Total rx values are %s", throughput)
+        # print("Total rx values are %s", throughput)
         for index, key in enumerate(throughput):
             for i in range(len(throughput[key])):
                 upload[i].append(throughput[key][i][0])
                 download[i].append(throughput[key][i][1])
-        print("Download Values", download)
         print("Upload values", upload)
-        upload_throughput = [float(f"{sum(i) / len(i): .2f}") for i in upload]
-        download_throughput = [float(f"{sum(i) / len(i): .2f}") for i in download]
+        print("Download Values", download)
+        upload_throughput = [float(f"{(sum(i) / 1000000) / len(i): .2f}") for i in upload]
+        download_throughput = [float(f"{(sum(i) / 1000000) / len(i): .2f}") for i in download]
         print("upload: ", upload_throughput)
         print("download: ", download_throughput)
         return upload_throughput, download_throughput
+
+    def set_report_data(self, data):
+        res = {}
+        if data is not None:
+            res = data
+        else:
+            print("No Data found to generate report!")
+            exit(1)
+        if self.traffic_type is not None:
+            if self.traffic_direction == 'upload':
+                for traffic in self.traffic_type:
+                    for key in res[traffic]:
+                        if 'download' in res[traffic][key]:
+                            res[traffic][key].pop('download')
+            elif self.traffic_direction == 'download':
+                for traffic in self.traffic_type:
+                    for key in res[traffic]:
+                        if 'download' in res[traffic][key]:
+                            res[traffic][key].pop('upload')
+            table_df = {}
+            num_stations = []
+            mode = []
+            graph_df = {}
+            if len(self.traffic_type) == 2:
+                graph_df = {f"{self.traffic_type[0]}": {}, f"{self.traffic_type[1]}": {}}
+            elif len(self.traffic_type) == 1:
+                graph_df = {f"{self.traffic_type[0]}": {}}
+            # for case in self.traffic_type:
+            #     throughput_df = []
+            #     for key in res[case]:
+            #         table_df.update({"No of Stations": []})
+            #         table_df.update({"Mode": []})
+            #         table_df.update({"Throughput for traffic {}".format(key): []})
+            #     graph_df.update({case: [throughput_df]})
+            # print(throughput)
+            # table_df.update({"No of Stations": num_stations})
+            # table_df.update({"Mode": mode})
+            for traffic in self.traffic_type:
+                if self.traffic_direction == 'upload':
+                    graph_df[traffic].update({"upload throughput": [float(f"{sum(res[traffic][i]['upload']):.2f}") for i in res[traffic]]})
+                elif self.traffic_direction == 'download':
+                    graph_df[traffic].update({"download throughput": [float(f"{sum(res[traffic][i]['download']):.2f}") for i in res[traffic]]})
+                elif self.traffic_direction == 'bidirectional':
+                    graph_df[traffic].update({"upload throughput": [float(f"{sum(res[traffic][i]['upload']):.2f}") for i in res[traffic]]})
+                    graph_df[traffic].update({"download throughput": [float(f"{sum(res[traffic][i]['download']):.2f}") for i in res[traffic]]})
+            # res.update({"throughput_table_df": table_df})
+            res.update({"graph_df": graph_df})
+        return res
 
     def generate_report(self, data, test_setup_info, input_setup_info):
         res = self.set_report_data(data)
@@ -260,49 +288,56 @@ class RvR(Realm):
         report_path_date_time = report.get_path_date_time()
         print("path: {}".format(report_path))
         print("path_date_time: {}".format(report_path_date_time))
-        report.set_title("Throughput QOS")
+        report.set_title("Rate vs Range")
         report.build_banner()
         # objective title and description
         report.set_obj_html(_obj_title="Objective",
-                            _obj="will measure the performance of stations over a certain distance of the DUT. Distance is emulated"
-                                 "using programmable attenuators and throughput test is run at each distance/RSSI step.")
+                            _obj="Through this test we can measure the performance of stations over a certain distance "
+                                 "of the DUT, Distance is emulated using programmable attenuators and throughput test is"
+                                 "run at each distance/RSSI step")
         report.build_objective()
         report.test_setup_table(test_setup_data=test_setup_info, value="Device Under Test")
-        report.set_table_title(
-            "Overall download Throughput for different attenuation")
-        report.build_table_title()
-        df_throughput = pd.DataFrame()
-        report.set_table_dataframe(df_throughput)
-        report.build_table()
-        graph = lf_bar_graph(_data_set=[30,40,50],
-                             _xaxis_name="stations",
-                             _yaxis_name="Throughput",
-                             _xaxis_categories=[1,2,3],
-                             _graph_image_name="Bi-single_radio_2.4GHz",
-                             _label=["bi-downlink", "bi-uplink", 'uplink'],
-                             _color=['darkorange', 'forestgreen', 'blueviolet'],
-                             _color_edge='red',
-                             _grp_title="Throughput for each attenuator",
-                             _xaxis_step=5,
-                             _show_bar_value=True,
-                             _text_font=7,
-                             _text_rotation=45,
-                             _xticks_font=7,
-                             _legend_loc="best",
-                             _legend_box=(1, 1),
-                             _legend_ncol=1,
-                             _enable_csv=True,
-                             _legend_fontsize=None)
+        # report.set_table_title(
+        #     "Overall download Throughput for different attenuation")
+        # report.build_table_title()
+        # df_throughput = pd.DataFrame(res["throughput_table_df"])
+        # report.set_table_dataframe(df_throughput)
+        # report.build_table()
+        print(res)
+        for key in res["graph_df"]:
+            for direction in res["graph_df"][key]:
+                report.set_obj_html(
+                    _obj_title=f"Overall {direction} for {len(self.station_names)} clients using {key} traffic.",
+                    _obj=f"The below graph represents overall {direction} for different attenuation (RSSI) ")
+                report.build_objective()
+                graph = lf_bar_graph(_data_set=[res["graph_df"][key][direction]],
+                                     _xaxis_name="Attenuation",
+                                     _yaxis_name="Throughput(in Mbps)",
+                                     _xaxis_categories=[str(key) for key in res[key].keys()],
+                                     _graph_image_name=f"rvr_{key}_{direction}",
+                                     _label=[str(direction).split()[0] if direction == 'upload throughput' else str(direction).split()[0]],
+                                     _color=['olivedrab' if direction == 'upload throughput' else 'orangered'],
+                                     _color_edge='grey',
+                                     _xaxis_step=1,
+                                     _graph_title="Overall throughput vs attenuation",
+                                     _title_size=16,
+                                     _bar_width=0.15,
+                                     _figsize=(18, 6),
+                                     _legend_loc="best",
+                                     _legend_box=(1.0, 1.0),
+                                     _dpi=96,
+                                     _show_bar_value=True,
+                                     _enable_csv=True)
+                graph_png = graph.build_bar_graph()
 
-        graph_png = graph.build_bar_graph()
+                print("graph name {}".format(graph_png))
 
-        print("graph name {}".format(graph_png))
-
-        report.set_graph_image(graph_png)
-        # need to move the graph image to the results
-        report.move_graph_image()
-
-        report.build_graph()
+                report.set_graph_image(graph_png)
+                # need to move the graph image to the results directory
+                report.move_graph_image()
+                report.set_csv_filename(graph_png)
+                report.move_csv_file()
+                report.build_graph()
         report.test_setup_table(test_setup_data=input_setup_info, value="Information")
         report.build_custom()
         report.build_footer()
@@ -318,7 +353,7 @@ def main():
     =====================================================================
     sudo python3 rvr_test.py --mgr localhost --mgr_port 8080 --upstream eth1 --num_stations 40 
     --security WPA2 --ssid NETGEAR73-5G --password fancylotus986 --radio wiphy3 --atten_serno 2222 --atten_idx all
-    --atten_val 10 --test_duration 1m --ap_name WAX610 ''', allow_abbrev=False)
+    --atten_val 10 --test_duration 1m --ap_model WAX610 --traffic 100''', allow_abbrev=False)
     optional = parser.add_argument_group('optional arguments')
     required = parser.add_argument_group('required arguments')
     optional.add_argument('--mgr', help='hostname for where LANforge GUI is running', default='localhost')
@@ -330,16 +365,16 @@ def main():
     required.add_argument('--ssid', help="ssid for client association with Access Point", required=True)
     required.add_argument('--security', help="security type of ssid", required=True)
     required.add_argument('--password', help="password of ssid", required=True)
-    required.add_argument('--traffic_type', help='provide the traffic Type lf_udp, lf_tcp', default='lf_udp')
+    required.add_argument('--traffic_type', help='provide the traffic Type lf_udp, lf_tcp', default='lf_tcp')
     optional.add_argument('--traffic_direction', help='Traffic direction i.e upload or download or bidirectional',
-                          default="download")
-    required.add_argument('--load', help='traffic (load) to be created for each client in layer 3', required=True)
+                          default="bidirectional")
+    required.add_argument('--traffic', help='traffic to be created for each client in layer 3', required=True)
     required.add_argument('--test_duration', help='test_duration sets the duration of the test', required=True)
     optional.add_argument('--create_sta', help='Used to force a connection to a particular AP', default=True)
     optional.add_argument('--sta_names',
                           help='Used to force a connection to a particular AP, create_sta should be False',
                           default="sta0000")
-    optional.add_argument('--ap_name', help="AP Model Name", default="Test-AP")
+    optional.add_argument('--ap_model', help="AP Model Name", default="Test-AP")
     required.add_argument('--num_stations', help='number of stations to create', required=True)
     optional.add_argument('-as', '--atten_serno', help='Serial number for requested Attenuator', default='2222')
     optional.add_argument('-ai', '--atten_idx',
@@ -368,15 +403,16 @@ def main():
             args.atten_val = temp
         else:
             args.atten_val = args.atten_val.split(',')
+    side_a, side_b = 25, 25
     if args.traffic_direction == "upload":
-        side_b = int(args.load) * 1000000
         side_a = 0
+        side_b = int(args.traffic) * 1000000
     elif args.traffic_direction == "download":
-        side_a = 0
-        side_b = int(args.load) * 1000000
+        side_a = int(args.traffic) * 1000000
+        side_b = 0
     elif args.traffic_direction == "bidirectional":
-        side_a = int(args.load) * 1000000
-        side_b = int(args.load) * 1000000
+        side_a = int(args.traffic) * 1000000
+        side_b = int(args.traffic) * 1000000
 
     if args.create_sta:
         station_list = LFUtils.portNameSeries(prefix_="sta", start_id_=0, end_id_=int(args.num_stations) - 1,
@@ -398,10 +434,11 @@ def main():
                   password=args.password,
                   security=args.security,
                   test_duration=args.test_duration,
-                  load=args.load,
+                  traffic=args.traffic,
                   side_a_min_rate=side_a,
                   side_b_min_rate=side_b,
                   mode=args.mode,
+                  ap_model=args.ap_model,
                   serial_number=args.atten_serno,
                   indices=args.atten_idx,
                   atten_val=args.atten_val,
@@ -410,11 +447,25 @@ def main():
                   _debug_on=args.debug)
 
     rvr_obj.pre_cleanup()
-    rvr_obj.build()
+    data = rvr_obj.build()
     rvr_obj.cleanup()
 
     test_end_time = datetime.now().strftime("%b %d %H:%M:%S")
     print("Test ended at: ", test_end_time)
+
+    test_setup_info = {
+        "AP Model": rvr_obj.ap_model,
+        "Number of Stations": rvr_obj.num_stations,
+        "SSID": rvr_obj.ssid,
+        "Intended traffic": f"{rvr_obj.traffic} Mbps",
+        "Test Duration": datetime.strptime(test_end_time, "%b %d %H:%M:%S") - datetime.strptime(
+            test_start_time, "%b %d %H:%M:%S")
+    }
+
+    input_setup_info = {
+        "contact": "support@candelatech.com"
+    }
+    rvr_obj.generate_report(data=data, test_setup_info=test_setup_info, input_setup_info=input_setup_info)
 
 
 if __name__ == "__main__":
