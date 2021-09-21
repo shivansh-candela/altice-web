@@ -212,7 +212,10 @@ class HttpDownload(Realm):
         uc_avg = self.monitor_uc_avg()
         bytes_rd = self.monitor_bytes()
         for i in range(len(uc_avg)):
-            rx_rate.append(bytes_rd[i]/(uc_avg[i]/1000))
+            if uc_avg[i] == 0:
+                rx_rate.append(0.0)
+            else:
+                rx_rate.append(bytes_rd[i]/(uc_avg[i]/1000))
         return [uc_avg, bytes_rd, rx_rate]
 
     def monitor_uc_avg(self):
@@ -378,21 +381,23 @@ class HttpDownload(Realm):
         x1 = []
         html_struct = dict.fromkeys(list(result_data.keys()))
         for fcc in list(result_data.keys()):
-            fcc_type = result_data[fcc]["avg"]
+            fcc_type = result_data[fcc]["max"]
             print(fcc_type)
             for i in fcc_type:
                 x1.append(i)
             # print(x)
+        print("x11",x1)
         y11 = []
         for i in x1:
             i = i / 1000
             y11.append(i)
         # print(y)
+        print("y11",y11)
         z11 = []
         for i in y11:
             i = str(round(i, 1))
             z11.append(i)
-        print(z11)
+        print("z11",z11)
         pass_fail_list = []
         # print(list(result_data.keys()))
         sumry2 = []
@@ -402,7 +407,7 @@ class HttpDownload(Realm):
         if bands == ["5G", "2.4G", "Both"]:
             print("yes")
             # 5G
-            if float(z11[0]) == 0.0 or float(z11[0]) > float(threshold_5g):
+            if (float(z11[0]) > float(threshold_5g)) or (result_data["5G"]["dl_time"].count(0) != 0):
                 print("FAIL")
                 pass_fail_list.append("FAIL")
                 sumry5.append("FAIL")
@@ -411,7 +416,7 @@ class HttpDownload(Realm):
                 pass_fail_list.append("PASS")
                 sumry5.append("PASS")
             # 2.4g
-            if float(z11[1]) == 0.0 or float(z11[1]) > float(threshold_2g):
+            if (float(z11[1]) > float(threshold_2g)) or (result_data["2.4G"]["dl_time"].count(0) != 0):
                 var = "FAIL"
                 pass_fail_list.append(var)
                 sumry2.append("FAIL")
@@ -419,7 +424,7 @@ class HttpDownload(Realm):
                 pass_fail_list.append("PASS")
                 sumry2.append("PASS")
             # BOTH
-            if float(z11[2]) == 0.0 or float(z11[2]) > float(threshold_both) :
+            if (float(z11[2]) > float(threshold_both)) or (result_data["Both"]["dl_time"].count(0) != 0):
                 var = "FAIL"
                 pass_fail_list.append(var)
                 sumryB.append("FAIL")
@@ -432,7 +437,7 @@ class HttpDownload(Realm):
             data.append(','.join(sumryB))
 
         elif bands == ['5G']:
-            if float(z11[0]) == 0.0 or float(z11[0]) > float(threshold_5g):
+            if (float(z11[0]) > float(threshold_5g)) or (result_data["5G"]["dl_time"].count(0) != 0):
                 print("FAIL")
                 pass_fail_list.append("FAIL")
                 sumry5.append("FAIL")
@@ -443,7 +448,7 @@ class HttpDownload(Realm):
             data.append(','.join(sumry5))
 
         elif bands == ['2.4G']:
-            if float(z11[0]) == 0.0 or float(z11[0]) > float(threshold_2g):
+            if (float(z11[0]) > float(threshold_2g)) or (result_data["2.4G"]["dl_time"].count(0) != 0):
                 var = "FAIL"
                 pass_fail_list.append(var)
                 sumry2.append("FAIL")
@@ -452,7 +457,7 @@ class HttpDownload(Realm):
                 sumry2.append("PASS")
             data.append(','.join(sumry2))
         elif bands == ["Both"]:
-            if float(z11[0]) == 0.0 or float(z11[0]) > float(threshold_both):
+            if (float(z11[0]) > float(threshold_both)) or (result_data["Both"]["dl_time"].count(0) != 0):
                 var = "FAIL"
                 pass_fail_list.append(var)
                 sumryB.append("FAIL")
@@ -461,7 +466,7 @@ class HttpDownload(Realm):
                 sumryB.append("PASS")
             data.append(','.join(sumryB))
         elif bands == ['5G', '2.4G']:
-            if float(z11[0]) == 0.0 or float(z11[0]) > float(threshold_5g):
+            if (float(z11[0]) > float(threshold_5g)) or (result_data["5G"]["dl_time"].count(0) != 0):
                 print("FAIL")
                 pass_fail_list.append("FAIL")
                 sumry5.append("FAIL")
@@ -470,7 +475,7 @@ class HttpDownload(Realm):
                 pass_fail_list.append("PASS")
                 sumry5.append("PASS")
             # 2.4g
-            if float(z11[1]) == 0.0 or float(z11[1]) > float(threshold_2g):
+            if (float(z11[1]) > float(threshold_2g)) or (result_data["2.4G"]["dl_time"].count(0) != 0):
                 var = "FAIL"
                 pass_fail_list.append(var)
                 sumry2.append("FAIL")
@@ -481,7 +486,7 @@ class HttpDownload(Realm):
             data.append(','.join(sumry2))
 
         elif bands == ['5G', 'Both']:
-            if float(z11[0]) == 0.0 or float(z11[0]) > float(threshold_5g):
+            if (float(z11[0]) > float(threshold_5g)) or (result_data["5G"]["dl_time"].count(0) != 0):
                 print("FAIL")
                 pass_fail_list.append("FAIL")
                 sumry5.append("FAIL")
@@ -489,7 +494,7 @@ class HttpDownload(Realm):
                 print("PASS")
                 pass_fail_list.append("PASS")
                 sumry5.append("PASS")
-            if float(z11[1]) == 0.0 or float(z11[1]) > float(threshold_both):
+            if (float(z11[1]) > float(threshold_both)) or (result_data["Both"]["dl_time"].count(0) != 0):
                 var = "FAIL"
                 pass_fail_list.append(var)
                 sumryB.append("FAIL")
@@ -501,14 +506,14 @@ class HttpDownload(Realm):
             data.append(','.join(sumryB))
 
         elif bands == ['2.4G', 'Both']:
-            if float(z11[0]) == 0.0 or float(z11[0]) > float(threshold_2g):
+            if (float(z11[0]) > float(threshold_2g)) or (result_data["2.4G"]["dl_time"].count(0) != 0):
                 var = "FAIL"
                 pass_fail_list.append(var)
                 sumry2.append("FAIL")
             elif float(z11[0]) < float(threshold_2g):
                 pass_fail_list.append("PASS")
                 sumry2.append("PASS")
-            if float(z11[1]) == 0.0 or float(z11[1]) > float(threshold_both):
+            if (float(z11[1]) > float(threshold_both)) or (result_data["Both"]["dl_time"].count(0) != 0):
                 var = "FAIL"
                 pass_fail_list.append(var)
                 sumryB.append("FAIL")
@@ -585,14 +590,24 @@ class HttpDownload(Realm):
         report.move_csv_file()
         report.move_graph_image()
         report.build_graph()
-        report.set_obj_html("Summary Table Description",
-                            "This Table shows you the summary result of Webpage Download Test as PASS or FAIL criteria. If the average time taken by " + str(
-                                num_stations) + " clients to access the webpage is less than " + str(
-                                threshold_2g) + "s it's a PASS criteria for 2.4 ghz clients, If the average time taken by " + "" + str(
-                                num_stations) + " clients to access the webpage is less than " + str(
-                                threshold_5g) + "s it's a PASS criteria for 5 ghz clients and If the average time taken by " + str(
-                                num_stations) + " clients to access the webpage is less than " + str(
-                                threshold_both) + "s it's a PASS criteria for 2.4 ghz and 5ghz clients")
+        desc = "This Table shows you the summary result of Webpage Download Test as PASS or FAIL criteria. "
+        for i in bands:
+            if i == "5G":
+                desc = desc + "If the time taken by " + str(
+                                    num_stations) + " clients to access the webpage is less than " + str(
+                                    threshold_5g) + "s, It's a PASS criteria for 5 ghz clients. "
+            elif i == "2.4G":
+                desc = desc + "If the time taken by " + str(
+                    num_stations) + " clients to access the webpage is less than " + str(
+                    threshold_2g) + "s, It's a PASS criteria for 2.4 ghz clients. "
+            elif i == "Both":
+                desc = desc + "If the time taken by " + str(
+                    num_stations) + " clients to access the webpage is less than " + str(
+                    threshold_both) + "s, It's a PASS criteria for 2.4 ghz and 5ghz clients. "
+
+
+
+        report.set_obj_html("Summary Table Description", desc)
 
         report.build_objective()
         test_setup1 = pd.DataFrame(summary_table_value)
@@ -711,7 +726,7 @@ def main():
     # print(dict_keys)
     final_dict = dict.fromkeys(dict_keys)
     # print(final_dict)
-    dict1_keys = ['dl_time', 'min', 'max', 'avg','bytes_rd', 'speed']
+    dict1_keys = ['dl_time', 'min', 'max', 'avg','bytes _rd', 'speed']
     for i in final_dict:
         final_dict[i] = dict.fromkeys(dict1_keys)
     print(final_dict)
