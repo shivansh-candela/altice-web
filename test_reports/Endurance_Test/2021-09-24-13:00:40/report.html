@@ -1,0 +1,297 @@
+
+                        
+							<!DOCTYPE html>
+							<html lang="en">
+							<head>
+							<!--    <meta charset="UTF-8" http-equiv="refresh" content="30">-->
+								<meta charset="UTF-8">
+								<meta name="viewport" content="width=device-width, initial-scale=1">
+								<title>Title</title>
+								<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+								<script src="https://d3js.org/d3.v4.min.js"></script>
+								<body>
+							 <div class='Section report_banner-1000x205' style='background-image:url("/home/lanforge/lanforge-scripts/py-scripts/artifacts/banner.png");
+                     background-repeat:no-repeat;padding:0;margin:0;min-width:1000px; min-height:205px;width:1000px; height:205px;max-width:1000px; max-height:205px;'>
+								<br>
+								<img align='right' style='padding:25;margin:5;width:200px;' src="/home/lanforge/lanforge-scripts/py-scripts/artifacts/CandelaLogo2-90dpi-200x90-trans.png" border='0' />
+
+
+								<div class='HeaderStyle'>
+								<br>
+								<h1 class='TitleFontPrint' style='color:darkgreen;'>  Endurance Test Report  </h1>
+								<h3 class='TitleFontPrint' style='color:darkgreen;'>2021-09-24-13:00:43</h3>
+								</div>
+								</div>
+                                <br><br>
+
+								
+                     
+                      
+                        <!-- Test Setup Information -->
+                        <table width='700px' border='1' cellpadding='2' cellspacing='0' style='border-top-color: gray; border-top-style: solid; border-top-width: 1px; border-right-color: gray; border-right-style: solid; border-right-width: 1px; border-bottom-color: gray; border-bottom-style: solid; border-bottom-width: 1px; border-left-color: gray; border-left-style: solid; border-left-width: 1px'>
+                            <tr>
+                              <th colspan='2'>Test Setup Information</th>
+                            </tr>
+                            <tr>
+                              <td>Device Under Test</td>
+                              <td>
+                                <table width='100%' border='0' cellpadding='2' cellspacing='0' style='border-top-color: gray; border-top-style: solid; border-top-width: 1px; border-right-color: gray; border-right-style: solid; border-right-width: 1px; border-bottom-color: gray; border-bottom-style: solid; border-bottom-width: 1px; border-left-color: gray; border-left-style: solid; border-left-width: 1px'>
+                                  <tr><td>AP Name</td><td colspan='3'>WAC564</td></tr><tr><td>SSID1</td><td colspan='3'>Endurance1</td></tr><tr><td>Security1</td><td colspan='3'>wpa3</td></tr><tr><td>SSID2</td><td colspan='3'>Endurance2</td></tr><tr><td>Security2</td><td colspan='3'>wpa2</td></tr><tr><td>Total Stations</td><td colspan='3'>8</td></tr><tr><td>Test Start Time</td><td colspan='3'>2021-09-24 13:00:40</td></tr><tr><td>Test End Time</td><td colspan='3'>2021-09-24 13:30:40</td></tr><tr><td>Test Duration</td><td colspan='3'>0:30:00</td></tr><tr><td>AP Total Memory</td><td colspan='3'>494196Kb</td></tr><tr><td>Traffic</td><td colspan='3'>PING , Multicast, Layer3</td></tr><tr><td>Upload</td><td colspan='3'>30000000bps</td></tr><tr><td>Download</td><td colspan='3'>30000000bps</td></tr>
+                                </table>
+                              </td>
+                            </tr>
+                        </table>
+                        <br>
+                                 
+							 <h2 style="align:left;color:darkgreen">Graph for Wifi Transmitted and Received in (MB):</h2>
+							<div id="wifi"></div>
+							 <h2 style="align:left;color:darkgreen">Graph for Ethernet Transmitted and Received in (MB):</h2>
+							<div id="ethernet"></div>
+							 <h2 style="align:left;color:darkgreen">Graph for Available ,Free Memory and CPU Utilization:</h2>
+							<div id="avail_free_cpu"></div>
+							 <h2 style="align:left;color:darkgreen">Graph for Kernel crash and Uptime:</h2>
+							<div id="kernel_crash_and_uptime"></div>
+							<script>
+
+
+
+							function makeplot() {
+								  d3.csv('2021-09-24-13:00:40.csv',function(data) {processData(data)});
+
+								  };
+
+							function processData(allRows) {
+
+							var time_stamp = [], wifi_tx = [],wifi_rx = [],eth_tx=[],eth_rx=[],avail_mem = [],free_mem =[],cpu_uti = [],up_time=[],k_crash=[],
+                                standard_deviation = [];              
+
+							  for (var i=0; i<allRows.length; i++) {
+								row = allRows[i];
+								time_stamp.push( row['Time_stamp_graph'] );
+								wifi_tx.push( row['Tx_Data_Bytes'] );
+								wifi_rx.push( row['Rx_Data_Bytes'] );
+								eth_tx.push( row['eth_Tx_Data_Bytes'] );
+								eth_rx.push( row['eth_Rx_Data_Bytes'] );
+								avail_mem.push(row['Memory_Available']);
+								free_mem.push(row['Free_Memory']);
+								cpu_uti.push(row['cpu_utilization']);
+								up_time.push(row['uptime']);
+								k_crash.push(row['kernel_crash']);
+							  }
+							  makePlotly( time_stamp,wifi_tx, wifi_rx,eth_tx, eth_rx,avail_mem,free_mem,cpu_uti,up_time,k_crash,standard_deviation );
+							};
+
+							function makePlotly(time_stamp,wifi_tx,wifi_rx,eth_tx,eth_rx,avail_mem,free_mem,cpu_uti,up_time,k_crash,sd) {
+							
+							        var uptime_y = [],k_crash_y=[];
+							        for (var i = 0;i<up_time.length;i++){
+							        uptime_y.push(1);
+							        }
+							        for (var i = 0;i<k_crash.length;i++){
+							        k_crash_y.push(1);
+							        }
+
+									var Transmitted_Bytes = {
+									  x: time_stamp,
+									  y: wifi_tx,
+									  name : 'Transmitted',
+									  mode: 'lines',
+									  line: {
+										color: '#80CAF6',
+										shape: 'spline',
+										width:5
+									  }
+									};
+
+									var Received_Bytes = {
+									  x: time_stamp,
+									  y: wifi_rx,
+									  name : 'Received',
+									  mode: 'lines',
+									  line: {color: '#DF56F1',
+											  width:5}
+									};
+									var eth_Transmitted_Bytes = {
+									  x: time_stamp,
+									  y: eth_tx,
+									  name : 'Transmitted',
+									  mode: 'lines',
+									  line: {
+										color: '#80CAF6',
+										shape: 'spline',
+										width:5
+									  }
+									};
+
+									var eth_Received_Bytes = {
+									  x: time_stamp,
+									  y: eth_rx,
+									  name : 'Received',
+									  mode: 'lines',
+									  line: {color: '#DF56F1',
+											  width:5}
+									};
+									var avail_mem = {
+									 x:time_stamp,
+									 y:avail_mem,
+									 name:'Available_Memory',
+									 mode : 'lines',
+									 line : {color : '#DF56F1',
+											 width:5}
+									};
+									var free_mem = {
+									 x:time_stamp,
+									 y:free_mem,
+									 name:'Free_Memory',
+									 mode : 'lines',
+									 line : {color : '#80CAF6',
+											  width:5}
+									};
+									var cpu_uti = {
+									 x:time_stamp,
+									 y:cpu_uti,
+									 name:'CPU Utilization',
+									 mode : 'lines',
+									 line : {color : '#00008b',
+											 width:5}
+									};
+									var up_time ={
+
+									 x:up_time,
+									 y:uptime_y,
+									 name:'Up Time',
+									 mode : 'markers',
+									 type : 'scatter',
+									 marker : {size : 12}
+							<!--         line : {color : '#DF56F1'}-->
+
+									};
+									var k_crash = {
+									 x:k_crash,
+									 y:k_crash_y,
+									 name:'Kernel Crash',
+								 mode : 'markers',
+									 type : 'scatter',
+									 marker : {size : 12}
+							<!--         line : {color : '#DF56F1'}-->
+
+									};
+
+
+
+							var config = {responsive:true};
+
+							var layout = {
+
+							};
+
+							var data1 = [Transmitted_Bytes,Received_Bytes];
+							var data2 = [eth_Transmitted_Bytes,eth_Received_Bytes];
+							var data3 = [avail_mem,free_mem,cpu_uti];
+							var data4 = [up_time,k_crash];
+
+							Plotly.plot('wifi', data1,layout,config);
+							Plotly.plot('ethernet', data2,layout,config);
+							Plotly.plot('avail_free_cpu', data3,layout,config);
+							Plotly.plot('kernel_crash_and_uptime', data4,layout,config);
+
+							};
+							makeplot();
+							<!--var cnt = 0;-->
+							var interval = setInterval(function(){
+
+										   d3.csv('2021-09-24-13:00:40.csv',function(data){ processData1(data) } );
+
+										   function processData1(allRows) {
+
+											console.log(allRows);
+											var time_stamp = [], wifi_tx = [],wifi_rx = [],eth_tx=[],eth_rx=[],avail_mem = [],free_mem =[],
+          
+                                             cpu_uti=[],up_time=[],k_crash=[],xx1=[],yy1 = [],xx2=[],yy2 = [],xx3=[],yy3=[],zz3=[],xx4=[],yy4=[[],[]];
+												 
+
+												var i=allRows.length-1;
+                                                console.log(i);
+												row = allRows[i];
+												time_stamp.push( row['Time_stamp_graph'] );
+												wifi_tx.push( row['Tx_Data_Bytes'] );
+												wifi_rx.push( row['Rx_Data_Bytes'] );
+												eth_tx.push( row['eth_Tx_Data_Bytes'] );
+												eth_rx.push( row['eth_Rx_Data_Bytes'] );
+												avail_mem.push(row['Memory_Available']);
+												free_mem.push(row['Free_Memory']);
+												cpu_uti.push(row['cpu_utilization']);
+                                                up_time.push(row['uptime']);
+                                                k_crash.push(row['kernel_crash']);
+
+												xx1.push(time_stamp);
+												xx1.push(time_stamp);
+
+												yy1.push(wifi_tx);
+												yy1.push(wifi_rx);
+
+												xx2.push(time_stamp);
+												xx2.push(time_stamp);
+												yy2.push(eth_tx);
+												yy2.push(eth_rx);
+
+												xx3.push(time_stamp);
+												xx3.push(time_stamp);
+												xx3.push(time_stamp);
+
+												yy3.push(avail_mem);
+												yy3.push(free_mem); 
+												yy3.push(cpu_uti);
+                                                
+                                                if(up_time.length >=1)
+                                                  {
+                                                   xx4.push(up_time);
+                                                   yy4[0].push(1);
+                                                  }
+                                                if(k_crash.length >=1)   
+                                                  {
+                                                   xx4.push(k_crash);
+                                                   yy4[1].push(1);
+                                                  }
+                                                
+
+
+											   var update1 = {
+												x: xx1,
+												y: yy1
+											  };
+											  var update2 = {
+												x: xx2,
+												y: yy2
+											  };
+											  var update3 ={
+												x:xx3,
+												y:yy3
+
+											  };
+                                              var update4 ={
+												x:xx4,
+												y:yy4
+
+											  };
+
+											  Plotly.extendTraces('wifi', update1, [0,1]);
+											  Plotly.extendTraces('ethernet', update2, [0,1]);
+											  Plotly.extendTraces('avail_free_cpu', update3, [0,1,2]);
+                                              Plotly.extendTraces('kernel_crash_and_uptime', update4, [0,1]);
+
+							<!--                if(++cnt === 100) clearInterval(interval);-->
+
+										  }
+
+
+
+							}, 10000);
+
+							</script>
+
+							</body>
+
+							</html>
+                       
+                        
