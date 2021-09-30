@@ -1,0 +1,25 @@
+{
+
+  "repeat" :1000,
+  "roam interval": 10,
+  "ap name" : "AP1 , AP2",
+
+  "ssid" : "roam",
+  "passwd" : "BLANK",
+  "security" : "open",
+
+  "2.4G client" : 20,
+  "2.4G radio" : "wiphy0",
+  "2.4G channel" : 1,
+  "5G client" : 20,
+  "5G radio" : "wiphy1",
+  "5G channel" : 36,
+
+
+  "roaming_configuration":
+  [
+    [ 1, 20, "2.4G", "ac:86:74:8c:ea:42","ac:86:74:a4:61:82"],
+    [ 1, 20, "5G", "ac:86:74:8c:ea:50","ac:86:74:a4:61:90"]
+  ]
+}
+
