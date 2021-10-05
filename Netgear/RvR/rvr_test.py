@@ -119,7 +119,7 @@ class RvR(Realm):
                 }
                 self.json_post(req_url, data)
         self.cx_profile.start_cx()
-        print("Monitoring CX's & Endpoints")
+        print("Monitoring CX's & Endpoints for %s seconds" % self.test_duration)
 
     def stop_l3(self):
         self.cx_profile.stop_cx()
@@ -189,6 +189,7 @@ class RvR(Realm):
                 throughput = {'upload': [], 'download': []}
                 self.set_attenuation(value=val)
                 self.start_l3()
+                time.sleep(15)
                 upload, download = self.monitor()
                 # self.stop_l3()
                 self.reset_l3()
@@ -270,20 +271,35 @@ class RvR(Realm):
             # table_df.update({"No of Stations": num_stations})
             # table_df.update({"Mode": mode})
             for traffic in self.traffic_type:
+                dataset, label, color = [], [], []
+                direction = ""
                 if self.traffic_direction == 'upload':
-                    graph_df[traffic].update({"upload throughput": [float(f"{sum(res[traffic][i]['upload']):.2f}") for i in res[traffic]]})
+                    dataset.append([float(f"{sum(res[traffic][i]['upload']):.2f}") for i in res[traffic]])
+                    label = ['upload']
+                    color = ['olivedrab']
+                    direction = "upload"
                 elif self.traffic_direction == 'download':
-                    graph_df[traffic].update({"download throughput": [float(f"{sum(res[traffic][i]['download']):.2f}") for i in res[traffic]]})
+                    dataset.append([float(f"{sum(res[traffic][i]['download']):.2f}") for i in res[traffic]])
+                    label = ['download']
+                    color = ['orangered']
+                    direction = "download"
                 elif self.traffic_direction == 'bidirectional':
-                    graph_df[traffic].update({"upload throughput": [float(f"{sum(res[traffic][i]['upload']):.2f}") for i in res[traffic]]})
-                    graph_df[traffic].update({"download throughput": [float(f"{sum(res[traffic][i]['download']):.2f}") for i in res[traffic]]})
+                    dataset.append([float(f"{sum(res[traffic][i]['upload']):.2f}") for i in res[traffic]])
+                    dataset.append([float(f"{sum(res[traffic][i]['download']):.2f}") for i in res[traffic]])
+                    label = ['upload', 'download']
+                    color = ['olivedrab', 'orangered']
+                    direction = "upload and download"
+                graph_df[traffic].update({"dataset": dataset})
+                graph_df[traffic].update({"label": label})
+                graph_df[traffic].update({"color": color})
+                graph_df[traffic].update({"direction": direction})
             # res.update({"throughput_table_df": table_df})
             res.update({"graph_df": graph_df})
         return res
 
     def generate_report(self, data, test_setup_info, input_setup_info):
         res = self.set_report_data(data)
-        report = lf_report(_output_pdf="rvr_test.pdf", _output_html="rvr_test.html")
+        report = lf_report(_output_pdf="rvr_test.pdf", _output_html="rvr_test.html", _results_dir_name="RvR_Test")
         report_path = report.get_path()
         report_path_date_time = report.get_path_date_time()
         print("path: {}".format(report_path))
@@ -293,7 +309,7 @@ class RvR(Realm):
         # objective title and description
         report.set_obj_html(_obj_title="Objective",
                             _obj="Through this test we can measure the performance of stations over a certain distance "
-                                 "of the DUT, Distance is emulated using programmable attenuators and throughput test is"
+                                 "of the DUT, Distance is emulated using programmable attenuators and throughput test is "
                                  "run at each distance/RSSI step")
         report.build_objective()
         report.test_setup_table(test_setup_data=test_setup_info, value="Device Under Test")
@@ -304,45 +320,90 @@ class RvR(Realm):
         # report.set_table_dataframe(df_throughput)
         # report.build_table()
         print(res)
-        for key in res["graph_df"]:
-            for direction in res["graph_df"][key]:
-                report.set_obj_html(
-                    _obj_title=f"Overall {direction} for {len(self.station_names)} clients using {key} traffic.",
-                    _obj=f"The below graph represents overall {direction} for different attenuation (RSSI) ")
-                report.build_objective()
-                graph = lf_bar_graph(_data_set=[res["graph_df"][key][direction]],
-                                     _xaxis_name="Attenuation",
-                                     _yaxis_name="Throughput(in Mbps)",
-                                     _xaxis_categories=[str(key) for key in res[key].keys()],
-                                     _graph_image_name=f"rvr_{key}_{direction}",
-                                     _label=[str(direction).split()[0] if direction == 'upload throughput' else str(direction).split()[0]],
-                                     _color=['olivedrab' if direction == 'upload throughput' else 'orangered'],
-                                     _color_edge='grey',
-                                     _xaxis_step=1,
-                                     _graph_title="Overall throughput vs attenuation",
-                                     _title_size=16,
-                                     _bar_width=0.15,
-                                     _figsize=(18, 6),
-                                     _legend_loc="best",
-                                     _legend_box=(1.0, 1.0),
-                                     _dpi=96,
-                                     _show_bar_value=True,
-                                     _enable_csv=True)
-                graph_png = graph.build_bar_graph()
+        for traffic_type in res["graph_df"]:
+            report.set_obj_html(
+                _obj_title="Overall {} throughput for {} clients using {} traffic.".format(res["graph_df"]
+                                                                                           [traffic_type]["direction"],
+                                                                                           len(self.station_names),
+                                                                                           traffic_type),
+                _obj="The below graph represents overall {} throughput for different attenuation (RSSI) ".format(
+                    res["graph_df"][traffic_type]["direction"]))
+            report.build_objective()
+            graph = lf_bar_graph(_data_set=res["graph_df"][traffic_type]["dataset"],
+                                 _xaxis_name="Attenuation",
+                                 _yaxis_name="Throughput(in Mbps)",
+                                 _xaxis_categories=[str(traffic_type) for traffic_type in res[traffic_type].keys()],
+                                 _graph_image_name=f"rvr_{traffic_type}_{self.traffic_direction}",
+                                 _label=res["graph_df"][traffic_type]["label"],
+                                 _color=res["graph_df"][traffic_type]["color"],
+                                 _color_edge='grey',
+                                 _xaxis_step=1,
+                                 _graph_title="Overall throughput vs attenuation",
+                                 _title_size=16,
+                                 _bar_width=0.15,
+                                 _figsize=(18, 6),
+                                 _legend_loc="best",
+                                 _legend_box=(1.0, 1.0),
+                                 _dpi=96,
+                                 _show_bar_value=True,
+                                 _enable_csv=True)
+            graph_png = graph.build_bar_graph()
 
-                print("graph name {}".format(graph_png))
+            print("graph name {}".format(graph_png))
 
-                report.set_graph_image(graph_png)
-                # need to move the graph image to the results directory
-                report.move_graph_image()
-                report.set_csv_filename(graph_png)
-                report.move_csv_file()
-                report.build_graph()
+            report.set_graph_image(graph_png)
+            # need to move the graph image to the results directory
+            report.move_graph_image()
+            report.set_csv_filename(graph_png)
+            report.move_csv_file()
+            report.build_graph()
+        self.generate_individual_graphs(report, res)
         report.test_setup_table(test_setup_data=input_setup_info, value="Information")
         report.build_custom()
         report.build_footer()
         report.write_html()
         report.write_pdf()
+
+    def generate_individual_graphs(self, report, res):
+        if len(res.keys()) > 0:
+            if "graph_df" in res:
+                res.pop("graph_df")
+        for traffic_type in res:
+            for attenuation in res[traffic_type]:
+                for direction in res[traffic_type][attenuation]:
+                    report.set_obj_html(
+                        _obj_title=f"Individual {direction} Throughput for {len(self.station_names)} clients using {traffic_type} traffic over {attenuation} attenuation",
+                        _obj=f"The below graph represents Individual {direction} throughput of all stations when attenuation (RSSI) set to {attenuation}")
+                    report.build_objective()
+                    graph = lf_bar_graph(_data_set=[res[traffic_type][attenuation][direction]],
+                                         _xaxis_name="No.of Stations",
+                                         _yaxis_name="Throughput(in Mbps)",
+                                         _xaxis_categories=[str(i + 1) for i in range(len(self.station_names))],
+                                         _graph_image_name=f"rvr_{traffic_type}_{attenuation}_{direction}",
+                                         _label=['upload' if direction == 'upload' else
+                                                 'download'],
+                                         _color=['olivedrab' if direction == 'upload' else 'orangered'],
+                                         _color_edge='grey',
+                                         _xaxis_step=1,
+                                         _graph_title=f"Individual throughput with {attenuation} attenuation",
+                                         _title_size=16,
+                                         _bar_width=0.15,
+                                         _figsize=(18, 6),
+                                         _legend_loc="best",
+                                         _legend_box=(1.0, 1.0),
+                                         _dpi=96,
+                                         _show_bar_value=True,
+                                         _enable_csv=True)
+                    graph_png = graph.build_bar_graph()
+
+                    print("graph name {}".format(graph_png))
+
+                    report.set_graph_image(graph_png)
+                    # need to move the graph image to the results directory
+                    report.move_graph_image()
+                    report.set_csv_filename(graph_png)
+                    report.move_csv_file()
+                    report.build_graph()
 
 
 def main():
@@ -360,22 +421,26 @@ def main():
     optional.add_argument('--mgr_port', help='port LANforge GUI HTTP service is running on', default=8080)
     optional.add_argument('--upstream', help='non-station port that generates traffic: <resource>.<port>, '
                                              'e.g: 1.eth1', default='eth1')
-    optional.add_argument('--mode', help='Used to force mode of stations', default="0")
-    required.add_argument('--radio', help='radio to use for creating clients', default="wiphy0")
+    optional.add_argument('--mode', help='used to force mode of stations', default="0")
+    required.add_argument('--radio', help='radio to use on which clients gets created', default="wiphy0")
     required.add_argument('--ssid', help="ssid for client association with Access Point", required=True)
     required.add_argument('--security', help="security type of ssid", required=True)
     required.add_argument('--password', help="password of ssid", required=True)
     required.add_argument('--traffic_type', help='provide the traffic Type lf_udp, lf_tcp', default='lf_tcp')
     optional.add_argument('--traffic_direction', help='Traffic direction i.e upload or download or bidirectional',
                           default="bidirectional")
-    required.add_argument('--traffic', help='traffic to be created for each client in layer 3', required=True)
-    required.add_argument('--test_duration', help='test_duration sets the duration of the test', required=True)
-    optional.add_argument('--create_sta', help='Used to force a connection to a particular AP', default=True)
+    required.add_argument('--traffic', help='traffic to be created for the given number of clients (in Mbps)',
+                          required=True)
+    required.add_argument('--test_duration', help='sets the duration of the test ex: 2s --> two seconds || 2m '
+                                                  '--> two minutes || 2h --> two hours', required=True)
+    optional.add_argument('--create_sta', help="used to create stations if you do not prefer existing stations",
+                          default=True)
     optional.add_argument('--sta_names',
-                          help='Used to force a connection to a particular AP, create_sta should be False',
+                          help='used to provide existing station names from the port manager, prefer only if create_sta is False',
                           default="sta0000")
     optional.add_argument('--ap_model', help="AP Model Name", default="Test-AP")
-    required.add_argument('--num_stations', help='number of stations to create', required=True)
+    required.add_argument('--num_stations', help='number of stations to create, works only if create_sta is True',
+                          required=True)
     optional.add_argument('-as', '--atten_serno', help='Serial number for requested Attenuator', default='2222')
     optional.add_argument('-ai', '--atten_idx',
                           help='Attenuator index eg. For module 1 = 0,module 2 = 1 --> --atten_idx 0,1',
@@ -388,13 +453,13 @@ def main():
     print("Test started at ", test_start_time)
     print(parser.parse_args())
     if args.test_duration.endswith('s') or args.test_duration.endswith('S'):
-        args.test_duration = int(args.test_duration[0:-1])
+        args.test_duration = abs(int(float(args.test_duration[0:-1])))
     elif args.test_duration.endswith('m') or args.test_duration.endswith('M'):
-        args.test_duration = int(args.test_duration[0:-1]) * 60
+        args.test_duration = abs(int(float(args.test_duration[0:-1]) * 60))
     elif args.test_duration.endswith('h') or args.test_duration.endswith('H'):
-        args.test_duration = int(args.test_duration[0:-1]) * 60 * 60
+        args.test_duration = abs(int(float(args.test_duration[0:-1]) * 60 * 60))
     elif args.test_duration.endswith(''):
-        args.test_duration = int(args.test_duration)
+        args.test_duration = abs(int(float(args.test_duration)))
 
     if args.atten_val:
         if args.atten_val.split(',')[0] != '0':
@@ -406,16 +471,16 @@ def main():
     side_a, side_b = 25, 25
     if args.traffic_direction == "upload":
         side_a = 0
-        side_b = int(args.traffic) * 1000000
+        side_b = abs(int(float(args.traffic) * 1000000))
     elif args.traffic_direction == "download":
-        side_a = int(args.traffic) * 1000000
+        side_a = abs(int(float(args.traffic) * 1000000))
         side_b = 0
     elif args.traffic_direction == "bidirectional":
-        side_a = int(args.traffic) * 1000000
-        side_b = int(args.traffic) * 1000000
+        side_a = abs(int(float(args.traffic) * 1000000))
+        side_b = abs(int(float(args.traffic) * 1000000))
 
     if args.create_sta:
-        station_list = LFUtils.portNameSeries(prefix_="sta", start_id_=0, end_id_=int(args.num_stations) - 1,
+        station_list = LFUtils.portNameSeries(prefix_="sta", start_id_=0, end_id_=abs(int(args.num_stations)) - 1,
                                               padding_number_=10000,
                                               radio=args.radio)
     else:
@@ -426,7 +491,7 @@ def main():
                   number_template="0000",
                   sta_list=station_list,
                   create_sta=args.create_sta,
-                  num_stations=int(args.num_stations),
+                  num_stations=abs(int(args.num_stations)),
                   name_prefix="RvR-",
                   upstream=args.upstream,
                   radio=args.radio,
@@ -434,7 +499,7 @@ def main():
                   password=args.password,
                   security=args.security,
                   test_duration=args.test_duration,
-                  traffic=args.traffic,
+                  traffic=abs(int(args.traffic)),
                   side_a_min_rate=side_a,
                   side_b_min_rate=side_b,
                   mode=args.mode,
