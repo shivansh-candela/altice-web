@@ -221,6 +221,9 @@ class HttpDownload(Realm):
     def monitor_uc_avg(self):
         # data in json format
         data = self.local_realm.json_get("layer4/list?fields=uc-avg")
+        #for total_urls field
+        data_urls = self.local_realm.json_get("layer4/list?fields=total-urls")
+
         data1 = []
         if self.num_sta == 1:
             data1.append(data['endpoint']['name'])
@@ -230,10 +233,10 @@ class HttpDownload(Realm):
         data2 = []
         for i in range(self.num_sta):
             if self.num_sta == 1:
-                data2.append((data['endpoint']['uc-avg']))
+                data2.append((data['endpoint']['uc-avg']) * (data_urls['endpoint']['total-urls']))
             else:
                 # print(type(data['endpoint'][i][data1[i]]['uc-avg']))
-                data2.append((data['endpoint'][i][data1[i]]['uc-avg']))
+                data2.append((data['endpoint'][i][data1[i]]['uc-avg']) * (data_urls['endpoint'][i][data1[i]]['total-urls']))
         return data2
 
     def monitor_bytes(self):
