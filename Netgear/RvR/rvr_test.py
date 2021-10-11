@@ -7,11 +7,7 @@ PURPOSE: rvr_test.py will measure the performance of stations over a certain dis
         using programmable attenuators and throughput test is run at each distance/RSSI step.
 
 EXAMPLE:
-python3 rvr_test.py --mgr 192.168.200.21 --mgr_port 8080 -u eth1 --num_stations 1
---radio wiphy1 --ssid TestAP5-71 --password lanforge --security wpa2 --mode 11 --a_min 1000000 --b_min 1000000 --traffic_type lf_udp
-
-python3 rvr_test.py --num_stations 1 --radio wiphy1 --ssid ct523c-vap --password ct523c-vap --security wpa2 --mode 11 --a_min 1000000 --b_min 1000000 --traffic_type lf_udp
-
+python3 rvr_test.py --mgr 192.168.200.21 --mgr_port 8080 --upstream eth1 --num_stations 15 --mode 9 --security wpa2 --ssid ct-523 --password ct-523-ps --radio wiphy3 --atten_serno 84 --atten_idx all --atten_val 10,20,30 --test_duration 1m --ap_model WAC505 --traffic 500
 
 Use './rvr_test.py --help' to see command line usage and options
 Copyright 2021 Candela Technologies Inc
@@ -468,6 +464,10 @@ def main():
             args.atten_val = temp
         else:
             args.atten_val = args.atten_val.split(',')
+
+    if args.traffic is not None and int(args.traffic) < 0:
+        raise ValueError("Traffic should be greater than 0 Mbps")
+
     side_a, side_b = 25, 25
     if args.traffic_direction == "upload":
         side_a = 0
