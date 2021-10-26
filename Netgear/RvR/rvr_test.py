@@ -39,9 +39,9 @@ class RvR(Realm):
                  host="localhost", port=8080,
                  mode=0, ap_model="", traffic_type="lf_tcp,lf_udp", traffic_direction="bidirectional",
                  side_a_min_rate=0, side_a_max_rate=0,
-                 sta_list=None, side_b_min_rate=56, side_b_max_rate=0, number_template="00000", test_duration="2m",
-                 num_stations=10,
-                 serial_number='2222', indices="all", atten_val="0", traffic=500, radio="wiphy0",
+                 sta_names=None, side_b_min_rate=56, side_b_max_rate=0, number_template="00000", test_duration="2m",
+                 sta_list=[1, 1],
+                 serial_number='2222', indices="all", atten_val="0", traffic=500, radio_list=['wiphy0', 'wiphy3'],
                  _debug_on=False, _exit_on_error=False, _exit_on_fail=False):
         super().__init__(lfclient_host=host,
                          lfclient_port=port),
@@ -51,9 +51,10 @@ class RvR(Realm):
         self.ssid = ssid
         self.security = security
         self.password = password
-        self.radio = radio
-        self.num_stations = num_stations
-        self.station_names = sta_list
+        self.radio = radio_list
+        self.sta_list = sta_list
+        self.num_stations = sum(self.sta_list)
+        self.station_names = sta_names
         self.create_sta = create_sta
         self.mode = mode
         self.ap_model = ap_model
@@ -106,6 +107,7 @@ class RvR(Realm):
 
     def start_l3(self):
         if len(self.cx_profile.created_cx) > 0:
+            self.json_post("/cli-json/clear_cx_counters", {"cx_name": 'all'})
             for cx in self.cx_profile.created_cx.keys():
                 req_url = "cli-json/set_cx_report_timer"
                 data = {
@@ -114,6 +116,7 @@ class RvR(Realm):
                     "milliseconds": 1000
                 }
                 self.json_post(req_url, data)
+        time.sleep(5)
         self.cx_profile.start_cx()
         print("Monitoring CX's & Endpoints for %s seconds" % self.test_duration)
 
@@ -174,7 +177,15 @@ class RvR(Realm):
         self.station_profile.set_command_flag("add_sta", "create_admin_down", 1)
         self.station_profile.set_command_param("set_port", "report_timer", 1500)
         self.station_profile.set_command_flag("set_port", "rpt_timer", 1)
-        self.station_profile.create(radio=self.radio, sta_names_=self.station_names, debug=self.debug)
+        first, last = 0, self.sta_list[0]
+        for i in range(len(self.radio)):
+            if i != 0:
+                last = last + self.sta_list[i]
+            print(first, last)
+            station_names = self.station_names[first:last]
+            self.station_profile.create(radio=self.radio[i], sta_names_=station_names, debug=self.debug)
+            first = first + self.sta_list[i]
+            print(station_names)
         self.start_stations()
         for traffic in self.traffic_type:
             self.cx_profile.create(endp_type=traffic, side_a=self.station_profile.station_names,
@@ -185,7 +196,7 @@ class RvR(Realm):
                 throughput = {'upload': [], 'download': []}
                 self.set_attenuation(value=val)
                 self.start_l3()
-                time.sleep(15)
+                time.sleep(20)
                 upload, download = self.monitor()
                 # self.stop_l3()
                 self.reset_l3()
@@ -305,8 +316,8 @@ class RvR(Realm):
         # objective title and description
         report.set_obj_html(_obj_title="Objective",
                             _obj="Through this test we can measure the performance of stations over a certain distance "
-                                 "of the DUT, Distance is emulated using programmable attenuators and throughput test is "
-                                 "run at each distance/RSSI step")
+                                 "of the DUT, Distance is emulated using programmable attenuators and throughput test "
+                                 "is run at each distance/RSSI step")
         report.build_objective()
         report.test_setup_table(test_setup_data=test_setup_info, value="Device Under Test")
         # report.set_table_title(
@@ -409,7 +420,7 @@ def main():
     Generic command layout:
     =====================================================================
     sudo python3 rvr_test.py --mgr localhost --mgr_port 8080 --upstream eth1 --num_stations 40 
-    --security WPA2 --ssid NETGEAR73-5G --password fancylotus986 --radio wiphy3 --atten_serno 2222 --atten_idx all
+    --security wpa2 --ssid NETGEAR73-5G --password fancylotus986 --radio wiphy3 --atten_serno 2222 --atten_idx all
     --atten_val 10 --test_duration 1m --ap_model WAX610 --traffic 100''', allow_abbrev=False)
     optional = parser.add_argument_group('optional arguments')
     required = parser.add_argument_group('required arguments')
@@ -418,9 +429,10 @@ def main():
     optional.add_argument('--upstream', help='non-station port that generates traffic: <resource>.<port>, '
                                              'e.g: 1.eth1', default='eth1')
     optional.add_argument('--mode', help='used to force mode of stations', default="0")
-    required.add_argument('--radio', help='radio to use on which clients gets created', default="wiphy0")
+    required.add_argument('--radio_list', help='radio to use on which clients gets created', default=['wiphy0', 'wiphy3'])
+    required.add_argument('--sta_list', help='radio to use on which clients gets created', default=[1, 1])
     required.add_argument('--ssid', help="ssid for client association with Access Point", required=True)
-    required.add_argument('--security', help="security type of ssid", required=True)
+    required.add_argument('--security', help="security type of ssid, ex: wpa || wpa2 || wpa3 || open", required=True)
     required.add_argument('--password', help="password of ssid", required=True)
     required.add_argument('--traffic_type', help='provide the traffic Type lf_udp, lf_tcp', default='lf_tcp')
     optional.add_argument('--traffic_direction', help='Traffic direction i.e upload or download or bidirectional',
@@ -432,17 +444,18 @@ def main():
     optional.add_argument('--create_sta', help="used to create stations if you do not prefer existing stations",
                           default=True)
     optional.add_argument('--sta_names',
-                          help='used to provide existing station names from the port manager, prefer only if create_sta is False',
+                          help='used to provide existing station names from the port manager, prefer only if '
+                               'create_sta is False',
                           default="sta0000")
     optional.add_argument('--ap_model', help="AP Model Name", default="Test-AP")
-    required.add_argument('--num_stations', help='number of stations to create, works only if create_sta is True',
-                          required=True)
+    # required.add_argument('--num_stations', help='number of stations to create, works only if create_sta is True',
+    #                       required=True)
     optional.add_argument('-as', '--atten_serno', help='Serial number for requested Attenuator', default='2222')
     optional.add_argument('-ai', '--atten_idx',
                           help='Attenuator index eg. For module 1 = 0,module 2 = 1 --> --atten_idx 0,1',
                           default='all')
     optional.add_argument('-av', '--atten_val',
-                          help='Requested attenuation in 1/10ths of dB (ddB) ex:--> --atten_val 0, 10', default='0')
+                          help='Requested attenuation in dB ex:--> --atten_val 0, 10', default='0')
     optional.add_argument('--debug', help="to enable debug", default=False)
     args = parser.parse_args()
     test_start_time = datetime.now().strftime("%b %d %H:%M:%S")
@@ -456,6 +469,27 @@ def main():
         args.test_duration = abs(int(float(args.test_duration[0:-1]) * 60 * 60))
     elif args.test_duration.endswith(''):
         args.test_duration = abs(int(float(args.test_duration)))
+
+    if not isinstance(args.radio_list, list):
+        if isinstance(args.radio_list, str):
+            print(args.radio_list)
+            args.radio_list = args.radio_list.split(",")
+            print(args.radio_list)
+        else:
+            raise TypeError("radio_list should be a list or a string of radio names separated with ','")
+
+    if not isinstance(args.sta_list, list):
+        if isinstance(args.sta_list, str):
+            print(args.sta_list)
+            args.sta_list = args.sta_list.split(",")
+            args.sta_list = [int(x) for x in args.sta_list]
+            print(args.sta_list)
+        else:
+            raise TypeError("sta_list should be a list of no. of stations or a string of no. of stations separated "
+                            "with ','")
+
+    if len(args.radio_list) != len(args.sta_list):
+        raise AttributeError("list of radio names and list of sta_list should be equal in number")
 
     if args.atten_val:
         if args.atten_val.split(',')[0] != '0':
@@ -480,21 +514,26 @@ def main():
         side_b = abs(int(float(args.traffic) * 1000000))
 
     if args.create_sta:
-        station_list = LFUtils.portNameSeries(prefix_="sta", start_id_=0, end_id_=abs(int(args.num_stations)) - 1,
-                                              padding_number_=10000,
-                                              radio=args.radio)
+        station_list = []
+        first, last = 0, args.sta_list[0]
+        for i in range(len(args.radio_list)):
+            if i != 0:
+                last = last + args.sta_list[i]
+            station_list.extend(LFUtils.portNameSeries(prefix_="sta", start_id_=first, end_id_=abs(last) - 1, padding_number_=10000, radio=args.radio_list[i]))
+            first = first + args.sta_list[i]
+            print(station_list)
     else:
         station_list = args.sta_names.split(",")
 
     rvr_obj = RvR(host=args.mgr,
                   port=args.mgr_port,
                   number_template="0000",
-                  sta_list=station_list,
+                  sta_names=station_list,
                   create_sta=args.create_sta,
-                  num_stations=abs(int(args.num_stations)),
+                  sta_list=args.sta_list,
                   name_prefix="RvR-",
                   upstream=args.upstream,
-                  radio=args.radio,
+                  radio_list=args.radio_list,
                   ssid=args.ssid,
                   password=args.password,
                   security=args.security,
@@ -535,4 +574,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
