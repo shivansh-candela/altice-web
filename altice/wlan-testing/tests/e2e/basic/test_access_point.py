@@ -7,6 +7,7 @@ import pytest
 @pytest.mark.uc_sanity
 @allure.feature("SDK REST API")
 @pytest.mark.gateway_ap_api
+@pytest.mark.ow_sanity_lf
 class TestAP(object):
 
     def test_ap_reboot(self, setup_controller, get_configuration, get_apnos):
@@ -32,7 +33,7 @@ class TestAP(object):
                   "when": 0
                 }
         resp = setup_controller.ap_reboot(device_name, payload)
-        time.sleep(150)
+        time.sleep(120)
         print(resp.json())
         allure.attach(name="Reboot", body=str(resp.json()), attachment_type=allure.attachment_type.JSON)
         for ap in get_configuration['access_point']:
@@ -77,7 +78,7 @@ class TestAP(object):
                   "keepRedirector": True
                 }
         resp = setup_controller.ap_factory_reset(device_name, payload)
-        time.sleep(200)
+        time.sleep(150)
         print(resp.json())
         allure.attach(name="Factory Reset", body=str(resp.json()), attachment_type=allure.attachment_type.JSON)
         for ap in get_configuration['access_point']:

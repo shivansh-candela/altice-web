@@ -47,9 +47,8 @@ class TestBridgeModeConnectivitySuiteA(object):
 
     @pytest.mark.open
     @pytest.mark.twog
-    @pytest.mark.altice_2g
     @allure.testcase(url="https://telecominfraproject.atlassian.net/browse/WIFI-2809", name="JIRA LINK")
-    def test_open_ssid_2g(self, lf_test, station_names_twog, set_ap_channel_and_band, get_ap_channel_generic):
+    def test_open_ssid_2g(self, lf_test, station_names_twog, get_ap_channel_generic):
         """Client Connectivity open ssid 2.4G
            pytest -m "client_connectivity and bridge and general and open and twog"
         """

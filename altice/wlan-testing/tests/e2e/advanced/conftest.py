@@ -12,7 +12,6 @@ if "libs" not in sys.path:
 from controller.controller_1x.controller import ProfileUtility
 from controller.controller_2x.controller import UProfileUtility
 from controller.controller_3x.controller import CController
-from controller.controller_4x.controller import AController
 import time
 from lanforge.lf_tests import RunTest
 from lanforge.lf_tools import ChamberView
@@ -26,8 +25,6 @@ def instantiate_profile(request):
         yield ProfileUtility
     elif request.config.getoption("cc.1"):
         yield CController
-    elif request.config.getoption("al.1"):
-        yield AController
     else:
         yield UProfileUtility
 
@@ -50,7 +47,7 @@ def setup_vlan():
 def setup_profiles(request, setup_controller, testbed, get_equipment_ref, fixtures_ver,
                    instantiate_profile, get_markers, create_lanforge_chamberview_dut, lf_tools,
                    get_security_flags, get_configuration, radius_info, get_apnos, radius_accounting_info,
-                   run_lf, cc_1, lf_reports, al_1):
+                   run_lf, cc_1, lf_reports):
     lf_tools.reset_scenario()
     param = dict(request.param)
 
@@ -76,10 +73,6 @@ def setup_profiles(request, setup_controller, testbed, get_equipment_ref, fixtur
         lf_tools.add_vlan(vlan_ids=vlan_list)
     print("fixture version ", fixtures_ver)
     if cc_1:
-        return_var = fixtures_ver.setup_profiles(request, param, run_lf, instantiate_profile, get_configuration,
-                                                 get_markers,
-                                                 lf_tools, lf_reports)
-    elif al_1:
         return_var = fixtures_ver.setup_profiles(request, param, run_lf, instantiate_profile, get_configuration,
                                                  get_markers,
                                                  lf_tools, lf_reports)

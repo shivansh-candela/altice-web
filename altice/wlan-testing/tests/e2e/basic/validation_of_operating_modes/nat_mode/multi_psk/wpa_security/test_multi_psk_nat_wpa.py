@@ -37,6 +37,14 @@ setup_params_general = {
                      "key": "lanforge3"
                  }
              ],
+             },
+            {"ssid_name": "ssid_wpa2_5g_br",
+             "appliedRadios": ["5G"],
+             "security_key": "something",
+             "rate-limit": {
+                 "ingress-rate": 100,
+                 "egress-rate": 100
+             }
              }]},
     "rf": {},
     "radius": False
@@ -61,7 +69,7 @@ class TestMultipskNAT(object):
     def test_client_wpa_2g_vlan1(self, lf_test, lf_tools):
 
         profile_data = setup_params_general["ssid_modes"]["wpa"][0]
-        lf_tools.reset_scenario()
+        print(profile_data)
         ssid_name = profile_data["ssid_name"]
         print(ssid_name)
         security_key = profile_data["security_key"]
@@ -94,7 +102,7 @@ class TestMultipskNAT(object):
     def test_client_wpa_2g_vlan2(self, lf_test, lf_tools):
 
         profile_data = setup_params_general["ssid_modes"]["wpa"][0]
-        lf_tools.reset_scenario()
+        print(profile_data)
         ssid_name = profile_data["ssid_name"]
         print(ssid_name)
         security_key = profile_data["security_key"]

@@ -13,7 +13,6 @@ if "libs" not in sys.path:
 from controller.controller_1x.controller import ProfileUtility
 from controller.controller_2x.controller import UProfileUtility
 from controller.controller_3x.controller import CController
-from controller.controller_4x.controller import AController
 import time
 from lanforge.lf_tools import ChamberView
 import pytest
@@ -26,8 +25,6 @@ def instantiate_profile(request):
         yield ProfileUtility
     elif request.config.getoption("cc.1"):
         yield CController
-    elif request.config.getoption("al.1"):
-        yield AController
     else:
         yield UProfileUtility
 
@@ -46,47 +43,58 @@ def create_lanforge_chamberview_dut(lf_tools, run_lf):
     return ""
 
 
+# @pytest.fixture(scope="class")
+# def setup_profiles(request, setup_controller, testbed, get_equipment_ref, fixtures_ver, reset_scenario_lf,
+#                    instantiate_profile, get_markers, create_lanforge_chamberview_dut, lf_tools, run_lf,
+#                    get_security_flags, get_configuration, radius_info, get_apnos, radius_accounting_info, cc_1):
+#     param = dict(request.param)
+#
+#     # VLAN Setup
+#     if request.param["mode"] == "VLAN":
+#
+#         vlan_list = list()
+#         refactored_vlan_list = list()
+#         ssid_modes = request.param["ssid_modes"].keys()
+#         for mode in ssid_modes:
+#             for ssid in range(len(request.param["ssid_modes"][mode])):
+#                 if "vlan" in request.param["ssid_modes"][mode][ssid]:
+#                     vlan_list.append(request.param["ssid_modes"][mode][ssid]["vlan"])
+#                 else:
+#                     pass
+#         if vlan_list:
+#             [refactored_vlan_list.append(x) for x in vlan_list if x not in refactored_vlan_list]
+#             vlan_list = refactored_vlan_list
+#             for i in range(len(vlan_list)):
+#                 if vlan_list[i] > 4095 or vlan_list[i] < 1:
+#                     vlan_list.pop(i)
+#     if request.param["mode"] == "VLAN":
+#         lf_tools.reset_scenario()
+#         lf_tools.add_vlan(vlan_ids=vlan_list)
+#
+#     # call this, if 1.x
+#     print("fixture version ", fixtures_ver)
+#     if cc_1:
+#         return_var = fixtures_ver.setup_profiles(request, param, run_lf, instantiate_profile, get_configuration, get_markers, lf_tools)
+#     else:
+#         return_var = fixtures_ver.setup_profiles(request, param, setup_controller, testbed, get_equipment_ref,
+#                                              instantiate_profile,
+#                                              get_markers, create_lanforge_chamberview_dut, lf_tools,
+#                                              get_security_flags, get_configuration, radius_info, get_apnos,
+#                                              radius_accounting_info, run_lf=run_lf)
+#
+#     yield return_var
+
 @pytest.fixture(scope="class")
-def setup_profiles(request, setup_controller, testbed, get_equipment_ref, fixtures_ver, reset_scenario_lf,
-                   instantiate_profile, get_markers, create_lanforge_chamberview_dut, lf_tools, run_lf,
-                   get_security_flags, get_configuration, radius_info, get_apnos, radius_accounting_info, cc_1, al_1, get_all_markers):
+def setup_profiles_generic(request, testbed, fixtures_ver, reset_scenario_lf,
+                           get_markers, lf_tools, run_lf,
+                           get_security_flags, get_configuration, get_apnos):
     param = dict(request.param)
 
-    # VLAN Setup
-    if request.param["mode"] == "VLAN":
-
-        vlan_list = list()
-        refactored_vlan_list = list()
-        ssid_modes = request.param["ssid_modes"].keys()
-        for mode in ssid_modes:
-            for ssid in range(len(request.param["ssid_modes"][mode])):
-                if "vlan" in request.param["ssid_modes"][mode][ssid]:
-                    vlan_list.append(request.param["ssid_modes"][mode][ssid]["vlan"])
-                else:
-                    pass
-        if vlan_list:
-            [refactored_vlan_list.append(x) for x in vlan_list if x not in refactored_vlan_list]
-            vlan_list = refactored_vlan_list
-            for i in range(len(vlan_list)):
-                if vlan_list[i] > 4095 or vlan_list[i] < 1:
-                    vlan_list.pop(i)
-    if request.param["mode"] == "VLAN":
-        lf_tools.reset_scenario()
-        lf_tools.add_vlan(vlan_ids=vlan_list)
-
-    # call this, if 1.x
-    print("fixture version ", fixtures_ver)
-    if cc_1:
-        return_var = fixtures_ver.setup_profiles(request, param, run_lf, instantiate_profile, get_configuration, get_markers, lf_tools)
-    elif al_1:
-        return_var = fixtures_ver.setup_profiles(request, param, run_lf, instantiate_profile, get_configuration,
-                                                 get_markers, testbed, lf_tools, get_all_markers)
-    else:
-        return_var = fixtures_ver.setup_profiles(request, param, setup_controller, testbed, get_equipment_ref,
-                                             instantiate_profile,
-                                             get_markers, create_lanforge_chamberview_dut, lf_tools,
-                                             get_security_flags, get_configuration, radius_info, get_apnos,
-                                             radius_accounting_info, run_lf=run_lf)
+    print("---- Hereeeeee ---- ")
+    return_var = fixtures_ver.setup_profiles_generic(request=request, param=param,
+                                                     get_markers=get_markers,
+                                                     get_configuration=get_configuration, get_apnos=get_apnos,
+                                                     run_lf=run_lf)
 
     yield return_var
 
@@ -148,11 +156,12 @@ def get_vlan_list(get_apnos, get_configuration):
 
 @pytest.fixture(scope="session")
 def reset_scenario_lf(request, lf_tools, run_lf):
-    if not run_lf:
-        lf_tools.reset_scenario()
-        def teardown_session():
-            lf_tools.reset_scenario()
-
-        request.addfinalizer(teardown_session)
+    print("reset_scenario_lf commented code here")
+    # if not run_lf:
+    #     lf_tools.reset_scenario()
+    #
+    #     def teardown_session():
+    #         lf_tools.reset_scenario()
+    #
+    #     request.addfinalizer(teardown_session)
     yield ""
-
