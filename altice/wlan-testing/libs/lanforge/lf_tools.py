@@ -33,6 +33,8 @@ import pandas as pd
 
 realm = importlib.import_module("py-json.realm")
 Realm = realm.Realm
+lf_report = importlib.import_module("py-scripts.lf_report")
+lf_report = lf_report.lf_report
 import logging
 
 LOGGER = logging.getLogger(__name__)
@@ -42,16 +44,20 @@ LOGGER.addHandler(stdout_handler)
 
 
 class ChamberView:
-    def __init__(self, lanforge_data=None, access_point_data=None, run_lf=False, debug=True, testbed=None,  cc_1=False, ap_version=None):
+    def __init__(self, lanforge_data=None, access_point_data=None, run_lf=False, debug=True, testbed=None,  cc_1=False, ap_version=None, al_1=False):
         print("lanforge data", lanforge_data)
         print("access point data", access_point_data)
         self.access_point_data = access_point_data
         self.access_point_data = access_point_data
         self.run_lf = run_lf
         self.cc_1 = cc_1
+        self.al_1 = al_1
         print("testbed", testbed)
+        print("self.al_1 in lf_tools : 54 ", self.al_1)
+
         if "type" in lanforge_data.keys():
             if lanforge_data["type"] == "Non-mesh":
+                print("----- Its in non mesh -------- ")
                 self.lanforge_ip = lanforge_data["ip"]
                 self.lanforge_port = lanforge_data["port"]
                 self.ssh_port = lanforge_data["ssh_port"]
@@ -70,6 +76,8 @@ class ChamberView:
                 self.ssid_list = []
                 self.staConnect = StaConnect2(self.lanforge_ip, self.lanforge_port, debug_=self.debug)
                 self.local_realm = realm.Realm(lfclient_host=self.lanforge_ip, lfclient_port=self.lanforge_port)
+                print("----- Its in non mesh -------- ")
+
                 self.raw_line = [
                     ["profile_link " + self.upstream_resources + " upstream-dhcp 1 NA NA " +
                      self.upstream_port.split(".")
@@ -163,6 +171,7 @@ class ChamberView:
                 self.debug = debug
                 self.testbed = "mesh"
                 self.scenario_name = "TIP-" + self.testbed
+                print(" in mesh 172")
                 self.raw_line = [
                     ["profile_link " + self.upstream_resource_1 + " upstream-dhcp 1 NA NA " +
                      self.upstream_port_1.split(".")[2] + ",AUTO -1 NA"],
@@ -171,6 +180,181 @@ class ChamberView:
                         self.uplink_port_1.split(".")[2] + "," + self.upstream_port_1.split(".")[2] + " -1 NA"]
                 ]
                 self.CreateChamberview = CreateChamberview(self.lanforge_ip, self.lanforge_port)
+        elif self.al_1:
+            print("----- Its in al_1 -------- ")
+            self.lanforge_ip = lanforge_data["ip"]
+            self.lanforge_port = lanforge_data["port"]
+            self.ssh_port = lanforge_data["ssh_port"]
+            self.twog_radios = lanforge_data["2.4G-Radio"]
+            self.fiveg_radios = lanforge_data["5G-Radio"]
+            self.ax_radios = lanforge_data["AX-Radio"]
+            self.upstream_port = lanforge_data["upstream"]
+            self.uplink_port = lanforge_data["uplink"]
+            self.upstream_subnet = lanforge_data["upstream_subnet"]
+            self.upstream_resources = self.upstream_port.split(".")[0] + "." + self.upstream_port.split(".")[1]
+            # self.uplink_resources = self.uplink_port.split(".")[0] + "." + self.uplink_port.split(".")[1]
+            self.scenario_name = testbed
+            self.debug = debug
+            self.exit_on_error = False
+            self.dut_idx_mapping = {}
+            self.ssid_list = []
+            self.staConnect = StaConnect2(self.lanforge_ip, self.lanforge_port, debug_=self.debug)
+            self.local_realm = realm.Realm(lfclient_host=self.lanforge_ip, lfclient_port=self.lanforge_port)
+            print("----- Its in al_1 -------- ")
+
+            self.raw_line = [
+                ["profile_link " + self.upstream_resources + " upstream 1 NA NA " +
+                 self.upstream_port.split(".")
+                 [2] + ",AUTO -1 NA"]
+                # [
+                #     "profile_link " + self.uplink_resources + " uplink-nat 1 'DUT: upstream LAN " + self.upstream_subnet
+                #     + "' NA " + self.uplink_port.split(".")[2] + "," + self.upstream_port.split(".")[2] + " -1 NA"]
+            ]
+            self.CreateChamberview = CreateChamberview(self.lanforge_ip, self.lanforge_port)
+
+            self.delete_old_scenario = True
+            if access_point_data:
+                print(len(access_point_data))
+
+                for ap in range(len(access_point_data)):
+                    print(access_point_data[ap])
+                    self.dut_name = access_point_data[ap]["model"]
+                    print(self.dut_name)
+                    self.ap_model = access_point_data[ap]["model"]
+                    self.version = access_point_data[ap]["version"].split("/")[-1]
+                    self.serial = access_point_data[ap]["serial"]
+                    self.ssid_data = None
+                    if self.run_lf:
+                        self.ssid_data = access_point_data[ap]['ssid']
+                        print(self.ssid_data)
+
+                    self.CreateDut = DUT(lfmgr=self.lanforge_ip,
+                                         port=self.lanforge_port,
+                                         dut_name=self.dut_name,
+                                         sw_version=self.version,
+                                         hw_version=self.ap_model,
+                                         model_num=self.ap_model,
+                                         serial_num=self.serial
+                                         )
+                    self.CreateDut.ssid = []
+                    if self.ssid_data is not None:
+                        self.twog_ssid = ["ssid_idx=0"
+                                          " ssid=" + self.ssid_data["2g-ssid"] +
+                                          " security=" + self.ssid_data["2g-encryption"].upper() +
+                                          " password=" + self.ssid_data["2g-password"] +
+                                          " bssid=" + self.ssid_data["2g-bssid"].lower().replace(" ", "")
+                                          ]
+
+                        self.fiveg_ssid = ["ssid_idx=1 ssid=" +
+                                           self.ssid_data["5g-ssid"] +
+                                           " security=" +
+                                           self.ssid_data["5g-encryption"].upper() +
+                                           " password=" +
+                                           self.ssid_data["5g-password"] +
+                                           " bssid=" +
+                                           self.ssid_data["5g-bssid"].lower().replace(" ", "")]
+                        if "6g-ssid" in self.ssid_data.keys():
+                            print("yes")
+                            self.sixg_ssid = ["ssid_idx=2 ssid=" +
+                                              self.ssid_data["6g-ssid"] +
+                                              " security=" +
+                                              self.ssid_data["6g-encryption"].upper() +
+                                              " password=" +
+                                              self.ssid_data["6g-password"] +
+                                              " bssid=" +
+                                              self.ssid_data["6g-bssid"].lower().replace(" ", "")]
+                            ssid_var = [self.twog_ssid, self.fiveg_ssid, self.sixg_ssid]
+                        else:
+                            ssid_var = [self.twog_ssid, self.fiveg_ssid]
+                        self.CreateDut.ssid = ssid_var
+                        # print(self.CreateDut.ssid)
+                        self.Create_Dut()
+            # print("lf_tools 178 self.al_1: ",self.al_1)
+            # self.lanforge_ip = lanforge_data["ip"]
+            # self.lanforge_port = lanforge_data["port"]
+            # self.ssh_port = lanforge_data["ssh_port"]
+            # self.twog_radios = lanforge_data["2.4G-Radio"]
+            # self.fiveg_radios = lanforge_data["5G-Radio"]
+            # self.ax_radios = lanforge_data["AX-Radio"]
+            # self.upstream_port = lanforge_data["upstream"]
+            # self.lan_upstream_port = lanforge_data["lan-upstream"]
+            # # self.uplink_port = ""
+            # # self.upstream_subnet = ""
+            # self.upstream_resources = self.upstream_port.split(".")[0] + "." + self.upstream_port.split(".")[1]
+            # # self.uplink_resources = self.uplink_port.split(".")[0] + "." + self.uplink_port.split(".")[1]
+            # self.scenario_name = testbed
+            # self.debug = debug
+            # self.exit_on_error = False
+            # self.dut_idx_mapping = {}
+            # self.ssid_list = []
+            # self.staConnect = StaConnect2(self.lanforge_ip, self.lanforge_port, debug_=self.debug)
+            # self.local_realm = realm.Realm(lfclient_host=self.lanforge_ip, lfclient_port=self.lanforge_port)
+            # self.raw_line = [
+            #     ["profile_link " + self.upstream_resources + " upstream 1 NA NA " +
+            #      self.upstream_port.split(".")
+            #      [2] + ",AUTO -1 NA"]
+            # ]
+            # self.CreateChamberview = CreateChamberview(self.lanforge_ip, self.lanforge_port)
+            #
+            # self.delete_old_scenario = True
+            # if access_point_data:
+            #     print(len(access_point_data))
+            #
+            #     for ap in range(len(access_point_data)):
+            #         print(access_point_data[ap])
+            #         self.dut_name = access_point_data[ap]["model"]
+            #         print(self.dut_name)
+            #         self.ap_model = access_point_data[ap]["model"]
+            #         self.version = access_point_data[ap]["version"].split("/")[-1]
+            #         self.serial = access_point_data[ap]["serial"]
+            #         self.ssid_data = None
+            #         if self.run_lf:
+            #             self.ssid_data = access_point_data[ap]['ssid']
+            #             print(self.ssid_data)
+            #
+            #         self.CreateDut = DUT(lfmgr=self.lanforge_ip,
+            #                              port=self.lanforge_port,
+            #                              dut_name=self.dut_name,
+            #                              sw_version=self.version,
+            #                              hw_version=self.ap_model,
+            #                              model_num=self.ap_model,
+            #                              serial_num=self.serial
+            #                              )
+            #         self.CreateDut.ssid = []
+            #         if self.ssid_data is not None:
+            #             print(f"self.ssid_data: {self.ssid_data}")
+            #
+            #             self.twog_ssid = ["ssid_idx=0"
+            #                               " ssid=" + self.ssid_data["2g-ssid"] +
+            #                               " security=" + self.ssid_data["2g-encryption"].upper() +
+            #                               " password=" + self.ssid_data["2g-password"] +
+            #                               " bssid=" + self.ssid_data["2g-bssid"].lower().replace(" ", "")
+            #                               ]
+            #
+            #             self.fiveg_ssid = ["ssid_idx=1"
+            #                                "ssid=" +  self.ssid_data["5g-ssid"] +
+            #                                " security=" + self.ssid_data["5g-encryption"].upper() +
+            #                                " password=" + self.ssid_data["5g-password"] +
+            #                                " bssid=" + self.ssid_data["5g-bssid"].lower().replace(" ", "")]
+            #
+            #             print(f"self.twog_ssid : {self.twog_ssid}, self.fiveg_ssid: {self.fiveg_ssid}")
+            #
+            #             if "6g-ssid" in self.ssid_data.keys():
+            #                 print("yes")
+            #                 self.sixg_ssid = ["ssid_idx=2 ssid=" +
+            #                                   self.ssid_data["6g-ssid"] +
+            #                                   " security=" +
+            #                                   self.ssid_data["6g-encryption"].upper() +
+            #                                   " password=" +
+            #                                   self.ssid_data["6g-password"] +
+            #                                   " bssid=" +
+            #                                   self.ssid_data["6g-bssid"].lower().replace(" ", "")]
+            #                 ssid_var = [self.twog_ssid, self.fiveg_ssid, self.sixg_ssid]
+            #             else:
+            #                 ssid_var = [self.twog_ssid, self.fiveg_ssid]
+            #             self.CreateDut.ssid = ssid_var
+            #             # print(self.CreateDut.ssid)
+            #             self.Create_Dut()
         else:
             self.lanforge_ip = lanforge_data["ip"]
             self.lanforge_port = lanforge_data["port"]
@@ -211,9 +395,13 @@ class ChamberView:
                 self.dut_name = testbed
                 self.ap_model = access_point_data[0]["model"]
                 self.ap_hw_info = access_point_data[0]["mode"]
-                # self.version = self.ap_version[0].split(" / ")[1].split("\r\n\n")[0]
                 # print("AP version", self.version)
-                self.version = "Version"
+                self.version = "next-latest"
+                try:
+                    self.version = self.ap_version[0].split(" / ")[1].split("\r\n\n")[0]
+                    print("AP version", self.version)
+                except Exception as e:
+                    print(e)
                 self.serial = access_point_data[0]["serial"]
                 self.ssid_data = None
                 if self.run_lf:
@@ -257,7 +445,7 @@ class ChamberView:
     def reset_scenario(self):
         # self.layer3_cleanup()
         # self.Create_Dut()
-        if not self.run_lf:
+        if not self.run_lf and not self.al_1:
             self.raw_line = [
                 ["profile_link " + self.upstream_resources + " upstream-dhcp 1 NA NA " + self.upstream_port.split(".")
                 [2] + ",AUTO -1 NA"],
@@ -265,6 +453,20 @@ class ChamberView:
                  + "' NA " + self.uplink_port.split(".")[2] + "," + self.upstream_port.split(".")[2] + " -1 NA"]
             ]
             print(self.raw_line)
+        if not self.run_lf and not self.al_1:
+            self.raw_line = [
+                ["profile_link " + self.upstream_resources + " upstream-dhcp 1 NA NA " + self.upstream_port.split(".")
+                [2] + ",AUTO -1 NA"]
+            ]
+            print(self.raw_line)
+
+        if not self.run_lf and self.al_1:
+            self.raw_line = [
+                ["profile_link " + self.upstream_resources + " upstream 1 NA NA " + self.upstream_port.split(".")
+                [2] + ",AUTO -1 NA"]
+            ]
+            print(self.raw_line)
+
         self.Chamber_View()
 
     def reset_dut(self):
@@ -329,7 +531,7 @@ class ChamberView:
             LOGGER.warning("0 Stations")
             return
         idx = idx
-        if self.run_lf or self.cc_1:
+        if self.run_lf or self.cc_1 or self.al_1:
             if band == "2G":
                 idx = 0
             if band == "5G":
@@ -533,8 +735,9 @@ class ChamberView:
         return cli_base.json_post(req_url, data)
 
     def station_data_query(self, station_name="wlan0", query="channel"):
-        x = self.upstream_port.split(".")
+        x = self.twog_radios[0].split(".")
         url = f"/port/{x[0]}/{x[1]}/{station_name}?fields={query}"
+        print("url", url)
         response = self.json_get(_req_url=url)
         print("response: ", response)
         if (response is None) or ("interface" not in response):
@@ -560,31 +763,45 @@ class ChamberView:
                 result = df[column_name].values.tolist()
                 return result
 
-    def read_csv_individual_station_throughput(self, dir_name, option):
+    def read_csv_individual_station_throughput(self, dir_name, option, individual_station_throughput=True, kpi_csv=False,
+                                               file_name="/csv-data/data-Combined_bps__60_second_running_average-1.csv",
+                                               batch_size="0"):
         try:
             df = pd.read_csv(
-                "../reports/" + str(dir_name) + "/csv-data/data-Combined_bps__60_second_running_average-1.csv",
+                "../reports/" + str(dir_name) + file_name,
                 sep=r'\t', engine='python')
             print("csv file opened")
         except FileNotFoundError:
             print("csv file does not exist")
             return False
 
-        dict_data = {}
-        if option == "download":
-            csv_sta_names = df.iloc[[0]].values.tolist()
-            csv_throughput_values = df.iloc[[1]].values.tolist()
-        elif option == "upload":
-            csv_sta_names = df.iloc[[0]].values.tolist()
-            csv_throughput_values = df.iloc[[2]].values.tolist()
-        else:
-            print("Provide proper option: download or upload")
-            return
+        if kpi_csv:
+            count = 0
+            dict_data = {"Down": {}, "Up": {}, "Both": {}}
+            csv_short_dis = df.loc[:,"short-description"]
+            csv_num_score = df.loc[:,"numeric-score"]
+            for i in range(len(batch_size.split(","))):
+                dict_data["Down"][csv_short_dis[count + 0]] = csv_num_score[count + 0]
+                dict_data["Up"][csv_short_dis[count + 1]] = csv_num_score[count + 1]
+                dict_data["Both"][csv_short_dis[count + 2]] = csv_num_score[count + 2]
+                count += 3
 
-        sta_list = csv_sta_names[0][0][:-1].replace('"', '').split(",")
-        th_list = list(map(float, csv_throughput_values[0][0].split(",")))
-        for i in range(len(sta_list)):
-            dict_data[sta_list[i]] = th_list[i]
+        if individual_station_throughput:
+            dict_data = {}
+            if option == "download":
+                csv_sta_names = df.iloc[[0]].values.tolist()
+                csv_throughput_values = df.iloc[[1]].values.tolist()
+            elif option == "upload":
+                csv_sta_names = df.iloc[[0]].values.tolist()
+                csv_throughput_values = df.iloc[[2]].values.tolist()
+            else:
+                print("Provide proper option: download or upload")
+                return
+
+            sta_list = csv_sta_names[0][0][:-1].replace('"', '').split(",")
+            th_list = list(map(float, csv_throughput_values[0][0].split(",")))
+            for i in range(len(sta_list)):
+                dict_data[sta_list[i]] = th_list[i]
 
         return dict_data
 
@@ -620,6 +837,90 @@ class ChamberView:
             allure.attach.file(source=relevant_path + i,
                                name=i,
                                attachment_type="image/png", extension=None)
+
+    # test_setup_info = Ap information and test information
+    # input_setup_info = Is Support information ex. support@candelatech.com
+    # data is realtime data
+    def create_dynamic_pdf(self, report_name=None, test_setup_info=None, result=None):
+        png_path = "../reports/" + str(report_name) + "/kpi-chart-1.png"
+        print(f"png_path: {png_path}")
+
+        report = lf_report(_alt_path=f"../reports/{str(report_name)}",
+                           _output_pdf=f"new-{str(report_name)}.pdf",
+                           _output_html=f"new-{str(report_name)}.html",
+                           _path_date_time=f"../reports/{str(report_name)}")
+
+        report_path = report.get_path()
+        print(f"report path: {report_path}")
+
+        report_path_date_time = report.get_path_date_time()
+        # logger.info("path: {}".format(report_path))
+        # logger.info("path_date_time: {}".format(report_path_date_time))
+        report.set_title("WiFi Capacity Test")
+        report.build_banner()
+
+        # objective title and description
+        report.set_obj_html(_obj_title="Objective", _obj=" The Candela WiFi Capacity test is designed to measure performance of an Access Point when handling"
+                                                         " different amounts of WiFi Stations. The test allows the user to increase the number of stations in "
+                                                         "user defined steps for each test iteration and measure the per station and the overall throughput for"
+                                                         " each trial. Along with throughput other measurements made are client connection times, Fairness, % "
+                                                         "packet loss, DHCP times and more. The expected behavior is for the AP to be able to handle several "
+                                                         "stations (within the limitations of the AP specs) and make sure all stations get a fair amount of "
+                                                         "airtime both in the upstream and downstream. An AP that scales well will not show a significant "
+                                                         "over-all throughput decrease as more stations are added.")
+        report.build_objective()
+
+        access_point = {
+            "ssid-name" : result["ssid-name"],
+            "security" : result["security"],
+            "security-key" : result["security-key"],
+            "band" : result["band"],
+            "channel" : result["channel"],
+        }
+
+        traffic_generator = {
+            "download-traffic" : result["test-download"],
+            "batch-size" : result["test-batch-size"],
+            "upload-rate" : result["test-upload-rate"],
+            "protocol" : result["test-protocol"],
+            "test-duration" : result["test-duration"],
+        }
+
+        result = {
+            "Result" : result["result"],
+            "expected-throughput" : result["expected-throughput"],
+            "actual-throughput" : result["actual-throughput"]
+        }
+
+        report.test_setup_table(test_setup_data=traffic_generator, value="Traffic Generator")
+        report.end_content_div()
+
+        report.test_setup_table(test_setup_data=access_point, value="Device Under Test")
+        report.end_content_div()
+
+        # report.set_table_title("<h3>: Testcase Result")
+        report.test_setup_table(test_setup_data=result, value="PASS/FAIL")
+
+        # report.build_table_title()
+        report.end_content_div()
+
+        report.build_text()
+        report.end_content_div()
+
+        report.set_graph_image("kpi-chart-1-print.png")
+        report.build_graph()
+
+        input_setup_info = {
+            "contact": "support@candelatech.com"
+        }
+
+        report.test_setup_table(test_setup_data=input_setup_info, value="Information")
+
+        report.build_custom()
+        report.build_footer()
+        html_path = report.write_html()
+        pdf_path = report.write_pdf()
+        return pdf_path
 
     def create_mesh_scenario(self):
         # upstream_list = []
