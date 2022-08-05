@@ -29,7 +29,6 @@ def instantiate_profile(request):
 
 @pytest.fixture(scope="session")
 def lf_tools(get_configuration, testbed):
-    print("in lf_tools")
     lf_tools_obj = ChamberView(lanforge_data=get_configuration['traffic_generator']['details'],
                                access_point_data=get_configuration['access_point'],
                                testbed=testbed)

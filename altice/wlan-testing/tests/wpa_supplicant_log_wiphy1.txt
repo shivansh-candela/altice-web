@@ -1,30 +1,29 @@
-1655720927.756922: Successfully initialized wpa_supplicant
-1655720927.766035: CTRL_IFACE monitor attached /tmp/wpa_ctrl_6510-2\x00
-1655720927.766162: CTRL_IFACE monitor attached /tmp/wpa_ctrl_6510-1\x00
-1655720937.125264: nl80211: kernel reports: key not allowed, no current_bss
-1655720937.125287: nl80211: kernel reports: key not allowed, no current_bss
-1655720937.125296: nl80211: kernel reports: key not allowed, no current_bss
-1655720937.125304: nl80211: kernel reports: key not allowed, no current_bss
-1655720937.125312: nl80211: kernel reports: key not allowed, no current_bss
-1655720937.125319: nl80211: kernel reports: key not allowed, no current_bss
-1655720953.596252: sta0000: CTRL-EVENT-DSCP-POLICY clear_all
-1655720953.608336: sta0000: CTRL-EVENT-DSCP-POLICY clear_all
-1655720953.608354: nl80211: deinit ifname=sta0000
-1655720953.610277: Could not read interface sta0000 flags: No such device
-1655721004.184706: nl80211: kernel reports: key not allowed, no current_bss
-1655721004.184856: nl80211: kernel reports: key not allowed, no current_bss
-1655721004.184898: nl80211: kernel reports: key not allowed, no current_bss
-1655721004.184971: nl80211: kernel reports: key not allowed, no current_bss
-1655721004.185013: nl80211: kernel reports: key not allowed, no current_bss
-1655721004.185166: nl80211: kernel reports: key not allowed, no current_bss
-1655721005.346195: wlan100: SME: Trying to authenticate with cc:19:a8:e6:cd:81 (SSID='client_connectivity_altice' freq=5180 MHz)
-1655721005.620640: wlan100: Trying to associate with cc:19:a8:e6:cd:81 (SSID='client_connectivity_altice' freq=5180 MHz)
-1655721005.642861: wlan100: Associated with cc:19:a8:e6:cd:81
-1655721005.644263: wlan100: CTRL-EVENT-CONNECTED - Connection to cc:19:a8:e6:cd:81 completed [id=0 id_str=]
-1655721005.644967: wlan100: CTRL-EVENT-SUBNET-STATUS-UPDATE status=0
-1655721060.856340: wlan100: CTRL-EVENT-DISCONNECTED bssid=cc:19:a8:e6:cd:81 reason=3 locally_generated=1
-1655721060.856410: BSSID cc:19:a8:e6:cd:81 ignore list count incremented to 2, ignoring for 10 seconds
-1655721060.929240: wlan100: CTRL-EVENT-DSCP-POLICY clear_all
-1655721060.941275: wlan100: CTRL-EVENT-DSCP-POLICY clear_all
-1655721060.941289: nl80211: deinit ifname=wlan100
-1655721060.943894: Could not read interface wlan100 flags: No such device
+1657029740.097811: Successfully initialized wpa_supplicant
+1657029740.106476: CTRL_IFACE monitor attached /tmp/wpa_ctrl_27613-2\x00
+1657029740.106547: CTRL_IFACE monitor attached /tmp/wpa_ctrl_27613-1\x00
+1657029748.987284: nl80211: kernel reports: key not allowed, no current_bss
+1657029748.987315: nl80211: kernel reports: key not allowed, no current_bss
+1657029748.987331: nl80211: kernel reports: key not allowed, no current_bss
+1657029748.987344: nl80211: kernel reports: key not allowed, no current_bss
+1657029748.987357: nl80211: kernel reports: key not allowed, no current_bss
+1657029748.987370: nl80211: kernel reports: key not allowed, no current_bss
+1657029758.888484: sta0000: CTRL-EVENT-DSCP-POLICY clear_all
+1657029758.897626: sta0000: CTRL-EVENT-DSCP-POLICY clear_all
+1657029758.897652: nl80211: deinit ifname=sta0000
+1657029758.899688: Could not read interface sta0000 flags: No such device
+1657029791.503588: nl80211: kernel reports: key not allowed, no current_bss
+1657029791.503628: nl80211: kernel reports: key not allowed, no current_bss
+1657029791.503641: nl80211: kernel reports: key not allowed, no current_bss
+1657029791.503651: nl80211: kernel reports: key not allowed, no current_bss
+1657029791.503661: nl80211: kernel reports: key not allowed, no current_bss
+1657029791.503671: nl80211: kernel reports: key not allowed, no current_bss
+1657029795.935896: wlan100: SME: Trying to authenticate with cc:19:a8:e6:cd:81 (SSID='client_connectivity_altice' freq=5180 MHz)
+1657029796.210382: wlan100: Trying to associate with cc:19:a8:e6:cd:81 (SSID='client_connectivity_altice' freq=5180 MHz)
+1657029796.223172: wlan100: Associated with cc:19:a8:e6:cd:81
+1657029796.223951: wlan100: CTRL-EVENT-CONNECTED - Connection to cc:19:a8:e6:cd:81 completed [id=1 id_str=]
+1657029796.224050: wlan100: CTRL-EVENT-SUBNET-STATUS-UPDATE status=0
+1657029851.053998: wlan100: CTRL-EVENT-DISCONNECTED bssid=cc:19:a8:e6:cd:81 reason=3 locally_generated=1
+1657029851.131481: wlan100: CTRL-EVENT-DSCP-POLICY clear_all
+1657029851.143652: wlan100: CTRL-EVENT-DSCP-POLICY clear_all
+1657029851.143666: nl80211: deinit ifname=wlan100
+1657029851.145553: Could not read interface wlan100 flags: No such device
