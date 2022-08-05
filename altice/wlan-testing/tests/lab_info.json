@@ -9,15 +9,15 @@
         },
         "access_point": [
             {
-                "model": "wallys_dr40x9",
-                "mode": "wifi5",
-                "serial": "c44bd1005b30",
+                "model": "edgecore_eap102",
+                "mode": "wifi6",
+                "serial": "903cb3bd7299",
                 "jumphost": true,
                 "ip": "10.28.3.100",
                 "username": "lanforge",
                 "password": "pumpkin77",
                 "port": 22,
-                "jumphost_tty": "/dev/ttyAP8",
+                "jumphost_tty": "/dev/ttyAP1",
                 "version": "next-latest"
             }
         ],
@@ -51,9 +51,9 @@
                 "mode": "wifi5",
                 "serial": "0006aee53b84",
                 "jumphost": true,
-                "ip": "192.168.52.89",
+                "ip": "10.28.3.100",
                 "username": "lanforge",
-                "password": "lanforge",
+                "password": "pumpkin77",
                 "port": 22,
                 "jumphost_tty": "/dev/ttyAP2",
                 "version": "next-latest"
@@ -62,7 +62,7 @@
         "traffic_generator": {
             "name": "lanforge",
             "details": {
-                "ip": "192.168.52.89",
+                "ip": "10.28.3.8",
                 "port": 8080,
                 "ssh_port": 22,
                 "2.4G-Radio": ["1.1.wiphy4"],
@@ -913,49 +913,6 @@
         }
     },
 
-    "local-01": {
-        "controller": {
-            "url": "asd",
-            "username": "asdsa",
-            "password": "dasd"
-        },
-        "access_point": [
-            {
-                "model": "local-tb",
-                "mode": "wifi6",
-                "serial": "123",
-                "jumphost": true,
-                "ip": "192.168.200.32",
-                "username": "lanforge",
-                "password": "lanforge",
-                "port": 22,
-                "jumphost_tty": "/dev/ttyUSB0",
-                "version": "next-latest",
-                "ap_username": "admin",
-                "ap_password": "DustBunnyRoundup9#",
-                "ap_prompt": "root@GEN8"
-            }
-        ],
-        "traffic_generator": {
-            "name": "lanforge",
-            "details": {
-                "ip": "192.168.200.32",
-                "port": 8080,
-                "ssh_port": 22,
-                "2.4G-Radio": ["1.1.wiphy0"],
-                "5G-Radio": ["1.1.wiphy1"],
-                "AX-Radio": ["1.1.wiphy2", "1.1.wiphy3", "1.1.wiphy4", "1.1.wiphy5"],
-                "upstream": "1.1.eth1",
-                "lan-upstream": "1.1.eth2",
-                "upstream_subnet": "",
-                "uplink": "",
-                "2.4G-Station-Name": "wlan0",
-                "5G-Station-Name": "wlan1",
-                "AX-Station-Name": "ax"
-            }
-        }
-    },
-
     "basic-ext-03-03": {
         "controller": {
             "url": "https://wlan-portal-svc-nola-ext-03.cicd.lab.wlan.tip.build",
@@ -992,6 +949,48 @@
                 "uplink": "1.1.eth2",
                 "2.4G-Station-Name": "wlan0",
                 "5G-Station-Name": "wlan0",
+                "AX-Station-Name": "ax"
+            }
+        }
+    },
+
+   "local-01": {
+        "controller": {
+            "url": "asd",
+            "username": "asdsa",
+            "password": "dasd"
+        },
+        "access_point": [
+            {
+                "model": "",
+                "mode": "wifi6",
+                "serial": "",
+                "jumphost": true,
+                "ip": "192.168.200.32",
+                "username": "lanforge",
+                "password": "lanforge",
+                "port": 22,
+                "jumphost_tty": "/dev/ttyUSB0",
+                "version": "next-latest",
+                "ap_username": "admin",
+                "ap_password": "DustBunnyRoundup9#",
+                "ap_prompt": "root@GEN8"
+            }
+        ],
+        "traffic_generator": {
+            "name": "lanforge",
+            "details": {
+                "ip": "192.168.200.32",
+                "port": 8080,
+                "ssh_port": 22,
+                "2.4G-Radio": ["1.1.wiphy0"],
+                "5G-Radio": ["1.1.wiphy1"],
+                "AX-Radio": ["1.1.wiphy2", "1.1.wiphy3", "1.1.wiphy4", "1.1.wiphy5"],
+                "upstream": "1.1.eth2",
+                "upstream_subnet": "192.168.200.1/24",
+                "uplink": "1.1.eth3",
+                "2.4G-Station-Name": "wlan0",
+                "5G-Station-Name": "wlan1",
                 "AX-Station-Name": "ax"
             }
         }
@@ -1220,19 +1219,9 @@
         "Disable DGAF": false
     }
 },
-"open_flow":{},
-"influx_params" : {},
-"AP_CLI": {
-    "wireless_ssid_details_2g": "/wireless/basic/show --wifi-index=0",
-    "wireless_ssid_details_5g": "/wireless/basic/show --wifi-index=1",
-    "wireless_ssid_client_connectivity_2g": "/wireless/basic/config --wifi-index=0 --wifi-ssid=client_connectivity_altice",
-    "wireless_ssid_client_connectivity_5g": "/wireless/basic/config --wifi-index=1 --wifi-ssid=client_connectivity_altice",
-    "wireless_sec_show_2g": "/wireless/security/show --wifi-index=0",
-    "wireless_sec_show_5g": "/wireless/security/show --wifi-index=1",
-    "wireless_ssid_open_config_2g": "/wireless/security/config --wifi-index=0 --wifi-sec-choose-interface=0 --wifi-wl-auth-mode=None",
-    "wireless_ssid_open_config_5g": "/wireless/security/config --wifi-index=1 --wifi-sec-choose-interface=0 --wifi-wl-auth-mode=None",
-    "wireless_ssid_wpa2_personal_config_2g": "/wireless/security/config --wifi-index=0 --wifi-sec-choose-interface=0 --wifi-wl-auth-mode=WPA2-Personal --wifi-wl-wpa-passphrase=something",
-    "wireless_ssid_wpa2_personal_config_5g": "/wireless/security/config --wifi-index=1 --wifi-sec-choose-interface=0 --wifi-wl-auth-mode=WPA2-Personal --wifi-wl-wpa-passphrase=something"
-}
+"open_flow":{}
+
+
+
 }
 

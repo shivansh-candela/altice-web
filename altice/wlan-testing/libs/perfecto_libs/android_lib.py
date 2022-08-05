@@ -2010,10 +2010,8 @@ def wifi_connect(request, WifiName, WifiPass, setup_perfectoMobile, connData):
                     # This is To get all available ssids
                     # ------------------------------------------------------
                     try:
-                        for k in range(9):
+                        for check_for_all_ssids in range(2):
                             available_ssids = get_all_available_ssids(driver, deviceModelName)
-                            print("active_ssid_list: ", available_ssids)
-                            allure.attach(name="Available SSIDs in device: ", body=str(available_ssids))
                             try:
                                 if WifiName not in available_ssids:
                                     scrollDown(setup_perfectoMobile)
@@ -2021,13 +2019,14 @@ def wifi_connect(request, WifiName, WifiPass, setup_perfectoMobile, connData):
                                 else:
                                     ssid_found = True
                                     print(WifiName + " : Found in Device")
-                                    # allure.attach(name= body=str(WifiName+" : Found in Device"))
+                                   #allure.attach(name= body=str(WifiName + " : Found in Device"))
                                     break
                             except:
-                                print("couldn't find wifi in available ssid")
+                                print("1538")
+                                pass
                         if not ssid_found:
-                            print("could not found " + WifiName + " in device")
-                            # allure.attach(name= body=str("could not found" + WifiName + " in device"))
+                            print("could not found" + WifiName + " in device")
+                           #allure.attach(name= body=str("could not found" + WifiName + " in device"))
                             closeApp(connData["appPackage-android"], setup_perfectoMobile)
                             return ssid_with_internet
                     except:
@@ -5074,7 +5073,7 @@ def captive_portal_and(request, WifiName, WifiPass, setup_perfectoMobile, connDa
                     except Exception as e:
                         print("Exception on Selecting Wifi Network.  Please check wifi Name or signal")
                     try:
-                        time.sleep(20)
+                        time.sleep(2)
                         report.step_start("Click Accept Terms Button")
                         print("Click Accept Terms Button")
                         join_btn_element = driver.find_element_by_xpath("//*[@text='Accept Terms of Service']")

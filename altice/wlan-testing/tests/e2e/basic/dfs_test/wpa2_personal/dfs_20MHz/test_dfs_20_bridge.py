@@ -79,19 +79,12 @@ class TestDFSChannel52Bw20(object):
             dfs_fail = False
         dfs_start.reboot()
         time.sleep(200)
-        count = 0
         while True:
             connected, latest, active = dfs_start.get_ucentral_status()
             if connected is True:
                 print("status is connected after reboot: ", connected)
                 break
-            else:
-                count = count + 1
-                if count > 5:
-                    break
-            time.sleep(5)
-        if count > 5:
-            assert False, "AP is disconnected"
+            time.sleep(1)
         if not dfs_fail:
             assert False
 
@@ -167,19 +160,12 @@ class TestDFSChannel100Bw20(object):
             dfs_fail = False
         dfs_start.reboot()
         time.sleep(200)
-        count = 0
         while True:
             connected, latest, active = dfs_start.get_ucentral_status()
             if connected is True:
                 print("status is connected after reboot: ", connected)
                 break
-            else:
-                count = count + 1
-                if count > 5:
-                    break
-            time.sleep(5)
-        if count > 5:
-            assert False, "AP is disconnected"
+            time.sleep(1)
         if not dfs_fail:
             assert False
 
@@ -255,19 +241,12 @@ class TestDFSChannel104Bw20(object):
             dfs_fail = False
         dfs_start.reboot()
         time.sleep(200)
-        count = 0
         while True:
             connected, latest, active = dfs_start.get_ucentral_status()
             if connected is True:
                 print("status is connected after reboot: ", connected)
                 break
-            else:
-                count = count + 1
-                if count > 5:
-                    break
-            time.sleep(5)
-        if count > 5:
-            assert False, "AP is disconnected"
+            time.sleep(1)
         if not dfs_fail:
             assert False
 
@@ -424,19 +403,12 @@ class TestDFSChannel60Bw20(object):
             dfs_fail = False
         dfs_start.reboot()
         time.sleep(200)
-        count = 0
         while True:
             connected, latest, active = dfs_start.get_ucentral_status()
             if connected is True:
                 print("status is connected after reboot: ", connected)
                 break
-            else:
-                count = count + 1
-                if count > 5:
-                    break
-            time.sleep(5)
-        if count > 5:
-            assert False, "AP is disconnected"
+            time.sleep(1)
         if not dfs_fail:
             assert False
 
@@ -593,19 +565,12 @@ class TestDFSChannel108Bw20(object):
             dfs_fail = False
         dfs_start.reboot()
         time.sleep(200)
-        count = 0
         while True:
             connected, latest, active = dfs_start.get_ucentral_status()
             if connected is True:
                 print("status is connected after reboot: ", connected)
                 break
-            else:
-                count = count + 1
-                if count > 5:
-                    break
-            time.sleep(5)
-        if count > 5:
-            assert False, "AP is disconnected"
+            time.sleep(1)
         if not dfs_fail:
             assert False
 
@@ -681,19 +646,12 @@ class TestDFSChannel112Bw20(object):
             dfs_fail = False
         dfs_start.reboot()
         time.sleep(200)
-        count = 0
         while True:
             connected, latest, active = dfs_start.get_ucentral_status()
             if connected is True:
                 print("status is connected after reboot: ", connected)
                 break
-            else:
-                count = count + 1
-                if count > 5:
-                    break
-            time.sleep(5)
-        if count > 5:
-            assert False, "AP is disconnected"
+            time.sleep(1)
         if not dfs_fail:
             assert False
 
@@ -843,19 +801,12 @@ class TestDFSChannel132Bw20(object):
             dfs_fail = False
         dfs_start.reboot()
         time.sleep(200)
-        count = 0
         while True:
             connected, latest, active = dfs_start.get_ucentral_status()
             if connected is True:
                 print("status is connected after reboot: ", connected)
                 break
-            else:
-                count = count + 1
-                if count > 5:
-                    break
-            time.sleep(5)
-        if count > 5:
-            assert False, "AP is disconnected"
+            time.sleep(1)
         if not dfs_fail:
             assert False
 
@@ -931,19 +882,12 @@ class TestDFSChannel136Bw20(object):
             dfs_fail = False
         dfs_start.reboot()
         time.sleep(200)
-        count = 0
         while True:
             connected, latest, active = dfs_start.get_ucentral_status()
             if connected is True:
                 print("status is connected after reboot: ", connected)
                 break
-            else:
-                count = count + 1
-                if count > 5:
-                    break
-            time.sleep(5)
-        if count > 5:
-            assert False, "AP is disconnected"
+            time.sleep(1)
         if not dfs_fail:
             assert False
 
@@ -1019,19 +963,12 @@ class TestDFSChannel140Bw20(object):
             dfs_fail = False
         dfs_start.reboot()
         time.sleep(200)
-        count = 0
         while True:
             connected, latest, active = dfs_start.get_ucentral_status()
             if connected is True:
                 print("status is connected after reboot: ", connected)
                 break
-            else:
-                count = count + 1
-                if count > 5:
-                    break
-            time.sleep(5)
-        if count > 5:
-            assert False, "AP is disconnected"
+            time.sleep(1)
         if not dfs_fail:
             assert False
 
@@ -1107,18 +1044,11 @@ class TestDFSChannel144Bw20(object):
             dfs_fail = False
         dfs_start.reboot()
         time.sleep(200)
-        count = 0
         while True:
             connected, latest, active = dfs_start.get_ucentral_status()
             if connected is True:
                 print("status is connected after reboot: ", connected)
                 break
-            else:
-                count = count + 1
-                if count > 5:
-                    break
-            time.sleep(5)
-        if count > 5:
-            assert False, "AP is disconnected"
+            time.sleep(1)
         if not dfs_fail:
             assert False

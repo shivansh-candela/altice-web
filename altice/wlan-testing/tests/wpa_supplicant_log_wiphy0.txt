@@ -1,37 +1,30 @@
-1657217964.627859: Successfully initialized wpa_supplicant
-1657217964.637151: CTRL_IFACE monitor attached /tmp/wpa_ctrl_12973-2\x00
-1657217964.637178: CTRL_IFACE monitor attached /tmp/wpa_ctrl_12973-1\x00
-1657217973.810682: nl80211: kernel reports: key not allowed, no current_bss
-1657217973.810707: nl80211: kernel reports: key not allowed, no current_bss
-1657217973.810715: nl80211: kernel reports: key not allowed, no current_bss
-1657217973.810723: nl80211: kernel reports: key not allowed, no current_bss
-1657217973.810731: nl80211: kernel reports: key not allowed, no current_bss
-1657217973.810738: nl80211: kernel reports: key not allowed, no current_bss
-1657217989.820411: sta0000: CTRL-EVENT-DSCP-POLICY clear_all
-1657217989.835503: sta0000: CTRL-EVENT-DSCP-POLICY clear_all
-1657217989.835516: nl80211: deinit ifname=sta0000
-1657217989.837547: Could not read interface sta0000 flags: No such device
-1657218029.319965: nl80211: kernel reports: key not allowed, no current_bss
-1657218029.319999: nl80211: kernel reports: key not allowed, no current_bss
-1657218029.320011: nl80211: kernel reports: key not allowed, no current_bss
-1657218029.320019: nl80211: kernel reports: key not allowed, no current_bss
-1657218029.320027: nl80211: kernel reports: key not allowed, no current_bss
-1657218029.320048: nl80211: kernel reports: key not allowed, no current_bss
-1657218030.478984: wlan000: SME: Trying to authenticate with cc:19:a8:e6:cd:80 (SSID='client_connectivity_altice' freq=2457 MHz)
-1657218030.758561: wlan000: Trying to associate with cc:19:a8:e6:cd:80 (SSID='client_connectivity_altice' freq=2457 MHz)
-1657218030.766838: wlan000: Associated with cc:19:a8:e6:cd:80
-1657218030.766877: wlan000: CTRL-EVENT-SUBNET-STATUS-UPDATE status=0
-1657218030.815287: wlan000: WPA: Key negotiation completed with cc:19:a8:e6:cd:80 [PTK=CCMP GTK=CCMP]
-1657218030.815734: wlan000: CTRL-EVENT-CONNECTED - Connection to cc:19:a8:e6:cd:80 completed [id=1 id_str=]
-1657218030.816868: wlan000: WPA: Key negotiation completed with cc:19:a8:e6:cd:80 [PTK=CCMP GTK=CCMP]
-1657218031.775465: wlan000: WPA: Group rekeying completed with cc:19:a8:e6:cd:80 [GTK=CCMP]
-1657218042.804404: wlan000: WPA: Group rekeying completed with cc:19:a8:e6:cd:80 [GTK=CCMP]
-1657218053.823364: wlan000: WPA: Group rekeying completed with cc:19:a8:e6:cd:80 [GTK=CCMP]
-1657218064.844378: wlan000: WPA: Group rekeying completed with cc:19:a8:e6:cd:80 [GTK=CCMP]
-1657218075.866312: wlan000: WPA: Group rekeying completed with cc:19:a8:e6:cd:80 [GTK=CCMP]
-1657218086.904416: wlan000: WPA: Group rekeying completed with cc:19:a8:e6:cd:80 [GTK=CCMP]
-1657218095.138731: wlan000: CTRL-EVENT-DISCONNECTED bssid=cc:19:a8:e6:cd:80 reason=3 locally_generated=1
-1657218095.205429: wlan000: CTRL-EVENT-DSCP-POLICY clear_all
-1657218095.215595: wlan000: CTRL-EVENT-DSCP-POLICY clear_all
-1657218095.215610: nl80211: deinit ifname=wlan000
-1657218095.217605: Could not read interface wlan000 flags: No such device
+1655720673.562296: Successfully initialized wpa_supplicant
+1655720673.571349: CTRL_IFACE monitor attached /tmp/wpa_ctrl_4919-2\x00
+1655720673.571457: CTRL_IFACE monitor attached /tmp/wpa_ctrl_4919-1\x00
+1655720682.945748: nl80211: kernel reports: key not allowed, no current_bss
+1655720682.945764: nl80211: kernel reports: key not allowed, no current_bss
+1655720682.945773: nl80211: kernel reports: key not allowed, no current_bss
+1655720682.945781: nl80211: kernel reports: key not allowed, no current_bss
+1655720682.945789: nl80211: kernel reports: key not allowed, no current_bss
+1655720682.945796: nl80211: kernel reports: key not allowed, no current_bss
+1655720694.521244: sta0000: CTRL-EVENT-DSCP-POLICY clear_all
+1655720694.533315: sta0000: CTRL-EVENT-DSCP-POLICY clear_all
+1655720694.533330: nl80211: deinit ifname=sta0000
+1655720694.535253: Could not read interface sta0000 flags: No such device
+1655720743.858279: nl80211: kernel reports: key not allowed, no current_bss
+1655720743.858303: nl80211: kernel reports: key not allowed, no current_bss
+1655720743.858312: nl80211: kernel reports: key not allowed, no current_bss
+1655720743.858323: nl80211: kernel reports: key not allowed, no current_bss
+1655720743.858330: nl80211: kernel reports: key not allowed, no current_bss
+1655720743.858544: nl80211: kernel reports: key not allowed, no current_bss
+1655720745.017732: wlan000: SME: Trying to authenticate with cc:19:a8:e6:cd:80 (SSID='client_connectivity_altice' freq=2462 MHz)
+1655720745.304101: wlan000: Trying to associate with cc:19:a8:e6:cd:80 (SSID='client_connectivity_altice' freq=2462 MHz)
+1655720745.311163: wlan000: Associated with cc:19:a8:e6:cd:80
+1655720745.311769: wlan000: CTRL-EVENT-CONNECTED - Connection to cc:19:a8:e6:cd:80 completed [id=0 id_str=]
+1655720745.311925: wlan000: CTRL-EVENT-SUBNET-STATUS-UPDATE status=0
+1655720800.046065: wlan000: CTRL-EVENT-DISCONNECTED bssid=cc:19:a8:e6:cd:80 reason=3 locally_generated=1
+1655720800.046148: BSSID cc:19:a8:e6:cd:80 ignore list count incremented to 2, ignoring for 10 seconds
+1655720800.120178: wlan000: CTRL-EVENT-DSCP-POLICY clear_all
+1655720800.143286: wlan000: CTRL-EVENT-DSCP-POLICY clear_all
+1655720800.143321: nl80211: deinit ifname=wlan000
+1655720800.146098: Could not read interface wlan000 flags: No such device

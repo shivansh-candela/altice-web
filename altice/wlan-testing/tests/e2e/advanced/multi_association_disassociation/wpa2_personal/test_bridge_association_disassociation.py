@@ -84,7 +84,6 @@ class TestMultiAssoDisassoBridge(object):
         allure.attach(name="Pass Fail Criteria",
                       body="UDP traffic rate is at least 99% of the configured rate for each station. Here configured " \
                            "traffic rate is 4 Mbps so traffic for each station should be 3.96 Mbps ")
-        lf_test.Client_disconnect(clear_all_sta=True, clean_l3_traffic=True)
         if not csv_val:
             print("csv file does not exist, station did not got ip, Test failed")
             allure.attach(name="Csv Data", body="station did not got ip Test failed.")
@@ -95,12 +94,13 @@ class TestMultiAssoDisassoBridge(object):
                     pass_fail.append(1)
                 else:
                     pass_fail.append(0)
-            allure.attach(name="Csv Data", body=str(csv_val))
             if pass_fail.count(0) == 0:
                 print("Test passed successfully")
+                allure.attach(name="Csv Data", body=str(csv_val))
                 assert True
             else:
                 print(" valueTest failed due to lesser")
+                allure.attach(name="Csv Data", body=str(csv_val))
                 assert False
         print("Test Completed... Cleaning up Stations")
 
@@ -161,7 +161,6 @@ class TestMultiAssoDisassoBridge(object):
         allure.attach(name="Pass Fail Criteria",
                       body="UDP traffic rate is at least 99% of the configured rate for each station. Here configured " \
                            "traffic rate is 4 Mbps so traffic for each station should be 3.96 Mbps ")
-        lf_test.Client_disconnect(clear_all_sta=True, clean_l3_traffic=True)
         if not csv_val:
             print("csv file does not exist, station did not got ip, Test failed")
             allure.attach(name="Csv Data", body="station did not got ip Test failed.")
@@ -172,12 +171,13 @@ class TestMultiAssoDisassoBridge(object):
                     pass_fail.append(1)
                 else:
                     pass_fail.append(0)
-            allure.attach(name="Csv Data", body=str(csv_val))
             if pass_fail.count(0) == 0:
                 print("Test passed successfully")
+                allure.attach(name="Csv Data", body=str(csv_val))
                 assert True
             else:
                 print(" valueTest failed due to lesser")
+                allure.attach(name="Csv Data", body=str(csv_val))
                 assert False
         print("Test Completed... Cleaning up Stations")
 
@@ -238,7 +238,6 @@ class TestMultiAssoDisassoBridge(object):
         allure.attach(name="Pass Fail Criteria",
                       body="UDP traffic rate is at least 99% of the configured rate for each station. Here configured " \
                            "traffic rate is 8 Mbps so traffic for each station should be 7.92 Mbps ")
-        lf_test.Client_disconnect(clear_all_sta=True, clean_l3_traffic=True)
         if not csv_val:
             print("csv file does not exist, station did not got ip, Test failed")
             allure.attach(name="Csv Data", body="station did not got ip Test failed.")
@@ -249,12 +248,13 @@ class TestMultiAssoDisassoBridge(object):
                     pass_fail.append(1)
                 else:
                     pass_fail.append(0)
-            allure.attach(name="Csv Data", body=str(csv_val))
             if pass_fail.count(0) == 0:
                 print("Test passed successfully")
+                allure.attach(name="Csv Data", body=str(csv_val))
                 assert True
             else:
                 print(" valueTest failed due to lesser")
+                allure.attach(name="Csv Data", body=str(csv_val))
                 assert False
         print("Test Completed... Cleaning up Stations")
 
@@ -315,7 +315,6 @@ class TestMultiAssoDisassoBridge(object):
         allure.attach(name="Pass Fail Criteria",
                       body="UDP traffic rate is at least 99% of the configured rate for each station. Here configured " \
                            "traffic rate is 8 Mbps so traffic for each station should be 7.92 Mbps ")
-        lf_test.Client_disconnect(clear_all_sta=True, clean_l3_traffic=True)
         if not csv_val:
             print("csv file does not exist, station did not got ip, Test failed")
             allure.attach(name="Csv Data", body="station did not got ip Test failed.")
@@ -326,12 +325,13 @@ class TestMultiAssoDisassoBridge(object):
                     pass_fail.append(1)
                 else:
                     pass_fail.append(0)
-            allure.attach(name="Csv Data", body=str(csv_val))
             if pass_fail.count(0) == 0:
                 print("Test passed successfully")
+                allure.attach(name="Csv Data", body=str(csv_val))
                 assert True
             else:
                 print(" valueTest failed due to lesser")
+                allure.attach(name="Csv Data", body=str(csv_val))
                 assert False
         print("Test Completed... Cleaning up Stations")
 
