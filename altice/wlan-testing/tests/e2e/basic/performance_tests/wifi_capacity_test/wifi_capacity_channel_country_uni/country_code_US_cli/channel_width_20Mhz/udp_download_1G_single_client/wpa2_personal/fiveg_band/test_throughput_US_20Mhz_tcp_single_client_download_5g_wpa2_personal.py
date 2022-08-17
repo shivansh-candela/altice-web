@@ -6,7 +6,7 @@ pytestmark = [pytest.mark.country_code, pytest.mark.nat, pytest.mark.wpa2, pytes
               pytest.mark.bandwidth_20mhz, pytest.mark.al, pytest.mark.udp, pytest.mark.wifi_capacity,
               pytest.mark.download, pytest.mark.udp_download, pytest.mark.wifi_capacity_single_client,
               pytest.mark.wifi_capacity_wpa2_20mhz_all_channels_single_client_download_1gbps,
-              pytest.mark.throughput_wpa2_20mhz_all_channels_single_client_download_1gbps, pytest.mark.fiveg]
+              pytest.mark.throughput_wpa2_20mhz_all_channels_single_client_download_1gbps, pytest.mark.fiveg,pytest.mark.udp,]
 
 setup_params_general = {
     "mode": "NAT",
@@ -73,12 +73,10 @@ class TestCountryUS20Mhz5G(object):
 
     @allure.testcase(url="https://telecominfraproject.atlassian.net/browse/WIFI-2546", name="WIFI-6938")
     @pytest.mark.wpa2_personal
-    @pytest.mark.sgs1
     @pytest.mark.twentyMhz
     @pytest.mark.fiveg
     @pytest.mark.channel36
     @pytest.mark.download
-    @pytest.mark.ss
     def test_client_nat_wpa2_chn36_20Mhz_US_5g_download(self, instantiate_profile, get_lf_logs,
                                                  lf_test, update_report,
                                                  station_names_fiveg, lf_tools,
@@ -108,7 +106,7 @@ class TestCountryUS20Mhz5G(object):
         # lf_tools.add_stations(band="ax", num_stations=1, dut=lf_tools.dut_name, ssid_name=ssid_name)
         lf_tools.Chamber_View()
 
-        wct_obj = lf_test.wifi_capacity(instance_name="test_client_wpa2_NAT_udp_dl", mode=mode, vlan_id=vlan,
+        wct_obj = lf_test.wifi_capacity(instance_name="test_client_wpa2_NAT_udp_dl_5g", mode=mode, vlan_id=vlan,
                                         download_rate="1Gbps", batch_size="1",
                                         upload_rate="0", protocol="UDP-IPv4", duration="60000")
 
@@ -148,7 +146,7 @@ class TestCountryUS20Mhz5G(object):
             print(f"pdf: {pdf}")
             if os.path.exists(pdf):
                 allure.attach.file(source=pdf,
-                                   name="WiFi_Capacity_1GBPS_Download_Throughput_Test", attachment_type="PDF")
+                                   name="WiFi_Capacity_1GBPS_Download_Throughput_udp_5g_Test", attachment_type="PDF")
             assert True
         else:
             result["result"] = "FAIL"
@@ -156,5 +154,5 @@ class TestCountryUS20Mhz5G(object):
             print(f"pdf: {pdf}")
             if os.path.exists(pdf):
                 allure.attach.file(source=pdf,
-                                   name="WiFi_Capacity_1GBPS_Download_Throughput_Test", attachment_type="PDF")
+                                   name="WiFi_Capacity_1GBPS_Download_Throughput_udp_5g_Test", attachment_type="PDF")
             assert False
