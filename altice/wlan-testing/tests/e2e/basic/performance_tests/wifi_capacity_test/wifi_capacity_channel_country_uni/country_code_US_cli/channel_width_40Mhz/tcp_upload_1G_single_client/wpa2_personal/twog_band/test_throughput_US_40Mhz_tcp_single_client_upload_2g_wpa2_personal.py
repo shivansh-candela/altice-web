@@ -3,10 +3,10 @@ import pytest
 import allure
 
 pytestmark = [pytest.mark.country_code, pytest.mark.nat, pytest.mark.wpa2, pytest.mark.united_states,
-              pytest.mark.bandwidth_20mhz, pytest.mark.al, pytest.mark.tcp, pytest.mark.wifi_capacity,
+              pytest.mark.bandwidth_40mhz, pytest.mark.al, pytest.mark.tcp, pytest.mark.wifi_capacity,
               pytest.mark.download, pytest.mark.tcp_download, pytest.mark.wifi_capacity_single_client,
-              pytest.mark.wifi_capacity_wpa2_20mhz_all_channels_single_client_download_1gbps,
-              pytest.mark.throughput_wpa2_20mhz_all_channels_single_client_download_1gbps]
+              pytest.mark.wifi_capacity_wpa2_40mhz_all_channels_single_client_download_1gbps,
+              pytest.mark.throughput_wpa2_40mhz_all_channels_single_client_download_1gbps]
 
 setup_params_general = {
     "mode": "NAT",
@@ -21,7 +21,7 @@ setup_params_general = {
             {'band': '2G',
              'country': 'US',
              "channel-mode": "VHT",
-             'channel-width': 20,
+             'channel-width': 40,
              "channel": 1}
     },
     "rf-2G-6": {
@@ -29,7 +29,7 @@ setup_params_general = {
             {'band': '2G',
              'country': 'US',
              'channel-mode': 'VHT',
-             'channel-width': 20,
+             'channel-width': 40,
              "channel": 6}
     },
     "rf-2G-11": {
@@ -37,7 +37,7 @@ setup_params_general = {
             {'band': '2G',
              'country': 'US',
              'channel-mode': 'VHT',
-             'channel-width': 20,
+             'channel-width': 40,
              "channel": 11}
     },
     "radius": False,
@@ -53,14 +53,14 @@ setup_params_general = {
     scope="class"
 )
 @pytest.mark.usefixtures("setup_profiles")
-class TestCountryUS20Mhz2g(object):
+class TestCountryUS40Mhz2g(object):
 
     @allure.testcase(url="https://telecominfraproject.atlassian.net/browse/WIFI-2546", name="WIFI-6938")
     @pytest.mark.wpa2_personal
     @pytest.mark.twentyMhz
     @pytest.mark.twog
     @pytest.mark.channel1
-    def test_client_nat_wpa2_chn1_20Mhz_US_2g_upload(self, instantiate_profile, get_lf_logs,
+    def test_client_nat_wpa2_chn1_40Mhz_US_2g_upload(self, instantiate_profile, get_lf_logs,
                                               lf_test, update_report,
                                               station_names_twog, lf_tools,
                                               test_cases, testbed, al_1, get_configuration):
