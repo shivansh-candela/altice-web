@@ -3,10 +3,10 @@ import pytest
 import allure
 
 pytestmark = [pytest.mark.country_code, pytest.mark.nat, pytest.mark.wpa2, pytest.mark.united_states,
-              pytest.mark.bandwidth_20mhz, pytest.mark.al, pytest.mark.tcp, pytest.mark.wifi_capacity,
-              pytest.mark.download, pytest.mark.tcp_download, pytest.mark.wifi_capacity_single_client,
-              pytest.mark.wifi_capacity_wpa2_20mhz_all_channels_single_client_download_1gbps,
-              pytest.mark.throughput_wpa2_20mhz_all_channels_single_client_download_1gbps]
+              pytest.mark.bandwidth_20mhz, pytest.mark.al, pytest.mark.udp, pytest.mark.wifi_capacity,
+              pytest.mark.upload, pytest.mark.udp_upload, pytest.mark.wifi_capacity_single_client,
+              pytest.mark.wifi_capacity_wpa2_20mhz_all_channels_single_client_upload_1gbps,
+              pytest.mark.throughput_wpa2_20mhz_all_channels_single_client_upload_1gbps, pytest.mark.fiveg,pytest.mark.udp]
 
 setup_params_general = {
     "mode": "NAT",
@@ -16,32 +16,48 @@ setup_params_general = {
         ]
     },
 
-    "rf-2G-1": {
-        "2G":
+    "rf-5G-1": {
+        "5G":
             {'band': '2G',
              'country': 'US',
              "channel-mode": "VHT",
              'channel-width': 20,
-             "channel": 1}
+             "channel": 36}
     },
-    "rf-2G-6": {
-        "2G":
+    "rf-5G-2": {
+        "5G":
             {'band': '2G',
              'country': 'US',
              'channel-mode': 'VHT',
              'channel-width': 20,
-             "channel": 6}
+             "channel": 40}
     },
-    "rf-2G-11": {
-        "2G":
+    "rf-5G-3": {
+        "5G":
             {'band': '2G',
              'country': 'US',
              'channel-mode': 'VHT',
              'channel-width': 20,
-             "channel": 11}
+             "channel": 44}
+    },
+    "rf-5G-4": {
+        "5G":
+            {'band': '2G',
+             'country': 'US',
+             'channel-mode': 'VHT',
+             'channel-width': 20,
+             "channel": 48}
+    },
+    "rf-5G-5": {
+        "5G":
+            {'band': '2G',
+             'country': 'US',
+             'channel-mode': 'VHT',
+             'channel-width': 20,
+             "channel": 149}
     },
     "radius": False,
-    "expected-throughput": 150
+    "expected-throughput": 170
 }
 
 
@@ -53,19 +69,20 @@ setup_params_general = {
     scope="class"
 )
 @pytest.mark.usefixtures("setup_profiles")
-class TestCountryUS20Mhz2g(object):
+class TestCountryUS20Mhz2G(object):
 
     @allure.testcase(url="https://telecominfraproject.atlassian.net/browse/WIFI-2546", name="WIFI-6938")
     @pytest.mark.wpa2_personal
     @pytest.mark.twentyMhz
     @pytest.mark.twog
-    @pytest.mark.channel1
-    def test_client_nat_wpa2_chn1_20Mhz_US_2g_upload(self, instantiate_profile, get_lf_logs,
-                                              lf_test, update_report,
-                                              station_names_twog, lf_tools,
-                                              test_cases, testbed, al_1, get_configuration):
+    @pytest.mark.channel36
+    @pytest.mark.upload
+    def test_client_nat_wpa2_chn36_20Mhz_US_2g_upload(self, instantiate_profile, get_lf_logs,
+                                                 lf_test, update_report,
+                                                 station_names_fiveg, lf_tools,
+                                                 test_cases, testbed, al_1, get_configuration):
         """
-           pytest -m "country_code and twentyMhz and wpa2 and twog and channel1"
+           pytest -m "country_code and twentyMhz and wpa2 and fiveg and channel36"
         """
         profile_data = setup_params_general["ssid_modes"]["wpa2_personal"][0]
         ssid_name = profile_data["ssid_name"]
@@ -79,18 +96,19 @@ class TestCountryUS20Mhz2g(object):
         expected_throughput = setup_params_general["expected-throughput"]
         batch_size = 1
 
+
         lf_tools.reset_scenario()
 
         obj = instantiate_profile(get_configuration['access_point'][0], "../libs/apnos/", "2.x")
-        obj.check_and_set_ap_channel(radio="2G", band=channel_width, channel=channel)
+        obj.check_and_set_ap_channel(radio="5G", band=channel_width, channel=channel)
 
-        lf_tools.add_stations(band="2G", num_stations=1, dut=lf_tools.dut_name, ssid_name=ssid_name)
+        lf_tools.add_stations(band="5G", num_stations=1, dut=lf_tools.dut_name, ssid_name=ssid_name)
         # lf_tools.add_stations(band="ax", num_stations=1, dut=lf_tools.dut_name, ssid_name=ssid_name)
         lf_tools.Chamber_View()
 
-        wct_obj = lf_test.wifi_capacity(instance_name="test_client_open_NAT_tcp_ul", mode=mode, vlan_id=vlan,
-                                        download_rate="1Gbps", batch_size="1",
-                                        upload_rate="0", protocol="TCP-IPv4", duration="60000")
+        wct_obj = lf_test.wifi_capacity(instance_name="test_client_wpa2_NAT_udp_ul_2g", mode=mode, vlan_id=vlan,
+                                        upload_rate="1Gbps", batch_size="1",
+                                        download_rate="0", protocol="UDP-IPv4", duration="60000")
 
         report_name = wct_obj.report_name[0]['LAST']["response"].split(":::")[1].split("/")[-1]
 
@@ -112,12 +130,12 @@ class TestCountryUS20Mhz2g(object):
             "security-key": security_key,
             "band": band,
             "channel": channel,
-            "description": "WiFi capacity test",
-            "test-download": "1Gbps",
-            "test-batch-size": "1",
-            "test-upload-rate": "0",
-            "test-protocol": "TCP-IPV4",
-            "test-duration": "60 Sec",
+            "description" : "WiFi capacity test",
+            "test-download" : "0",
+            "test-batch-size" : "1",
+            "test-upload-rate" : "1Gbps",
+            "test-protocol" : "UDP-IPV4",
+            "test-duration" : "60 Sec",
             "expected-throughput": f" > {expected_throughput}",
             "actual-throughput": actual_throughput
         }
@@ -128,7 +146,7 @@ class TestCountryUS20Mhz2g(object):
             print(f"pdf: {pdf}")
             if os.path.exists(pdf):
                 allure.attach.file(source=pdf,
-                                   name="WiFi_Capacity_1GBPS_Upload_Throughput_Test", attachment_type="PDF")
+                                   name="WiFi_Capacity_1GBPS_Upload_Throughput_WPA2_UDP_2G_Test", attachment_type="PDF")
             assert True
         else:
             result["result"] = "FAIL"
@@ -136,394 +154,5 @@ class TestCountryUS20Mhz2g(object):
             print(f"pdf: {pdf}")
             if os.path.exists(pdf):
                 allure.attach.file(source=pdf,
-                                   name="WiFi_Capacity_1GBPS_Upload_Throughput_Test", attachment_type="PDF")
+                                   name="WiFi_Capacity_1GBPS_Upload_Throughput_WPA2_UDP_2G_Test", attachment_type="PDF")
             assert False
-
-    @allure.testcase(url="https://telecominfraproject.atlassian.net/browse/WIFI-2546", name="WIFI-6938")
-    @pytest.mark.wpa2_personal
-    @pytest.mark.twentyMhz
-    @pytest.mark.twog
-    @pytest.mark.channel6
-    def test_client_nat_wpa2_chn6_20Mhz_US_2g(self, instantiate_profile, get_lf_logs,
-                                              lf_test, update_report,
-                                              station_names_twog, lf_tools,
-                                              test_cases, testbed, al_1, get_configuration):
-        """
-           pytest -m "country_code and twentyMhz and wpa2 and twog and channel6"
-        """
-        profile_data = setup_params_general["ssid_modes"]["wpa2_personal"][0]
-        ssid_name = profile_data["ssid_name"]
-        security_key = profile_data["security_key"]
-        security = "wpa2"
-        mode = "NAT"
-        band = "twog"
-        vlan = 1
-        channel = setup_params_general['rf-2G-6']['2G']['channel']
-        channel_width = setup_params_general['rf-2G-6']['2G']['channel-width']
-
-        obj = instantiate_profile(get_configuration['access_point'][0], "../libs/apnos/", "2.x")
-        obj.check_and_set_ap_channel(radio="2G", band=channel_width, channel=channel)
-
-        lf_tools.add_stations(band="2G", num_stations=1, dut=lf_tools.dut_name, ssid_name=ssid_name)
-        # lf_tools.add_stations(band="ax", num_stations="max", dut=lf_tools.dut_name, ssid_name=ssid_name)
-        lf_tools.Chamber_View()
-        wct_obj = lf_test.wifi_capacity(instance_name="test_client_open_NAT_tcp_dl", mode=mode, vlan_id=vlan,
-                                        download_rate="1Gbps", batch_size="1",
-                                        upload_rate="0", protocol="TCP-IPv4", duration="60000")
-
-        report_name = wct_obj.report_name[0]['LAST']["response"].split(":::")[1].split("/")[-1]
-
-        lf_tools.attach_report_graphs(report_name=report_name)
-        print("Test Completed... Cleaning up Stations")
-        lf_tools.reset_scenario()
-        assert True
-
-    @allure.testcase(url="https://telecominfraproject.atlassian.net/browse/WIFI-2546", name="WIFI-6938")
-    @pytest.mark.wpa2_personal
-    @pytest.mark.twentyMhz
-    @pytest.mark.twog
-    @pytest.mark.channel11
-    def test_client_nat_wpa2_chn11_20Mhz_US_2g(self, instantiate_profile, get_lf_logs,
-                                               lf_test, update_report,
-                                               station_names_twog, lf_tools,
-                                               test_cases, testbed, al_1, get_configuration):
-        """
-           pytest -m "country_code and twentyMhz and wpa2 and twog and channel11"
-        """
-        profile_data = setup_params_general["ssid_modes"]["wpa2_personal"][0]
-        ssid_name = profile_data["ssid_name"]
-        security_key = profile_data["security_key"]
-        security = "wpa2"
-        mode = "NAT"
-        band = "twog"
-        vlan = 1
-        channel = setup_params_general['rf-2G-11']['2G']['channel']
-        channel_width = setup_params_general['rf-2G-11']['2G']['channel-width']
-
-        obj = instantiate_profile(get_configuration['access_point'][0], "../libs/apnos/", "2.x")
-        obj.check_and_set_ap_channel(radio="2G", band=channel_width, channel=channel)
-
-        lf_tools.add_stations(band="2G", num_stations=1, dut=lf_tools.dut_name, ssid_name=ssid_name)
-        # lf_tools.add_stations(band="ax", num_stations="max", dut=lf_tools.dut_name, ssid_name=ssid_name)
-        lf_tools.Chamber_View()
-        wct_obj = lf_test.wifi_capacity(instance_name="test_client_open_NAT_tcp_dl", mode=mode, vlan_id=vlan,
-                                        download_rate="1Gbps", batch_size="1",
-                                        upload_rate="0", protocol="TCP-IPv4", duration="60000")
-
-        report_name = wct_obj.report_name[0]['LAST']["response"].split(":::")[1].split("/")[-1]
-
-        lf_tools.attach_report_graphs(report_name=report_name)
-        print("Test Completed... Cleaning up Stations")
-        lf_tools.reset_scenario()
-        assert True
-
-    # @allure.testcase(url="https://telecominfraproject.atlassian.net/browse/WIFI-2546", name="WIFI-6938")
-    # @pytest.mark.wpa2_personal
-    # @pytest.mark.twentyMhz
-    # @pytest.mark.twog
-    # @pytest.mark.channel2
-    # def test_client_nat_wpa2_chn2_20Mhz_US_2g(self, instantiate_profile, get_lf_logs,
-    #                                              lf_test, update_report,
-    #                                              station_names_twog, lf_tools,
-    #                                              test_cases, testbed, al_1, get_configuration):
-    #     """
-    #        pytest -m "country_code and twentyMhz and wpa2 and twog and channel2"
-    #     """
-    #     profile_data = setup_params_general["ssid_modes"]["wpa2_personal"][0]
-    #     ssid_name = profile_data["ssid_name"]
-    #     security_key = profile_data["security_key"]
-    #     security = "wpa2"
-    #     mode = "NAT"
-    #     band = "twog"
-    #     vlan = 1
-    #     channel = setup_params_general['rf-2G-2']['2G']['channel']
-    #     channel_width = setup_params_general['rf-2G-2']['2G']['channel-width']
-    #
-    #     obj = instantiate_profile(get_configuration['access_point'][0], "../libs/apnos/", "2.x")
-    #     obj.check_and_set_ap_channel(radio="2G", band=channel_width, channel=channel)
-    #
-    #     lf_tools.add_stations(band="2G", num_stations=1, dut=lf_tools.dut_name, ssid_name=ssid_name)
-    #     # lf_tools.add_stations(band="ax", num_stations="max", dut=lf_tools.dut_name, ssid_name=ssid_name)
-    #     lf_tools.Chamber_View()
-    #     wct_obj = lf_test.wifi_capacity(instance_name="test_client_open_NAT_tcp_dl", mode=mode, vlan_id=vlan,
-    #                                     download_rate="1Gbps", batch_size="1",
-    #                                     upload_rate="0", protocol="TCP-IPv4", duration="60000")
-    #
-    #     report_name = wct_obj.report_name[0]['LAST']["response"].split(":::")[1].split("/")[-1]
-    #
-    #     lf_tools.attach_report_graphs(report_name=report_name)
-    #     print("Test Completed... Cleaning up Stations")
-    #     lf_tools.reset_scenario()
-    #     assert True
-    #
-    # @allure.testcase(url="https://telecominfraproject.atlassian.net/browse/WIFI-2546", name="WIFI-6938")
-    # @pytest.mark.wpa2_personal
-    # @pytest.mark.twentyMhz
-    # @pytest.mark.twog
-    # @pytest.mark.channel3
-    # def test_client_nat_wpa2_chn3_20Mhz_US_2g(self, instantiate_profile, get_lf_logs,
-    #                                              lf_test, update_report,
-    #                                              station_names_twog, lf_tools,
-    #                                              test_cases, testbed, al_1, get_configuration):
-    #     """
-    #        pytest -m "country_code and twentyMhz and wpa2 and twog and channel3"
-    #     """
-    #     profile_data = setup_params_general["ssid_modes"]["wpa2_personal"][0]
-    #     ssid_name = profile_data["ssid_name"]
-    #     security_key = profile_data["security_key"]
-    #     security = "wpa2"
-    #     mode = "NAT"
-    #     band = "twog"
-    #     vlan = 1
-    #     channel = setup_params_general['rf-2G-3']['2G']['channel']
-    #     channel_width = setup_params_general['rf-2G-3']['2G']['channel-width']
-    #
-    #     obj = instantiate_profile(get_configuration['access_point'][0], "../libs/apnos/", "2.x")
-    #     obj.check_and_set_ap_channel(radio="2G", band=channel_width, channel=channel)
-    #
-    #     lf_tools.add_stations(band="2G", num_stations=1, dut=lf_tools.dut_name, ssid_name=ssid_name)
-    #     # lf_tools.add_stations(band="ax", num_stations="max", dut=lf_tools.dut_name, ssid_name=ssid_name)
-    #     lf_tools.Chamber_View()
-    #     wct_obj = lf_test.wifi_capacity(instance_name="test_client_open_NAT_tcp_dl", mode=mode, vlan_id=vlan,
-    #                                     download_rate="1Gbps", batch_size="1",
-    #                                     upload_rate="0", protocol="TCP-IPv4", duration="60000")
-    #
-    #     report_name = wct_obj.report_name[0]['LAST']["response"].split(":::")[1].split("/")[-1]
-    #
-    #     lf_tools.attach_report_graphs(report_name=report_name)
-    #     print("Test Completed... Cleaning up Stations")
-    #     lf_tools.reset_scenario()
-    #     assert True
-    #
-    # @allure.testcase(url="https://telecominfraproject.atlassian.net/browse/WIFI-2546", name="WIFI-6938")
-    # @pytest.mark.wpa2_personal
-    # @pytest.mark.twentyMhz
-    # @pytest.mark.twog
-    # @pytest.mark.channel4
-    # def test_client_nat_wpa2_chn4_20Mhz_US_2g(self, instantiate_profile, get_lf_logs,
-    #                                              lf_test, update_report,
-    #                                              station_names_twog, lf_tools,
-    #                                              test_cases, testbed, al_1, get_configuration):
-    #     """
-    #        pytest -m "country_code and twentyMhz and wpa2 and twog and channel4"
-    #     """
-    #     profile_data = setup_params_general["ssid_modes"]["wpa2_personal"][0]
-    #     ssid_name = profile_data["ssid_name"]
-    #     security_key = profile_data["security_key"]
-    #     security = "wpa2"
-    #     mode = "NAT"
-    #     band = "twog"
-    #     vlan = 1
-    #     channel = setup_params_general['rf-2G-4']['2G']['channel']
-    #     channel_width = setup_params_general['rf-2G-4']['2G']['channel-width']
-    #
-    #     obj = instantiate_profile(get_configuration['access_point'][0], "../libs/apnos/", "2.x")
-    #     obj.check_and_set_ap_channel(radio="2G", band=channel_width, channel=channel)
-    #
-    #     lf_tools.add_stations(band="2G", num_stations=1, dut=lf_tools.dut_name, ssid_name=ssid_name)
-    #     # lf_tools.add_stations(band="ax", num_stations="max", dut=lf_tools.dut_name, ssid_name=ssid_name)
-    #     lf_tools.Chamber_View()
-    #     wct_obj = lf_test.wifi_capacity(instance_name="test_client_open_NAT_tcp_dl", mode=mode, vlan_id=vlan,
-    #                                     download_rate="1Gbps", batch_size="1",
-    #                                     upload_rate="0", protocol="TCP-IPv4", duration="60000")
-    #
-    #     report_name = wct_obj.report_name[0]['LAST']["response"].split(":::")[1].split("/")[-1]
-    #
-    #     lf_tools.attach_report_graphs(report_name=report_name)
-    #     print("Test Completed... Cleaning up Stations")
-    #     lf_tools.reset_scenario()
-    #     assert True
-    #
-    # @allure.testcase(url="https://telecominfraproject.atlassian.net/browse/WIFI-2546", name="WIFI-6938")
-    # @pytest.mark.wpa2_personal
-    # @pytest.mark.twentyMhz
-    # @pytest.mark.twog
-    # @pytest.mark.channel5
-    # def test_client_nat_wpa2_chn5_20Mhz_US_2g(self, instantiate_profile, get_lf_logs,
-    #                                              lf_test, update_report,
-    #                                              station_names_twog, lf_tools,
-    #                                              test_cases, testbed, al_1, get_configuration):
-    #     """
-    #        pytest -m "country_code and twentyMhz and wpa2 and twog and channel5"
-    #     """
-    #     profile_data = setup_params_general["ssid_modes"]["wpa2_personal"][0]
-    #     ssid_name = profile_data["ssid_name"]
-    #     security_key = profile_data["security_key"]
-    #     security = "wpa2"
-    #     mode = "NAT"
-    #     band = "twog"
-    #     vlan = 1
-    #     channel = setup_params_general['rf-2G-5']['2G']['channel']
-    #     channel_width = setup_params_general['rf-2G-5']['2G']['channel-width']
-    #
-    #     obj = instantiate_profile(get_configuration['access_point'][0], "../libs/apnos/", "2.x")
-    #     obj.check_and_set_ap_channel(radio="2G", band=channel_width, channel=channel)
-    #
-    #     lf_tools.add_stations(band="2G", num_stations=1, dut=lf_tools.dut_name, ssid_name=ssid_name)
-    #     # lf_tools.add_stations(band="ax", num_stations="max", dut=lf_tools.dut_name, ssid_name=ssid_name)
-    #     lf_tools.Chamber_View()
-    #     wct_obj = lf_test.wifi_capacity(instance_name="test_client_open_NAT_tcp_dl", mode=mode, vlan_id=vlan,
-    #                                     download_rate="1Gbps", batch_size="1",
-    #                                     upload_rate="0", protocol="TCP-IPv4", duration="60000")
-    #
-    #     report_name = wct_obj.report_name[0]['LAST']["response"].split(":::")[1].split("/")[-1]
-    #
-    #     lf_tools.attach_report_graphs(report_name=report_name)
-    #     print("Test Completed... Cleaning up Stations")
-    #     lf_tools.reset_scenario()
-    #     assert True
-    # @allure.testcase(url="https://telecominfraproject.atlassian.net/browse/WIFI-2546", name="WIFI-6938")
-    # @pytest.mark.wpa2_personal
-    # @pytest.mark.twentyMhz
-    # @pytest.mark.twog
-    # @pytest.mark.channel7
-    # def test_client_nat_wpa2_chn7_20Mhz_US_2g(self, instantiate_profile, get_lf_logs,
-    #                                              lf_test, update_report,
-    #                                              station_names_twog, lf_tools,
-    #                                              test_cases, testbed, al_1, get_configuration):
-    #     """
-    #        pytest -m "country_code and twentyMhz and wpa2 and twog and channel7"
-    #     """
-    #     profile_data = setup_params_general["ssid_modes"]["wpa2_personal"][0]
-    #     ssid_name = profile_data["ssid_name"]
-    #     security_key = profile_data["security_key"]
-    #     security = "wpa2"
-    #     mode = "NAT"
-    #     band = "twog"
-    #     vlan = 1
-    #     channel = setup_params_general['rf-2G-7']['2G']['channel']
-    #     channel_width = setup_params_general['rf-2G-7']['2G']['channel-width']
-    #
-    #     obj = instantiate_profile(get_configuration['access_point'][0], "../libs/apnos/", "2.x")
-    #     obj.check_and_set_ap_channel(radio="2G", band=channel_width, channel=channel)
-    #
-    #     lf_tools.add_stations(band="2G", num_stations=1, dut=lf_tools.dut_name, ssid_name=ssid_name)
-    #     # lf_tools.add_stations(band="ax", num_stations="max", dut=lf_tools.dut_name, ssid_name=ssid_name)
-    #     lf_tools.Chamber_View()
-    #     wct_obj = lf_test.wifi_capacity(instance_name="test_client_open_NAT_tcp_dl", mode=mode, vlan_id=vlan,
-    #                                     download_rate="1Gbps", batch_size="1",
-    #                                     upload_rate="0", protocol="TCP-IPv4", duration="60000")
-    #
-    #     report_name = wct_obj.report_name[0]['LAST']["response"].split(":::")[1].split("/")[-1]
-    #
-    #     lf_tools.attach_report_graphs(report_name=report_name)
-    #     print("Test Completed... Cleaning up Stations")
-    #     lf_tools.reset_scenario()
-    #     assert True
-    #
-    # @allure.testcase(url="https://telecominfraproject.atlassian.net/browse/WIFI-2546", name="WIFI-6938")
-    # @pytest.mark.wpa2_personal
-    # @pytest.mark.twentyMhz
-    # @pytest.mark.twog
-    # @pytest.mark.channel8
-    # def test_client_nat_wpa2_chn8_20Mhz_US_2g(self, instantiate_profile, get_lf_logs,
-    #                                              lf_test, update_report,
-    #                                              station_names_twog, lf_tools,
-    #                                              test_cases, testbed, al_1, get_configuration):
-    #     """
-    #        pytest -m "country_code and twentyMhz and wpa2 and twog and channel8"
-    #     """
-    #     profile_data = setup_params_general["ssid_modes"]["wpa2_personal"][0]
-    #     ssid_name = profile_data["ssid_name"]
-    #     security_key = profile_data["security_key"]
-    #     security = "wpa2"
-    #     mode = "NAT"
-    #     band = "twog"
-    #     vlan = 1
-    #     channel = setup_params_general['rf-2G-8']['2G']['channel']
-    #     channel_width = setup_params_general['rf-2G-8']['2G']['channel-width']
-    #
-    #     obj = instantiate_profile(get_configuration['access_point'][0], "../libs/apnos/", "2.x")
-    #     obj.check_and_set_ap_channel(radio="2G", band=channel_width, channel=channel)
-    #
-    #     lf_tools.add_stations(band="2G", num_stations=1, dut=lf_tools.dut_name, ssid_name=ssid_name)
-    #     # lf_tools.add_stations(band="ax", num_stations="max", dut=lf_tools.dut_name, ssid_name=ssid_name)
-    #     lf_tools.Chamber_View()
-    #     wct_obj = lf_test.wifi_capacity(instance_name="test_client_open_NAT_tcp_dl", mode=mode, vlan_id=vlan,
-    #                                     download_rate="1Gbps", batch_size="1",
-    #                                     upload_rate="0", protocol="TCP-IPv4", duration="60000")
-    #
-    #     report_name = wct_obj.report_name[0]['LAST']["response"].split(":::")[1].split("/")[-1]
-    #
-    #     lf_tools.attach_report_graphs(report_name=report_name)
-    #     print("Test Completed... Cleaning up Stations")
-    #     lf_tools.reset_scenario()
-    #     assert True
-    #
-    # @allure.testcase(url="https://telecominfraproject.atlassian.net/browse/WIFI-2546", name="WIFI-6938")
-    # @pytest.mark.wpa2_personal
-    # @pytest.mark.twentyMhz
-    # @pytest.mark.twog
-    # @pytest.mark.channel9
-    # def test_client_nat_wpa2_chn9_20Mhz_US_2g(self, instantiate_profile, get_lf_logs,
-    #                                              lf_test, update_report,
-    #                                              station_names_twog, lf_tools,
-    #                                              test_cases, testbed, al_1, get_configuration):
-    #     """
-    #        pytest -m "country_code and twentyMhz and wpa2 and twog and channel9"
-    #     """
-    #     profile_data = setup_params_general["ssid_modes"]["wpa2_personal"][0]
-    #     ssid_name = profile_data["ssid_name"]
-    #     security_key = profile_data["security_key"]
-    #     security = "wpa2"
-    #     mode = "NAT"
-    #     band = "twog"
-    #     vlan = 1
-    #     channel = setup_params_general['rf-2G-9']['2G']['channel']
-    #     channel_width = setup_params_general['rf-2G-9']['2G']['channel-width']
-    #
-    #     obj = instantiate_profile(get_configuration['access_point'][0], "../libs/apnos/", "2.x")
-    #     obj.check_and_set_ap_channel(radio="2G", band=channel_width, channel=channel)
-    #
-    #     lf_tools.add_stations(band="2G", num_stations=1, dut=lf_tools.dut_name, ssid_name=ssid_name)
-    #     # lf_tools.add_stations(band="ax", num_stations="max", dut=lf_tools.dut_name, ssid_name=ssid_name)
-    #     lf_tools.Chamber_View()
-    #     wct_obj = lf_test.wifi_capacity(instance_name="test_client_open_NAT_tcp_dl", mode=mode, vlan_id=vlan,
-    #                                     download_rate="1Gbps", batch_size="1",
-    #                                     upload_rate="0", protocol="TCP-IPv4", duration="60000")
-    #
-    #     report_name = wct_obj.report_name[0]['LAST']["response"].split(":::")[1].split("/")[-1]
-    #
-    #     lf_tools.attach_report_graphs(report_name=report_name)
-    #     print("Test Completed... Cleaning up Stations")
-    #     lf_tools.reset_scenario()
-    #     assert True
-    #
-    # @allure.testcase(url="https://telecominfraproject.atlassian.net/browse/WIFI-2546", name="WIFI-6938")
-    # @pytest.mark.wpa2_personal
-    # @pytest.mark.twentyMhz
-    # @pytest.mark.twog
-    # @pytest.mark.channel10
-    # def test_client_nat_wpa2_chn10_20Mhz_US_2g(self, instantiate_profile, get_lf_logs,
-    #                                               lf_test, update_report,
-    #                                               station_names_twog, lf_tools,
-    #                                               test_cases, testbed, al_1, get_configuration):
-    #     """
-    #        pytest -m "country_code and twentyMhz and wpa2 and twog and channel10"
-    #     """
-    #     profile_data = setup_params_general["ssid_modes"]["wpa2_personal"][0]
-    #     ssid_name = profile_data["ssid_name"]
-    #     security_key = profile_data["security_key"]
-    #     security = "wpa2"
-    #     mode = "NAT"
-    #     band = "twog"
-    #     vlan = 1
-    #     channel = setup_params_general['rf-2G-10']['2G']['channel']
-    #     channel_width = setup_params_general['rf-2G-10']['2G']['channel-width']
-    #
-    #     obj = instantiate_profile(get_configuration['access_point'][0], "../libs/apnos/", "2.x")
-    #     obj.check_and_set_ap_channel(radio="2G", band=channel_width, channel=channel)
-    #
-    #     lf_tools.add_stations(band="2G", num_stations=1, dut=lf_tools.dut_name, ssid_name=ssid_name)
-    #     # lf_tools.add_stations(band="ax", num_stations="max", dut=lf_tools.dut_name, ssid_name=ssid_name)
-    #     lf_tools.Chamber_View()
-    #     wct_obj = lf_test.wifi_capacity(instance_name="test_client_open_NAT_tcp_dl", mode=mode, vlan_id=vlan,
-    #                                     download_rate="1Gbps", batch_size="1",
-    #                                     upload_rate="0", protocol="TCP-IPv4", duration="60000")
-    #
-    #     report_name = wct_obj.report_name[0]['LAST']["response"].split(":::")[1].split("/")[-1]
-    #
-    #     lf_tools.attach_report_graphs(report_name=report_name)
-    #     print("Test Completed... Cleaning up Stations")
-    #     lf_tools.reset_scenario()
-    #     assert True
