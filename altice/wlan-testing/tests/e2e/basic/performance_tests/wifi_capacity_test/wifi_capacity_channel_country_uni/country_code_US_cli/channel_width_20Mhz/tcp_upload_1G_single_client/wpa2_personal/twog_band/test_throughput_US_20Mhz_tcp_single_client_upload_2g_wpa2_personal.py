@@ -60,7 +60,7 @@ class TestCountryUS20Mhz2g(object):
     @pytest.mark.twentyMhz
     @pytest.mark.twog
     @pytest.mark.channel1
-    def test_client_nat_wpa2_chn1_20Mhz_US_2g_upload(self, instantiate_profile, get_lf_logs,
+    def test_client_nat_wpa2_chn1_20Mhz_US_2g_tcp_upload(self, instantiate_profile, get_lf_logs,
                                               lf_test, update_report,
                                               station_names_twog, lf_tools,
                                               test_cases, testbed, al_1, get_configuration):
