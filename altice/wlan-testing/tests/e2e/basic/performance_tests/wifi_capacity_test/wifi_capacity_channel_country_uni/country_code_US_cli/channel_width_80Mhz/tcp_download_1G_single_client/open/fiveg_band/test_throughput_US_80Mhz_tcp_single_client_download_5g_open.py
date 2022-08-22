@@ -164,7 +164,7 @@ class TestCountryUS80Mhz5G(object):
     @pytest.mark.fiveg
     @pytest.mark.channel149
     @pytest.mark.download
-    def test_client_nat_open_chn36_80Mhz_US_5g_download(self, instantiate_profile, get_lf_logs,
+    def test_client_nat_open_chn149_80Mhz_US_5g_download(self, instantiate_profile, get_lf_logs,
                                                  lf_test, update_report,
                                                  station_names_fiveg, lf_tools,
                                                  test_cases, testbed, al_1, get_configuration):

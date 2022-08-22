@@ -22,40 +22,25 @@ setup_params_general = {
              'country': 'US',
              "channel-mode": "VHT",
              'channel-width': 40,
-             "channel": 36}
+             "channel": 1}
     },
-    "rf-5G-2": {
+    "rf-5G-6": {
         "5G":
             {'band': '2G',
              'country': 'US',
              'channel-mode': 'VHT',
              'channel-width': 40,
-             "channel": 40}
+             "channel": 6}
     },
-    "rf-5G-3": {
+    "rf-5G-11": {
         "5G":
             {'band': '2G',
              'country': 'US',
              'channel-mode': 'VHT',
              'channel-width': 40,
-             "channel": 44}
+             "channel": 11}
     },
-    "rf-5G-4": {
-        "5G":
-            {'band': '2G',
-             'country': 'US',
-             'channel-mode': 'VHT',
-             'channel-width': 40,
-             "channel": 48}
-    },
-    "rf-5G-5": {
-        "5G":
-            {'band': '2G',
-             'country': 'US',
-             'channel-mode': 'VHT',
-             'channel-width': 40,
-             "channel": 149}
-    },
+
     "radius": False,
     "expected-throughput": 170
 }
@@ -75,9 +60,9 @@ class TestCountryUS40Mhz2G(object):
     @pytest.mark.open
     @pytest.mark.fourtyMhz
     @pytest.mark.twog
-    @pytest.mark.channel36
+    @pytest.mark.channel1
     @pytest.mark.upload
-    def test_client_nat_open_chn36_40Mhz_US_2g_upload(self, instantiate_profile, get_lf_logs,
+    def test_client_nat_open_chn1_40Mhz_US_2g_upload(self, instantiate_profile, get_lf_logs,
                                                  lf_test, update_report,
                                                  station_names_fiveg, lf_tools,
                                                  test_cases, testbed, al_1, get_configuration):
