@@ -60,6 +60,7 @@ class TestCountryUS20Mhz2g(object):
     @pytest.mark.twentyMhz
     @pytest.mark.twog
     @pytest.mark.channel1
+    @pytest.mark.udp_download
     def test_client_nat_wpa2_chn1_20Mhz_US_2g_udp_download(self, instantiate_profile, get_lf_logs,
                                               lf_test, update_report,
                                               station_names_twog, lf_tools,

@@ -76,7 +76,7 @@ class TestCountryUS20Mhz5G(object):
     @pytest.mark.twentyMhz
     @pytest.mark.fiveg
     @pytest.mark.channel36
-    @pytest.mark.bidirectional
+    @pytest.mark.udp_bidirectional
     def test_client_nat_open_chn36_20Mhz_US_5g_udp_bidirectional(self, instantiate_profile, get_lf_logs,
                                                  lf_test, update_report,
                                                  station_names_fiveg, lf_tools,

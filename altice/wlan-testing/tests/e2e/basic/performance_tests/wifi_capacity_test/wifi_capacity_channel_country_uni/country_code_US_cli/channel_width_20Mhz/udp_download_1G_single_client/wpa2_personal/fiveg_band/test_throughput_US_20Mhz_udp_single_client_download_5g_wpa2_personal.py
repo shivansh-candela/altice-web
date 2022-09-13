@@ -76,7 +76,7 @@ class TestCountryUS20Mhz5G(object):
     @pytest.mark.twentyMhz
     @pytest.mark.fiveg
     @pytest.mark.channel36
-    @pytest.mark.download
+    @pytest.mark.udp_download
     def test_client_nat_wpa2_chn36_20Mhz_US_5g_udp_download(self, instantiate_profile, get_lf_logs,
                                                  lf_test, update_report,
                                                  station_names_fiveg, lf_tools,
