@@ -76,7 +76,7 @@ class TestCountryUS80Mhz5G(object):
     @pytest.mark.eightyMhz
     @pytest.mark.fiveg
     @pytest.mark.channel36
-    @pytest.mark.upload
+    @pytest.mark.tcp_upload
     def test_client_nat_wpa2_chn36_80Mhz_US_5g_tcp_upload(self, instantiate_profile, get_lf_logs,
                                                  lf_test, update_report,
                                                  station_names_fiveg, lf_tools,

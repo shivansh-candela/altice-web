@@ -61,6 +61,7 @@ class TestCountryUS40Mhz2g(object):
     @pytest.mark.fourtyMhz
     @pytest.mark.twog
     @pytest.mark.channel1
+    @pytest.mark.tcp_download
     def test_client_nat_open_chn1_40Mhz_US_2g_tcp_download(self, instantiate_profile, get_lf_logs,
                                               lf_test, update_report,
                                               station_names_twog, lf_tools,
@@ -147,6 +148,7 @@ class TestCountryUS40Mhz2g(object):
     @pytest.mark.fourtyMhz
     @pytest.mark.twog
     @pytest.mark.channel6
+    @pytest.mark.tcp_download
     def test_client_nat_open_chn6_40Mhz_US_2g_tcp_download(self, instantiate_profile, get_lf_logs,
                                               lf_test, update_report,
                                               station_names_twog, lf_tools,
@@ -233,6 +235,7 @@ class TestCountryUS40Mhz2g(object):
     @pytest.mark.fourtyMhz
     @pytest.mark.twog
     @pytest.mark.channel11
+    @pytest.mark.tcp_download
     def test_client_nat_open_chn11_40Mhz_US_2g_tcp_download(self, instantiate_profile, get_lf_logs,
                                               lf_test, update_report,
                                               station_names_twog, lf_tools,

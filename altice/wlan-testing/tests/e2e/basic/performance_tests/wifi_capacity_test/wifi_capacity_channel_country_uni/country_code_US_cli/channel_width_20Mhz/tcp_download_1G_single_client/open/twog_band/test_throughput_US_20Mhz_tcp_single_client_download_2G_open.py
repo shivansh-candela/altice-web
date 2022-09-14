@@ -12,7 +12,7 @@ setup_params_general = {
     "mode": "NAT",
     "ssid_modes": {
         "open": [
-            {"ssid_name": "client_connectivity", "appliedRadios": ["2G"], "security_key": "something"},
+            {"ssid_name": "client_connectivity_al", "appliedRadios": ["2G"], "security_key": "something"},
         ]
     },
 
@@ -60,6 +60,7 @@ class TestCountryUS20Mhz2g(object):
     @pytest.mark.twentyMhz
     @pytest.mark.twog
     @pytest.mark.channel1
+    @pytest.mark.tcp_download
     def test_client_nat_open_chn1_20Mhz_US_2g_tcp_download(self, instantiate_profile, get_lf_logs,
                                               lf_test, update_report,
                                               station_names_twog, lf_tools,

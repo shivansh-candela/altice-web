@@ -12,7 +12,7 @@ setup_params_general = {
     "mode": "NAT",
     "ssid_modes": {
         "open": [
-            {"ssid_name": "client_connectivity", "appliedRadios": ["2G"], "security_key": "something"},
+            {"ssid_name": "client_connectivity_al", "appliedRadios": ["2G"], "security_key": "something"},
         ]
     },
 
@@ -40,7 +40,8 @@ setup_params_general = {
              'channel-width': 20,
              "channel": 11}
     },
-    "radius": False
+    "radius": False,
+    "expected-throughput": 150
 }
 
 
@@ -59,6 +60,7 @@ class TestCountryUS20Mhz2g(object):
     @pytest.mark.twentyMhz
     @pytest.mark.twog
     @pytest.mark.channel1
+    @pytest.mark.tcp_bidirectional
     def test_client_nat_open_chn1_20Mhz_US_2g_tcp_bidirectional(self, instantiate_profile, get_lf_logs,
                                               lf_test, update_report,
                                               station_names_twog, lf_tools,
@@ -73,7 +75,7 @@ class TestCountryUS20Mhz2g(object):
         mode = "NAT"
         band = "twog"
         vlan = 1
-        channel = setup_params_general['rf-5G-1']['2G']['channel']
+        channel = setup_params_general['rf-2G-1']['2G']['channel']
         channel_width = setup_params_general['rf-2G-1']['2G']['channel-width']
         expected_throughput = setup_params_general["expected-throughput"]
         batch_size = 1

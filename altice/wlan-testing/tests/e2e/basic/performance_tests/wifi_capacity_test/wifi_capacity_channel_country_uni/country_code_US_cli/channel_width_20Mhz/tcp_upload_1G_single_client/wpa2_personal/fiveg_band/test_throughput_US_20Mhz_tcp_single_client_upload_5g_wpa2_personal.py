@@ -4,7 +4,7 @@ import allure
 
 pytestmark = [pytest.mark.country_code, pytest.mark.nat, pytest.mark.wpa2, pytest.mark.united_states,
               pytest.mark.bandwidth_20mhz, pytest.mark.al, pytest.mark.tcp, pytest.mark.wifi_capacity,
-              pytest.mark.upload, pytest.mark.tcp_download, pytest.mark.wifi_capacity_single_client,
+              pytest.mark.upload, pytest.mark.tcp_upload, pytest.mark.wifi_capacity_single_client,
               pytest.mark.wifi_capacity_wpa2_20mhz_all_channels_single_client_upload_1gbps,
               pytest.mark.throughput_wpa2_20mhz_all_channels_single_client_upload_1gbps, pytest.mark.fiveg]
 
@@ -76,7 +76,7 @@ class TestCountryUS20Mhz5G(object):
     @pytest.mark.twentyMhz
     @pytest.mark.fiveg
     @pytest.mark.channel36
-    @pytest.mark.upload
+    @pytest.mark.tcp_upload
     def test_client_nat_wpa2_chn36_20Mhz_US_5g_tcp_upload(self, instantiate_profile, get_lf_logs,
                                                  lf_test, update_report,
                                                  station_names_fiveg, lf_tools,

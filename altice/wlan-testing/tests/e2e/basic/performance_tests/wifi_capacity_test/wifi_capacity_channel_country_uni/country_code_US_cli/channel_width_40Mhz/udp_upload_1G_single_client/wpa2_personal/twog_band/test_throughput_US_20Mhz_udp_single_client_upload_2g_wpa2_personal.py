@@ -76,7 +76,7 @@ class TestCountryUS40Mhz2G(object):
     @pytest.mark.twentyMhz
     @pytest.mark.twog
     @pytest.mark.channel36
-    @pytest.mark.upload
+    @pytest.mark.udp_upload
     def test_client_nat_wpa2_chn36_40Mhz_US_2g_udp_upload(self, instantiate_profile, get_lf_logs,
                                                  lf_test, update_report,
                                                  station_names_fiveg, lf_tools,

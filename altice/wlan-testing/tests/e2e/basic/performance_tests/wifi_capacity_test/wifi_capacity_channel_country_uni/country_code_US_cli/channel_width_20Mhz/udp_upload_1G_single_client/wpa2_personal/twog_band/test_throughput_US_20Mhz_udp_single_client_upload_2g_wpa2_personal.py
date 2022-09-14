@@ -16,45 +16,29 @@ setup_params_general = {
         ]
     },
 
-    "rf-5G-1": {
+    "rf-2G-1": {
         "5G":
             {'band': '2G',
              'country': 'US',
              "channel-mode": "VHT",
              'channel-width': 20,
-             "channel": 36}
+             "channel": 1}
     },
-    "rf-5G-2": {
+    "rf-2G-6": {
         "5G":
             {'band': '2G',
              'country': 'US',
              'channel-mode': 'VHT',
              'channel-width': 20,
-             "channel": 40}
+             "channel": 6}
     },
-    "rf-5G-3": {
+    "rf-2G-11": {
         "5G":
             {'band': '2G',
              'country': 'US',
              'channel-mode': 'VHT',
              'channel-width': 20,
-             "channel": 44}
-    },
-    "rf-5G-4": {
-        "5G":
-            {'band': '2G',
-             'country': 'US',
-             'channel-mode': 'VHT',
-             'channel-width': 20,
-             "channel": 48}
-    },
-    "rf-5G-5": {
-        "5G":
-            {'band': '2G',
-             'country': 'US',
-             'channel-mode': 'VHT',
-             'channel-width': 20,
-             "channel": 149}
+             "channel": 11}
     },
     "radius": False,
     "expected-throughput": 170
@@ -75,9 +59,9 @@ class TestCountryUS20Mhz2G(object):
     @pytest.mark.wpa2_personal
     @pytest.mark.twentyMhz
     @pytest.mark.twog
-    @pytest.mark.channel36
-    @pytest.mark.upload
-    def test_client_nat_wpa2_chn36_20Mhz_US_2g_udp_upload(self, instantiate_profile, get_lf_logs,
+    @pytest.mark.channel1
+    @pytest.mark.udp_upload
+    def test_client_nat_wpa2_chn1_20Mhz_US_2g_udp_upload(self, instantiate_profile, get_lf_logs,
                                                  lf_test, update_report,
                                                  station_names_fiveg, lf_tools,
                                                  test_cases, testbed, al_1, get_configuration):

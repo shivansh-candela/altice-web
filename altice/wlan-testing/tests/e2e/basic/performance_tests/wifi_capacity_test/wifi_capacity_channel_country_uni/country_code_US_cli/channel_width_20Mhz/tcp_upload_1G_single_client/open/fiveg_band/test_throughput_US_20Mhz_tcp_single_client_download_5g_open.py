@@ -76,7 +76,7 @@ class TestCountryUS20Mhz5G(object):
     @pytest.mark.twentyMhz
     @pytest.mark.fiveg
     @pytest.mark.channel36
-    @pytest.mark.upload
+    @pytest.mark.tcp_upload
     def test_client_nat_open_chn36_20Mhz_US_5g_tcp_upload(self, instantiate_profile, get_lf_logs,
                                                  lf_test, update_report,
                                                  station_names_fiveg, lf_tools,
