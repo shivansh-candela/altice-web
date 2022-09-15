@@ -1067,3 +1067,11 @@ def get_cli_configuration(device, request):
 
     LOGGER.info("Selected the lab Info data: " + str((PERFECTO_DETAILS[device])))
     yield PERFECTO_DETAILS[device]
+
+@pytest.fixture(scope="session")
+def get_attenuators(get_configuration, request):
+    connected_attenuators_serial = get_configuration['traffic_generator']['details']['attenuation_connected_serial']
+    print(f"connected_attenuators_serial : {connected_attenuators_serial}")
+    selected_attenuators_serial = get_configuration['traffic_generator']['details']['attenuation_selected_serial']
+    print(f"selected_attenuators_serial : {selected_attenuators_serial}")
+    yield connected_attenuators_serial, selected_attenuators_serial
