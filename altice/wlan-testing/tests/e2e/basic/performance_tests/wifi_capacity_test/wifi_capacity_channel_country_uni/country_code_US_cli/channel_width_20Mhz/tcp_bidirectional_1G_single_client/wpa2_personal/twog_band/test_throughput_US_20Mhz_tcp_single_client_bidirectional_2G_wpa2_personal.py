@@ -286,7 +286,7 @@ class TestCountryUS20Mhz2g(object):
         # lf_tools.add_stations(band="ax", num_stations=1, dut=lf_tools.dut_name, ssid_name=ssid_name)
         lf_tools.Chamber_View()
 
-        wct_obj = lf_test.wifi_capacity(instance_name="test_client_open_NAT_tcp_bd_2g", mode=mode, vlan_id=vlan,
+        wct_obj = lf_test.wifi_capacity(instance_name="test_client_wpa2_NAT_tcp_bd_2g", mode=mode, vlan_id=vlan,
                                         download_rate="1Gbps", batch_size="1",
                                         upload_rate="1Gbps", protocol="TCP-IPv4", duration="60000")
 
@@ -428,7 +428,7 @@ class TestCountryUS20Mhz2g(object):
         # lf_tools.add_stations(band="ax", num_stations=1, dut=lf_tools.dut_name, ssid_name=ssid_name)
         lf_tools.Chamber_View()
 
-        wct_obj = lf_test.wifi_capacity(instance_name="test_client_open_NAT_tcp_bd_2g", mode=mode, vlan_id=vlan,
+        wct_obj = lf_test.wifi_capacity(instance_name="test_client_wpa2_NAT_tcp_bd_2g", mode=mode, vlan_id=vlan,
                                         download_rate="1Gbps", batch_size="1",
                                         upload_rate="1Gbps", protocol="TCP-IPv4", duration="60000")
 
