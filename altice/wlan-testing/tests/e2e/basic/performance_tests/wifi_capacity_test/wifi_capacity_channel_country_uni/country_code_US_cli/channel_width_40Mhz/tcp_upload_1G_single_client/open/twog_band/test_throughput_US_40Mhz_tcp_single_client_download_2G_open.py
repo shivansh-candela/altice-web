@@ -4,7 +4,7 @@ import allure
 import time
 
 pytestmark = [pytest.mark.country_code, pytest.mark.nat, pytest.mark.open, pytest.mark.united_states,
-              pytest.mark.bandwidth_40mhz, pytest.mark.al, pytest.mark.tcp, pytest.mark.wifi_capacity,
+              pytest.mark.bandwidth_40mhz, pytest.mark.al, pytest.mark.tcp, pytest.mark.wifi_capacity, pytest.mark.wifi_capacity_test,
               pytest.mark.upload, pytest.mark.tcp_upload, pytest.mark.wifi_capacity_single_client,
               pytest.mark.open_20mhz_all_channels_single_client_upload_1gbps,
               pytest.mark.throughput_open_20mhz_all_channels_single_client_upload_1gbps]
@@ -22,7 +22,7 @@ setup_params_general = {
             {'band': '2G',
              'country': 'US',
              "channel-mode": "VHT",
-             'channel-width': 20,
+             'channel-width': 40,
              "channel": 1}
     },
     "rf-2G-6": {
@@ -30,7 +30,7 @@ setup_params_general = {
             {'band': '2G',
              'country': 'US',
              'channel-mode': 'VHT',
-             'channel-width': 20,
+             'channel-width': 40,
              "channel": 6}
     },
     "rf-2G-11": {
@@ -38,7 +38,7 @@ setup_params_general = {
             {'band': '2G',
              'country': 'US',
              'channel-mode': 'VHT',
-             'channel-width': 20,
+             'channel-width': 40,
              "channel": 11}
     },
     "radius": False,
@@ -60,14 +60,14 @@ class TestCountryUS40Mhz2g(object):
     @pytest.mark.open
     @pytest.mark.fourtyMhz
     @pytest.mark.twog
-    @pytest.mark.channel1
+    @pytest.mark.channel_1
     @pytest.mark.tcp_upload
     def test_client_nat_open_chn1_40Mhz_US_2g_tcp_upload(self, instantiate_profile, get_lf_logs,
                                               lf_test, update_report,
                                               station_names_twog, lf_tools,
                                               test_cases, testbed, al_1, get_configuration, get_attenuators):
         """
-           pytest -m "country_code and twentyMhz and open and twog and channel1"
+           pytest -m "country_code and twentyMhz and open and twog and channel_1"
         """
         profile_data = setup_params_general["ssid_modes"]["open"][0]
         ssid_name = profile_data["ssid_name"]
@@ -202,14 +202,14 @@ class TestCountryUS40Mhz2g(object):
     @pytest.mark.open
     @pytest.mark.fourtyMhz
     @pytest.mark.twog
-    @pytest.mark.channel6
+    @pytest.mark.channel_6
     @pytest.mark.tcp_upload
     def test_client_nat_open_chn6_40Mhz_US_2g_tcp_upload(self, instantiate_profile, get_lf_logs,
                                               lf_test, update_report,
                                               station_names_twog, lf_tools,
                                               test_cases, testbed, al_1, get_configuration, get_attenuators):
         """
-           pytest -m "country_code and fourtyMhz and open and twog and channel6"
+           pytest -m "country_code and fourtyMhz and open and twog and channel_6"
         """
         profile_data = setup_params_general["ssid_modes"]["open"][0]
         ssid_name = profile_data["ssid_name"]
@@ -343,14 +343,14 @@ class TestCountryUS40Mhz2g(object):
     @pytest.mark.open
     @pytest.mark.fourtyMhz
     @pytest.mark.twog
-    @pytest.mark.channel11
+    @pytest.mark.channel_11
     @pytest.mark.tcp_upload
     def test_client_nat_open_chn11_40Mhz_US_2g_tcp_upload(self, instantiate_profile, get_lf_logs,
                                               lf_test, update_report,
                                               station_names_twog, lf_tools,
                                               test_cases, testbed, al_1, get_configuration, get_attenuators):
         """
-           pytest -m "country_code and fourtyMhz and open and twog and channel11"
+           pytest -m "country_code and fourtyMhz and open and twog and channel_11"
         """
         profile_data = setup_params_general["ssid_modes"]["open"][0]
         ssid_name = profile_data["ssid_name"]

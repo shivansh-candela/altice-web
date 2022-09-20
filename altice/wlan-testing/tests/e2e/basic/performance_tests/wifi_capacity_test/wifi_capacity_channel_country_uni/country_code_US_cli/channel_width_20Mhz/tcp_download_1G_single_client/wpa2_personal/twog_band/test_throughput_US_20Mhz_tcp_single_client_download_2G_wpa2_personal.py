@@ -3,7 +3,7 @@ import pytest
 import allure
 import time
 pytestmark = [pytest.mark.country_code, pytest.mark.nat, pytest.mark.wpa2, pytest.mark.united_states,
-              pytest.mark.bandwidth_20mhz, pytest.mark.al, pytest.mark.tcp, pytest.mark.wifi_capacity,
+              pytest.mark.bandwidth_20mhz, pytest.mark.al, pytest.mark.tcp, pytest.mark.wifi_capacity,pytest.mark.wifi_capacity_test,
               pytest.mark.download, pytest.mark.tcp_download, pytest.mark.wifi_capacity_single_client,
               pytest.mark.wifi_capacity_wpa2_20mhz_all_channels_single_client_download_1gbps,
               pytest.mark.throughput_wpa2_20mhz_all_channels_single_client_download_1gbps]
@@ -59,14 +59,14 @@ class TestCountryUS20Mhz2g(object):
     @pytest.mark.wpa2_personal
     @pytest.mark.twentyMhz
     @pytest.mark.twog
-    @pytest.mark.channel1
+    @pytest.mark.channel_1
     @pytest.mark.tcp_download
     def test_client_nat_wpa2_chn1_20Mhz_US_2g_tcp_download(self, instantiate_profile, get_lf_logs,
                                                  lf_test, update_report,
                                                  station_names_twog, lf_tools,
                                                  test_cases, testbed, al_1, get_configuration, get_attenuators):
         """
-           pytest -m "country_code and twentyMhz and wpa2 and twog and channel1"
+           pytest -m "country_code and twentyMhz and wpa2 and twog and channel_1"
         """
         profile_data = setup_params_general["ssid_modes"]["wpa2_personal"][0]
         ssid_name = profile_data["ssid_name"]
@@ -199,14 +199,14 @@ class TestCountryUS20Mhz2g(object):
     @pytest.mark.wpa2_personal
     @pytest.mark.twentyMhz
     @pytest.mark.twog
-    @pytest.mark.channel6
+    @pytest.mark.channel_6
     @pytest.mark.tcp_download
     def test_client_nat_wpa2_chn6_20Mhz_US_2g_tcp_download(self, instantiate_profile, get_lf_logs,
                                                  lf_test, update_report,
                                                  station_names_twog, lf_tools,
                                                  test_cases, testbed, al_1, get_configuration, get_attenuators):
         """
-           pytest -m "country_code and twentyMhz and wpa2 and twog and channel6"
+           pytest -m "country_code and twentyMhz and wpa2 and twog and channel_6"
         """
         profile_data = setup_params_general["ssid_modes"]["wpa2_personal"][0]
         ssid_name = profile_data["ssid_name"]
@@ -338,14 +338,14 @@ class TestCountryUS20Mhz2g(object):
     @pytest.mark.wpa2_personal
     @pytest.mark.twentyMhz
     @pytest.mark.twog
-    @pytest.mark.channel11
+    @pytest.mark.channel_11
     @pytest.mark.tcp_download
     def test_client_nat_wpa2_chn11_20Mhz_US_2g_tcp_download(self, instantiate_profile, get_lf_logs,
                                                  lf_test, update_report,
                                                  station_names_twog, lf_tools,
                                                  test_cases, testbed, al_1, get_configuration, get_attenuators):
         """
-           pytest -m "country_code and twentyMhz and wpa2 and twog and channel11"
+           pytest -m "country_code and twentyMhz and wpa2 and twog and channel_11"
         """
         profile_data = setup_params_general["ssid_modes"]["wpa2_personal"][0]
         ssid_name = profile_data["ssid_name"]

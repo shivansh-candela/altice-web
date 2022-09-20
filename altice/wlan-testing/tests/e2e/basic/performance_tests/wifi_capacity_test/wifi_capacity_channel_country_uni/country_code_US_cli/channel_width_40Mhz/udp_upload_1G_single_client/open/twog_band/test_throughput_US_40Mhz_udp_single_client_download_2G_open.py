@@ -4,7 +4,7 @@ import allure
 import time
 
 pytestmark = [pytest.mark.country_code, pytest.mark.nat, pytest.mark.open, pytest.mark.united_states,
-              pytest.mark.bandwidth_40mhz, pytest.mark.al, pytest.mark.udp, pytest.mark.wifi_capacity,
+              pytest.mark.bandwidth_40mhz, pytest.mark.al, pytest.mark.udp, pytest.mark.wifi_capacity, pytest.mark.wifi_capacity_test,
               pytest.mark.upload, pytest.mark.udp_upload, pytest.mark.wifi_capacity_single_client,
               pytest.mark.wifi_capacity_open_40mhz_all_channels_single_client_upload_1gbps,
               pytest.mark.throughput_open_40mhz_all_channels_single_client_upload_1gbps, pytest.mark.fiveg,pytest.mark.udp]
@@ -61,14 +61,14 @@ class TestCountryUS40Mhz2G(object):
     @pytest.mark.open
     @pytest.mark.fourtyMhz
     @pytest.mark.twog
-    @pytest.mark.channel1
+    @pytest.mark.channel_1
     @pytest.mark.udp_upload
     def test_client_nat_open_chn1_40Mhz_US_2g_udp_upload(self, instantiate_profile, get_lf_logs,
                                                  lf_test, update_report,
                                                  station_names_twog, lf_tools,
                                                  test_cases, testbed, al_1, get_configuration, get_attenuators):
         """
-           pytest -m "country_code and twentyMhz and twog and channel1"
+           pytest -m "country_code and fourtyMhz and twog and channel_1"
         """
         profile_data = setup_params_general["ssid_modes"]["open"][0]
         ssid_name = profile_data["ssid_name"]
@@ -202,14 +202,14 @@ class TestCountryUS40Mhz2G(object):
     @pytest.mark.open
     @pytest.mark.fourtyMhz
     @pytest.mark.twog
-    @pytest.mark.channel6
+    @pytest.mark.channel_6
     @pytest.mark.udp_upload
     def test_client_nat_open_chn6_40Mhz_US_2g_udp_upload(self, instantiate_profile, get_lf_logs,
                                                  lf_test, update_report,
                                                  station_names_twog, lf_tools,
                                                  test_cases, testbed, al_1, get_configuration, get_attenuators):
         """
-           pytest -m "country_code and twentyMhz and OPEN and fiveg and channel6"
+           pytest -m "country_code and fourtyMhz and OPEN and twog and channel_6"
         """
         profile_data = setup_params_general["ssid_modes"]["open"][0]
         ssid_name = profile_data["ssid_name"]
@@ -344,14 +344,14 @@ class TestCountryUS40Mhz2G(object):
     @pytest.mark.open
     @pytest.mark.fourtyMhz
     @pytest.mark.twog
-    @pytest.mark.channel11
+    @pytest.mark.channel_11
     @pytest.mark.udp_upload
     def test_client_nat_open_chn11_40Mhz_US_2g_udp_upload(self, instantiate_profile, get_lf_logs,
                                                  lf_test, update_report,
                                                  station_names_twog, lf_tools,
                                                  test_cases, testbed, al_1, get_configuration):
         """
-           pytest -m "country_code and fourtyMhz and fiveg and channel11"
+           pytest -m "country_code and fourtyMhz and twog and channel_11"
         """
         profile_data = setup_params_general["ssid_modes"]["open"][0]
         ssid_name = profile_data["ssid_name"]
