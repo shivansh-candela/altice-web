@@ -4,7 +4,7 @@ import allure
 import time
 
 pytestmark = [pytest.mark.country_code, pytest.mark.nat, pytest.mark.wpa2, pytest.mark.united_states,
-              pytest.mark.bandwidth_80mhz, pytest.mark.al, pytest.mark.udp, pytest.mark.wifi_capacity,
+              pytest.mark.bandwidth_80mhz, pytest.mark.al, pytest.mark.udp, pytest.mark.wifi_capacity_test,
               pytest.mark.download, pytest.mark.udp_download, pytest.mark.wifi_capacity_single_client,
               pytest.mark.wifi_capacity_wpa2_80mhz_all_channels_single_client_download_1gbps,
               pytest.mark.throughput_wpa2_80mhz_all_channels_single_client_download_1gbps, pytest.mark.fiveg,pytest.mark.udp,]
@@ -76,14 +76,14 @@ class TestCountryUS80Mhz5G(object):
     @pytest.mark.wpa2_personal
     @pytest.mark.eightyMhz
     @pytest.mark.fiveg
-    @pytest.mark.channel36
+    @pytest.mark.channel_36
     @pytest.mark.udp_download
     def test_client_nat_wpa2_chn36_80Mhz_US_5g_udp_download(self, instantiate_profile, get_lf_logs,
                                                  lf_test, update_report,
                                                  station_names_fiveg, lf_tools,
                                                  test_cases, testbed, al_1, get_configuration, get_attenuators):
         """
-           pytest -m "country_code and eightyMhz and wpa2 and fiveg and channel36"
+           pytest -m "country_code and eightyMhz and wpa2 and fiveg and channel_36"
         """
         profile_data = setup_params_general["ssid_modes"]["wpa2_personal"][0]
         ssid_name = profile_data["ssid_name"]
@@ -217,14 +217,14 @@ class TestCountryUS80Mhz5G(object):
     @pytest.mark.wpa2_personal
     @pytest.mark.eightyMhz
     @pytest.mark.fiveg
-    @pytest.mark.channel40
+    @pytest.mark.channel_40
     @pytest.mark.udp_download
     def test_client_nat_wpa2_chn40_80Mhz_US_5g_udp_download(self, instantiate_profile, get_lf_logs,
                                                         lf_test, update_report,
                                                         station_names_fiveg, lf_tools,
                                                         test_cases, testbed, al_1, get_configuration, get_attenuators):
         """
-           pytest -m "country_code and eightyMhz and wpa2 and fiveg and channel40"
+           pytest -m "country_code and eightyMhz and wpa2 and fiveg and channel_40"
         """
         profile_data = setup_params_general["ssid_modes"]["wpa2_personal"][0]
         ssid_name = profile_data["ssid_name"]
@@ -358,14 +358,14 @@ class TestCountryUS80Mhz5G(object):
     @pytest.mark.wpa2_personal
     @pytest.mark.eightyMhz
     @pytest.mark.fiveg
-    @pytest.mark.channel149
+    @pytest.mark.channel_149
     @pytest.mark.udp_download
     def test_client_nat_wpa2_chn149_80Mhz_US_5g_udp_download(self, instantiate_profile, get_lf_logs,
                                                         lf_test, update_report,
                                                         station_names_fiveg, lf_tools,
                                                         test_cases, testbed, al_1, get_configuration, get_attenuators):
         """
-           pytest -m "country_code and eightyMhz and wpa2 and fiveg and channel149"
+           pytest -m "country_code and eightyMhz and wpa2 and fiveg and channel_149"
         """
         profile_data = setup_params_general["ssid_modes"]["wpa2_personal"][0]
         ssid_name = profile_data["ssid_name"]
