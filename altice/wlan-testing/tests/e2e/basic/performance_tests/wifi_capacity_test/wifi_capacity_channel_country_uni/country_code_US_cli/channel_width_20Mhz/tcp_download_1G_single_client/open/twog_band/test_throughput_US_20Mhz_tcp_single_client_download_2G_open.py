@@ -60,7 +60,7 @@ class TestCountryUS20Mhz2g(object):
     @pytest.mark.open
     @pytest.mark.twentyMhz
     @pytest.mark.twog
-    @pytest.mark.channel1
+    @pytest.mark.channel_1
     @pytest.mark.tcp_download
     def test_client_nat_open_chn1_20Mhz_US_2g_tcp_download(self, instantiate_profile, get_lf_logs,
                                               lf_test, update_report,

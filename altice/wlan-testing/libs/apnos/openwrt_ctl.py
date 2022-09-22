@@ -104,7 +104,9 @@ def main():
         port = args.port
         # port = (default_ports[scheme], args.port)[args.port != None]
         user = args.user
+        print(user,"uuuuuuuuuuuuu")
         passwd = args.passwd
+        print("ppppppppppppp",passwd)
         logfile = args.log
         tty = args.tty;
         if (args.prompt != None):
