@@ -21,7 +21,7 @@ setup_params_general = {
             {'band': '2G',
              'country': 'US',
              "channel-mode": "VHT",
-             4'channel-width': 40,
+             'channel-width': 40,
              "channel": 1}
     },
     "rf-2G-6": {
