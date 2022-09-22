@@ -4,16 +4,16 @@ import allure
 import time
 
 pytestmark = [pytest.mark.country_code, pytest.mark.nat, pytest.mark.open, pytest.mark.united_states,
-              pytest.mark.bandwidth_20mhz, pytest.mark.al, pytest.mark.udp, pytest.mark.wifi_capacity,pytest.mark.wifi_capacity_test,
-              pytest.mark.upload, pytest.mark.udp_upload, pytest.mark.wifi_capacity_single_client,
-              pytest.mark.wifi_capacity_open_20mhz_all_channels_single_client_upload_1gbps,
-              pytest.mark.throughput_open_20mhz_all_channels_single_client_upload_1gbps, pytest.mark.udp]
+              pytest.mark.bandwidth_40mhz, pytest.mark.al, pytest.mark.tcp, pytest.mark.wifi_capacity, pytest.mark.wifi_capacity_test,
+              pytest.mark.bidirectional, pytest.mark.tcp_bidirectional, pytest.mark.wifi_capacity_single_client,
+              pytest.mark.wifi_capacity_open_40mhz_all_channels_single_client_bidirectional_1gbps,
+              pytest.mark.throughput_open_40mhz_all_channels_single_client_bidirectional_1gbps]
 
 setup_params_general = {
     "mode": "NAT",
     "ssid_modes": {
         "open": [
-            {"ssid_name": "client_connectivity_al", "appliedRadios": ["2G"], "security_key": "something"}
+            {"ssid_name": "client_connectivity_al", "appliedRadios": ["2G"], "security_key": "something"},
         ]
     },
 
@@ -22,7 +22,7 @@ setup_params_general = {
             {'band': '2G',
              'country': 'US',
              "channel-mode": "VHT",
-             'channel-width': 20,
+             'channel-width': 40,
              "channel": 1}
     },
     "rf-2G-6": {
@@ -30,7 +30,7 @@ setup_params_general = {
             {'band': '2G',
              'country': 'US',
              'channel-mode': 'VHT',
-             'channel-width': 20,
+             'channel-width': 40,
              "channel": 6}
     },
     "rf-2G-11": {
@@ -38,7 +38,7 @@ setup_params_general = {
             {'band': '2G',
              'country': 'US',
              'channel-mode': 'VHT',
-             'channel-width': 20,
+             'channel-width': 40,
              "channel": 11}
     },
     "radius": False,
@@ -54,20 +54,20 @@ setup_params_general = {
     scope="class"
 )
 @pytest.mark.usefixtures("setup_profiles")
-class TestCountryUS20Mhz2g(object):
+class TestCountryUS40Mhz2g(object):
 
     @allure.testcase(url="https://telecominfraproject.atlassian.net/browse/WIFI-2546", name="WIFI-6938")
     @pytest.mark.open
-    @pytest.mark.twentyMhz
+    @pytest.mark.fourtyMhz
     @pytest.mark.twog
     @pytest.mark.channel_1
-    @pytest.mark.udp_upload
-    def test_client_nat_open_chn1_20Mhz_US_2g_udp_upload(self, instantiate_profile, get_lf_logs,
+    @pytest.mark.tcp_bidirectional
+    def test_client_nat_open_chn1_40Mhz_US_2g_tcp_bidirectional(self, instantiate_profile, get_lf_logs,
                                               lf_test, update_report,
                                               station_names_twog, lf_tools,
                                               test_cases, testbed, al_1, get_configuration, get_attenuators):
         """
-           pytest -m "country_code and twentyMhz and open and twog and channel_1"
+           pytest -m "country_code and fourtyMhz and open and twog and channel_1"
         """
         profile_data = setup_params_general["ssid_modes"]["open"][0]
         ssid_name = profile_data["ssid_name"]
@@ -145,9 +145,9 @@ class TestCountryUS20Mhz2g(object):
         # lf_tools.add_stations(band="ax", num_stations=1, dut=lf_tools.dut_name, ssid_name=ssid_name)
         lf_tools.Chamber_View()
 
-        wct_obj = lf_test.wifi_capacity(instance_name="test_client_open_NAT_udp_ul_2g", mode=mode, vlan_id=vlan,
-                                        upload_rate="1Gbps", batch_size="1",
-                                        download_rate="0", protocol="UDP-IPv4", duration="60000")
+        wct_obj = lf_test.wifi_capacity(instance_name="test_client_open_NAT_tcp_bd_2g", mode=mode, vlan_id=vlan,
+                                        download_rate="1Gbps", batch_size="1",
+                                        upload_rate="0", protocol="TCP-IPv4", duration="60000")
 
         report_name = wct_obj.report_name[0]['LAST']["response"].split(":::")[1].split("/")[-1]
 
@@ -158,8 +158,8 @@ class TestCountryUS20Mhz2g(object):
                                                                   individual_station_throughput=False, kpi_csv=True,
                                                                   file_name="/kpi.csv", batch_size=str(batch_size))
         print(csv_val)
-        print(f"Upload Traffic Throughput: {csv_val['Up']['UP Mbps - 1 STA']}")
-        actual_throughput = csv_val['Up']['UL Mbps - 1 STA']
+        print(f"Download Traffic Throughput: {csv_val['Down']['DL Mbps - 1 STA']}")
+        actual_throughput = csv_val['Down']['DL Mbps - 1 STA']
 
         result = {
 
@@ -169,12 +169,12 @@ class TestCountryUS20Mhz2g(object):
             "security-key": security_key,
             "band": band,
             "channel": channel,
-            "description": "WiFi capacity test",
-            "test-download": "0",
-            "test-batch-size": "1",
-            "test-upload-rate": "1Gbps",
-            "test-protocol": "UDP-IPV4",
-            "test-duration": "60 Sec",
+            "description" : "WiFi capacity test",
+            "test-download" : "1Gbps",
+            "test-batch-size" : "1",
+            "test-upload-rate" : "1Gbps",
+            "test-protocol" : "TCP-IPV4",
+            "test-duration" : "60 Sec",
             "expected-throughput": f" > {expected_throughput}",
             "actual-throughput": actual_throughput
         }
@@ -185,7 +185,7 @@ class TestCountryUS20Mhz2g(object):
             print(f"pdf: {pdf}")
             if os.path.exists(pdf):
                 allure.attach.file(source=pdf,
-                                   name="WiFi_Capacity_1GBPS_Upload_Throughput_Test_UDP_2g", attachment_type="PDF")
+                                   name="WiFi_Capacity_1GBPS_Bidirectional_Throughput_TCP_2g_Test", attachment_type="PDF")
             assert True
         else:
             result["result"] = "FAIL"
@@ -193,21 +193,23 @@ class TestCountryUS20Mhz2g(object):
             print(f"pdf: {pdf}")
             if os.path.exists(pdf):
                 allure.attach.file(source=pdf,
-                                   name="WiFi_Capacity_1GBPS_Upload_Throughput_Test_UDP_2g", attachment_type="PDF")
+                                   name="WiFi_Capacity_1GBPS_Bidirectional_Throughput_TCP_2g_Test", attachment_type="PDF")
             assert False
+
+
 
     @allure.testcase(url="https://telecominfraproject.atlassian.net/browse/WIFI-2546", name="WIFI-6938")
     @pytest.mark.open
-    @pytest.mark.twentyMhz
+    @pytest.mark.fourtyMhz
     @pytest.mark.twog
     @pytest.mark.channel_6
-    @pytest.mark.udp_upload
-    def test_client_nat_open_chn6_20Mhz_US_2g_udp_upload(self, instantiate_profile, get_lf_logs,
+    @pytest.mark.tcp_bidirectional
+    def test_client_nat_open_chn6_40Mhz_US_2g_tcp_bidirectional(self, instantiate_profile, get_lf_logs,
                                               lf_test, update_report,
                                               station_names_twog, lf_tools,
                                               test_cases, testbed, al_1, get_configuration, get_attenuators):
         """
-           pytest -m "country_code and twentyMhz and open and twog and channel_6"
+           pytest -m "country_code and fourtyMhz and open and twog and channel_6"
         """
         profile_data = setup_params_general["ssid_modes"]["open"][0]
         ssid_name = profile_data["ssid_name"]
@@ -277,6 +279,7 @@ class TestCountryUS20Mhz2g(object):
         # END//To Do: This code looks important for ip not getting issue might need to test later
 
         lf_tools.reset_scenario()
+
         obj = instantiate_profile(get_configuration['access_point'][0], "../libs/apnos/", "2.x")
         obj.check_and_set_ap_channel(radio="2G", band=channel_width, channel=channel)
 
@@ -284,9 +287,9 @@ class TestCountryUS20Mhz2g(object):
         # lf_tools.add_stations(band="ax", num_stations=1, dut=lf_tools.dut_name, ssid_name=ssid_name)
         lf_tools.Chamber_View()
 
-        wct_obj = lf_test.wifi_capacity(instance_name="test_client_open_NAT_udp_ul_2g", mode=mode, vlan_id=vlan,
-                                        upload_rate="1Gbps", batch_size="1",
-                                        download_rate="0", protocol="UDP-IPv4", duration="60000")
+        wct_obj = lf_test.wifi_capacity(instance_name="test_client_open_NAT_tcp_bd_2g", mode=mode, vlan_id=vlan,
+                                        download_rate="1Gbps", batch_size="1",
+                                        upload_rate="0", protocol="TCP-IPv4", duration="60000")
 
         report_name = wct_obj.report_name[0]['LAST']["response"].split(":::")[1].split("/")[-1]
 
@@ -297,8 +300,8 @@ class TestCountryUS20Mhz2g(object):
                                                                   individual_station_throughput=False, kpi_csv=True,
                                                                   file_name="/kpi.csv", batch_size=str(batch_size))
         print(csv_val)
-        print(f"Upload Traffic Throughput: {csv_val['Up']['UP Mbps - 1 STA']}")
-        actual_throughput = csv_val['Up']['UL Mbps - 1 STA']
+        print(f"Download Traffic Throughput: {csv_val['Down']['DL Mbps - 1 STA']}")
+        actual_throughput = csv_val['Down']['DL Mbps - 1 STA']
 
         result = {
 
@@ -308,12 +311,12 @@ class TestCountryUS20Mhz2g(object):
             "security-key": security_key,
             "band": band,
             "channel": channel,
-            "description": "WiFi capacity test",
-            "test-download": "0",
-            "test-batch-size": "1",
-            "test-upload-rate": "1Gbps",
-            "test-protocol": "UDP-IPV4",
-            "test-duration": "60 Sec",
+            "description" : "WiFi capacity test",
+            "test-download" : "1Gbps",
+            "test-batch-size" : "1",
+            "test-upload-rate" : "1Gbps",
+            "test-protocol" : "TCP-IPV4",
+            "test-duration" : "60 Sec",
             "expected-throughput": f" > {expected_throughput}",
             "actual-throughput": actual_throughput
         }
@@ -324,7 +327,7 @@ class TestCountryUS20Mhz2g(object):
             print(f"pdf: {pdf}")
             if os.path.exists(pdf):
                 allure.attach.file(source=pdf,
-                                   name="WiFi_Capacity_1GBPS_Upload_Throughput_Test_UDP_2g", attachment_type="PDF")
+                                   name="WiFi_Capacity_1GBPS_Bidirectional_Throughput_TCP_2g_Test", attachment_type="PDF")
             assert True
         else:
             result["result"] = "FAIL"
@@ -332,22 +335,21 @@ class TestCountryUS20Mhz2g(object):
             print(f"pdf: {pdf}")
             if os.path.exists(pdf):
                 allure.attach.file(source=pdf,
-                                   name="WiFi_Capacity_1GBPS_Upload_Throughput_Test_UDP_2g", attachment_type="PDF")
+                                   name="WiFi_Capacity_1GBPS_Bidirectional_Throughput_TCP_2g_Test", attachment_type="PDF")
             assert False
-
 
     @allure.testcase(url="https://telecominfraproject.atlassian.net/browse/WIFI-2546", name="WIFI-6938")
     @pytest.mark.open
-    @pytest.mark.twentyMhz
+    @pytest.mark.fourtyMhz
     @pytest.mark.twog
     @pytest.mark.channel_11
-    @pytest.mark.udp_upload
-    def test_client_nat_open_chn11_20Mhz_US_2g_udp_upload(self, instantiate_profile, get_lf_logs,
+    @pytest.mark.tcp_bidirectional
+    def test_client_nat_open_chn11_40Mhz_US_2g_tcp_bidirectional(self, instantiate_profile, get_lf_logs,
                                               lf_test, update_report,
                                               station_names_twog, lf_tools,
                                               test_cases, testbed, al_1, get_configuration, get_attenuators):
         """
-           pytest -m "country_code and twentyMhz and open and twog and channel_11"
+           pytest -m "country_code and fourtyMhz and open and twog and channel_11"
         """
         profile_data = setup_params_general["ssid_modes"]["open"][0]
         ssid_name = profile_data["ssid_name"]
@@ -417,6 +419,7 @@ class TestCountryUS20Mhz2g(object):
         # END//To Do: This code looks important for ip not getting issue might need to test later
 
         lf_tools.reset_scenario()
+
         obj = instantiate_profile(get_configuration['access_point'][0], "../libs/apnos/", "2.x")
         obj.check_and_set_ap_channel(radio="2G", band=channel_width, channel=channel)
 
@@ -424,9 +427,9 @@ class TestCountryUS20Mhz2g(object):
         # lf_tools.add_stations(band="ax", num_stations=1, dut=lf_tools.dut_name, ssid_name=ssid_name)
         lf_tools.Chamber_View()
 
-        wct_obj = lf_test.wifi_capacity(instance_name="test_client_open_NAT_udp_ul_2g", mode=mode, vlan_id=vlan,
-                                        upload_rate="1Gbps", batch_size="1",
-                                        download_rate="0", protocol="UDP-IPv4", duration="60000")
+        wct_obj = lf_test.wifi_capacity(instance_name="test_client_open_NAT_tcp_bd_2g", mode=mode, vlan_id=vlan,
+                                        download_rate="1Gbps", batch_size="1",
+                                        upload_rate="0", protocol="TCP-IPv4", duration="60000")
 
         report_name = wct_obj.report_name[0]['LAST']["response"].split(":::")[1].split("/")[-1]
 
@@ -437,8 +440,8 @@ class TestCountryUS20Mhz2g(object):
                                                                   individual_station_throughput=False, kpi_csv=True,
                                                                   file_name="/kpi.csv", batch_size=str(batch_size))
         print(csv_val)
-        print(f"Upload Traffic Throughput: {csv_val['Up']['UP Mbps - 1 STA']}")
-        actual_throughput = csv_val['Up']['UL Mbps - 1 STA']
+        print(f"Download Traffic Throughput: {csv_val['Down']['DL Mbps - 1 STA']}")
+        actual_throughput = csv_val['Down']['DL Mbps - 1 STA']
 
         result = {
 
@@ -448,12 +451,12 @@ class TestCountryUS20Mhz2g(object):
             "security-key": security_key,
             "band": band,
             "channel": channel,
-            "description": "WiFi capacity test",
-            "test-download": "0",
-            "test-batch-size": "1",
-            "test-upload-rate": "1Gbps",
-            "test-protocol": "UDP-IPV4",
-            "test-duration": "60 Sec",
+            "description" : "WiFi capacity test",
+            "test-download" : "1Gbps",
+            "test-batch-size" : "1",
+            "test-upload-rate" : "1Gbps",
+            "test-protocol" : "TCP-IPV4",
+            "test-duration" : "60 Sec",
             "expected-throughput": f" > {expected_throughput}",
             "actual-throughput": actual_throughput
         }
@@ -464,7 +467,7 @@ class TestCountryUS20Mhz2g(object):
             print(f"pdf: {pdf}")
             if os.path.exists(pdf):
                 allure.attach.file(source=pdf,
-                                   name="WiFi_Capacity_1GBPS_Upload_Throughput_Test_UDP_2g", attachment_type="PDF")
+                                   name="WiFi_Capacity_1GBPS_Bidirectional_Throughput_TCP_2g_Test", attachment_type="PDF")
             assert True
         else:
             result["result"] = "FAIL"
@@ -472,5 +475,5 @@ class TestCountryUS20Mhz2g(object):
             print(f"pdf: {pdf}")
             if os.path.exists(pdf):
                 allure.attach.file(source=pdf,
-                                   name="WiFi_Capacity_1GBPS_Upload_Throughput_Test_UDP_2g", attachment_type="PDF")
+                                   name="WiFi_Capacity_1GBPS_Bidirectional_Throughput_TCP_2g_Test", attachment_type="PDF")
             assert False
