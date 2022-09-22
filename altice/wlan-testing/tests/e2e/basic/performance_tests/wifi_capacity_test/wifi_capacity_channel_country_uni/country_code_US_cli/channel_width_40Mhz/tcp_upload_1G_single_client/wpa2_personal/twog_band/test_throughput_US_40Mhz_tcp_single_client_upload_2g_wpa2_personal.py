@@ -138,6 +138,21 @@ class TestCountryUS40Mhz2g(object):
 
         lf_tools.reset_scenario()
 
+        # End//Attenuation is set
+
+        # Start//To Do: This code looks important for ip not getting issue might need to test later
+        # for i in range(3):
+        #     sta.append(station_name + str(i))
+        # print(sta)
+        # lf_tools.set_radio_antenna("cli-json/set_wifi_radio", shelf, resource, values[2], 1)
+        # sta_ip = lf_test.Client_Connect_Using_Radio(ssid=ssid_name, passkey=profile_data["security_key"],
+        #                                             radio=radio_name, station_name=sta)
+        # if not sta_ip:
+        #     print("test failed due to no station ip")
+        #     assert False
+        # END//To Do: This code looks important for ip not getting issue might need to test later
+
+        lf_tools.reset_scenario()
         obj = instantiate_profile(get_configuration['access_point'][0], "../libs/apnos/", "2.x")
         obj.check_and_set_ap_channel(radio="2G", band=channel_width, channel=channel)
 
