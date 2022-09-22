@@ -476,7 +476,7 @@ class RunTest:
             upstream_port = self.upstream_port
         elif mode == "VLAN":
             upstream_port = self.upstream_port + "." + str(vlan_id)
-        print("anjcnajnasncjasnjaasncjancjknckjac",protocol)
+        print("Protocol",protocol)
         '''SINGLE WIFI CAPACITY using lf_wifi_capacity.py'''
         wificapacity_obj = WiFiCapacityTest(lfclient_host=self.lanforge_ip,
                                             lf_port=self.lanforge_port,
@@ -508,7 +508,7 @@ class RunTest:
                                             raw_lines_file="",
                                             test_tag=influx_tags,
                                             sets=sets)
-        print("pppppppppppppppppppppp",protocol)
+        print("Protocol",protocol)
         wificapacity_obj.setup()
         wificapacity_obj.run()
         if move_to_influx:
