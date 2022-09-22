@@ -34,7 +34,7 @@ from LANforge.LFUtils import *
 if 'py-json' not in sys.path:
     sys.path.append('../py-scripts')
 from apnos.apnos import APNOS
-from controller.controller_1x.controller import FirmwareUtility
+# from controller.controller_1x.controller import FirmwareUtility
 import pytest
 from lanforge.lf_tests import RunTest
 from cv_test_manager import cv_test

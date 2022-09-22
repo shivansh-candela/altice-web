@@ -62,6 +62,7 @@ class TestCountryUS20Mhz2g(object):
     @pytest.mark.twog
     @pytest.mark.channel_1
     @pytest.mark.tcp_upload
+    
     def test_client_nat_open_chn1_20Mhz_US_2g_tcp_upload(self, instantiate_profile, get_lf_logs,
                                               lf_test, update_report,
                                               station_names_twog, lf_tools,

@@ -91,7 +91,7 @@ class AController:
             a = str(stdout.read()).split("\\n")
             # print("a : ",a)
             for i in a:
-                if i.__contains__("minicom ap" + self.tty[-1]):
+                if i.__contains__("minicom usb0"):
                     temp = i.split("minicom")
                     a = temp[0].replace(" ", "")
                     cmd = "kill " + str(a).replace("b'", "")
@@ -122,9 +122,9 @@ class AController:
 
         self.setup_cli_connection()
 
-    def setup_cli_connection(self, cmd=" "):
-        output = self.run_generic_command(" ")
-        # print("output: ", output)
+    def setup_cli_connection(self, cmd="cli"):
+        output = self.run_generic_command("cli")
+        print("output:ewrjkuhfdeisuwhfiudshfi ", output)
         try:
             if output[0].strip() != "/cli>":
                 if output[1].strip() != "/cli>":
@@ -138,6 +138,7 @@ class AController:
         try:
             client = self.ssh_cli_connect()
             cmd = cmd
+            self.owrt_args = "--prompt " + "/cli" + " -s serial --log stdout --user " + self.ap_username + " --passwd " + self.ap_password
             if self.mode:
                 cmd = f"cd ~/cicd-git/ && ./openwrt_ctl.py {self.owrt_args} -t {self.tty} --action " \
                       f"cmd --value \"{cmd}\" "
@@ -222,8 +223,10 @@ class AController:
         else:
             wifi_index = 1
         if security == "open" or security is None:
+            print("============Setting Up OPEN Security============")
             cmd = f"/wireless/security/config --wifi-index={wifi_index} --wifi-sec-choose-interface=0 --wifi-wl-auth-mode=None"
         elif security == "wpa2_personal":
+            print("=============Setting Up WPA2 Security============")
             cmd = f"/wireless/security/config --wifi-index={wifi_index} --wifi-sec-choose-interface=0 --wifi-wl-auth-mode=WPA2-Personal --wifi-wl-wpa-passphrase={password}"
 
         command = self.run_generic_command(cmd)
@@ -454,7 +457,7 @@ class AController:
         else:
             wifi_index = 1
         # print(f"442 band : {band}, channel : {channel}")
-        print("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",band)
+        print("Band",band)
         if band == "20":
             ap_cli_band = 0
             print(f"band : {band}, ap_cli_channel : {ap_cli_band}")
@@ -493,19 +496,30 @@ class AController:
         self.get_all_ssid_detail(radio=radio)
         print(f"ssid: 481: {ssid}, self.ap_ssid: {self.ap_ssid_5G}")
 
-        if radio == "2G" or radio == "5G":
-            if ssid != self.ap_ssid_2G or ssid != self.ap_ssid_5G:
-                print("Setting SSID")
+        if radio == "2G":
+            if ssid != self.ap_ssid_2G:
+                print("Setting 2g SSID")
                 self.set_ssid(radio=radio, ssid=ssid)
+            else:
+                print("Same named SSID already Exists")
+        if radio == "5G":
+            if ssid != self.ap_ssid_5G:
+                print("Setting 5g SSID")
+                self.set_ssid(radio=radio, ssid=ssid)
+            else:
+                print("Same named SSID already Exists")
+        if radio == "2G" or radio == "5G":
+            print("Setting SSID SECURITY")
+            self.set_ap_security(radio=radio, security=security)
 
 
-        sec = self.get_ap_security(radio=radio)
-        if sec == "WPA2-Personal":
-            ap_security = "wpa2_personal"
-        else:
-            ap_security = "open"
-        if security != ap_security:
-            sec_details = self.set_ap_security(radio=radio, security=security, password=password)
+        # sec = self.get_ap_security(radio=radio)
+        # if sec == "WPA2-Personal":
+        #     ap_security = "wpa2_personal"
+        # else:
+        #     ap_security = "open"
+        # if security != ap_security:
+        #     sec_details = self.set_ap_security(radio=radio, security=security, password=password)
 
         # if ssid != self.get_ap_ssid_name(radio=radio):
         #     ssid_details = self.set_ssid(radio=radio, ssid=ssid)
@@ -537,10 +551,10 @@ class AController:
                 print(f"Available SSID in AP: {available_ssid_in_ap[-1]}")
                 if radio == "2G":
                     self.ap_ssid_2G = available_ssid_in_ap[-1]
-                    print(f"**************** ap_ssid_2g : {self.ap_ssid_2G}")
+                    print(f"**************** ap_ssid_2g **************** : {self.ap_ssid_2G}")
                 else:
                     self.ap_ssid_5G = available_ssid_in_ap[-1]
-                    print(f"**************** ap_ssid_5g : {self.ap_ssid_5G}")
+                    print(f"**************** ap_ssid_5g **************** : {self.ap_ssid_5G}")
 
             elif ssid_details[i].startswith("BSSID:"):
                 available_bssid_in_ap = ssid_details[i]
@@ -587,6 +601,15 @@ class AController:
                 pass
 
         return None
+
+if __name__ == '__main__':
+    obj = AController(data["CONFIGURATION"]["local-01"]["access_point"][0], pwd="../../apnos", sdk="2.x")
+    obj.setup_cli_connection()
+    print(obj.get_ssid_sec_details_2g())
+    print(obj.get_ssid_sec_details_5g())
+    print(obj.get_ssid_details_2g())
+    print(obj.get_ssid_details_5g())
+
 
 # if __name__ == '__main__':
 # controller = {

@@ -76,7 +76,7 @@ class TestCountryUS20Mhz5G(object):
     @pytest.mark.open
     @pytest.mark.twentyMhz
     @pytest.mark.fiveg
-    @pytest.mark.channel36
+    @pytest.mark.channel_36
     @pytest.mark.tcp_bidirectional
     def test_client_nat_open_chn36_20Mhz_US_5g_tcp_bidirectional(self, instantiate_profile, get_lf_logs,
                                                  lf_test, update_report,
