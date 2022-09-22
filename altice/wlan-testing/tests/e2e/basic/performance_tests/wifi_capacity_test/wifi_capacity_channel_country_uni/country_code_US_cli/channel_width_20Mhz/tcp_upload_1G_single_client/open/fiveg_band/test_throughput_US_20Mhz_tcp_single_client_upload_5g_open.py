@@ -3,16 +3,16 @@ import pytest
 import allure
 import time
 
-pytestmark = [pytest.mark.country_code, pytest.mark.nat, pytest.mark.wpa2, pytest.mark.united_states,
+pytestmark = [pytest.mark.country_code, pytest.mark.nat, pytest.mark.open, pytest.mark.united_states,
               pytest.mark.bandwidth_20mhz, pytest.mark.al, pytest.mark.tcp, pytest.mark.wifi_capacity_test,
-              pytest.mark.download, pytest.mark.tcp_download, pytest.mark.wifi_capacity_single_client,
-              pytest.mark.wifi_capacity_wpa2_20mhz_all_channels_single_client_download_1gbps,
-              pytest.mark.throughput_wpa2_20mhz_all_channels_single_client_download_1gbps, pytest.mark.fiveg]
+              pytest.mark.upload, pytest.mark.tcp_upload, pytest.mark.wifi_capacity_single_client,
+              pytest.mark.wifi_capacity_open_20mhz_all_channels_single_client_upload_1gbps,
+              pytest.mark.throughput_open_20mhz_all_channels_single_client_upload_1gbps, pytest.mark.fiveg]
 
 setup_params_general = {
     "mode": "NAT",
     "ssid_modes": {
-        "wpa2_personal": [
+        "open": [
             {"ssid_name": "client_connectivity_al", "appliedRadios": ["5G"], "security_key": "something"}
         ]
     },
@@ -58,7 +58,7 @@ setup_params_general = {
              "channel": 149}
     },
     "radius": False,
-    "expected-throughput": 280
+    "expected-throughput": 170
 }
 
 
@@ -73,22 +73,22 @@ setup_params_general = {
 class TestCountryUS20Mhz5G(object):
 
     @allure.testcase(url="https://telecominfraproject.atlassian.net/browse/WIFI-2546", name="WIFI-6938")
-    @pytest.mark.wpa2_personal
+    @pytest.mark.open
     @pytest.mark.twentyMhz
     @pytest.mark.fiveg
     @pytest.mark.channel_36
-    @pytest.mark.tcp_download
-    def test_client_nat_wpa2_chn36_20Mhz_US_5g_tcp_download(self, instantiate_profile, get_lf_logs,
+    @pytest.mark.tcp_upload
+    def test_client_nat_open_chn36_20Mhz_US_5g_tcp_upload(self, instantiate_profile, get_lf_logs,
                                                  lf_test, update_report,
                                                  station_names_fiveg, lf_tools,
                                                  test_cases, testbed, al_1, get_configuration, get_attenuators):
         """
-           pytest -m "country_code and twentyMhz and wpa2 and fiveg and channel_36"
+           pytest -m "country_code and twentyMhz and open and fiveg and channel_36"
         """
-        profile_data = setup_params_general["ssid_modes"]["wpa2_personal"][0]
+        profile_data = setup_params_general["ssid_modes"]["open"][0]
         ssid_name = profile_data["ssid_name"]
         security_key = profile_data["security_key"]
-        security = "wpa2"
+        security = "open"
         mode = "NAT"
         band = "fiveg"
         vlan = 1
@@ -162,9 +162,9 @@ class TestCountryUS20Mhz5G(object):
         # lf_tools.add_stations(band="ax", num_stations=1, dut=lf_tools.dut_name, ssid_name=ssid_name)
         lf_tools.Chamber_View()
 
-        wct_obj = lf_test.wifi_capacity(instance_name="test_client_wpa2_NAT_tcp_dl_5g", mode=mode, vlan_id=vlan,
-                                        download_rate="1Gbps", batch_size="1",
-                                        upload_rate="0", protocol="TCP-IPv4", duration="60000")
+        wct_obj = lf_test.wifi_capacity(instance_name="test_client_open_NAT_tcp_ul_5g", mode=mode, vlan_id=vlan,
+                                        upload_rate="1Gbps", batch_size="1",
+                                        download_rate="0", protocol="TCP-IPv4", duration="60000")
 
         report_name = wct_obj.report_name[0]['LAST']["response"].split(":::")[1].split("/")[-1]
 
@@ -175,8 +175,8 @@ class TestCountryUS20Mhz5G(object):
                                                                   individual_station_throughput=False, kpi_csv=True,
                                                                   file_name="/kpi.csv", batch_size=str(batch_size))
         print(csv_val)
-        print(f"Download Traffic Throughput: {csv_val['Down']['DL Mbps - 1 STA']}")
-        actual_throughput = csv_val['Down']['DL Mbps - 1 STA']
+        print(f"Upload Traffic Throughput: {csv_val['Up']['UL Mbps - 1 STA']}")
+        actual_throughput = csv_val['Up']['UL Mbps - 1 STA']
 
         result = {
 
@@ -187,9 +187,9 @@ class TestCountryUS20Mhz5G(object):
             "band": band,
             "channel": channel,
             "description" : "WiFi capacity test",
-            "test-download" : "1Gbps",
+            "test-download" : "0",
             "test-batch-size" : "1",
-            "test-upload-rate" : "0",
+            "test-upload-rate" : "1Gbps",
             "test-protocol" : "TCP-IPV4",
             "test-duration" : "60 Sec",
             "expected-throughput": f" > {expected_throughput}",
@@ -202,7 +202,7 @@ class TestCountryUS20Mhz5G(object):
             print(f"pdf: {pdf}")
             if os.path.exists(pdf):
                 allure.attach.file(source=pdf,
-                                   name="WiFi_Capacity_1GBPS_Download_Throughput_TCP_5g_Test", attachment_type="PDF")
+                                   name="WiFi_Capacity_1GBPS_Upload_Throughput_TCP_5g_Test", attachment_type="PDF")
             assert True
         else:
             result["result"] = "FAIL"
@@ -210,26 +210,26 @@ class TestCountryUS20Mhz5G(object):
             print(f"pdf: {pdf}")
             if os.path.exists(pdf):
                 allure.attach.file(source=pdf,
-                                   name="WiFi_Capacity_1GBPS_Download_Throughput_TCP_5g_Test", attachment_type="PDF")
+                                   name="WiFi_Capacity_1GBPS_Upload_Throughput_TCP_5g_Test", attachment_type="PDF")
             assert False
 
     @allure.testcase(url="https://telecominfraproject.atlassian.net/browse/WIFI-2546", name="WIFI-6938")
-    @pytest.mark.wpa2_personal
+    @pytest.mark.open
     @pytest.mark.twentyMhz
     @pytest.mark.fiveg
     @pytest.mark.channel_149
-    @pytest.mark.tcp_download
-    def test_client_nat_wpa2_chn149_20Mhz_US_5g_tcp_download(self, instantiate_profile, get_lf_logs,
+    @pytest.mark.tcp_upload
+    def test_client_nat_open_chn149_20Mhz_US_5g_tcp_upload(self, instantiate_profile, get_lf_logs,
                                                  lf_test, update_report,
                                                  station_names_fiveg, lf_tools,
                                                  test_cases, testbed, al_1, get_configuration, get_attenuators):
         """
-           pytest -m "country_code and twentyMhz and wpa2 and fiveg and channel_149"
+           pytest -m "country_code and twentyMhz and open and fiveg and channel_149"
         """
-        profile_data = setup_params_general["ssid_modes"]["wpa2_personal"][0]
+        profile_data = setup_params_general["ssid_modes"]["open"][0]
         ssid_name = profile_data["ssid_name"]
         security_key = profile_data["security_key"]
-        security = "wpa2"
+        security = "open"
         mode = "NAT"
         band = "fiveg"
         vlan = 1
@@ -303,9 +303,9 @@ class TestCountryUS20Mhz5G(object):
         # lf_tools.add_stations(band="ax", num_stations=1, dut=lf_tools.dut_name, ssid_name=ssid_name)
         lf_tools.Chamber_View()
 
-        wct_obj = lf_test.wifi_capacity(instance_name="test_client_wpa2_NAT_tcp_dl_5g", mode=mode, vlan_id=vlan,
-                                        download_rate="1Gbps", batch_size="1",
-                                        upload_rate="0", protocol="TCP-IPv4", duration="60000")
+        wct_obj = lf_test.wifi_capacity(instance_name="test_client_open_NAT_tcp_ul_5g", mode=mode, vlan_id=vlan,
+                                        upload_rate="1Gbps", batch_size="1",
+                                        download_rate="0", protocol="TCP-IPv4", duration="60000")
 
         report_name = wct_obj.report_name[0]['LAST']["response"].split(":::")[1].split("/")[-1]
 
@@ -316,8 +316,8 @@ class TestCountryUS20Mhz5G(object):
                                                                   individual_station_throughput=False, kpi_csv=True,
                                                                   file_name="/kpi.csv", batch_size=str(batch_size))
         print(csv_val)
-        print(f"Download Traffic Throughput: {csv_val['Down']['DL Mbps - 1 STA']}")
-        actual_throughput = csv_val['Down']['DL Mbps - 1 STA']
+        print(f"Upload Traffic Throughput: {csv_val['Up']['UL Mbps - 1 STA']}")
+        actual_throughput = csv_val['Up']['UL Mbps - 1 STA']
 
         result = {
 
@@ -328,9 +328,9 @@ class TestCountryUS20Mhz5G(object):
             "band": band,
             "channel": channel,
             "description" : "WiFi capacity test",
-            "test-download" : "1Gbps",
+            "test-download" : "0",
             "test-batch-size" : "1",
-            "test-upload-rate" : "0",
+            "test-upload-rate" : "1Gbps",
             "test-protocol" : "TCP-IPV4",
             "test-duration" : "60 Sec",
             "expected-throughput": f" > {expected_throughput}",
@@ -343,7 +343,7 @@ class TestCountryUS20Mhz5G(object):
             print(f"pdf: {pdf}")
             if os.path.exists(pdf):
                 allure.attach.file(source=pdf,
-                                   name="WiFi_Capacity_1GBPS_Download_Throughput_TCP_5g_Test", attachment_type="PDF")
+                                   name="WiFi_Capacity_1GBPS_Upload_Throughput_TCP_5g_Test", attachment_type="PDF")
             assert True
         else:
             result["result"] = "FAIL"
@@ -351,5 +351,5 @@ class TestCountryUS20Mhz5G(object):
             print(f"pdf: {pdf}")
             if os.path.exists(pdf):
                 allure.attach.file(source=pdf,
-                                   name="WiFi_Capacity_1GBPS_Download_Throughput_TCP_5g_Test", attachment_type="PDF")
+                                   name="WiFi_Capacity_1GBPS_Upload_Throughput_TCP_5g_Test", attachment_type="PDF")
             assert False
