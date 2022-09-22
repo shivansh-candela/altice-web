@@ -4,10 +4,10 @@ import allure
 import time
 
 pytestmark = [pytest.mark.country_code, pytest.mark.nat, pytest.mark.wpa2, pytest.mark.united_states,
-              pytest.mark.bandwidth_20mhz, pytest.mark.al, pytest.mark.tcp, pytest.mark.wifi_capacity_test,
+              pytest.mark.bandwidth_40mhz, pytest.mark.al, pytest.mark.tcp, pytest.mark.wifi_capacity_test,
               pytest.mark.upload, pytest.mark.tcp_download, pytest.mark.wifi_capacity_single_client,
-              pytest.mark.wifi_capacity_wpa2_20mhz_all_channels_single_client_upload_1gbps,
-              pytest.mark.throughput_wpa2_20mhz_all_channels_single_client_upload_1gbps, pytest.mark.fiveg]
+              pytest.mark.wifi_capacity_wpa2_40mhz_all_channels_single_client_upload_1gbps,
+              pytest.mark.throughput_wpa2_40mhz_all_channels_single_client_upload_1gbps, pytest.mark.fiveg]
 
 setup_params_general = {
     "mode": "NAT",
@@ -22,7 +22,7 @@ setup_params_general = {
             {'band': '5G',
              'country': 'US',
              "channel-mode": "VHT",
-             'channel-width': 20,
+             'channel-width': 40,
              "channel": 36}
     },
     "rf-5G-2": {
@@ -30,7 +30,7 @@ setup_params_general = {
             {'band': '5G',
              'country': 'US',
              'channel-mode': 'VHT',
-             'channel-width': 20,
+             'channel-width': 40,
              "channel": 40}
     },
     "rf-5G-3": {
@@ -38,7 +38,7 @@ setup_params_general = {
             {'band': '5G',
              'country': 'US',
              'channel-mode': 'VHT',
-             'channel-width': 20,
+             'channel-width': 40,
              "channel": 44}
     },
     "rf-5G-4": {
@@ -46,7 +46,7 @@ setup_params_general = {
             {'band': '5G',
              'country': 'US',
              'channel-mode': 'VHT',
-             'channel-width': 20,
+             'channel-width': 40,
              "channel": 48}
     },
     "rf-5G-5": {
@@ -54,7 +54,7 @@ setup_params_general = {
             {'band': '5G',
              'country': 'US',
              'channel-mode': 'VHT',
-             'channel-width': 20,
+             'channel-width': 40,
              "channel": 149}
     },
     "radius": False,
@@ -74,7 +74,7 @@ class TestCountryUS40Mhz5G(object):
 
     @allure.testcase(url="https://telecominfraproject.atlassian.net/browse/WIFI-2546", name="WIFI-6938")
     @pytest.mark.wpa2_personal
-    @pytest.mark.twentyMhz
+    @pytest.mark.fourtyMhz
     @pytest.mark.fiveg
     @pytest.mark.channel_36
     @pytest.mark.tcp_upload
@@ -83,7 +83,7 @@ class TestCountryUS40Mhz5G(object):
                                                  station_names_fiveg, lf_tools,
                                                  test_cases, testbed, al_1, get_configuration, get_attenuators):
         """
-           pytest -m "country_code and twentyMhz and wpa2 and fiveg and channel_36"
+           pytest -m "country_code and fourtyMhz and wpa2 and fiveg and channel_36"
         """
         profile_data = setup_params_general["ssid_modes"]["wpa2_personal"][0]
         ssid_name = profile_data["ssid_name"]
@@ -269,7 +269,7 @@ class TestCountryUS40Mhz5G(object):
 
     @allure.testcase(url="https://telecominfraproject.atlassian.net/browse/WIFI-2546", name="WIFI-6938")
     @pytest.mark.wpa2_personal
-    @pytest.mark.twentyMhz
+    @pytest.mark.fourtyMhz
     @pytest.mark.fiveg
     @pytest.mark.channel_149
     @pytest.mark.tcp_upload
@@ -278,7 +278,7 @@ class TestCountryUS40Mhz5G(object):
                                                  station_names_fiveg, lf_tools,
                                                  test_cases, testbed, al_1, get_configuration, get_attenuators):
         """
-           pytest -m "country_code and twentyMhz and wpa2 and fiveg and channel_149"
+           pytest -m "country_code and fourtyMhz and wpa2 and fiveg and channel_149"
         """
         profile_data = setup_params_general["ssid_modes"]["wpa2_personal"][0]
         ssid_name = profile_data["ssid_name"]
