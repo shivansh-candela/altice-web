@@ -3,16 +3,16 @@ import pytest
 import allure
 import time
 
-pytestmark = [pytest.mark.country_code, pytest.mark.nat, pytest.mark.wpa2, pytest.mark.united_states,
-              pytest.mark.bandwidth_20mhz, pytest.mark.al, pytest.mark.tcp, pytest.mark.wifi_capacity_test,
-              pytest.mark.upload, pytest.mark.tcp_download, pytest.mark.wifi_capacity_single_client,
-              pytest.mark.wifi_capacity_wpa2_20mhz_all_channels_single_client_upload_1gbps,
-              pytest.mark.throughput_wpa2_20mhz_all_channels_single_client_upload_1gbps, pytest.mark.fiveg]
+pytestmark = [pytest.mark.country_code, pytest.mark.nat, pytest.mark.open, pytest.mark.united_states,
+              pytest.mark.bandwidth_40mhz, pytest.mark.al, pytest.mark.tcp, pytest.mark.wifi_capacity_test,
+              pytest.mark.upload, pytest.mark.tcp_upload, pytest.mark.wifi_capacity_single_client,
+              pytest.mark.wifi_capacity_open_40mhz_all_channels_single_client_upload_1gbps,
+              pytest.mark.throughput_open_40mhz_all_channels_single_client_upload_1gbps, pytest.mark.fiveg]
 
 setup_params_general = {
     "mode": "NAT",
     "ssid_modes": {
-        "wpa2_personal": [
+        "open": [
             {"ssid_name": "client_connectivity_al", "appliedRadios": ["5G"], "security_key": "something"}
         ]
     },
@@ -22,7 +22,7 @@ setup_params_general = {
             {'band': '5G',
              'country': 'US',
              "channel-mode": "VHT",
-             'channel-width': 20,
+             'channel-width': 40,
              "channel": 36}
     },
     "rf-5G-2": {
@@ -30,7 +30,7 @@ setup_params_general = {
             {'band': '5G',
              'country': 'US',
              'channel-mode': 'VHT',
-             'channel-width': 20,
+             'channel-width': 40,
              "channel": 40}
     },
     "rf-5G-3": {
@@ -38,7 +38,7 @@ setup_params_general = {
             {'band': '5G',
              'country': 'US',
              'channel-mode': 'VHT',
-             'channel-width': 20,
+             'channel-width': 40,
              "channel": 44}
     },
     "rf-5G-4": {
@@ -46,7 +46,7 @@ setup_params_general = {
             {'band': '5G',
              'country': 'US',
              'channel-mode': 'VHT',
-             'channel-width': 20,
+             'channel-width': 40,
              "channel": 48}
     },
     "rf-5G-5": {
@@ -54,7 +54,7 @@ setup_params_general = {
             {'band': '5G',
              'country': 'US',
              'channel-mode': 'VHT',
-             'channel-width': 20,
+             'channel-width': 40,
              "channel": 149}
     },
     "radius": False,
@@ -73,22 +73,22 @@ setup_params_general = {
 class TestCountryUS40Mhz5G(object):
 
     @allure.testcase(url="https://telecominfraproject.atlassian.net/browse/WIFI-2546", name="WIFI-6938")
-    @pytest.mark.wpa2_personal
-    @pytest.mark.twentyMhz
+    @pytest.mark.open
+    @pytest.mark.fourtyMhz
     @pytest.mark.fiveg
-    @pytest.mark.channel_36
+    @pytest.mark.channel36
     @pytest.mark.tcp_upload
-    def test_client_nat_wpa2_chn36_40Mhz_US_5g_tcp_upload(self, instantiate_profile, get_lf_logs,
+    def test_client_nat_open_chn36_40Mhz_US_5g_tcp_upload(self, instantiate_profile, get_lf_logs,
                                                  lf_test, update_report,
                                                  station_names_fiveg, lf_tools,
                                                  test_cases, testbed, al_1, get_configuration, get_attenuators):
         """
-           pytest -m "country_code and twentyMhz and wpa2 and fiveg and channel_36"
+           pytest -m "country_code and twentyMhz and open and fiveg and channel_36"
         """
-        profile_data = setup_params_general["ssid_modes"]["wpa2_personal"][0]
+        profile_data = setup_params_general["ssid_modes"]["open"][0]
         ssid_name = profile_data["ssid_name"]
         security_key = profile_data["security_key"]
-        security = "wpa2"
+        security = "open"
         mode = "NAT"
         band = "fiveg"
         vlan = 1
@@ -162,7 +162,7 @@ class TestCountryUS40Mhz5G(object):
         # lf_tools.add_stations(band="ax", num_stations=1, dut=lf_tools.dut_name, ssid_name=ssid_name)
         lf_tools.Chamber_View()
 
-        wct_obj = lf_test.wifi_capacity(instance_name="test_client_wpa2_NAT_tcp_ul_5g", mode=mode, vlan_id=vlan,
+        wct_obj = lf_test.wifi_capacity(instance_name="test_client_open_NAT_tcp_ul_5g", mode=mode, vlan_id=vlan,
                                         upload_rate="1Gbps", batch_size="1",
                                         download_rate="0", protocol="TCP-IPv4", duration="60000")
 
@@ -214,22 +214,22 @@ class TestCountryUS40Mhz5G(object):
             assert False
 
     @allure.testcase(url="https://telecominfraproject.atlassian.net/browse/WIFI-2546", name="WIFI-6938")
-    @pytest.mark.wpa2_personal
-    @pytest.mark.twentyMhz
+    @pytest.mark.open
+    @pytest.mark.fourtyMhz
     @pytest.mark.fiveg
-    @pytest.mark.channel_149
+    @pytest.mark.channel149
     @pytest.mark.tcp_upload
-    def test_client_nat_wpa2_chn149_40Mhz_US_5g_tcp_upload(self, instantiate_profile, get_lf_logs,
+    def test_client_nat_open_chn149_40Mhz_US_5g_tcp_upload(self, instantiate_profile, get_lf_logs,
                                                  lf_test, update_report,
                                                  station_names_fiveg, lf_tools,
                                                  test_cases, testbed, al_1, get_configuration, get_attenuators):
         """
-           pytest -m "country_code and twentyMhz and wpa2 and fiveg and channel_149"
+           pytest -m "country_code and twentyMhz and open and fiveg and channel_149"
         """
-        profile_data = setup_params_general["ssid_modes"]["wpa2_personal"][0]
+        profile_data = setup_params_general["ssid_modes"]["open"][0]
         ssid_name = profile_data["ssid_name"]
         security_key = profile_data["security_key"]
-        security = "wpa2"
+        security = "open"
         mode = "NAT"
         band = "fiveg"
         vlan = 1
@@ -303,7 +303,7 @@ class TestCountryUS40Mhz5G(object):
         # lf_tools.add_stations(band="ax", num_stations=1, dut=lf_tools.dut_name, ssid_name=ssid_name)
         lf_tools.Chamber_View()
 
-        wct_obj = lf_test.wifi_capacity(instance_name="test_client_wpa2_NAT_tcp_ul_5g", mode=mode, vlan_id=vlan,
+        wct_obj = lf_test.wifi_capacity(instance_name="test_client_open_NAT_tcp_ul_5g", mode=mode, vlan_id=vlan,
                                         upload_rate="1Gbps", batch_size="1",
                                         download_rate="0", protocol="TCP-IPv4", duration="60000")
 
