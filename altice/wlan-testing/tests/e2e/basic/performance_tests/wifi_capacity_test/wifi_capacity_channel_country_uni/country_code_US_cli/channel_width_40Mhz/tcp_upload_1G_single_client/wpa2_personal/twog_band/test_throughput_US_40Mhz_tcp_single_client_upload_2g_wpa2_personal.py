@@ -58,11 +58,11 @@ class TestCountryUS40Mhz2g(object):
 
     @allure.testcase(url="https://telecominfraproject.atlassian.net/browse/WIFI-2546", name="WIFI-6938")
     @pytest.mark.wpa2_personal
-    @pytest.mark.fourtytyMhz
+    @pytest.mark.fourtyMhz
     @pytest.mark.twog
     @pytest.mark.channel_1
     @pytest.mark.tcp_upload
-    def test_client_nat_wpa2_chn1_40Mhz_US_2g_upload(self, instantiate_profile, get_lf_logs,
+    def test_client_nat_wpa2_chn1_40Mhz_US_2g_tcp_upload(self, instantiate_profile, get_lf_logs,
                                               lf_test, update_report,
                                               station_names_twog, lf_tools,
                                               test_cases, testbed, al_1, get_configuration, get_attenuators):
@@ -218,7 +218,7 @@ class TestCountryUS40Mhz2g(object):
     @pytest.mark.twog
     @pytest.mark.channel_6
     @pytest.mark.tcp_upload
-    def test_client_nat_wpa2_chn6_40Mhz_US_2g_upload(self, instantiate_profile, get_lf_logs,
+    def test_client_nat_wpa2_chn6_40Mhz_US_2g_tcp_upload(self, instantiate_profile, get_lf_logs,
                                               lf_test, update_report,
                                               station_names_twog, lf_tools,
                                               test_cases, testbed, al_1, get_configuration, get_attenuators):
@@ -358,7 +358,7 @@ class TestCountryUS40Mhz2g(object):
     @pytest.mark.twog
     @pytest.mark.channel_11
     @pytest.mark.tcp_upload
-    def test_client_nat_wpa2_chn11_40Mhz_US_2g_upload(self, instantiate_profile, get_lf_logs,
+    def test_client_nat_wpa2_chn11_40Mhz_US_2g_tcp_upload(self, instantiate_profile, get_lf_logs,
                                               lf_test, update_report,
                                               station_names_twog, lf_tools,
                                               test_cases, testbed, al_1, get_configuration, get_attenuators):

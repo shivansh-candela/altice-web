@@ -81,7 +81,7 @@ class TestCountryUS20Mhz5G(object):
     def test_client_nat_open_chn36_20Mhz_US_5g_udp_download(self, instantiate_profile, get_lf_logs,
                                                  lf_test, update_report,
                                                  station_names_fiveg, lf_tools,
-                                                 test_cases, testbed, al_1, get_configuration, get_attenuators, get_attenuators):
+                                                 test_cases, testbed, al_1, get_configuration, get_attenuators):
         """
            pytest -m "country_code and twentyMhz and open and fiveg and channel_36"
         """
