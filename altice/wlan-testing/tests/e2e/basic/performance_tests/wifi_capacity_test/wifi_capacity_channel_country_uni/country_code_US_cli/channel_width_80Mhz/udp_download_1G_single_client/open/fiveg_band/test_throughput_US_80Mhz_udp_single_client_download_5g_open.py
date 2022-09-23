@@ -74,7 +74,7 @@ class TestCountryUS80Mhz5G(object):
 
     @allure.testcase(url="https://telecominfraproject.atlassian.net/browse/WIFI-2546", name="WIFI-6938")
     @pytest.mark.open
-    @pytest.mark.twentyMhz
+    @pytest.mark.eightyMhz
     @pytest.mark.fiveg
     @pytest.mark.channel_36
     @pytest.mark.udp_download
@@ -83,7 +83,7 @@ class TestCountryUS80Mhz5G(object):
                                                  station_names_fiveg, lf_tools,
                                                  test_cases, testbed, al_1, get_configuration, get_attenuators):
         """
-           pytest -m "country_code and twentyMhz and open and fiveg and channel_36"
+           pytest -m "country_code and eightyMhz and open and fiveg and channel_36"
         """
         profile_data = setup_params_general["ssid_modes"]["open"][0]
         ssid_name = profile_data["ssid_name"]
@@ -269,7 +269,7 @@ class TestCountryUS80Mhz5G(object):
 
     @allure.testcase(url="https://telecominfraproject.atlassian.net/browse/WIFI-2546", name="WIFI-6938")
     @pytest.mark.open
-    @pytest.mark.twentyMhz
+    @pytest.mark.eightyMhz
     @pytest.mark.fiveg
     @pytest.mark.channel_149
     @pytest.mark.udp_download
@@ -278,7 +278,7 @@ class TestCountryUS80Mhz5G(object):
                                                         station_names_fiveg, lf_tools,
                                                         test_cases, testbed, al_1, get_configuration, get_attenuators):
         """
-           pytest -m "country_code and twentyMhz and open and fiveg and channel_36"
+           pytest -m "country_code and eightyMhz and open and fiveg and channel_36"
         """
         profile_data = setup_params_general["ssid_modes"]["open"][0]
         ssid_name = profile_data["ssid_name"]
