@@ -76,7 +76,7 @@ class TestCountryUS40Mhz5G(object):
     @pytest.mark.open
     @pytest.mark.fourtyMhz
     @pytest.mark.fiveg
-    @pytest.mark.channel36
+    @pytest.mark.channel_36
     @pytest.mark.tcp_upload
     def test_client_nat_open_chn36_40Mhz_US_5g_tcp_upload(self, instantiate_profile, get_lf_logs,
                                                  lf_test, update_report,
@@ -217,7 +217,7 @@ class TestCountryUS40Mhz5G(object):
     @pytest.mark.open
     @pytest.mark.fourtyMhz
     @pytest.mark.fiveg
-    @pytest.mark.channel149
+    @pytest.mark.channel_149
     @pytest.mark.tcp_upload
     def test_client_nat_open_chn149_40Mhz_US_5g_tcp_upload(self, instantiate_profile, get_lf_logs,
                                                  lf_test, update_report,
