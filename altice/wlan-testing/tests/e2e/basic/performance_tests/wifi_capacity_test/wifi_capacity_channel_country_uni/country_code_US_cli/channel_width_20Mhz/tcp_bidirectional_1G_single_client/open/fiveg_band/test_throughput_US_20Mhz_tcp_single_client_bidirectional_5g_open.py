@@ -257,6 +257,9 @@ class TestCountryUS20Mhz5G(object):
             if os.path.exists(pdf):
                 allure.attach.file(source=pdf,
                                    name="WiFi_Capacity_1GBPS_Bidirectional_Throughput_TCP_5g_Test", attachment_type="PDF")
+            allure.attach(name="PASSED:Throughput Results:", body=str(
+                "Actual throughput:" + str(float(actual_throughput)) + "is greater than Expected Throughput:" + str(
+                    expected_throughput)))
             assert True
         else:
             result["result"] = "FAIL"
@@ -265,6 +268,9 @@ class TestCountryUS20Mhz5G(object):
             if os.path.exists(pdf):
                 allure.attach.file(source=pdf,
                                    name="WiFi_Capacity_1GBPS_Bidirectional_Throughput_TCP_5g_Test", attachment_type="PDF")
+            allure.attach(name="FAILED:Throughput Results:", body=str(
+                "Actual throughput:" + float(actual_throughput) + "is lesser than Expected Throughput:" + str(
+                    expected_throughput)))
             assert False
 
     @allure.testcase(url="https://telecominfraproject.atlassian.net/browse/WIFI-2546", name="WIFI-6938")
