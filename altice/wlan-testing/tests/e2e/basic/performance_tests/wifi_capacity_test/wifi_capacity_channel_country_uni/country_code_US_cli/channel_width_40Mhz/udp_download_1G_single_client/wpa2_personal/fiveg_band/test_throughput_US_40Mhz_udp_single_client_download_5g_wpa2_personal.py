@@ -154,61 +154,6 @@ class TestCountryUS20Mhz5G(object):
         # END//To Do: This code looks important for ip not getting issue might need to test later
 
         lf_tools.reset_scenario()
-        connected_attenuators, selected_attenuators = get_attenuators
-        print(f"connected_attenuators : {connected_attenuators}")
-        print(f"selected_attenuators : {selected_attenuators}")
-
-        attenuation_value = 0
-        connected_attenuators = list(set(connected_attenuators) - set(selected_attenuators))
-
-        if selected_attenuators:  # selected attenuators list is Empty
-            for selected_atten in range(len(selected_attenuators)):
-                print(f"This is available in selected : selected_attens : {selected_atten}")
-                for i in range(4):
-                    lf_test.attenuator_modify(int(selected_attenuators[selected_atten]), i, attenuation_value)
-                    time.sleep(0.5)
-
-        for connected_atten in range(len(connected_attenuators)):
-            print(f"This is available in connected : connected_atten : {connected_atten}")
-            for i in range(4):
-                lf_test.attenuator_modify(int(connected_attenuators[connected_atten]), i, 0)
-                time.sleep(0.5)
-
-        # for connected_atten in range(len(connected_attenuators)):
-        #     for selected_atten in range(len(selected_attenuators)):
-        #         if connected_atten in selected_attenuators:
-        #             print(f"This is available in selected : connected_atten : {connected_atten}")
-        #             for i in range(4):
-        #                 lf_test.attenuator_modify(int(connected_attenuators[connected_atten]), i, attenuation_value)
-        #                 time.sleep(0.5)
-        #         else:
-        #             print(f"This is not available in selected : connected_atten : {connected_atten}")
-        #             for i in range(4):
-        #                 lf_test.attenuator_modify(int(connected_attenuators[connected_atten]), i, 0)
-        #                 time.sleep(0.5)
-
-        # Start//To set attenuation
-        # attenuator_serial = lf_test.attenuator_serial()
-        # print(f"attenuator_serial : {attenuator_serial}")
-        # connected_attenuators = get_configuration['traffic_generator']['details']['attenuation_connected_serial']
-        # attenuator_serial1 = (attenuator_serial[0].split("."))[-1]
-        # print(f"attenuator_serial1 : {attenuator_serial1}")
-
-        # End//Attenuation is set
-
-        # Start//To Do: This code looks important for ip not getting issue might need to test later
-        # for i in range(3):
-        #     sta.append(station_name + str(i))
-        # print(sta)
-        # lf_tools.set_radio_antenna("cli-json/set_wifi_radio", shelf, resource, values[2], 1)
-        # sta_ip = lf_test.Client_Connect_Using_Radio(ssid=ssid_name, passkey=profile_data["security_key"],
-        #                                             radio=radio_name, station_name=sta)
-        # if not sta_ip:
-        #     print("test failed due to no station ip")
-        #     assert False
-        # END//To Do: This code looks important for ip not getting issue might need to test later
-
-        lf_tools.reset_scenario()
 
         obj = instantiate_profile(get_configuration['access_point'][0], "../libs/apnos/", "2.x")
         obj.check_and_set_ap_channel(radio="5G", band=channel_width, channel=channel)
@@ -258,6 +203,9 @@ class TestCountryUS20Mhz5G(object):
             if os.path.exists(pdf):
                 allure.attach.file(source=pdf,
                                    name="WiFi_Capacity_1GBPS_Download_Throughput_udp_5g_Test", attachment_type="PDF")
+            allure.attach(name="PASSED:Throughput Results:", body=str(
+                "Actual throughput:" + str(float(actual_throughput)) + "is greater than Expected Throughput:" + str(
+                    expected_throughput)))
             assert True
         else:
             result["result"] = "FAIL"
@@ -266,6 +214,9 @@ class TestCountryUS20Mhz5G(object):
             if os.path.exists(pdf):
                 allure.attach.file(source=pdf,
                                    name="WiFi_Capacity_1GBPS_Download_Throughput_udp_5g_Test", attachment_type="PDF")
+            allure.attach(name="FAILED:Throughput Results:", body=str(
+                "Actual throughput:" + float(actual_throughput) + "is lesser than Expected Throughput:" + str(
+                    expected_throughput)))
             assert False
 
     @allure.testcase(url="https://telecominfraproject.atlassian.net/browse/WIFI-2546", name="WIFI-6938")
@@ -399,6 +350,9 @@ class TestCountryUS20Mhz5G(object):
             if os.path.exists(pdf):
                 allure.attach.file(source=pdf,
                                    name="WiFi_Capacity_1GBPS_Download_Throughput_udp_5g_Test", attachment_type="PDF")
+            allure.attach(name="PASSED:Throughput Results:", body=str(
+                "Actual throughput:" + str(float(actual_throughput)) + "is greater than Expected Throughput:" + str(
+                    expected_throughput)))
             assert True
         else:
             result["result"] = "FAIL"
@@ -407,6 +361,9 @@ class TestCountryUS20Mhz5G(object):
             if os.path.exists(pdf):
                 allure.attach.file(source=pdf,
                                    name="WiFi_Capacity_1GBPS_Download_Throughput_udp_5g_Test", attachment_type="PDF")
+            allure.attach(name="FAILED:Throughput Results:", body=str(
+                "Actual throughput:" + float(actual_throughput) + "is lesser than Expected Throughput:" + str(
+                    expected_throughput)))
             assert False         
 
     @allure.testcase(url="https://telecominfraproject.atlassian.net/browse/WIFI-2546", name="WIFI-6938")
@@ -540,6 +497,9 @@ class TestCountryUS20Mhz5G(object):
             if os.path.exists(pdf):
                 allure.attach.file(source=pdf,
                                    name="WiFi_Capacity_1GBPS_Download_Throughput_udp_5g_Test", attachment_type="PDF")
+            allure.attach(name="PASSED:Throughput Results:", body=str(
+                "Actual throughput:" + str(float(actual_throughput)) + "is greater than Expected Throughput:" + str(
+                    expected_throughput)))
             assert True
         else:
             result["result"] = "FAIL"
@@ -548,4 +508,7 @@ class TestCountryUS20Mhz5G(object):
             if os.path.exists(pdf):
                 allure.attach.file(source=pdf,
                                    name="WiFi_Capacity_1GBPS_Download_Throughput_udp_5g_Test", attachment_type="PDF")
+            allure.attach(name="FAILED:Throughput Results:", body=str(
+                "Actual throughput:" + float(actual_throughput) + "is lesser than Expected Throughput:" + str(
+                    expected_throughput)))
             assert False

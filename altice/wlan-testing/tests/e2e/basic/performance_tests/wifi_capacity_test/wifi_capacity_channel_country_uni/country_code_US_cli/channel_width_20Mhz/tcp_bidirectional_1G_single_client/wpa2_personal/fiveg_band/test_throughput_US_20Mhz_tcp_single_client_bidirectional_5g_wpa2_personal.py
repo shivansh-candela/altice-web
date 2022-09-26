@@ -2,7 +2,6 @@ import os
 import pytest
 import allure
 import time
-import time
 
 pytestmark = [pytest.mark.country_code, pytest.mark.nat, pytest.mark.wpa2, pytest.mark.united_states,
               pytest.mark.bandwidth_20mhz, pytest.mark.al, pytest.mark.tcp, pytest.mark.wifi_capacity_test,
@@ -351,6 +350,9 @@ class TestCountryUS20Mhz5G(object):
             if os.path.exists(pdf):
                 allure.attach.file(source=pdf,
                                    name="WiFi_Capacity_1GBPS_Download_Throughput_TCP_5g_Test", attachment_type="PDF")
+            allure.attach(name="PASSED:Throughput Results:", body=str(
+                "Actual throughput:" + str(float(actual_throughput)) + "is greater than Expected Throughput:" + str(
+                    expected_throughput)))
             assert True
         else:
             result["result"] = "FAIL"
@@ -359,4 +361,7 @@ class TestCountryUS20Mhz5G(object):
             if os.path.exists(pdf):
                 allure.attach.file(source=pdf,
                                    name="WiFi_Capacity_1GBPS_Download_Throughput_TCP_5g_Test", attachment_type="PDF")
+            allure.attach(name="FAILED:Throughput Results:", body=str(
+                "Actual throughput:" + float(actual_throughput) + "is lesser than Expected Throughput:" + str(
+                    expected_throughput)))
             assert False
