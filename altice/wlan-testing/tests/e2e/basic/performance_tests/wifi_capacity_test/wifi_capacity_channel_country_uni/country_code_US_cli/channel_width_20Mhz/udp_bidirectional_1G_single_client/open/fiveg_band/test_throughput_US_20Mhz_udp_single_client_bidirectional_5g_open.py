@@ -213,7 +213,7 @@ class TestCountryUS20Mhz5G(object):
                 allure.attach.file(source=pdf,
                                    name="WiFi_Capacity_1GBPS_Bidirectional_Throughput_udp_5g_Test", attachment_type="PDF")
             allure.attach(name="FAILED:Throughput Results:", body=str(
-                "Actual throughput:" + float(actual_throughput) + "is lesser than Expected Throughput:" + str(
+                "Actual throughput:" + str(float(actual_throughput)) + "is lesser than Expected Throughput:" + str(
                     expected_throughput)))
             assert False
 
@@ -360,6 +360,6 @@ class TestCountryUS20Mhz5G(object):
                 allure.attach.file(source=pdf,
                                    name="WiFi_Capacity_1GBPS_Bidirectional_Throughput_udp_5g_Test", attachment_type="PDF")
             allure.attach(name="FAILED:Throughput Results:", body=str(
-                "Actual throughput:" + float(actual_throughput) + "is lesser than Expected Throughput:" + str(
+                "Actual throughput:" + str(float(actual_throughput)) + "is lesser than Expected Throughput:" + str(
                     expected_throughput)))
             assert False
