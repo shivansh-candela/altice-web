@@ -8,7 +8,7 @@ You might need to install pexpect-serial using pip:
 $ pip3 install serial
 $ pip3 install pexpect-serial
 
-./openwrt_ctl.py -l stdout -u root -p TIP -s serial --tty ttyUSB0
+./openwrt_ctl.py -l stdout -u admin -p DustBunnyRoundup9# -s serial --tty ttyUSB0
 
 # Set up reverse ssh tunnel
 ./openwrt_ctl.py --tty /dev/ttyAP1 --action ssh-tunnel \
@@ -42,7 +42,7 @@ CR = "\r\n"
 Q = '"'
 A = "'"
 FORMAT = '%(asctime)s %(name)s %(levelname)s: %(message)s'
-prompt = "root@OpenWrt:"
+prompt = "GEN8 login:"
 
 
 def usage():
@@ -154,7 +154,11 @@ def main():
                     logg.info("expect-0: %i" % (i))
                     if (i == 0):
                         logg.info("Found prompt, login complete.")
-                        break
+                        print("uydsgfudgfuydghsfiuyadghsfiuyads")
+                        logg.info("Sending username: %s" % (user))
+                        egg.sendline(user)
+                        logg.info("Sending password: %s" % (passwd))
+                        egg.sendline(passwd)
                     if (i == 1):
                         logg.info("Sending newline")
                         egg.setdline(NL)
