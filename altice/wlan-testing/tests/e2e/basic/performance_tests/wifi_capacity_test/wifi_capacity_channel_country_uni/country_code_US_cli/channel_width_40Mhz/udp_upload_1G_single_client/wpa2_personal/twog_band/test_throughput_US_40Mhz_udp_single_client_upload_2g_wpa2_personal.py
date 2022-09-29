@@ -12,7 +12,7 @@ pytestmark = [pytest.mark.country_code, pytest.mark.nat, pytest.mark.wpa2, pytes
 setup_params_general = {
     "mode": "NAT",
     "ssid_modes": {
-        "open": [
+        "wpa2_personal": [
             {"ssid_name": "client_connectivity_al", "appliedRadios": ["2G"], "security_key": "something"}
         ]
     },
