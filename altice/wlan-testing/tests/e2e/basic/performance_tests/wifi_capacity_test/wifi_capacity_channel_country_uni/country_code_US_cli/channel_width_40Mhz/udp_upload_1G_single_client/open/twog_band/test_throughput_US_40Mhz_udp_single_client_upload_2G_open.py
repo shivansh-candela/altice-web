@@ -361,7 +361,7 @@ class TestCountryUS40Mhz2G(object):
     def test_client_nat_open_chn11_40Mhz_US_2g_udp_upload(self, instantiate_profile, get_lf_logs,
                                                  lf_test, update_report,
                                                  station_names_twog, lf_tools,
-                                                 test_cases, testbed, al_1, get_configuration):
+                                                 test_cases, testbed, al_1, get_configuration, get_attenuators):
         """
            pytest -m "country_code and fourtyMhz and twog and channel_11"
         """
