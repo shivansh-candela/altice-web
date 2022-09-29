@@ -958,6 +958,50 @@
         }
     },
 
+    "local-02": {
+        "controller": {
+            "url": "asd",
+            "username": "asdsa",
+            "password": "dasd"
+        },
+        "access_point": [
+            {
+                "model": "local-tb2",
+                "mode": "wifi6",
+                "serial": "",
+                "jumphost": true,
+                "ip": "192.168.200.43",
+                "username": "lanforge",
+                "password": "lanforge",
+                "port": 22,
+                "jumphost_tty": "/dev/ttyUSB0",
+                "version": "next-latest",
+                "ap_username": "admin",
+                "ap_password": "DustBunnyRoundup9#",
+                "ap_prompt": "root@GEN8"
+            }
+        ],
+        "traffic_generator": {
+            "name": "lanforge",
+            "details": {
+                "ip": "192.168.200.43",
+                "port": 8080,
+                "ssh_port": 22,
+                "2.4G-Radio": ["1.1.wiphy5"],
+                "5G-Radio": ["1.1.wiphy5"],
+                "AX-Radio": ["1.1.wiphy5"],
+                "upstream": "1.1.eth1",
+                "lan-upstream": "1.1.eth1",
+                "upstream_subnet": "",
+                "uplink": "",
+                "2.4G-Station-Name": "wlan0",
+                "5G-Station-Name": "wlan1",
+                "AX-Station-Name": "ax",
+                "attenuation_connected_serial" : "",
+                "attenuation_selected_serial" : ""
+            }
+        }
+    },
     "basic-ext-03-03": {
         "controller": {
             "url": "https://wlan-portal-svc-nola-ext-03.cicd.lab.wlan.tip.build",
