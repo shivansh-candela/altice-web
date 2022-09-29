@@ -124,26 +124,36 @@ class AController:
 
     def setup_cli_connection(self, cmd="cli"):
         output = self.run_generic_command("cli")
-        print("output:ewrjkuhfdeisuwhfiudshfi ", output)
+        print("output: ", output)
         try:
             if output[0].strip() != "/cli>":
                 if output[1].strip() != "/cli>":
+                    print("Adding AP in CLI mode")
                     output = self.run_generic_command(cmd="cli")  # To put AP in cli mode
                     print("AP in CLI mode: ", output)
+                    # print("AP in CLI mode: ", output)
         except:
-            output = self.run_generic_command(cmd="cli")  # To put AP in cli mode
-            print("AP already in CLI mode: ", output)
+            print("AP already in cli mode")
+            # output = self.run_generic_command(cmd="cli")  # To put AP in cli mode
+            # print("AP already in CLI mode: ", output)
 
     def run_generic_command(self, cmd=""):
         try:
             client = self.ssh_cli_connect()
             cmd = cmd
-            self.owrt_args = "--prompt " + "/cli" + " -s serial --log stdout --user " + self.ap_username + " --passwd " + self.ap_password
+            if cmd=="cli":
+                self.owrt_args = "--prompt " + "root@GEN8" + " -s serial --log stdout --user " + self.ap_username + " --passwd " + self.ap_password
+            else:
+                self.owrt_args = "--prompt " + "/cli" + " -s serial --log stdout --user " + self.ap_username + " --passwd " + self.ap_password
+            print("oooooooooooooooooooooo",self.owrt_args)
+            print("SELF.mode",self.mode)
             if self.mode:
-                cmd = f"cd ~/cicd-git/ && ./openwrt_ctl.py {self.owrt_args} -t {self.tty} --action " \
+                cmd = f"cd ~/cicd-git/ && ./openwrt_ctl.py {self.owrt_args} -t /dev/ttyUSB0 --action " \
                       f"cmd --value \"{cmd}\" "
+            #./openwrt_ctl.py --prompt /cli -s serial -l stdout -u admin -p DustBunnyRoundup9# -s serial --tty /dev/ttyUSB0 --action cmd --value /cli
             stdin, stdout, stderr = client.exec_command(cmd)
             output = stdout.read()
+            print("outpuuuuuuut",output)
             # print(output.decode('utf-8'))
             # status = output.decode('utf-8').splitlines()
             status = re.sub("[^a-zA-Z_/0-9=> :\\^-]+", "", output.decode('utf-8'))
@@ -166,6 +176,7 @@ class AController:
                        port=self.port, timeout=10, allow_agent=False, banner_timeout=200)
         return client
 
+    
     # To get all the ssid names
     def get_ap_ssid_name(self, radio="2G"):
         if radio == "2G":
