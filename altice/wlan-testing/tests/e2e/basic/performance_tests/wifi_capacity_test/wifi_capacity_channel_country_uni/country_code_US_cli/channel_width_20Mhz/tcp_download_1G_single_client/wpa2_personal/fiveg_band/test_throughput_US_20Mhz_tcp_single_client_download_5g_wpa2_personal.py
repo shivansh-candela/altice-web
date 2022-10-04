@@ -58,7 +58,7 @@ setup_params_general = {
              "channel": 149}
     },
     "radius": False,
-    "expected-throughput": 280
+    "expected-throughput": 186.42
 }
 
 
