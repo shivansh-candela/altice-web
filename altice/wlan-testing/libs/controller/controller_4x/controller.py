@@ -145,7 +145,7 @@ class AController:
                 self.owrt_args = "--prompt " + "root@GEN8" + " -s serial --log stdout --user " + self.ap_username + " --passwd " + self.ap_password
             else:
                 self.owrt_args = "--prompt " + "/cli" + " -s serial --log stdout --user " + self.ap_username + " --passwd " + self.ap_password
-            print("CLI-Conf:",self.owrt_args)
+            print("run generic command:",self.owrt_args)
             print("SELF.mode",self.mode)
             if self.mode:
                 cmd = f"cd ~/cicd-git/ && ./openwrt_ctl.py {self.owrt_args} -t /dev/ttyUSB0 --action " \
@@ -153,7 +153,7 @@ class AController:
             #./openwrt_ctl.py --prompt /cli -s serial -l stdout -u admin -p DustBunnyRoundup9# -s serial --tty /dev/ttyUSB0 --action cmd --value /cli
             stdin, stdout, stderr = client.exec_command(cmd)
             output = stdout.read()
-            print("output",output)
+            print("run generic command output:",output)
             # print(output.decode('utf-8'))
             # status = output.decode('utf-8').splitlines()
             status = re.sub("[^a-zA-Z_/0-9=> :\\^-]+", "", output.decode('utf-8'))
