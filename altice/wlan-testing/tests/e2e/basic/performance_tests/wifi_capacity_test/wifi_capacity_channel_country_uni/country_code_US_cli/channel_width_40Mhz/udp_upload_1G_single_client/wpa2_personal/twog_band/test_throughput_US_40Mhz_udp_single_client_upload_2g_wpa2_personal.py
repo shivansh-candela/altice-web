@@ -43,7 +43,7 @@ setup_params_general = {
     },
 
     "radius": False,
-    "expected-throughput": 170
+    "expected-throughput": 372.775
 }
 
 
