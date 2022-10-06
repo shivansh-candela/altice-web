@@ -856,7 +856,7 @@ class ChamberView:
         report_path_date_time = report.get_path_date_time()
         # logger.info("path: {}".format(report_path))
         # logger.info("path_date_time: {}".format(report_path_date_time))
-        report.set_title("WiFi Capacity Test")
+        report.set_title("WiFi Capacity Summary Report")
         report.build_banner()
 
         # objective title and description
