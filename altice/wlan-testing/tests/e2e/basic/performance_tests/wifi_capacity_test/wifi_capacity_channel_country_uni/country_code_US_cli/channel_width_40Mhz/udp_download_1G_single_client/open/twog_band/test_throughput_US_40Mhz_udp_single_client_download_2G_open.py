@@ -2,7 +2,10 @@ import os
 import pytest
 import allure
 import time
-
+import json
+f=open('throughput.json')
+data=json.load(f)
+f.close()
 pytestmark = [pytest.mark.country_code, pytest.mark.nat, pytest.mark.open, pytest.mark.united_states,
               pytest.mark.bandwidth_40mhz, pytest.mark.al, pytest.mark.udp, pytest.mark.wifi_capacity, pytest.mark.wifi_capacity_test,
               pytest.mark.download, pytest.mark.udp_download, pytest.mark.wifi_capacity_single_client,
@@ -42,7 +45,7 @@ setup_params_general = {
              "channel": 11}
     },
     "radius": False,
-    "expected-throughput": 372.775
+    "expected-throughput": data["wc"]["2g"]["udp"]["dl"]["40Mhz"]
 }
 
 
