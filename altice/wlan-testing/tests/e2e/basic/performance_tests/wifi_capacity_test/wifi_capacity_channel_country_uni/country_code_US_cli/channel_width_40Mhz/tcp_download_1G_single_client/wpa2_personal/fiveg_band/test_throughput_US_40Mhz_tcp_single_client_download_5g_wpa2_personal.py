@@ -6,8 +6,8 @@ import time
 pytestmark = [pytest.mark.country_code, pytest.mark.nat, pytest.mark.wpa2, pytest.mark.united_states,
               pytest.mark.bandwidth_40mhz, pytest.mark.al, pytest.mark.tcp, pytest.mark.wifi_capacity_test,
               pytest.mark.download, pytest.mark.tcp_download, pytest.mark.wifi_capacity_single_client,
-              pytest.mark.wifi_capacity_wpa2_20mhz_all_channels_single_client_download_1gbps,
-              pytest.mark.throughput_wpa2_20mhz_all_channels_single_client_download_1gbps, pytest.mark.fiveg]
+              pytest.mark.wifi_capacity_wpa2_40mhz_all_channels_single_client_download_1gbps,
+              pytest.mark.throughput_wpa2_40mhz_all_channels_single_client_download_1gbps, pytest.mark.fiveg]
 
 setup_params_general = {
     "mode": "NAT",
@@ -76,7 +76,7 @@ class TestCountryUS40Mhz5G(object):
     @pytest.mark.wpa2_personal
     @pytest.mark.fourtyMhz
     @pytest.mark.fiveg
-    @pytest.mark.channel36
+    @pytest.mark.channel_36
     @pytest.mark.tcp_download
     def test_client_nat_wpa2_chn36_40Mhz_US_5g_tcp_download(self, instantiate_profile, get_lf_logs,
                                                  lf_test, update_report,
