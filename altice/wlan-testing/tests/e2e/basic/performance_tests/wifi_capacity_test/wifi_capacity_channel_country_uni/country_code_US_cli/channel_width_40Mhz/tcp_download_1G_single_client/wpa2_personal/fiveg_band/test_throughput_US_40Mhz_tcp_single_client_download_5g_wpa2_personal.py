@@ -224,7 +224,7 @@ class TestCountryUS40Mhz5G(object):
     @pytest.mark.wpa2_personal
     @pytest.mark.fourtyMhz
     @pytest.mark.fiveg
-    @pytest.mark.channel149
+    @pytest.mark.channel_149
     @pytest.mark.tcp_download
     def test_client_nat_wpa2_chn149_40Mhz_US_5g_tcp_download(self, instantiate_profile, get_lf_logs,
                                                  lf_test, update_report,
