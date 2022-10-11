@@ -223,7 +223,6 @@ class TestCountryUS20Mhz5G(object):
     @pytest.mark.fiveg
     @pytest.mark.channel_149
     @pytest.mark.tcp_download
-    @pytest.mark.sg123
     def test_client_nat_wpa2_chn149_20Mhz_US_5g_tcp_download(self, instantiate_profile, get_lf_logs,
                                                  lf_test, update_report,
                                                  station_names_fiveg, lf_tools,
