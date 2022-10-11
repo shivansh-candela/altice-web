@@ -331,7 +331,7 @@ class TestCountryUS20Mhz2g(object):
                 allure.attach.file(source=pdf,
                                    name="WiFi_Capacity_1GBPS_Download_Throughput_TCP_2g_Test", attachment_type="PDF")
             allure.attach(name="PASSED:Throughput Results:", body=str(
-                "Actual throughput:" + str(float(actual_throughput)) + "is greater than Expected Throughput:" + str(
+                "Actual throughput: " + str(float(actual_throughput)) + "is greater than Expected Throughput:" + str(
                     expected_throughput)))
             assert True
         else:
@@ -342,7 +342,7 @@ class TestCountryUS20Mhz2g(object):
                 allure.attach.file(source=pdf,
                                    name="WiFi_Capacity_1GBPS_Download_Throughput_TCP_2g_Test", attachment_type="PDF")
             allure.attach(name="FAILED:Throughput Results:", body=str(
-                "Actual throughput:" + str(float(actual_throughput)) + "is lesser than Expected Throughput:" + str(
+                "Actual throughput: " + str(float(actual_throughput)) + "is lesser than Expected Throughput:" + str(
                     expected_throughput)))
             assert False
 
@@ -476,7 +476,7 @@ class TestCountryUS20Mhz2g(object):
                 allure.attach.file(source=pdf,
                                    name="WiFi_Capacity_1GBPS_Download_Throughput_TCP_2g_Test", attachment_type="PDF")
             allure.attach(name="PASSED:Throughput Results:", body=str(
-                "Actual throughput:" + str(float(actual_throughput)) + "is greater than Expected Throughput:" + str(
+                "Actual throughput: " + str(float(actual_throughput)) + "is greater than Expected Throughput:" + str(
                     expected_throughput)))
             assert True
         else:
@@ -487,6 +487,6 @@ class TestCountryUS20Mhz2g(object):
                 allure.attach.file(source=pdf,
                                    name="WiFi_Capacity_1GBPS_Download_Throughput_TCP_2g_Test", attachment_type="PDF")
             allure.attach(name="FAILED:Throughput Results:", body=str(
-                "Actual throughput:" + str(float(actual_throughput)) + "is lesser than Expected Throughput:" + str(
+                "Actual throughput: " + str(float(actual_throughput)) + "is lesser than Expected Throughput:" + str(
                     expected_throughput)))
             assert False
