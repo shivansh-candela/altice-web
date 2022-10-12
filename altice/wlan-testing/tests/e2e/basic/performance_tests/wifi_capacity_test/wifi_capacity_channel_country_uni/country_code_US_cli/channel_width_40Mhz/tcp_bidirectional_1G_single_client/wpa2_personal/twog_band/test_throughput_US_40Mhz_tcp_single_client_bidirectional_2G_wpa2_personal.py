@@ -158,7 +158,7 @@ class TestCountryUS40Mhz2g(object):
                                                                   individual_station_throughput=False, kpi_csv=True,
                                                                   file_name="/kpi.csv", batch_size=str(batch_size))
         print(csv_val)
-        print(f"Download Traffic Throughput: {csv_val['Both']['UL+DL Mbps - 1 STA']}")
+        print(f"Bidirectional Traffic Throughput: {csv_val['Both']['UL+DL Mbps - 1 STA']}")
         actual_throughput = csv_val['Both']['UL+DL Mbps - 1 STA']
 
         result = {
@@ -187,7 +187,7 @@ class TestCountryUS40Mhz2g(object):
                 allure.attach.file(source=pdf,
                                    name="WiFi_Capacity_1GBPS_Bidirectional_Throughput_TCP_2g_Test", attachment_type="PDF")
             allure.attach(name="PASSED:Throughput Results:", body=str(
-                "Actual throughput:" + str(float(actual_throughput)) + "is greater than Expected Throughput:" + str(
+                "Actual throughput: " + str(float(actual_throughput)) + "is greater than Expected Throughput:" + str(
                     expected_throughput)))
             assert True
         else:
@@ -198,7 +198,7 @@ class TestCountryUS40Mhz2g(object):
                 allure.attach.file(source=pdf,
                                    name="WiFi_Capacity_1GBPS_Bidirectional_Throughput_TCP_2g_Test", attachment_type="PDF")
             allure.attach(name="FAILED:Throughput Results:", body=str(
-                "Actual throughput:" + str(float(actual_throughput)) + "is lesser than Expected Throughput:" + str(
+                "Actual throughput: " + str(float(actual_throughput)) + "is lesser than Expected Throughput:" + str(
                     expected_throughput)))
             assert False
 
@@ -305,7 +305,7 @@ class TestCountryUS40Mhz2g(object):
                                                                   individual_station_throughput=False, kpi_csv=True,
                                                                   file_name="/kpi.csv", batch_size=str(batch_size))
         print(csv_val)
-        print(f"Download Traffic Throughput: {csv_val['Both']['UL+DL Mbps - 1 STA']}")
+        print(f"Bidirectional Traffic Throughput: {csv_val['Both']['UL+DL Mbps - 1 STA']}")
         actual_throughput = csv_val['Both']['UL+DL Mbps - 1 STA']
 
         result = {
@@ -334,7 +334,7 @@ class TestCountryUS40Mhz2g(object):
                 allure.attach.file(source=pdf,
                                    name="WiFi_Capacity_1GBPS_Bidirectional_Throughput_TCP_2g_Test", attachment_type="PDF")
             allure.attach(name="PASSED:Throughput Results:", body=str(
-                "Actual throughput:" + str(float(actual_throughput)) + "is greater than Expected Throughput:" + str(
+                "Actual throughput: " + str(float(actual_throughput)) + "is greater than Expected Throughput:" + str(
                     expected_throughput)))
             assert True
         else:
@@ -345,7 +345,7 @@ class TestCountryUS40Mhz2g(object):
                 allure.attach.file(source=pdf,
                                    name="WiFi_Capacity_1GBPS_Bidirectional_Throughput_TCP_2g_Test", attachment_type="PDF")
             allure.attach(name="FAILED:Throughput Results:", body=str(
-                "Actual throughput:" + str(float(actual_throughput)) + "is lesser than Expected Throughput:" + str(
+                "Actual throughput: " + str(float(actual_throughput)) + "is lesser than Expected Throughput:" + str(
                     expected_throughput)))
             assert False
 
@@ -453,7 +453,7 @@ class TestCountryUS40Mhz2g(object):
                                                                   individual_station_throughput=False, kpi_csv=True,
                                                                   file_name="/kpi.csv", batch_size=str(batch_size))
         print(csv_val)
-        print(f"Download Traffic Throughput: {csv_val['Both']['UL+DL Mbps - 1 STA']}")
+        print(f"Bidirectional Traffic Throughput: {csv_val['Both']['UL+DL Mbps - 1 STA']}")
         actual_throughput = csv_val['Both']['UL+DL Mbps - 1 STA']
 
         result = {
@@ -482,7 +482,7 @@ class TestCountryUS40Mhz2g(object):
                 allure.attach.file(source=pdf,
                                    name="WiFi_Capacity_1GBPS_Bidirectional_Throughput_TCP_2g_Test", attachment_type="PDF")
             allure.attach(name="PASSED:Throughput Results:", body=str(
-                "Actual throughput:" + str(float(actual_throughput)) + "is greater than Expected Throughput:" + str(
+                "Actual throughput: " + str(float(actual_throughput)) + "is greater than Expected Throughput:" + str(
                     expected_throughput)))
             assert True
         else:
@@ -493,6 +493,6 @@ class TestCountryUS40Mhz2g(object):
                 allure.attach.file(source=pdf,
                                    name="WiFi_Capacity_1GBPS_Bidirectional_Throughput_TCP_2g_Test", attachment_type="PDF")
             allure.attach(name="FAILED:Throughput Results:", body=str(
-                "Actual throughput:" + str(float(actual_throughput)) + "is lesser than Expected Throughput:" + str(
+                "Actual throughput: " + str(float(actual_throughput)) + "is lesser than Expected Throughput:" + str(
                     expected_throughput)))
             assert False

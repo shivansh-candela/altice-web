@@ -188,7 +188,7 @@ class TestCountryUS40Mhz2g(object):
                 allure.attach.file(source=pdf,
                                    name="WiFi_Capacity_1GBPS_Download_Throughput_TCP_2g_Test", attachment_type="PDF")
             allure.attach(name="PASSED:Throughput Results:", body=str(
-                "Actual throughput:" + str(float(actual_throughput)) + "is greater than Expected Throughput:" + str(
+                "Actual throughput: " + str(float(actual_throughput)) + "is greater than Expected Throughput:" + str(
                     expected_throughput)))
             assert True
         else:
@@ -199,7 +199,7 @@ class TestCountryUS40Mhz2g(object):
                 allure.attach.file(source=pdf,
                                    name="WiFi_Capacity_1GBPS_Download_Throughput_TCP_2g_Test", attachment_type="PDF")
             allure.attach(name="FAILED:Throughput Results:", body=str(
-                "Actual throughput:" + str(float(actual_throughput)) + "is lesser than Expected Throughput:" + str(
+                "Actual throughput: " + str(float(actual_throughput)) + "is lesser than Expected Throughput:" + str(
                     expected_throughput)))
             assert False
 
@@ -294,12 +294,6 @@ class TestCountryUS40Mhz2g(object):
         # lf_tools.add_stations(band="ax", num_stations=1, dut=lf_tools.dut_name, ssid_name=ssid_name)
         lf_tools.Chamber_View()
 
-        obj = instantiate_profile(get_configuration['access_point'][0], "../libs/apnos/", "2.x")
-        obj.check_and_set_ap_channel(radio="2G", band=channel_width, channel=channel)
-
-        lf_tools.add_stations(band="2G", num_stations=1, dut=lf_tools.dut_name, ssid_name=ssid_name)
-        # lf_tools.add_stations(band="ax", num_stations=1, dut=lf_tools.dut_name, ssid_name=ssid_name)
-        lf_tools.Chamber_View()
 
         wct_obj = lf_test.wifi_capacity(instance_name="test_client_open_NAT_tcp_dl_2g", mode=mode, vlan_id=vlan,
                                         download_rate="1Gbps", batch_size="1",
@@ -343,7 +337,7 @@ class TestCountryUS40Mhz2g(object):
                 allure.attach.file(source=pdf,
                                    name="WiFi_Capacity_1GBPS_Download_Throughput_TCP_2g_Test", attachment_type="PDF")
             allure.attach(name="PASSED:Throughput Results:", body=str(
-                "Actual throughput:" + str(float(actual_throughput)) + "is greater than Expected Throughput:" + str(
+                "Actual throughput: " + str(float(actual_throughput)) + "is greater than Expected Throughput:" + str(
                     expected_throughput)))
             assert True
         else:
@@ -354,7 +348,7 @@ class TestCountryUS40Mhz2g(object):
                 allure.attach.file(source=pdf,
                                    name="WiFi_Capacity_1GBPS_Download_Throughput_TCP_2g_Test", attachment_type="PDF")
             allure.attach(name="FAILED:Throughput Results:", body=str(
-                "Actual throughput:" + str(float(actual_throughput)) + "is lesser than Expected Throughput:" + str(
+                "Actual throughput: " + str(float(actual_throughput)) + "is lesser than Expected Throughput:" + str(
                     expected_throughput)))
             assert False
 
@@ -449,12 +443,7 @@ class TestCountryUS40Mhz2g(object):
         # lf_tools.add_stations(band="ax", num_stations=1, dut=lf_tools.dut_name, ssid_name=ssid_name)
         lf_tools.Chamber_View()
         
-        obj = instantiate_profile(get_configuration['access_point'][0], "../libs/apnos/", "2.x")
-        obj.check_and_set_ap_channel(radio="2G", band=channel_width, channel=channel)
 
-        lf_tools.add_stations(band="2G", num_stations=1, dut=lf_tools.dut_name, ssid_name=ssid_name)
-        # lf_tools.add_stations(band="ax", num_stations=1, dut=lf_tools.dut_name, ssid_name=ssid_name)
-        lf_tools.Chamber_View()
 
         wct_obj = lf_test.wifi_capacity(instance_name="test_client_open_NAT_tcp_dl_2g", mode=mode, vlan_id=vlan,
                                         download_rate="1Gbps", batch_size="1",
@@ -498,7 +487,7 @@ class TestCountryUS40Mhz2g(object):
                 allure.attach.file(source=pdf,
                                    name="WiFi_Capacity_1GBPS_Download_Throughput_TCP_2g_Test", attachment_type="PDF")
             allure.attach(name="PASSED:Throughput Results:", body=str(
-                "Actual throughput:" + str(float(actual_throughput)) + "is greater than Expected Throughput:" + str(
+                "Actual throughput: " + str(float(actual_throughput)) + "is greater than Expected Throughput:" + str(
                     expected_throughput)))
             assert True
         else:
@@ -509,6 +498,6 @@ class TestCountryUS40Mhz2g(object):
                 allure.attach.file(source=pdf,
                                    name="WiFi_Capacity_1GBPS_Download_Throughput_TCP_2g_Test", attachment_type="PDF")
             allure.attach(name="FAILED:Throughput Results:", body=str(
-                "Actual throughput:" + str(float(actual_throughput)) + "is lesser than Expected Throughput:" + str(
+                "Actual throughput: " + str(float(actual_throughput)) + "is lesser than Expected Throughput:" + str(
                     expected_throughput)))
             assert False

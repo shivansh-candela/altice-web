@@ -147,7 +147,7 @@ class TestCountryUS20Mhz2g(object):
 
         wct_obj = lf_test.wifi_capacity(instance_name="test_client_open_NAT_tcp_bd_2g", mode=mode, vlan_id=vlan,
                                         download_rate="1Gbps", batch_size="1",
-                                        upload_rate="0", protocol="TCP-IPv4", duration="60000")
+                                        upload_rate="1Gbps", protocol="TCP-IPv4", duration="60000")
 
         report_name = wct_obj.report_name[0]['LAST']["response"].split(":::")[1].split("/")[-1]
 
@@ -187,7 +187,7 @@ class TestCountryUS20Mhz2g(object):
                 allure.attach.file(source=pdf,
                                    name="WiFi_Capacity_1GBPS_Bidirectional_Throughput_TCP_2g_Test", attachment_type="PDF")
             allure.attach(name="PASSED:Throughput Results:", body=str(
-                "Actual throughput:" + str(float(actual_throughput)) + "is greater than Expected Throughput:" + str(
+                "Actual throughput: " + str(float(actual_throughput)) + "is greater than Expected Throughput:" + str(
                     expected_throughput)))
             assert True
         else:
@@ -198,7 +198,7 @@ class TestCountryUS20Mhz2g(object):
                 allure.attach.file(source=pdf,
                                    name="WiFi_Capacity_1GBPS_Bidirectional_Throughput_TCP_2g_Test", attachment_type="PDF")
             allure.attach(name="FAILED:Throughput Results:", body=str(
-                "Actual throughput:" + str(float(actual_throughput)) + "is lesser than Expected Throughput:" + str(
+                "Actual throughput: " + str(float(actual_throughput)) + "is lesser than Expected Throughput:" + str(
                     expected_throughput)))
             assert False
 
@@ -295,7 +295,7 @@ class TestCountryUS20Mhz2g(object):
 
         wct_obj = lf_test.wifi_capacity(instance_name="test_client_open_NAT_tcp_bd_2g", mode=mode, vlan_id=vlan,
                                         download_rate="1Gbps", batch_size="1",
-                                        upload_rate="0", protocol="TCP-IPv4", duration="60000")
+                                        upload_rate="1Gbps", protocol="TCP-IPv4", duration="60000")
 
         report_name = wct_obj.report_name[0]['LAST']["response"].split(":::")[1].split("/")[-1]
 
@@ -335,7 +335,7 @@ class TestCountryUS20Mhz2g(object):
                 allure.attach.file(source=pdf,
                                    name="WiFi_Capacity_1GBPS_Bidirectional_Throughput_TCP_2g_Test", attachment_type="PDF")
             allure.attach(name="PASSED:Throughput Results:", body=str(
-                "Actual throughput:" + str(float(actual_throughput)) + "is greater than Expected Throughput:" + str(
+                "Actual throughput: " + str(float(actual_throughput)) + "is greater than Expected Throughput:" + str(
                     expected_throughput)))
             assert True
         else:
@@ -346,7 +346,7 @@ class TestCountryUS20Mhz2g(object):
                 allure.attach.file(source=pdf,
                                    name="WiFi_Capacity_1GBPS_Bidirectional_Throughput_TCP_2g_Test", attachment_type="PDF")
             allure.attach(name="FAILED:Throughput Results:", body=str(
-                "Actual throughput:" + str(float(actual_throughput)) + "is lesser than Expected Throughput:" + str(
+                "Actual throughput: " + str(float(actual_throughput)) + "is lesser than Expected Throughput:" + str(
                     expected_throughput)))
             assert False
 
@@ -441,7 +441,7 @@ class TestCountryUS20Mhz2g(object):
 
         wct_obj = lf_test.wifi_capacity(instance_name="test_client_open_NAT_tcp_bd_2g", mode=mode, vlan_id=vlan,
                                         download_rate="1Gbps", batch_size="1",
-                                        upload_rate="0", protocol="TCP-IPv4", duration="60000")
+                                        upload_rate="1Gbps", protocol="TCP-IPv4", duration="60000")
 
         report_name = wct_obj.report_name[0]['LAST']["response"].split(":::")[1].split("/")[-1]
 
@@ -481,7 +481,7 @@ class TestCountryUS20Mhz2g(object):
                 allure.attach.file(source=pdf,
                                    name="WiFi_Capacity_1GBPS_Bidirectional_Throughput_TCP_2g_Test", attachment_type="PDF")
             allure.attach(name="PASSED:Throughput Results:", body=str(
-                "Actual throughput:" + str(float(actual_throughput)) + "is greater than Expected Throughput:" + str(
+                "Actual throughput: " + str(float(actual_throughput)) + "is greater than Expected Throughput:" + str(
                     expected_throughput)))
             assert True
         else:
@@ -492,6 +492,6 @@ class TestCountryUS20Mhz2g(object):
                 allure.attach.file(source=pdf,
                                    name="WiFi_Capacity_1GBPS_Bidirectional_Throughput_TCP_2g_Test", attachment_type="PDF")
             allure.attach(name="FAILED:Throughput Results:", body=str(
-                "Actual throughput:" + str(float(actual_throughput)) + "is lesser than Expected Throughput:" + str(
+                "Actual throughput: " + str(float(actual_throughput)) + "is lesser than Expected Throughput:" + str(
                     expected_throughput)))
             assert False
