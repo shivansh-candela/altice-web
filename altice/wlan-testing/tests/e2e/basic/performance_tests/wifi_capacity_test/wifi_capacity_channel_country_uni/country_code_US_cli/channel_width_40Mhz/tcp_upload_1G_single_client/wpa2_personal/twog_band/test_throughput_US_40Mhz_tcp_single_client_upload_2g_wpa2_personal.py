@@ -80,6 +80,7 @@ class TestCountryUS40Mhz2g(object):
         channel_width = setup_params_general['rf-2G-1']['2G']['channel-width']
         expected_throughput = setup_params_general["expected-throughput"]
         batch_size = 1
+        lf_test.Client_disconnect(clear_all_sta=True, clean_l3_traffic=True)
 
         lf_tools.reset_scenario()
         connected_attenuators, selected_attenuators = get_attenuators
@@ -187,8 +188,9 @@ class TestCountryUS40Mhz2g(object):
                 allure.attach.file(source=pdf,
                                    name="WiFi_Capacity_1GBPS_Upload_Throughput_TCP_2g_Test", attachment_type="PDF")
             allure.attach(name="PASSED:Throughput Results:", body=str(
-                "Actual throughput: " + str(float(actual_throughput)) + "is greater than Expected Throughput:" + str(
+                "Actual throughput: " + str(float(actual_throughput)) + " is greater than Expected Throughput:" + str(
                     expected_throughput)))
+            lf_test.Client_disconnect(clear_all_sta=True, clean_l3_traffic=True)
             assert True
         else:
             result["result"] = "FAIL"
@@ -198,8 +200,9 @@ class TestCountryUS40Mhz2g(object):
                 allure.attach.file(source=pdf,
                                    name="WiFi_Capacity_1GBPS_Upload_Throughput_TCP_2g_Test", attachment_type="PDF")
             allure.attach(name="FAILED:Throughput Results:", body=str(
-                "Actual throughput: " + str(float(actual_throughput)) + "is lesser than Expected Throughput:" + str(
+                "Actual throughput: " + str(float(actual_throughput)) + " is lesser than Expected Throughput:" + str(
                     expected_throughput)))
+            lf_test.Client_disconnect(clear_all_sta=True, clean_l3_traffic=True)
             assert False
 
 
@@ -227,6 +230,7 @@ class TestCountryUS40Mhz2g(object):
         channel_width = setup_params_general['rf-2G-6']['2G']['channel-width']
         expected_throughput = setup_params_general["expected-throughput"]
         batch_size = 1
+        lf_test.Client_disconnect(clear_all_sta=True, clean_l3_traffic=True)
 
         lf_tools.reset_scenario()
         connected_attenuators, selected_attenuators = get_attenuators
@@ -333,8 +337,9 @@ class TestCountryUS40Mhz2g(object):
                 allure.attach.file(source=pdf,
                                    name="WiFi_Capacity_1GBPS_Upload_Throughput_TCP_2g_Test", attachment_type="PDF")
             allure.attach(name="PASSED:Throughput Results:", body=str(
-                "Actual throughput: " + str(float(actual_throughput)) + "is greater than Expected Throughput:" + str(
+                "Actual throughput: " + str(float(actual_throughput)) + " is greater than Expected Throughput:" + str(
                     expected_throughput)))
+            lf_test.Client_disconnect(clear_all_sta=True, clean_l3_traffic=True)
             assert True
         else:
             result["result"] = "FAIL"
@@ -344,8 +349,9 @@ class TestCountryUS40Mhz2g(object):
                 allure.attach.file(source=pdf,
                                    name="WiFi_Capacity_1GBPS_Upload_Throughput_TCP_2g_Test", attachment_type="PDF")
             allure.attach(name="FAILED:Throughput Results:", body=str(
-                "Actual throughput: " + str(float(actual_throughput)) + "is lesser than Expected Throughput:" + str(
+                "Actual throughput: " + str(float(actual_throughput)) + " is lesser than Expected Throughput:" + str(
                     expected_throughput)))
+            lf_test.Client_disconnect(clear_all_sta=True, clean_l3_traffic=True)
             assert False
 
 
@@ -373,6 +379,7 @@ class TestCountryUS40Mhz2g(object):
         channel_width = setup_params_general['rf-2G-11']['2G']['channel-width']
         expected_throughput = setup_params_general["expected-throughput"]
         batch_size = 1
+        lf_test.Client_disconnect(clear_all_sta=True, clean_l3_traffic=True)
 
         lf_tools.reset_scenario()
         connected_attenuators, selected_attenuators = get_attenuators
@@ -479,8 +486,9 @@ class TestCountryUS40Mhz2g(object):
                 allure.attach.file(source=pdf,
                                    name="WiFi_Capacity_1GBPS_Upload_Throughput_TCP_2g_Test", attachment_type="PDF")
             allure.attach(name="PASSED:Throughput Results:", body=str(
-                "Actual throughput: " + str(float(actual_throughput)) + "is greater than Expected Throughput:" + str(
+                "Actual throughput: " + str(float(actual_throughput)) + " is greater than Expected Throughput:" + str(
                     expected_throughput)))
+            lf_test.Client_disconnect(clear_all_sta=True, clean_l3_traffic=True)
             assert True
         else:
             result["result"] = "FAIL"
@@ -490,6 +498,7 @@ class TestCountryUS40Mhz2g(object):
                 allure.attach.file(source=pdf,
                                    name="WiFi_Capacity_1GBPS_Upload_Throughput_TCP_2g_Test", attachment_type="PDF")
             allure.attach(name="FAILED:Throughput Results:", body=str(
-                "Actual throughput: " + str(float(actual_throughput)) + "is lesser than Expected Throughput:" + str(
+                "Actual throughput: " + str(float(actual_throughput)) + " is lesser than Expected Throughput:" + str(
                     expected_throughput)))
+            lf_test.Client_disconnect(clear_all_sta=True, clean_l3_traffic=True)
             assert False
