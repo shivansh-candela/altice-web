@@ -80,6 +80,7 @@ class TestCountryUS20Mhz2g(object):
         channel_width = setup_params_general['rf-2G-1']['2G']['channel-width']
         expected_throughput = setup_params_general["expected-throughput"]
         batch_size = 1
+        lf_test.Client_disconnect(clear_all_sta=True, clean_l3_traffic=True)
 
         lf_tools.reset_scenario()
         connected_attenuators, selected_attenuators = get_attenuators
@@ -189,6 +190,7 @@ class TestCountryUS20Mhz2g(object):
             allure.attach(name="PASSED:Throughput Results:", body=str(
                 "Actual throughput: " + str(float(actual_throughput)) + "is greater than Expected Throughput:" + str(
                     expected_throughput)))
+            lf_test.Client_disconnect(clear_all_sta=True, clean_l3_traffic=True)
             assert True
         else:
             result["result"] = "FAIL"
@@ -200,6 +202,7 @@ class TestCountryUS20Mhz2g(object):
             allure.attach(name="FAILED:Throughput Results:", body=str(
                 "Actual throughput: " + str(float(actual_throughput)) + "is lesser than Expected Throughput:" + str(
                     expected_throughput)))
+            lf_test.Client_disconnect(clear_all_sta=True, clean_l3_traffic=True)
             assert False
 
 
@@ -228,6 +231,7 @@ class TestCountryUS20Mhz2g(object):
         channel_width = setup_params_general['rf-2G-6']['2G']['channel-width']
         expected_throughput = setup_params_general["expected-throughput"]
         batch_size = 1
+        lf_test.Client_disconnect(clear_all_sta=True, clean_l3_traffic=True)
 
         lf_tools.reset_scenario()
         connected_attenuators, selected_attenuators = get_attenuators
@@ -337,6 +341,7 @@ class TestCountryUS20Mhz2g(object):
             allure.attach(name="PASSED:Throughput Results:", body=str(
                 "Actual throughput: " + str(float(actual_throughput)) + "is greater than Expected Throughput:" + str(
                     expected_throughput)))
+            lf_test.Client_disconnect(clear_all_sta=True, clean_l3_traffic=True)
             assert True
         else:
             result["result"] = "FAIL"
@@ -348,6 +353,7 @@ class TestCountryUS20Mhz2g(object):
             allure.attach(name="FAILED:Throughput Results:", body=str(
                 "Actual throughput: " + str(float(actual_throughput)) + "is lesser than Expected Throughput:" + str(
                     expected_throughput)))
+            lf_test.Client_disconnect(clear_all_sta=True, clean_l3_traffic=True)
             assert False
 
     @allure.testcase(url="https://telecominfraproject.atlassian.net/browse/WIFI-2546", name="WIFI-6938")
@@ -374,6 +380,7 @@ class TestCountryUS20Mhz2g(object):
         channel_width = setup_params_general['rf-2G-11']['2G']['channel-width']
         expected_throughput = setup_params_general["expected-throughput"]
         batch_size = 1
+        lf_test.Client_disconnect(clear_all_sta=True, clean_l3_traffic=True)
 
         lf_tools.reset_scenario()
         connected_attenuators, selected_attenuators = get_attenuators
@@ -483,6 +490,7 @@ class TestCountryUS20Mhz2g(object):
             allure.attach(name="PASSED:Throughput Results:", body=str(
                 "Actual throughput: " + str(float(actual_throughput)) + "is greater than Expected Throughput:" + str(
                     expected_throughput)))
+            lf_test.Client_disconnect(clear_all_sta=True, clean_l3_traffic=True)
             assert True
         else:
             result["result"] = "FAIL"
@@ -494,4 +502,5 @@ class TestCountryUS20Mhz2g(object):
             allure.attach(name="FAILED:Throughput Results:", body=str(
                 "Actual throughput: " + str(float(actual_throughput)) + "is lesser than Expected Throughput:" + str(
                     expected_throughput)))
+            lf_test.Client_disconnect(clear_all_sta=True, clean_l3_traffic=True)
             assert False
