@@ -19,7 +19,6 @@ import pytest
 from scp import SCPClient
 import os
 import re
-
 sys.path.append(os.path.join(os.path.abspath("../../../lanforge/lanforge-scripts/")))
 logger = logging.getLogger(__name__)
 # lf_logger_config = importlib.import_module("py-scripts.lf_logger_config")
@@ -123,21 +122,22 @@ class AController:
         self.setup_cli_connection()
 
     def setup_cli_connection(self, cmd="cli"):
-        output = self.run_generic_command("cli")
+        output = self.run_generic_cli_command("cli")
         print("output: ", output)
         try:
             if output[0].strip() != "/cli>":
                 if output[1].strip() != "/cli>":
                     print("Adding AP in CLI mode")
-                    output = self.run_generic_command(cmd="cli")  # To put AP in cli mode
+                    output = self.run_generic_cli_command(cmd="cli")  # To put AP in cli mode
                     print("AP in CLI mode: ", output)
                     # print("AP in CLI mode: ", output)
         except:
             print("AP already in cli mode")
-            # output = self.run_generic_command(cmd="cli")  # To put AP in cli mode
+            # output = self.run_generic_cli_command(cmd="cli")  # To put AP in cli mode
             # print("AP already in CLI mode: ", output)
 
-    def run_generic_command(self, cmd=""):
+    def run_generic_cli_command(self, cmd=""):
+        print("Command: ",cmd)
         try:
             client = self.ssh_cli_connect()
             cmd = cmd
@@ -153,7 +153,34 @@ class AController:
             #./openwrt_ctl.py --prompt /cli -s serial -l stdout -u admin -p DustBunnyRoundup9# -s serial --tty /dev/ttyUSB0 --action cmd --value /cli
             stdin, stdout, stderr = client.exec_command(cmd)
             output = stdout.read()
-            print("run generic command output:",output)
+            print("Run Generic Command Output:",output)
+            # print(output.decode('utf-8'))
+            # status = output.decode('utf-8').splitlines()
+            status = re.sub("[^a-zA-Z_/0-9=> :\\^-]+", "", output.decode('utf-8'))
+            # print("status: 122",status)
+            status = status.split(" ")
+            # print("status: 124",status)
+            client.close()
+        except Exception as e:
+            print(e)
+            status = " ** Error ** "
+        return status
+
+    def run_generic_ap_prompt_command(self, cmd=""):
+        print("Command: ",cmd)
+        try:
+            client = self.ssh_cli_connect()
+            cmd = cmd
+            self.owrt_args = "--prompt " + "root@GEN8" + " -s serial --log stdout --user " + self.ap_username + " --passwd " + self.ap_password
+            print("run generic command:",self.owrt_args)
+            print("SELF.mode",self.mode)
+            if self.mode:
+                cmd = f"cd ~/cicd-git/ && ./openwrt_ctl.py {self.owrt_args} -t /dev/ttyUSB0 --action " \
+                      f"cmd --value \"{cmd}\" "
+            #./openwrt_ctl.py --prompt /cli -s serial -l stdout -u admin -p DustBunnyRoundup9# -s serial --tty /dev/ttyUSB0 --action cmd --value /cli
+            stdin, stdout, stderr = client.exec_command(cmd)
+            output = stdout.read()
+            print("Run Generic AP Prompt Command Output:",output)
             # print(output.decode('utf-8'))
             # status = output.decode('utf-8').splitlines()
             status = re.sub("[^a-zA-Z_/0-9=> :\\^-]+", "", output.decode('utf-8'))
@@ -185,7 +212,7 @@ class AController:
             wifi_index = 1
         cmd = f"/wireless/basic/show --wifi-index={wifi_index}"
 
-        ssid_details = self.run_generic_command(cmd)
+        ssid_details = self.run_generic_cli_command(cmd)
         # print("ssid_details: 145 ", ssid_details)
 
         for i in range(len(ssid_details)):
@@ -214,7 +241,7 @@ class AController:
             wifi_index = 1
         cmd = f"/wireless/security/show --wifi-index={wifi_index}"
 
-        ssid_sec_details = self.run_generic_command(cmd)
+        ssid_sec_details = self.run_generic_cli_command(cmd)
 
         for i in range(len(ssid_sec_details)):
             if ssid_sec_details[i] == "":
@@ -240,14 +267,14 @@ class AController:
             print("=============Setting Up WPA2 Security============")
             cmd = f"/wireless/security/config --wifi-index={wifi_index} --wifi-sec-choose-interface=0 --wifi-wl-auth-mode=WPA2-Personal --wifi-wl-wpa-passphrase={password}"
 
-        command = self.run_generic_command(cmd)
+        command = self.run_generic_cli_command(cmd)
         # print(f"Configure AP security: {command}")
         return command
 
     def get_ssid_details_2g(self):
         cmd = str(data["AP_CLI"]["wireless_ssid_details_2g"])
         # print("cmd: 143 ", cmd)
-        ssid_details = self.run_generic_command(cmd)
+        ssid_details = self.run_generic_cli_command(cmd)
         # print("ssid_details: 145 ", ssid_details)
 
         for i in range(len(ssid_details)):
@@ -263,7 +290,7 @@ class AController:
 
     def get_ssid_details_5g(self):
         cmd = str(data["AP_CLI"]["wireless_ssid_details_5g"])
-        ssid_details = self.run_generic_command(cmd)
+        ssid_details = self.run_generic_cli_command(cmd)
 
         for i in range(len(ssid_details)):
             if ssid_details[i] == "":
@@ -277,28 +304,28 @@ class AController:
         return None
 
     def get_all_ssid_details_2g(self):
-        cmd = self.run_generic_command(str(data["AP_CLI"]["wireless_ssid_details_2g"]))
-        # ssid_details = self.run_generic_command(cmd)
+        cmd = self.run_generic_cli_command(str(data["AP_CLI"]["wireless_ssid_details_2g"]))
+        # ssid_details = self.run_generic_cli_command(cmd)
         return cmd
 
     def get_all_ssid_details_5g(self):
         cmd = str(data["AP_CLI"]["wireless_ssid_details_5g"])
-        ssid_details = self.run_generic_command(cmd)
+        ssid_details = self.run_generic_cli_command(cmd)
         return ssid_details
 
     def set_ssid_2g(self):
-        cmd = self.run_generic_command(str(data["AP_CLI"]["wireless_ssid_client_connectivity_2g"]))
-        # ssid_details = self.run_generic_command(cmd)
+        cmd = self.run_generic_cli_command(str(data["AP_CLI"]["wireless_ssid_client_connectivity_2g"]))
+        # ssid_details = self.run_generic_cli_command(cmd)
         return cmd
 
     def set_ssid_5g(self):
-        cmd = self.run_generic_command(str(data["AP_CLI"]["wireless_ssid_client_connectivity_5g"]))
-        # ssid_details = self.run_generic_command(cmd)
+        cmd = self.run_generic_cli_command(str(data["AP_CLI"]["wireless_ssid_client_connectivity_5g"]))
+        # ssid_details = self.run_generic_cli_command(cmd)
         return cmd
 
     def get_ssid_sec_details_2g(self):
         cmd = str(data["AP_CLI"]["wireless_sec_show_2g"])
-        ssid_sec_details = self.run_generic_command(cmd)
+        ssid_sec_details = self.run_generic_cli_command(cmd)
 
         for i in range(len(ssid_sec_details)):
             if ssid_sec_details[i] == "":
@@ -312,7 +339,7 @@ class AController:
 
     def get_ssid_sec_details_5g(self):
         cmd = str(data["AP_CLI"]["wireless_sec_show_5g"])
-        ssid_sec_details = self.run_generic_command(cmd)
+        ssid_sec_details = self.run_generic_cli_command(cmd)
 
         for i in range(len(ssid_sec_details)):
             if ssid_sec_details[i] == "":
@@ -326,31 +353,31 @@ class AController:
         return None
 
     def get_all_ssid_sec_details_2g(self):
-        cmd = self.run_generic_command(str(data["AP_CLI"]["wireless_sec_show_2g"]))
-        # ssid_sec_details = self.run_generic_command(cmd)
+        cmd = self.run_generic_cli_command(str(data["AP_CLI"]["wireless_sec_show_2g"]))
+        # ssid_sec_details = self.run_generic_cli_command(cmd)
         return cmd
 
     def get_all_ssid_sec_details_5g(self):
-        cmd = self.run_generic_command(str(data["AP_CLI"]["wireless_sec_show_5g"]))
-        # ssid_sec_details = self.run_generic_command(cmd)
+        cmd = self.run_generic_cli_command(str(data["AP_CLI"]["wireless_sec_show_5g"]))
+        # ssid_sec_details = self.run_generic_cli_command(cmd)
         return cmd
 
     def set_ssid_sec_2g(self, sec=None):
         if sec == "open":
-            cmd = self.run_generic_command(str(data["AP_CLI"]["wireless_ssid_open_config_2g"]))
+            cmd = self.run_generic_cli_command(str(data["AP_CLI"]["wireless_ssid_open_config_2g"]))
         elif sec == "wpa2_personal":
-            cmd = self.run_generic_command(str(data["AP_CLI"]["wireless_ssid_wpa2_personal_config_2g"]))
+            cmd = self.run_generic_cli_command(str(data["AP_CLI"]["wireless_ssid_wpa2_personal_config_2g"]))
 
-        # ssid_details = self.run_generic_command(cmd)
+        # ssid_details = self.run_generic_cli_command(cmd)
         return cmd
 
     def set_ssid_sec_5g(self, sec=None):
         if sec == "open":
-            cmd = self.run_generic_command(str(data["AP_CLI"]["wireless_ssid_open_config_5g"]))
+            cmd = self.run_generic_cli_command(str(data["AP_CLI"]["wireless_ssid_open_config_5g"]))
         elif sec == "wpa2_personal":
-            cmd = self.run_generic_command(str(data["AP_CLI"]["wireless_ssid_wpa2_personal_config_5g"]))
+            cmd = self.run_generic_cli_command(str(data["AP_CLI"]["wireless_ssid_wpa2_personal_config_5g"]))
 
-        # ssid_details = self.run_generic_command(cmd)
+        # ssid_details = self.run_generic_cli_command(cmd)
         return cmd
 
     def set_channel_band_2g(self, channel="AUTO", band="20"):
@@ -361,13 +388,17 @@ class AController:
             cmd = f"/wireless/advance/config --wifi-channel={channel} --wifi-bandwidth={ap_cli_band} --wifi-index=0"
             print(f" ------------------ cmd : {cmd} ------------------")
             # print("cmd: 254: ", cmd)
-            cmd = self.run_generic_command(str(cmd))
+            cmd = self.run_generic_cli_command(str(cmd))
             return cmd
         elif band == "40":
             ap_cli_band = 1
             cmd = f"/wireless/advance/config --wifi-channel={channel} --wifi-bandwidth={ap_cli_band} --wifi-index=0"
-            cmd = self.run_generic_command(str(cmd))
+            cmd = self.run_generic_cli_command(str(cmd))
             return cmd
+        elif band == "80":
+            ap_cli_band = 1
+            cmd = f"/wireless/advance/config --wifi-channel={channel} --wifi-bandwidth={ap_cli_band} --wifi-index=0"
+            cmd = self.run_generic_cli_command(str(cmd))
         else:
             cmd = None
             return cmd
@@ -376,22 +407,22 @@ class AController:
         if band == "20":
             ap_cli_band = 0
             cmd = f"/wireless/advance/config --wifi-channel={channel} --wifi-bandwidth={ap_cli_band} --wifi-index=1"
-            cmd = self.run_generic_command(str(cmd))
+            cmd = self.run_generic_cli_command(str(cmd))
             return cmd
         elif band == "40":
             ap_cli_band = 1
             cmd = f"/wireless/advance/config --wifi-channel={channel} --wifi-bandwidth={ap_cli_band} --wifi-index=1"
-            cmd = self.run_generic_command(str(cmd))
+            cmd = self.run_generic_cli_command(str(cmd))
             return cmd
         elif band == "80":
             ap_cli_band = 2
             cmd = f"/wireless/advance/config --wifi-channel={channel} --wifi-bandwidth={ap_cli_band} --wifi-index=1"
-            cmd = self.run_generic_command(str(cmd))
+            cmd = self.run_generic_cli_command(str(cmd))
             return cmd
         elif band == "160":
             ap_cli_band = 3
             cmd = f"/wireless/advance/config --wifi-channel={channel} --wifi-bandwidth={ap_cli_band} --wifi-index=1"
-            cmd = self.run_generic_command(str(cmd))
+            cmd = self.run_generic_cli_command(str(cmd))
             return cmd
         else:
             cmd = None
@@ -399,7 +430,7 @@ class AController:
 
     def get_channel_band_2g(self):
         cmd = "/wireless/advance/show --wifi-index=0"
-        channel_details_2g = self.run_generic_command(str(cmd))
+        channel_details_2g = self.run_generic_cli_command(str(cmd))
 
         for i in range(len(channel_details_2g)):
             if channel_details_2g[i] == "":
@@ -414,7 +445,7 @@ class AController:
 
     def get_channel_band_5g(self):
         cmd = "/wireless/advance/show --wifi-index=1"
-        channel_details_5g = self.run_generic_command(str(cmd))
+        channel_details_5g = self.run_generic_cli_command(str(cmd))
 
         for i in range(len(channel_details_5g)):
             if channel_details_5g[i] == "":
@@ -435,7 +466,7 @@ class AController:
             wifi_index = 1;
         command = f"/wireless/basic/config --wifi-index={wifi_index} --wifi-ssid={ssid}"
         print(f"setting ssid : cmd: {command}")
-        cmd = self.run_generic_command(command)
+        cmd = self.run_generic_cli_command(command)
         print(f"Result : {cmd}")
         return cmd
 
@@ -447,7 +478,7 @@ class AController:
             wifi_index = 1
 
         cmd = f"/wireless/advance/show --wifi-index={wifi_index}"
-        channel_details = self.run_generic_command(str(cmd))
+        channel_details = self.run_generic_cli_command(str(cmd))
         print(f"current channel details: {channel_details}")
 
         for i in range(len(channel_details)):
@@ -456,7 +487,7 @@ class AController:
 
             if channel_details[i].startswith("wifi-channel:"):
                 available_channel = channel_details[i]
-                # available_channel = available_channel.split("wifi-fadsfdschannel:")
+                available_channel = available_channel.split("wifi-channel:")
                 print(f"current ap channel: {available_channel[-1]}")
                 return available_channel[-1]
         return None
@@ -469,26 +500,76 @@ class AController:
             wifi_index = 1
         # print(f"442 band : {band}, channel : {channel}")
         print("Band",band)
-        if band == "20":
-            ap_cli_band = 0
-            print(f"band : {band}, ap_cli_channel : {ap_cli_band}")
-            cmd = f"/wireless/advance/config --wifi-channel={channel} --wifi-bandwidth={ap_cli_band} --wifi-index={wifi_index}"
-            # print("cmd: 447: ", cmd)
-            cmd = self.run_generic_command(str(cmd))
-            # print(f" ------------------ after command : {cmd} ------------------")
-            return cmd
-        elif band == "40":
-            ap_cli_band = 1
-            cmd = f"/wireless/advance/config --wifi-channel={channel} --wifi-bandwidth={ap_cli_band} --wifi-index={wifi_index}"
-            # print("cmd: 454: ", cmd)
-            cmd = self.run_generic_command(str(cmd))
-            # print(f" 455 ------------------ after command : {cmd} ------------------")
-            return cmd
+        if channel == "149":
+            print("************************************Channel Requested is 149************************************")
+            if band == "20":
+                ap_cli_band = 0
+                print(f"band : {band}, ap_cli_channel : {ap_cli_band}")
+                cmd=f"quit"
+                cmd = self.run_generic_cli_command(str(cmd))
+                cmd = f"dmcli eRT setv Device.WiFi.Radio.2.AutoChannelEnable bool 0 ; dmcli eRT setv Device.WiFi.Radio.2.Channel uint 149 ; dmcli eRT setv Device.WiFi.Radio.2.OperatingChannelBandwidth string 20MHz ; nvram commit ; nvram restart"
+                # print("cmd: 447: ", cmd)
+                cmd = self.run_generic_ap_prompt_command(str(cmd))
+                # print(f" ------------------ after command : {cmd} ------------------")
+                return cmd
+
+            elif band == "40":
+                ap_cli_band = 1
+                print(f"band : {band}, ap_cli_channel : {ap_cli_band}")
+                cmd = f"quit"
+                cmd = self.run_generic_cli_command(str(cmd))
+                cmd = f"dmcli eRT setv Device.WiFi.Radio.2.AutoChannelEnable bool 0 ; dmcli eRT setv Device.WiFi.Radio.2.Channel uint 149 ; dmcli eRT setv Device.WiFi.Radio.2.OperatingChannelBandwidth string 40MHz ; nvram commit ; nvram restart"
+                # print("cmd: 454: ", cmd)
+                cmd = self.run_generic_ap_prompt_command(str(cmd))
+                # print(f" 455 ------------------ after command : {cmd} ------------------")
+                return cmd
+            elif band == "80":
+                ap_cli_band = 2
+                print(f"band : {band}, ap_cli_channel : {ap_cli_band}")
+                cmd = f"quit"
+                cmd = self.run_generic_cli_command(str(cmd))
+                cmd = f"dmcli eRT setv Device.WiFi.Radio.2.AutoChannelEnable bool 0 ; dmcli eRT setv Device.WiFi.Radio.2.Channel uint 149 ; dmcli eRT setv Device.WiFi.Radio.2.OperatingChannelBandwidth string 80MHz ; nvram commit ; nvram restart"
+                # print("cmd: 454: ", cmd)
+                cmd = self.run_generic_ap_prompt_command(str(cmd))
+                # print(f" 455 ------------------ after command : {cmd} ------------------")
+                return cmd
+            else:
+                print(
+                    "/************************************/ Channel passing failed /************************************/")
+                cmd = None
+                return cmd
+
         else:
-            print(
-                "/************************************/ Channel passing failed /************************************/")
-            cmd = None
-            return cmd
+            if band == "20":
+                ap_cli_band = 0
+                print(f"band : {band}, ap_cli_channel : {ap_cli_band}")
+                cmd = f"/wireless/advance/config --wifi-channel={channel} --wifi-bandwidth={ap_cli_band} --wifi-index={wifi_index}"
+                # print("cmd: 447: ", cmd)
+                cmd = self.run_generic_cli_command(str(cmd))
+                # print(f" ------------------ after command : {cmd} ------------------")
+                return cmd
+            elif band == "40":
+                ap_cli_band = 1
+                print(f"band : {band}, ap_cli_channel : {ap_cli_band}")
+                cmd = f"/wireless/advance/config --wifi-channel={channel} --wifi-bandwidth={ap_cli_band} --wifi-index={wifi_index}"
+                # print("cmd: 454: ", cmd)
+                cmd = self.run_generic_cli_command(str(cmd))
+                # print(f" 455 ------------------ after command : {cmd} ------------------")
+                return cmd
+            elif band == "80":
+                ap_cli_band = 2
+                print(f"band : {band}, ap_cli_channel : {ap_cli_band}")
+                cmd = f"/wireless/advance/config --wifi-channel={channel} --wifi-bandwidth={ap_cli_band} --wifi-index={wifi_index}"
+                # print("cmd: 454: ", cmd)
+                cmd = self.run_generic_cli_command(str(cmd))
+                # print(f" 455 ------------------ after command : {cmd} ------------------")
+                return cmd
+            else:
+                print(
+                    "/************************************/ Channel passing failed /************************************/")
+                cmd = None
+                return cmd
+            print("1")
 
     def check_and_set_ap_channel(self, radio="2G", band="20", channel="AUTO"):
         # print("PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP",self.get_channel_band(radio=radio))
@@ -501,6 +582,11 @@ class AController:
             print("Expected channel from AP and Current Channel of AP mismatched"+"\nDesired Channel"+str(channel)+" not equals to Current Channel:"+str(channel_from_ap))
             print("Going to set desired channel in AP")
             self.set_channel_band(radio=str(radio), band=str(band), channel=str(channel))
+            if channel==149:
+                self.setup_cli_connection(cmd="cli")
+                self.get_channel_band(radio=radio)
+            else:
+                self.get_channel_band(radio=radio)
         # self.get_channel_band(radio=radio)
 
     def check_and_set_ssid_sec(self, radio="2G", ssid="client_altice", security="open", password="something"):
@@ -550,7 +636,7 @@ class AController:
             wifi_index = 1
         cmd = f"/wireless/basic/show --wifi-index={wifi_index}"
 
-        ssid_details = self.run_generic_command(cmd)
+        ssid_details = self.run_generic_cli_command(cmd)
         # print("ssid_details: 145 ", ssid_details)
 
         for i in range(len(ssid_details)):
