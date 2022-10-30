@@ -203,8 +203,9 @@ class TestCountryUS80Mhz5G(object):
                 allure.attach.file(source=pdf,
                                    name="WiFi_Capacity_1GBPS_Download_Throughput_udp_5g_Test", attachment_type="PDF")
             allure.attach(name="PASSED:Throughput Results:", body=str(
-                "Actual throughput:" + str(float(actual_throughput)) + "is greater than Expected Throughput:" + str(
+                "Actual throughput:" + str(float(actual_throughput)) + " is greater than Expected Throughput:" + str(
                     expected_throughput)))
+            lf_test.Client_disconnect(clear_all_sta=True, clean_l3_traffic=True)
             assert True
         else:
             result["result"] = "FAIL"
@@ -214,8 +215,9 @@ class TestCountryUS80Mhz5G(object):
                 allure.attach.file(source=pdf,
                                    name="WiFi_Capacity_1GBPS_Download_Throughput_udp_5g_Test", attachment_type="PDF")
             allure.attach(name="FAILED:Throughput Results:", body=str(
-                "Actual throughput:" + str(float(actual_throughput)) + "is lesser than Expected Throughput:" + str(
+                "Actual throughput:" + str(float(actual_throughput)) + " is lesser than Expected Throughput:" + str(
                     expected_throughput)))
+            lf_test.Client_disconnect(clear_all_sta=True, clean_l3_traffic=True)
             assert False
 
     @allure.testcase(url="https://telecominfraproject.atlassian.net/browse/WIFI-2546", name="WIFI-6938")
@@ -349,8 +351,9 @@ class TestCountryUS80Mhz5G(object):
                 allure.attach.file(source=pdf,
                                    name="WiFi_Capacity_1GBPS_Download_Throughput_udp_5g_Test", attachment_type="PDF")
             allure.attach(name="PASSED:Throughput Results:", body=str(
-                "Actual throughput:" + str(float(actual_throughput)) + "is greater than Expected Throughput:" + str(
+                "Actual throughput:" + str(float(actual_throughput)) + " is greater than Expected Throughput:" + str(
                     expected_throughput)))
+            lf_test.Client_disconnect(clear_all_sta=True, clean_l3_traffic=True)
             assert True
         else:
             result["result"] = "FAIL"
@@ -360,6 +363,7 @@ class TestCountryUS80Mhz5G(object):
                 allure.attach.file(source=pdf,
                                    name="WiFi_Capacity_1GBPS_Download_Throughput_udp_5g_Test", attachment_type="PDF")
             allure.attach(name="FAILED:Throughput Results:", body=str(
-                "Actual throughput:" + str(float(actual_throughput)) + "is lesser than Expected Throughput:" + str(
+                "Actual throughput:" + str(float(actual_throughput)) + " is lesser than Expected Throughput:" + str(
                     expected_throughput)))
+            lf_test.Client_disconnect(clear_all_sta=True, clean_l3_traffic=True)
             assert False
