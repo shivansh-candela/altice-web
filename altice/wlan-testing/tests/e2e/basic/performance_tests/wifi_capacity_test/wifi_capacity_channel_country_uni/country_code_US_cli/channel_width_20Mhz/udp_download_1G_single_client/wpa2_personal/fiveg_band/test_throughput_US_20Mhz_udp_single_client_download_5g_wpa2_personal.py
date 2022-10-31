@@ -96,7 +96,7 @@ class TestCountryUS20Mhz5G(object):
         channel_width = setup_params_general['rf-5G-1']['5G']['channel-width']
         expected_throughput = setup_params_general["expected-throughput"]
         batch_size = 1
-
+        lf_test.Client_disconnect(clear_all_sta=True, clean_l3_traffic=True)
         lf_tools.reset_scenario()
         connected_attenuators, selected_attenuators = get_attenuators
         print(f"connected_attenuators : {connected_attenuators}")
@@ -243,7 +243,7 @@ class TestCountryUS20Mhz5G(object):
         channel_width = setup_params_general['rf-5G-2']['5G']['channel-width']
         expected_throughput = setup_params_general["expected-throughput"]
         batch_size = 1
-
+        lf_test.Client_disconnect(clear_all_sta=True, clean_l3_traffic=True)
 
         lf_tools.reset_scenario()
         connected_attenuators, selected_attenuators = get_attenuators
@@ -391,7 +391,7 @@ class TestCountryUS20Mhz5G(object):
         channel_width = setup_params_general['rf-5G-5']['5G']['channel-width']
         expected_throughput = setup_params_general["expected-throughput"]
         batch_size = 1
-
+        lf_test.Client_disconnect(clear_all_sta=True, clean_l3_traffic=True)
 
         lf_tools.reset_scenario()
         connected_attenuators, selected_attenuators = get_attenuators
