@@ -592,7 +592,6 @@ class AController:
                         "/************************************/ Channel passing failed /************************************/")
                     cmd = None
                     return cmd
-
             else:
                 if band == "20":
                     ap_cli_band = 0
@@ -623,8 +622,6 @@ class AController:
                         "/************************************/ Channel passing failed /************************************/")
                     cmd = None
                     return cmd
-        # print(f"442 band : {band}, channel : {channel}")
-        print("Band",band)
 
 
     def check_and_set_ap_channel(self, radio="2G", band="20", channel="AUTO"):
