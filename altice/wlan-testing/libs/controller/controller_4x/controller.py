@@ -502,7 +502,7 @@ class AController:
                 if band == "20":
                     cmd = f"quit"
                     cmd = self.run_generic_cli_command(str(cmd))
-                    cmd = f"dmcli eRT setv Device.WiFi.Radio.1.AutoChannelEnable bool 0 ; dmcli eRT setv Device.WiFi.Radio.1.Channel uint {channel} ; dmcli eRT setv Device.WiFi.Radio.2.OperatingChannelBandwidth string 20MHz ; nvram commit ; nvram restart"
+                    cmd = f"dmcli eRT setv Device.WiFi.Radio.1.AutoChannelEnable bool 0 ; dmcli eRT setv Device.WiFi.Radio.1.Channel uint {channel} ; dmcli eRT setv Device.WiFi.Radio.1.OperatingChannelBandwidth string 20MHz ; nvram commit ; nvram restart"
                     # print("cmd: 447: ", cmd)
                     cmd = self.run_generic_ap_prompt_command(str(cmd))
                     # print(f" ------------------ after command : {cmd} ------------------")
@@ -511,7 +511,7 @@ class AController:
                 elif band == "40":
                     cmd = f"quit"
                     cmd = self.run_generic_cli_command(str(cmd))
-                    cmd = f"dmcli eRT setv Device.WiFi.Radio.1.AutoChannelEnable bool 0 ; dmcli eRT setv Device.WiFi.Radio.1.Channel uint {channel} ; dmcli eRT setv Device.WiFi.Radio.2.OperatingChannelBandwidth string 40MHz ; nvram commit ; nvram restart"
+                    cmd = f"dmcli eRT setv Device.WiFi.Radio.1.AutoChannelEnable bool 0 ; dmcli eRT setv Device.WiFi.Radio.1.Channel uint {channel} ; dmcli eRT setv Device.WiFi.Radio.1.OperatingChannelBandwidth string 40MHz ; nvram commit ; nvram restart"
                     # print("cmd: 454: ", cmd)
                     cmd = self.run_generic_ap_prompt_command(str(cmd))
                     # print(f" 455 ------------------ after command : {cmd} ------------------")
