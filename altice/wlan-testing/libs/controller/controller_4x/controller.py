@@ -496,80 +496,133 @@ class AController:
         print("Set Channel")
         if radio == "2G":
             wifi_index = 0
+            if channel == "11":
+                print(
+                    "************************************Channel Requested is 11************************************")
+                if band == "20":
+                    cmd = f"quit"
+                    cmd = self.run_generic_cli_command(str(cmd))
+                    cmd = f"dmcli eRT setv Device.WiFi.Radio.1.AutoChannelEnable bool 0 ; dmcli eRT setv Device.WiFi.Radio.1.Channel uint {channel} ; dmcli eRT setv Device.WiFi.Radio.2.OperatingChannelBandwidth string 20MHz ; nvram commit ; nvram restart"
+                    # print("cmd: 447: ", cmd)
+                    cmd = self.run_generic_ap_prompt_command(str(cmd))
+                    # print(f" ------------------ after command : {cmd} ------------------")
+                    return cmd
+
+                elif band == "40":
+                    cmd = f"quit"
+                    cmd = self.run_generic_cli_command(str(cmd))
+                    cmd = f"dmcli eRT setv Device.WiFi.Radio.1.AutoChannelEnable bool 0 ; dmcli eRT setv Device.WiFi.Radio.1.Channel uint {channel} ; dmcli eRT setv Device.WiFi.Radio.2.OperatingChannelBandwidth string 40MHz ; nvram commit ; nvram restart"
+                    # print("cmd: 454: ", cmd)
+                    cmd = self.run_generic_ap_prompt_command(str(cmd))
+                    # print(f" 455 ------------------ after command : {cmd} ------------------")
+                    return cmd
+                else:
+                    print(
+                        "/************************************/ Channel passing failed /************************************/")
+                    cmd = None
+                    return cmd
+            else:
+                if band == "20":
+                    ap_cli_band = 0
+                    print(f"band : {band}, ap_cli_channel : {ap_cli_band}")
+                    cmd = f"/wireless/advance/config --wifi-channel={channel} --wifi-bandwidth={ap_cli_band} --wifi-index={wifi_index}"
+                    # print("cmd: 447: ", cmd)
+                    cmd = self.run_generic_cli_command(str(cmd))
+                    # print(f" ------------------ after command : {cmd} ------------------")
+                    return cmd
+                elif band == "40":
+                    ap_cli_band = 1
+                    print(f"band : {band}, ap_cli_channel : {ap_cli_band}")
+                    cmd = f"/wireless/advance/config --wifi-channel={channel} --wifi-bandwidth={ap_cli_band} --wifi-index={wifi_index}"
+                    # print("cmd: 454: ", cmd)
+                    cmd = self.run_generic_cli_command(str(cmd))
+                    # print(f" 455 ------------------ after command : {cmd} ------------------")
+                    return cmd
+                elif band == "80":
+                    ap_cli_band = 2
+                    print(f"band : {band}, ap_cli_channel : {ap_cli_band}")
+                    cmd = f"/wireless/advance/config --wifi-channel={channel} --wifi-bandwidth={ap_cli_band} --wifi-index={wifi_index}"
+                    # print("cmd: 454: ", cmd)
+                    cmd = self.run_generic_cli_command(str(cmd))
+                    # print(f" 455 ------------------ after command : {cmd} ------------------")
+                    return cmd
+                else:
+                    print(
+                        "/************************************/ Channel passing failed /************************************/")
+                    cmd = None
+                    return cmd
         else:
             wifi_index = 1
-        # print(f"442 band : {band}, channel : {channel}")
-        print("Band",band)
-        if channel == "149":
-            print("************************************Channel Requested is 149************************************")
-            if band == "20":
-                ap_cli_band = 0
-                print(f"band : {band}, ap_cli_channel : {ap_cli_band}")
-                cmd=f"quit"
-                cmd = self.run_generic_cli_command(str(cmd))
-                cmd = f"dmcli eRT setv Device.WiFi.Radio.2.AutoChannelEnable bool 0 ; dmcli eRT setv Device.WiFi.Radio.2.Channel uint 149 ; dmcli eRT setv Device.WiFi.Radio.2.OperatingChannelBandwidth string 20MHz ; nvram commit ; nvram restart"
-                # print("cmd: 447: ", cmd)
-                cmd = self.run_generic_ap_prompt_command(str(cmd))
-                # print(f" ------------------ after command : {cmd} ------------------")
-                return cmd
-
-            elif band == "40":
-                ap_cli_band = 1
-                print(f"band : {band}, ap_cli_channel : {ap_cli_band}")
-                cmd = f"quit"
-                cmd = self.run_generic_cli_command(str(cmd))
-                cmd = f"dmcli eRT setv Device.WiFi.Radio.2.AutoChannelEnable bool 0 ; dmcli eRT setv Device.WiFi.Radio.2.Channel uint 149 ; dmcli eRT setv Device.WiFi.Radio.2.OperatingChannelBandwidth string 40MHz ; nvram commit ; nvram restart"
-                # print("cmd: 454: ", cmd)
-                cmd = self.run_generic_ap_prompt_command(str(cmd))
-                # print(f" 455 ------------------ after command : {cmd} ------------------")
-                return cmd
-            elif band == "80":
-                ap_cli_band = 2
-                print(f"band : {band}, ap_cli_channel : {ap_cli_band}")
-                cmd = f"quit"
-                cmd = self.run_generic_cli_command(str(cmd))
-                cmd = f"dmcli eRT setv Device.WiFi.Radio.2.AutoChannelEnable bool 0 ; dmcli eRT setv Device.WiFi.Radio.2.Channel uint 149 ; dmcli eRT setv Device.WiFi.Radio.2.OperatingChannelBandwidth string 80MHz ; nvram commit ; nvram restart"
-                # print("cmd: 454: ", cmd)
-                cmd = self.run_generic_ap_prompt_command(str(cmd))
-                # print(f" 455 ------------------ after command : {cmd} ------------------")
-                return cmd
-            else:
+            if channel == "149":
                 print(
-                    "/************************************/ Channel passing failed /************************************/")
-                cmd = None
-                return cmd
+                    "************************************Channel Requested is 149************************************")
+                if band == "20":
+                    ap_cli_band = 0
+                    print(f"band : {band}, ap_cli_channel : {ap_cli_band}")
+                    cmd = f"quit"
+                    cmd = self.run_generic_cli_command(str(cmd))
+                    cmd = f"dmcli eRT setv Device.WiFi.Radio.2.AutoChannelEnable bool 0 ; dmcli eRT setv Device.WiFi.Radio.2.Channel uint 149 ; dmcli eRT setv Device.WiFi.Radio.2.OperatingChannelBandwidth string 20MHz ; nvram commit ; nvram restart"
+                    # print("cmd: 447: ", cmd)
+                    cmd = self.run_generic_ap_prompt_command(str(cmd))
+                    # print(f" ------------------ after command : {cmd} ------------------")
+                    return cmd
 
-        else:
-            if band == "20":
-                ap_cli_band = 0
-                print(f"band : {band}, ap_cli_channel : {ap_cli_band}")
-                cmd = f"/wireless/advance/config --wifi-channel={channel} --wifi-bandwidth={ap_cli_band} --wifi-index={wifi_index}"
-                # print("cmd: 447: ", cmd)
-                cmd = self.run_generic_cli_command(str(cmd))
-                # print(f" ------------------ after command : {cmd} ------------------")
-                return cmd
-            elif band == "40":
-                ap_cli_band = 1
-                print(f"band : {band}, ap_cli_channel : {ap_cli_band}")
-                cmd = f"/wireless/advance/config --wifi-channel={channel} --wifi-bandwidth={ap_cli_band} --wifi-index={wifi_index}"
-                # print("cmd: 454: ", cmd)
-                cmd = self.run_generic_cli_command(str(cmd))
-                # print(f" 455 ------------------ after command : {cmd} ------------------")
-                return cmd
-            elif band == "80":
-                ap_cli_band = 2
-                print(f"band : {band}, ap_cli_channel : {ap_cli_band}")
-                cmd = f"/wireless/advance/config --wifi-channel={channel} --wifi-bandwidth={ap_cli_band} --wifi-index={wifi_index}"
-                # print("cmd: 454: ", cmd)
-                cmd = self.run_generic_cli_command(str(cmd))
-                # print(f" 455 ------------------ after command : {cmd} ------------------")
-                return cmd
+                elif band == "40":
+                    ap_cli_band = 1
+                    print(f"band : {band}, ap_cli_channel : {ap_cli_band}")
+                    cmd = f"quit"
+                    cmd = self.run_generic_cli_command(str(cmd))
+                    cmd = f"dmcli eRT setv Device.WiFi.Radio.2.AutoChannelEnable bool 0 ; dmcli eRT setv Device.WiFi.Radio.2.Channel uint 149 ; dmcli eRT setv Device.WiFi.Radio.2.OperatingChannelBandwidth string 40MHz ; nvram commit ; nvram restart"
+                    # print("cmd: 454: ", cmd)
+                    cmd = self.run_generic_ap_prompt_command(str(cmd))
+                    # print(f" 455 ------------------ after command : {cmd} ------------------")
+                    return cmd
+                elif band == "80":
+                    ap_cli_band = 2
+                    print(f"band : {band}, ap_cli_channel : {ap_cli_band}")
+                    cmd = f"quit"
+                    cmd = self.run_generic_cli_command(str(cmd))
+                    cmd = f"dmcli eRT setv Device.WiFi.Radio.2.AutoChannelEnable bool 0 ; dmcli eRT setv Device.WiFi.Radio.2.Channel uint 149 ; dmcli eRT setv Device.WiFi.Radio.2.OperatingChannelBandwidth string 80MHz ; nvram commit ; nvram restart"
+                    # print("cmd: 454: ", cmd)
+                    cmd = self.run_generic_ap_prompt_command(str(cmd))
+                    # print(f" 455 ------------------ after command : {cmd} ------------------")
+                    return cmd
+                else:
+                    print(
+                        "/************************************/ Channel passing failed /************************************/")
+                    cmd = None
+                    return cmd
             else:
-                print(
-                    "/************************************/ Channel passing failed /************************************/")
-                cmd = None
-                return cmd
-            print("1")
+                if band == "20":
+                    ap_cli_band = 0
+                    print(f"band : {band}, ap_cli_channel : {ap_cli_band}")
+                    cmd = f"/wireless/advance/config --wifi-channel={channel} --wifi-bandwidth={ap_cli_band} --wifi-index={wifi_index}"
+                    # print("cmd: 447: ", cmd)
+                    cmd = self.run_generic_cli_command(str(cmd))
+                    # print(f" ------------------ after command : {cmd} ------------------")
+                    return cmd
+                elif band == "40":
+                    ap_cli_band = 1
+                    print(f"band : {band}, ap_cli_channel : {ap_cli_band}")
+                    cmd = f"/wireless/advance/config --wifi-channel={channel} --wifi-bandwidth={ap_cli_band} --wifi-index={wifi_index}"
+                    # print("cmd: 454: ", cmd)
+                    cmd = self.run_generic_cli_command(str(cmd))
+                    # print(f" 455 ------------------ after command : {cmd} ------------------")
+                    return cmd
+                elif band == "80":
+                    ap_cli_band = 2
+                    print(f"band : {band}, ap_cli_channel : {ap_cli_band}")
+                    cmd = f"/wireless/advance/config --wifi-channel={channel} --wifi-bandwidth={ap_cli_band} --wifi-index={wifi_index}"
+                    # print("cmd: 454: ", cmd)
+                    cmd = self.run_generic_cli_command(str(cmd))
+                    # print(f" 455 ------------------ after command : {cmd} ------------------")
+                    return cmd
+                else:
+                    print(
+                        "/************************************/ Channel passing failed /************************************/")
+                    cmd = None
+                    return cmd
+
 
     def check_and_set_ap_channel(self, radio="2G", band="20", channel="AUTO"):
         # print("PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP",self.get_channel_band(radio=radio))
@@ -582,7 +635,7 @@ class AController:
             print("Expected channel from AP and Current Channel of AP mismatched"+"\nDesired Channel"+str(channel)+" not equals to Current Channel:"+str(channel_from_ap))
             print("Going to set desired channel in AP")
             self.set_channel_band(radio=str(radio), band=str(band), channel=str(channel))
-            if channel==149:
+            if channel==149 or channel==11:
                 self.setup_cli_connection(cmd="cli")
                 self.get_channel_band(radio=radio)
             else:
