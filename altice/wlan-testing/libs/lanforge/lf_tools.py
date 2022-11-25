@@ -841,6 +841,103 @@ class ChamberView:
     # test_setup_info = Ap information and test information
     # input_setup_info = Is Support information ex. support@candelatech.com
     # data is realtime data
+    def create_rvr_dynamic_pdf(self, report_name=None, test_setup_info=None, result=None):
+        png_path = "../reports/" + str(report_name) + "/kpi-chart-1.png"
+        csv_path = "../reports/" + str(report_name) + "/text-csv-0.csv"
+        print(f"png_path: {png_path}")
+        print(f"csv_path: {csv_path}")
+        print("123")
+        df = pd.read_csv(csv_path)
+        # print("UUUUUUUUUUUUUUUUUUUUUUUUUuu",type(df))
+        # print("456")
+
+        report = lf_report(_alt_path=f"../reports/{str(report_name)}",
+                           _output_pdf=f"new-{str(report_name)}.pdf",
+                           _output_html=f"new-{str(report_name)}.html",
+                           _path_date_time=f"../reports/{str(report_name)}")
+
+        report_path = report.get_path()
+        print(f"report path: {report_path}")
+
+        report_path_date_time = report.get_path_date_time()
+        # logger.info("path: {}".format(report_path))
+        # logger.info("path_date_time: {}".format(report_path_date_time))
+        report.set_title("Rate VS Range Summary Report")
+        report.build_banner()
+
+        # objective title and description
+        report.set_obj_html(_obj_title="Objective",
+                            _obj=" This test measures the performance over distance of the Device Under Test. Distance is emulated using"
+                                 " programmable attenuation and a throughput test is run at each distance/RSSI step and plotted on a chart. The test "
+                                 "allows the user to plot RSSI curves both upstream and downstream for different types of traffic and different station"
+                                 " types.")
+        report.build_objective()
+
+        access_point = {
+            "ssid-name": result["ssid-name"],
+            "security": result["security"],
+            "security-key": result["security-key"],
+            "band": result["band"],
+            "channel": result["channel"],
+        }
+
+        traffic_generator = {
+            "download-traffic": result["test-download"],
+            "batch-size": result["test-batch-size"],
+            "upload-rate": result["test-upload-rate"],
+            "protocol": result["test-protocol"],
+            "test-duration": result["test-duration"],
+        }
+
+        result = {
+            "Result": result["result"],
+            "expected-throughput": result["expected-throughput"],
+            "actual-throughput": result["throughput-value"]
+        }
+
+        report.test_setup_table(test_setup_data=traffic_generator, value="Traffic Generator")
+        report.end_content_div()
+
+        report.test_setup_table(test_setup_data=access_point, value="Device Under Test")
+        report.end_content_div()
+
+        # report.set_table_title("<h3>: Testcase Result")
+        report.test_setup_table(test_setup_data=result, value="PASS/FAIL")
+
+        # report.build_table_title()
+        report.end_content_div()
+
+        report.build_text()
+        report.end_content_div()
+
+        report.set_table_title("Graphical Representaion of the Above Throughput Result")
+        report.build_table_title()
+
+        report.set_graph_image("kpi-chart-1-print.png")
+        report.build_graph()
+
+        # report.test_setup_table(test_setup_data=str(df))
+        # report.build_table_title()
+        report.set_table_title("Tabular data of above graph")
+        report.build_table_title()
+
+        report.set_table_dataframe(df)
+        report.build_table()
+
+        # report.set_table_dataframe_from_csv(csv_path)
+        # print("0009")
+        input_setup_info = {
+            "contact": "support@candelatech.com"
+        }
+
+        report.test_setup_table(test_setup_data=input_setup_info, value="Information")
+
+        report.build_custom()
+        report.build_footer()
+        html_path = report.write_html()
+        pdf_path = report.write_pdf()
+        return pdf_path
+
     def create_dynamic_pdf(self, report_name=None, test_setup_info=None, result=None):
         png_path = "../reports/" + str(report_name) + "/kpi-chart-1.png"
         print(f"png_path: {png_path}")
