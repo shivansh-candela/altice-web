@@ -82,7 +82,7 @@ class TestCountryUS20Mhz5G(object):
     @pytest.mark.fiveg
     @pytest.mark.channel_36
     @pytest.mark.tcp_download
-    @pytest.mark.ghj123456
+    @pytest.mark.ghj456
     def test_client_wpa2_chn36_20Mhz_US_5g_tcp_download(self, instantiate_profile, get_lf_logs,
                                                                   lf_test, update_report,
                                                                   station_names_fiveg, lf_tools,
@@ -103,8 +103,9 @@ class TestCountryUS20Mhz5G(object):
         pass_value=setup_params_general["expected-throughput"]
         print("PASSS VALLUES",pass_value)
         atn=pass_value.keys()
+        atn = list(pass_value.keys())
         attenuations=list(''.join(l + ',' * (n % 1 == 0) for n, l in enumerate(atn)))
-        attenuations1= attenuations[:len(attenuations) - 2]
+        attenuations1= attenuations[:len(attenuations) - 1]
         main_attenuations = ' '.join([str(elem) for elem in attenuations1])
         main_attenuations2=main_attenuations.replace(" ","")
         batch_size = 1
@@ -132,6 +133,7 @@ class TestCountryUS20Mhz5G(object):
                                         instance_name="MODE_RVR_TWOG_mod",
                                         vlan_id=vlan, dut_name=lf_tools.dut_name, raw_lines=val, ssid_channel=channel)
             report_name = rvr_o.report_name[0]['LAST']["response"].split(":::")[1].split("/")[-1]
+            obj.get_channel_band(radio="5G")                #to recheck the AP configuration
             print("report name ", report_name)
             entries = os.listdir("../reports/" + report_name + '/')
             print("entries", entries)
@@ -149,7 +151,7 @@ class TestCountryUS20Mhz5G(object):
             #        52, 54, 56, 58, 60, 62, 64, 66, 68, 70]
             if kpi in entries:
                 kpi_val = lf_tools.read_kpi_file(column_name=["numeric-score"], dir_name=report_name)
-                print("KPI VALUE",kpi_val)
+                print("KPI VALUE", kpi_val)
                 if str(kpi_val) == "empty":
                     print("Throughput value from kpi.csv is empty, Test failed")
                     allure.attach(name="CSV Data", body="Throughput value from kpi.csv is empty, Test failed")
@@ -159,18 +161,23 @@ class TestCountryUS20Mhz5G(object):
                     start, thrpt_val, pass_fail = 0, {}, []
                     for i in pass_value:
                         count = 0
-                        direction = "DUT-TX"
+                        direction = "DUT-RX"
                         for j in range(start, len(kpi_val), len(atn)):
                             thrpt_val[f"{atn[start]}--{direction}"] = kpi_val[j][0]
-                            print("PF VALUE THPT",thrpt_val[f"{atn[start]}--{direction}"])
-                            print("PF VALUE THPT KPI",kpi_val[j][0])
-                            if kpi_val[j][0] >= pass_value[i]:
-                                pass_fail.append("PASS")
+
+                            print("fdsfdsfds", kpi_val[j][0])
+                            if kpi_val[j][0] == None:
+                                print("KPI value is missing")
                             else:
-                                pass_fail.append("FAIL")
-                            count += 1
-                            direction = "DUT-RX"
-                        start += 1
+                                print("PF VALUE THPT", thrpt_val[f"{atn[start]}--{direction}"])
+                                print("PF VALUE THPT KPI", kpi_val[j][0])
+                                if kpi_val[j][0] >= pass_value[i]:
+                                    pass_fail.append("PASS")
+                                else:
+                                    pass_fail.append("FAIL")
+                                count += 1
+                                direction = "DUT-RX"
+                            start += 1
                     print(pass_fail, "\nThroughput value-->", thrpt_val)
                     result = {
                         "result": None,
@@ -229,7 +236,7 @@ class TestCountryUS20Mhz5G(object):
     def test_client_wpa2_chn149_20Mhz_US_5g_tcp_bidirectional(self, instantiate_profile, get_lf_logs,
                                                                   lf_test, update_report,
                                                                   station_names_fiveg, lf_tools,
-                                                                  test_cases, testbed, al_1, get_configuration,create_lanforge_chamberview_dut):
+                                                                  test_cases, testbed, al_1, get_configuration,create_lanforge_chamberview_dut, get_attenuators):
         """
            pytest -m "country_code and twentyMhz and wpa2 and fiveg and channel149"
         """
@@ -245,8 +252,9 @@ class TestCountryUS20Mhz5G(object):
         pass_value = setup_params_general["expected-throughput"]
         print("PASSS VALLUES", pass_value)
         atn = pass_value.keys()
+        atn = list(pass_value.keys())
         attenuations = list(''.join(l + ',' * (n % 1 == 0) for n, l in enumerate(atn)))
-        attenuations1 = attenuations[:len(attenuations) - 2]
+        attenuations1 = attenuations[:len(attenuations) - 1]
         main_attenuations = ' '.join([str(elem) for elem in attenuations1])
         main_attenuations2 = main_attenuations.replace(" ", "")
         batch_size = 1

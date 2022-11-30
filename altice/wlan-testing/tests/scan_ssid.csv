@@ -1,3 +1,53 @@
-,age,auth,beacon,bss,channel,entity id,frequency,info,signal,ssid
-0,4670,WPA2,100,b0:39:56:1c:3a:b6,10,1.1.4,2457,4x4 MCS 0-9 AC,-62.0,CT-Living Space
-1,4704,WPA2,100,cc:19:a8:e6:cd:80,10,1.1.4,2457,0x0 MCS 0-0 AX,6.0,client_connectivity_altice
+,age,auth,beacon,bss,channel,country,entity id,frequency,info,signal,ssid
+0,616140,WPA2,100,00:5f:67:a4:47:be,157,US,1.1.wiphy1,5785,2x2 MCS 0-11 AX,-61.0,Tplinkax20
+1,8844,WPA2,100,00:5f:67:a4:47:bf,2,US,1.1.wiphy1,2417,2x2 MCS 0-11 AX,-75.0,Tplinkax20
+2,5749,WPA2,100,08:36:c9:2c:bb:71,36,US,1.1.wiphy1,5180,2x2 MCS 0-9 AC,-89.0,Netgear5g
+3,604065,WPA2,100,10:0c:6b:58:38:2c,157,KR,1.1.wiphy1,5785,4x4 MCS 0-11 AX,-88.0,interop_5g
+4,8600,WPA2,100,10:0c:6b:58:38:2d,6,KR,1.1.wiphy1,2437,2x2 MCS 0-11 AX,-85.0,interop_2g
+5,8438599,WPA2,100,4e:6d:06:f3:93:4c,36,NA,1.1.wiphy1,5180,2x2 MCS 0-9 AC,-85.0,realme X2
+6,616274,WPA2,100,78:d2:94:4a:aa:eb,11,NA,1.1.wiphy1,2462,4x4 MCS 0-9 AC,-84.0,NETGEAR_2G
+7,622277,WPA2,100,78:d2:94:4a:aa:ed,36,US,1.1.wiphy1,5180,4x4 MCS 0-9 AC,-92.0,NETGEAR_5G
+8,571844,WPA2,100,90:3c:b3:6c:46:57,100,CA,1.1.wiphy1,5500,2x2 MCS 0-11 AX,-80.0,OpenWifi
+9,8254,Open,100,90:3c:b3:6c:46:b0,11,CA,1.1.wiphy1,2462,2x2 MCS 0-11 AX,-80.0,OpenWifi
+10,1175879,Open,100,90:3c:b3:6c:46:b1,52,CA,1.1.wiphy1,5260,2x2 MCS 0-11 AX,-89.0,OpenWifi
+11,8203,WPA2,100,90:3c:b3:6c:47:2d,11,CA,1.1.wiphy1,2462,2x2 MCS 0-11 AX,-73.0,OpenWifi-Gopi
+12,7774,WPA2,100,90:3c:b3:6c:47:2e,149,CA,1.1.wiphy1,5745,2x2 MCS 0-11 AX,-74.0,OpenWifi-Gopi
+13,573194,WPA2,100,90:3c:b3:b1:70:0b,149,CA,1.1.wiphy1,5745,2x2 MCS 0-11 AX,-74.0,tipap
+14,573191,WPA,100,90:3c:b3:b1:70:0c,149,CA,1.1.wiphy1,5745,2x2 MCS 0-11 AX,-74.0,OpenWifi_wpa
+15,7774,WPA2,100,90:3c:b3:b1:70:0d,149,CA,1.1.wiphy1,5745,2x2 MCS 0-11 AX,-74.0,OpenWifi_wpa2
+16,573189,WPA3,100,90:3c:b3:b1:70:0e,149,CA,1.1.wiphy1,5745,2x2 MCS 0-11 AX,-74.0,OpenWifi_wpa3
+17,8238,WPA2,100,90:3c:b3:b1:70:13,11,CA,1.1.wiphy1,2462,2x2 MCS 0-11 AX,-74.0,tipap
+18,8211,WPA,100,90:3c:b3:b1:70:14,11,CA,1.1.wiphy1,2462,2x2 MCS 0-11 AX,-73.0,OpenWifi_wpa
+19,8275,WPA2,100,90:3c:b3:b1:70:15,11,CA,1.1.wiphy1,2462,2x2 MCS 0-11 AX,-74.0,OpenWifi_wpa2
+20,8261,WPA3,100,90:3c:b3:b1:70:16,11,CA,1.1.wiphy1,2462,2x2 MCS 0-11 AX,-74.0,OpenWifi_wpa3
+21,8191,Open,100,90:3c:b3:bb:1d:f8,11,CA,1.1.wiphy1,2462,2x2 MCS 0-11 AX,-82.0,Somethinggg
+22,602177,Open,100,90:3c:b3:bb:1d:f9,52,CA,1.1.wiphy1,5260,2x2 MCS 0-11 AX,-90.0,Somethinggg
+23,5744,WPA2,100,90:3c:b3:bb:26:5f,36,CA,1.1.wiphy1,5180,2x2 MCS 0-11 AX,-82.0,OpenWifi
+24,6478,WPA2,100,92:3c:b3:6c:46:57,100,CA,1.1.wiphy1,5500,2x2 MCS 0-11 AX,-77.0,OpenWifi
+25,8227,WPA,100,92:3c:b3:6c:46:b0,11,CA,1.1.wiphy1,2462,2x2 MCS 0-11 AX,-81.0,OpenWifi_wpa
+26,1175654,WPA,100,92:3c:b3:6c:46:b1,52,CA,1.1.wiphy1,5260,2x2 MCS 0-11 AX,-89.0,OpenWifi_wpa
+27,8268,WPA,100,92:3c:b3:bb:1d:f8,11,CA,1.1.wiphy1,2462,2x2 MCS 0-11 AX,-83.0,OpenWifi_wpa
+28,6113,WPA,100,92:3c:b3:bb:1d:f9,52,CA,1.1.wiphy1,5260,2x2 MCS 0-11 AX,-89.0,OpenWifi_wpa
+29,5738,WPA2,100,92:3c:b3:bb:26:5f,36,CA,1.1.wiphy1,5180,2x2 MCS 0-11 AX,-81.0,OpenWifi
+30,1650951,WPA2,100,94:a6:7e:74:05:f0,60,IN,1.1.wiphy1,5300,2x2 MCS 0-9 AC,-92.0,Candela-office
+31,1650948,WPA2,100,94:a6:7e:74:05:f1,60,IN,1.1.wiphy1,5300,2x2 MCS 0-9 AC,-91.0,Guest
+32,8530,WPA2,100,94:a6:7e:74:09:e0,6,IN,1.1.wiphy1,2437,2x2 MCS 0-9 AC,-81.0,Candela-office
+33,573215,WPA2,100,94:a6:7e:74:09:f0,157,IN,1.1.wiphy1,5785,2x2 MCS 0-9 AC,-71.0,Candela-office
+34,573215,WPA2,100,94:a6:7e:74:09:f1,157,IN,1.1.wiphy1,5785,2x2 MCS 0-9 AC,-72.0,Guest
+35,8200,WPA2,100,96:3c:b3:6c:46:b0,11,CA,1.1.wiphy1,2462,2x2 MCS 0-11 AX,-81.0,OpenWifi_wpa2
+36,571465,WPA2,100,96:3c:b3:6c:46:b1,52,CA,1.1.wiphy1,5260,2x2 MCS 0-11 AX,-87.0,OpenWifi_wpa2
+37,573656,WPA2,100,96:3c:b3:bb:1d:f8,11,CA,1.1.wiphy1,2462,2x2 MCS 0-11 AX,-81.0,OpenWifi_wpa2
+38,5881,WPA2,100,96:3c:b3:bb:1d:f9,52,CA,1.1.wiphy1,5260,2x2 MCS 0-11 AX,-88.0,OpenWifi_wpa2
+39,8272,WPA3,100,9a:3c:b3:6c:46:b0,11,CA,1.1.wiphy1,2462,2x2 MCS 0-11 AX,-81.0,OpenWifi_wpa3
+40,571233,WPA3,100,9a:3c:b3:6c:46:b1,52,CA,1.1.wiphy1,5260,2x2 MCS 0-11 AX,-86.0,OpenWifi_wpa3
+41,8218,WPA3,100,9a:3c:b3:bb:1d:f8,11,CA,1.1.wiphy1,2462,2x2 MCS 0-11 AX,-84.0,OpenWifi_wpa3
+42,602408,WPA3,100,9a:3c:b3:bb:1d:f9,52,CA,1.1.wiphy1,5260,2x2 MCS 0-11 AX,-89.0,OpenWifi_wpa3
+43,7799,WPA2,100,b2:5f:67:a4:47:b0,157,US,1.1.wiphy1,5785,2x2 MCS 0-11 AX,-84.0,\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00
+44,1191988,WPA WPA2,100,b4:f9:49:17:e1:41,36,US,1.1.wiphy1,5180,2x2 MCS 0-9 AC,-89.0,Apple-5G
+45,574195,WPA WPA2,100,b4:f9:49:17:e1:45,3,US,1.1.wiphy1,2422,2x2 MIMO,-90.0,Apple-2.4G
+46,8847,WPA2,100,ba:5f:67:a4:47:b1,2,US,1.1.wiphy1,2417,2x2 MCS 0-11 AX,-77.0,\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00
+47,8657,WPA2,100,cc:19:a8:e6:cd:80,1,NA,1.1.wiphy1,2412,4x4 MCS 0-11 AX,-18.0,client_connectivity_al
+48,5748,WPA2,100,cc:19:a8:e6:cd:81,36,NA,1.1.wiphy1,5180,4x4 MCS 0-11 AX,-29.0,client_connectivity_al
+49,602033,WPA2,100,cc:19:a8:e6:cd:87,36,NA,1.1.wiphy1,5180,4x4 MCS 0-11 AX,-39.0,NA
+50,8469,WPA2,100,dc:ef:09:e3:b8:7b,6,NA,1.1.wiphy1,2437,4x4 MCS 0-9 AC,-77.0,NETGEAR81
+51,573205,WPA2,100,dc:ef:09:e3:b8:7d,153,US,1.1.wiphy1,5765,4x4 MCS 0-9 AC,-79.0,NETGEAR81-5G
