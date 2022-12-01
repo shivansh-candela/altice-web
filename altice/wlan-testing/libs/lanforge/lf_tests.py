@@ -845,13 +845,38 @@ class RunTest:
         return self.apstab_obj
 
     def ratevsrange(self, station_name=None, mode="BRIDGE", vlan_id=100, download_rate="85%", dut_name="TIP",
-                    upload_rate="0", duration="1m", instance_name="test_demo", raw_lines=None):
+                    upload_rate="0", duration="1m", instance_name="test_demo", raw_lines=None, move_to_influx=False,
+                    ssid_channel=None, band="twog"):
+        self.staConnect = StaConnect2(self.lanforge_ip, self.lanforge_port, debug_=self.debug)
+
+        self.staConnect.sta_mode = 0
         if mode == "BRIDGE":
             self.client_connect.upstream_port = self.upstream_port
         elif mode == "NAT":
             self.client_connect.upstream_port = self.upstream_port
-        elif mode == "VLAN":
+        else:
             self.client_connect.upstream_port = self.upstream_port + "." + str(vlan_id)
+        if band == "twog":
+            if self.run_lf:
+                ssid = self.ssid_data["2g-ssid"]
+                passkey = self.ssid_data["2g-password"]
+                security = self.ssid_data["2g-encryption"].lower()
+                print("twog", ssid)
+            self.staConnect.radio = self.twog_radios[0]
+            self.staConnect.admin_down(self.staConnect.radio)
+            self.staConnect.admin_up(self.staConnect.radio)
+            self.staConnect.sta_prefix = self.twog_prefix
+        if band == "fiveg":
+            if self.run_lf:
+                ssid = self.ssid_data["5g-ssid"]
+                passkey = self.ssid_data["5g-password"]
+                security = self.ssid_data["5g-encryption"].lower()
+            self.staConnect.radio = self.fiveg_radios[0]
+            self.staConnect.reset_port(self.staConnect.radio)
+            self.staConnect.sta_prefix = self.fiveg_prefix
+        # print("aaaaaaaa", self.staConnect.radio)
+        # print("SSSSSSSSSSS", ssid_channel)
+        self.set_radio_channel(radio=self.staConnect.radio, channel=ssid_channel)
 
         self.rvr_obj = RvrTest(lf_host=self.lanforge_ip,
                                lf_port=self.lanforge_port,
@@ -872,15 +897,20 @@ class RunTest:
                                raw_lines=raw_lines)
         self.rvr_obj.setup()
         self.rvr_obj.run()
-        report_name = self.rvr_obj.report_name[0]['LAST']["response"].split(":::")[1].split("/")[-1]
-        influx = CSVtoInflux(influx_host=self.influx_params["influx_host"],
-                             influx_port=self.influx_params["influx_port"],
-                             influx_org=self.influx_params["influx_org"],
-                             influx_token=self.influx_params["influx_token"],
-                             influx_bucket=self.influx_params["influx_bucket"],
-                             path=report_name)
+        if move_to_influx:
+            try:
+                report_name = "../reports/" + self.rvr_obj.report_name[0]['LAST']["response"].split(":::")[1].split("/")[-1]
+                influx = CSVtoInflux(influx_host=self.influx_params["influx_host"],
+                                     influx_port=self.influx_params["influx_port"],
+                                     influx_org=self.influx_params["influx_org"],
+                                     influx_token=self.influx_params["influx_token"],
+                                     influx_bucket=self.influx_params["influx_bucket"],
+                                     path=report_name)
 
-        influx.glob()
+                influx.glob()
+            except Exception as e:
+                print(e)
+                pass
         return self.rvr_obj
 
     def rx_sensitivity(self, station_name=None, mode="BRIDGE", vlan_id=100, download_rate="100%", dut_name="TIP",
