@@ -13,7 +13,7 @@ setup_params_general = {
     "mode": "NAT",
     "ssid_modes": {
         "open": [
-            {"ssid_name": "client_connectivity_al", "appliedRadios": ["5G"], "security_key": "something"}
+            {"ssid_name": "client_connectivity_al", "appliedRadios": ["5G"], "security_key": ["BLANK"]}
         ]
     },
 
@@ -59,7 +59,10 @@ setup_params_general = {
     },
     "radius": False,
     "expected-throughput": {"0":200,"20":200,"40":200,"60":200,"80":200,"100":200,"120":200,"140":200,"160":200,
-                            "180":200,"200":200,"220":200,"240":200,"260":200,"280":200,"300":200}
+                            "180":200,"200":200,"220":200,"240":200,"260":200,"280":200,"300":200,"320":200,
+                            "340":200,"360":200,"380":200,"400":200,"420":200,"440":200,"460":200,"480":200,
+                            "500":200,"520":200,"540":200,"560":200,"580":200,"600":200,"620":200,"640":200,
+                            "660":200,"680":200,"700":200}
 }
 
 
@@ -97,7 +100,7 @@ class TestCountryUS20Mhz5G(object):
         channel = setup_params_general['rf-5G-1']['5G']['channel']
         channel_width = setup_params_general['rf-5G-1']['5G']['channel-width']
         pass_value=setup_params_general["expected-throughput"]
-        atn=list(pass_value.keys())
+        atn = list(pass_value.keys())
         attenuations=list(''.join(l + ',' * (n % 1 == 0) for n, l in enumerate(atn)))
         attenuations1= attenuations[:len(attenuations) - 1]
         main_attenuations = ' '.join([str(elem) for elem in attenuations1])
@@ -232,11 +235,12 @@ class TestCountryUS20Mhz5G(object):
         mode = "NAT"
         band = "fiveg"
         vlan = 1
-        channel = setup_params_general['rf-5G-1']['5G']['channel']
-        channel_width = setup_params_general['rf-5G-1']['5G']['channel-width']
+        channel = setup_params_general['rf-5G-5']['5G']['channel']
+        channel_width = setup_params_general['rf-5G-5']['5G']['channel-width']
         pass_value = setup_params_general["expected-throughput"]
         print("PASSS VALLUES", pass_value)
         atn = pass_value.keys()
+        atn = list(pass_value.keys())
         attenuations = list(''.join(l + ',' * (n % 1 == 0) for n, l in enumerate(atn)))
         attenuations1 = attenuations[:len(attenuations) - 2]
         main_attenuations = ' '.join([str(elem) for elem in attenuations1])
@@ -253,7 +257,7 @@ class TestCountryUS20Mhz5G(object):
         station = lf_test.Client_Connect(ssid=ssid_name, security=security,
                                          passkey=security_key, mode=mode, band=band,
                                          station_name=station_names_fiveg, vlan_id=vlan)
-        val = [['modes: Auto'], ['pkts: MTU'], ['directions: DUT Transmit'], ['traffic_types:UDP'],
+        val = [['modes: Auto'], ['pkts: MTU'], ['directions: DUT Receive'], ['traffic_types:UDP'],
                ['bandw_options: AUTO'], ['spatial_streams: AUTO'], [f'attenuator: {attenuator}'],
                [f'attenuations: {main_attenuations2}'], ['chamber: 0'], ['tt_deg: 0']]
 

@@ -237,6 +237,7 @@ class TestCountryUS80Mhz5G(object):
         pass_value = setup_params_general["expected-throughput"]
         print("PASSS VALLUES", pass_value)
         atn = pass_value.keys()
+        atn=list(pass_value.keys())
         attenuations = list(''.join(l + ',' * (n % 1 == 0) for n, l in enumerate(atn)))
         attenuations1 = attenuations[:len(attenuations) - 2]
         main_attenuations = ' '.join([str(elem) for elem in attenuations1])
@@ -255,7 +256,7 @@ class TestCountryUS80Mhz5G(object):
                                          station_name=station_names_fiveg, vlan_id=vlan)
         # print("sta", station)
         # lf_tools.Chamber_View()
-        val = [['modes: Auto'], ['pkts: MTU'], ['directions: DUT Transmit'], ['traffic_types:TCP'],
+        val = [['modes: Auto'], ['pkts: MTU'], ['directions: DUT Receive'], ['traffic_types:TCP'],
                ['bandw_options: AUTO'], ['spatial_streams: AUTO'], [f'attenuator: {attenuator}'],
                [f'attenuations: {main_attenuations2}'], ['chamber: 0'], ['tt_deg: 0']]
 

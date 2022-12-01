@@ -13,7 +13,7 @@ setup_params_general = {
     "mode": "NAT",
     "ssid_modes": {
         "open": [
-            {"ssid_name": "client_connectivity_al", "appliedRadios": ["5G"], "security_key": "something"}
+            {"ssid_name": "client_connectivity_al", "appliedRadios": ["5G"], "security_key": None}
         ]
     },
 
@@ -227,7 +227,7 @@ class TestCountryUS20Mhz5G(object):
         """
         profile_data = setup_params_general["ssid_modes"]["open"][0]
         ssid_name = profile_data["ssid_name"]
-        security_key = profile_data["security_key"]
+        security_key = None
         security = "open"
         mode = "NAT"
         band = "fiveg"
@@ -237,6 +237,7 @@ class TestCountryUS20Mhz5G(object):
         pass_value = setup_params_general["expected-throughput"]
         print("PASSS VALLUES", pass_value)
         atn = pass_value.keys()
+        atn = list(pass_value.keys())
         attenuations = list(''.join(l + ',' * (n % 1 == 0) for n, l in enumerate(atn)))
         attenuations1 = attenuations[:len(attenuations) - 2]
         main_attenuations = ' '.join([str(elem) for elem in attenuations1])
@@ -253,7 +254,7 @@ class TestCountryUS20Mhz5G(object):
         station = lf_test.Client_Connect(ssid=ssid_name, security=security,
                                          passkey=security_key, mode=mode, band=band,
                                          station_name=station_names_fiveg, vlan_id=vlan)
-        val = [['modes: Auto'], ['pkts: MTU'], ['directions: DUT Transmit'], ['traffic_types:TCP'],
+        val = [['modes: Auto'], ['pkts: MTU'], ['directions: DUT Receive'], ['traffic_types:TCP'],
                ['bandw_options: AUTO'], ['spatial_streams: AUTO'], [f'attenuator: {attenuator}'],
                [f'attenuations: {main_attenuations2}'], ['chamber: 0'], ['tt_deg: 0']]
 
