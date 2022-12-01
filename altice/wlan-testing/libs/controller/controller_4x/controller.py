@@ -626,11 +626,13 @@ class AController:
 
     def check_and_set_ap_channel(self, radio="2G", band="20", channel="AUTO"):
         # print("PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP",self.get_channel_band(radio=radio))
-        print("Desired Channel",channel)
+        print("Desired Channel type",type(channel))
+        print("Desired Channel", channel)
         # p=type(self.get_channel_band(radio=radio))
         channel_from_ap = self.get_channel_band(radio=radio)
         channel_from_ap.split("wifi-channel:")
-        print("Current Channel",channel_from_ap)
+        print("Current Channel type ",type(channel_from_ap))
+        print("Current Channel ", channel_from_ap)
         if channel != channel_from_ap:
             print("Expected channel from AP and Current Channel of AP mismatched"+"\nDesired Channel"+str(channel)+" not equals to Current Channel:"+str(channel_from_ap))
             print("Going to set desired channel in AP")
