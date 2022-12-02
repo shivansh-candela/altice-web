@@ -13,7 +13,7 @@ setup_params_general = {
     "mode": "NAT",
     "ssid_modes": {
         "open": [
-            {"ssid_name": "client_connectivity_al", "appliedRadios": ["5G"], "security_key": None}
+            {"ssid_name": "client_connectivity_al", "appliedRadios": ["5G"], "security_key": ["BLANK"]}
         ]
     },
 
