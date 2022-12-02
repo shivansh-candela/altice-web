@@ -182,27 +182,30 @@ class TestCountryUS20Mhz5G(object):
                         "throughput-value": thrpt_val
 
                     }
-                    if "FAIL" in pass_fail:
+                    if len(failed_throughput) >= 1:
+                        print("LENGTH of Failed", len(failed_throughput))
                         pdf = lf_tools.create_rvr_dynamic_pdf(report_name, get_configuration, result)
                         print("Test failed due to lesser value")
                         if os.path.exists(pdf):
                             result["result"] = "FAIL"
                             allure.attach.file(source=pdf,
-                                               name="Rate_Vs_Range_1GBPS_Upload_Throughput_UDP_5g_Test",
+                                               name="Rate_Vs_Range_1GBPS_Upload_Throughput_UDP_Test",
                                                attachment_type="PDF")
-                        allure.attach(name="FAILED:Throughput Results:", body=str(
-                            "Failed Throughputs are:" + str(failed_throughput)))
+                        allure.attach(name="FAILED:Throughput Results: ", body=str(
+                            "Failed Throughputs are: " + str(failed_throughput)) + "Passed Throughputs: " + str(
+                            passed_throughput))
                         assert False, "Test failed due to lesser value"
                     else:
+                        print("LENGTH of Passed", len(passed_throughput))
                         result["result"] = "PASS"
                         pdf = lf_tools.create_rvr_dynamic_pdf(report_name, get_configuration, result)
                         print("Test passed successfully")
                         if os.path.exists(pdf):
                             allure.attach.file(source=pdf,
-                                               name="Rate_Vs_Range_1GBPS_Upoad_Throughput_UDP_5g_Test",
+                                               name="Rate_Vs_Range_1GBPS_Upoad_Throughput_UDP_Test",
                                                attachment_type="PDF")
                         allure.attach(name="Passed:Throughput Results:",
-                                      body=str("Passed Throughputs are:" + str(passed_throughput)))
+                                      body=str("Passed Throughputs are :" + str(passed_throughput)))
                         assert True
             else:
                 print("csv file does not exist, Test failed")
@@ -323,27 +326,30 @@ class TestCountryUS20Mhz5G(object):
                         "throughput-value": thrpt_val
 
                     }
-                    if "FAIL" in pass_fail:
+                    if len(failed_throughput) >= 1:
+                        print("LENGTH of Failed", len(failed_throughput))
                         pdf = lf_tools.create_rvr_dynamic_pdf(report_name, get_configuration, result)
                         print("Test failed due to lesser value")
                         if os.path.exists(pdf):
                             result["result"] = "FAIL"
                             allure.attach.file(source=pdf,
-                                               name="Rate_Vs_Range_1GBPS_Upload_Throughput_UDP_5g_Test",
+                                               name="Rate_Vs_Range_1GBPS_Upload_Throughput_UDP_Test",
                                                attachment_type="PDF")
-                        allure.attach(name="FAILED:Throughput Results:", body=str(
-                            "Failed Throughputs are:" + str(failed_throughput)))
+                        allure.attach(name="FAILED:Throughput Results: ", body=str(
+                            "Failed Throughputs are: " + str(failed_throughput)) + "Passed Throughputs: " + str(
+                            passed_throughput))
                         assert False, "Test failed due to lesser value"
                     else:
+                        print("LENGTH of Passed", len(passed_throughput))
                         result["result"] = "PASS"
                         pdf = lf_tools.create_rvr_dynamic_pdf(report_name, get_configuration, result)
                         print("Test passed successfully")
                         if os.path.exists(pdf):
                             allure.attach.file(source=pdf,
-                                               name="Rate_Vs_Range_1GBPS_Upoad_Throughput_UDP_5g_Test",
+                                               name="Rate_Vs_Range_1GBPS_Upoad_Throughput_UDP_Test",
                                                attachment_type="PDF")
                         allure.attach(name="Passed:Throughput Results:",
-                                      body=str("Passed Throughputs are:" + str(passed_throughput)))
+                                      body=str("Passed Throughputs are :" + str(passed_throughput)))
                         assert True
             else:
                 print("csv file does not exist, Test failed")
