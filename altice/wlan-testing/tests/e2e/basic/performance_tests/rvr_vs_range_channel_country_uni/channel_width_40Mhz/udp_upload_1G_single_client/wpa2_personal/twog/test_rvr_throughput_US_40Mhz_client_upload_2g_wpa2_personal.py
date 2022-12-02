@@ -257,7 +257,7 @@ class TestCountryUS40Mhz5G(object):
         if station:
             rvr_o = lf_test.ratevsrange(station_name=station_names_twog, mode=mode, download_rate="100%",
                                         duration='60000',
-                                        instance_name="RVR_Channel_6_40_Mhz_Twog_Mode",
+                                        instance_name="RVR_Channel_6_40_Mhz_Udp_Twog_Mode",
                                         vlan_id=vlan, dut_name=lf_tools.dut_name, raw_lines=val, ssid_channel=channel)
             report_name = rvr_o.report_name[0]['LAST']["response"].split(":::")[1].split("/")[-1]
             print("report name ", report_name)
@@ -402,7 +402,7 @@ class TestCountryUS40Mhz5G(object):
         if station:
             rvr_o = lf_test.ratevsrange(station_name=station_names_twog, mode=mode, download_rate="100%",
                                         duration='60000',
-                                        instance_name="RVR_Channel_11_40_Mhz_Twog_Mode",
+                                        instance_name="RVR_Channel_11_40_Mhz_Udp_Twog_Mode",
                                         vlan_id=vlan, dut_name=lf_tools.dut_name, raw_lines=val, ssid_channel=channel)
             report_name = rvr_o.report_name[0]['LAST']["response"].split(":::")[1].split("/")[-1]
             print("report name ", report_name)
