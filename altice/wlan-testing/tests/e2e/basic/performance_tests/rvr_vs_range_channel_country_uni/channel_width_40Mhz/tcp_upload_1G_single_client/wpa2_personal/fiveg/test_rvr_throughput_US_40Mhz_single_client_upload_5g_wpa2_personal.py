@@ -119,7 +119,7 @@ class TestCountryUS40Mhz5G(object):
         if station:
             rvr_o = lf_test.ratevsrange(station_name=station_names_fiveg, mode=mode, download_rate="100%",
                                         duration='60000',
-                                        instance_name="RVR_Channel_36_40_Mhz_Fiveg_Mode",
+                                        instance_name="RVR_Channel_36_40_Mhz_Tcp_Fiveg_Mode",
                                         vlan_id=vlan, dut_name=lf_tools.dut_name, raw_lines=val, ssid_channel=channel)
             report_name = rvr_o.report_name[0]['LAST']["response"].split(":::")[1].split("/")[-1]
             obj.get_channel_band(radio="5G")                #to recheck the AP configuration
@@ -267,7 +267,7 @@ class TestCountryUS40Mhz5G(object):
         if station:
             rvr_o = lf_test.ratevsrange(station_name=station_names_fiveg, mode=mode, download_rate="100%",
                                         duration='60000',
-                                        instance_name="RVR_Channel_149_40_Mhz_Fiveg_Mode",
+                                        instance_name="RVR_Channel_149_40_Mhz_Tcp_Fiveg_Mode",
                                         vlan_id=vlan, dut_name=lf_tools.dut_name, raw_lines=val, ssid_channel=channel)
             report_name = rvr_o.report_name[0]['LAST']["response"].split(":::")[1].split("/")[-1]
             print("report name ", report_name)
