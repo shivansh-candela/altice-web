@@ -3,16 +3,16 @@ import pytest
 import allure
 import time
 
-pytestmark = [pytest.mark.country_code, pytest.mark.nat, pytest.mark.wpa2, pytest.mark.united_states,
-              pytest.mark.bandwidth_80mhz, pytest.mark.al, pytest.mark.tcp, pytest.mark.rate_vs_range,
-              pytest.mark.upload, pytest.mark.tcp_upload, pytest.mark.wifi_capacity_single_client,
-              pytest.mark.rate_vs_range_wpa2_80mhz_all_channels_single_client_upload_1gbps,
-              pytest.mark.rate_vs_range_throughput_wpa2_80mhz_all_channels_single_client_upload_1gbps, pytest.mark.fiveg, pytest.mark.tcp]
+pytestmark = [pytest.mark.country_code, pytest.mark.nat, pytest.mark.open, pytest.mark.united_states,
+              pytest.mark.bandwidth_80mhz, pytest.mark.al, pytest.mark.udp, pytest.mark.rate_vs_range,
+              pytest.mark.download, pytest.mark.udp_download,
+              pytest.mark.rate_vs_range_open_80mhz_all_channels_single_client_download_1gbps,
+              pytest.mark.rate_vs_range_throughput_open_80mhz_all_channels_single_client_download_1gbps, pytest.mark.fiveg, pytest.mark.udp]
 
 setup_params_general = {
     "mode": "NAT",
     "ssid_modes": {
-        "wpa2_personal": [
+        "open": [
             {"ssid_name": "client_connectivity_al", "appliedRadios": ["5G"], "security_key": "something"}
         ]
     },
@@ -74,23 +74,23 @@ setup_params_general = {
 class TestCountryUS80Mhz5G(object):
 
     @allure.testcase(url="https://telecominfraproject.atlassian.net/browse/WIFI-2546", name="WIFI-6938")
-    @pytest.mark.wpa2_personal
+    @pytest.mark.open
     @pytest.mark.eightyMhz
     @pytest.mark.fiveg
     @pytest.mark.channel_36
-    @pytest.mark.tcp_upload
-    def test_client_wpa2_ch36_80Mhz_US_5g_tcp_upload(self, instantiate_profile, get_lf_logs,
+    @pytest.mark.udp_download
+    def test_client_open_ch36_80Mhz_US_5g_udp_download(self, instantiate_profile, get_lf_logs,
                                                                   lf_test, update_report,
                                                                   station_names_fiveg, lf_tools,
                                                                   test_cases, testbed, al_1, get_configuration,
                                                                   create_lanforge_chamberview_dut, get_attenuators):
         """
-           pytest -m "country_code and eightyMhz and wpa2 and fiveg and channel149"
+           pytest -m "country_code and eightyMhz and open and fiveg and channel149"
         """
-        profile_data = setup_params_general["ssid_modes"]["wpa2_personal"][0]
+        profile_data = setup_params_general["ssid_modes"]["open"][0]
         ssid_name = profile_data["ssid_name"]
         security_key = profile_data["security_key"]
-        security = "wpa2"
+        security = "open"
         mode = "NAT"
         band = "fiveg"
         vlan = 1
@@ -112,14 +112,14 @@ class TestCountryUS80Mhz5G(object):
         station = lf_test.Client_Connect(ssid=ssid_name, security=security,
                                          passkey=security_key, mode=mode, band=band,
                                          station_name=station_names_fiveg, vlan_id=vlan)
-        val = [['modes: Auto'], ['pkts: MTU'], ['directions: DUT Receive'], ['traffic_types:TCP'],
+        val = [['modes: Auto'], ['pkts: MTU'], ['directions: DUT Receive'], ['traffic_types:UDP'],
                ['bandw_options: AUTO'], ['spatial_streams: AUTO'], [f'attenuator: {attenuator}'],
                [f'attenuations: {main_attenuations2}'], ['chamber: 0'], ['tt_deg: 0']]
 
         if station:
             rvr_o = lf_test.ratevsrange(station_name=station_names_fiveg, mode=mode, download_rate="100%",
                                         duration='60000',
-                                        instance_name="RVR_Channel_36_80_Mhz_Tcp_Fiveg_Mode",
+                                        instance_name="RVR_Channel_36_80_Mhz_Udp_Fiveg_Mode",
                                         vlan_id=vlan, dut_name=lf_tools.dut_name, raw_lines=val, ssid_channel=channel)
             report_name = rvr_o.report_name[0]['LAST']["response"].split(":::")[1].split("/")[-1]
             obj.get_channel_band(radio="5G")                #to recheck the AP configuration
@@ -172,10 +172,10 @@ class TestCountryUS80Mhz5G(object):
                         "band": band,
                         "channel": channel,
                         "description": "RvR capacity test",
-                        "test-download": "0",
-                        "test-upload": "1Gbps",
+                        "test-download": "1Gbps",
+                        "test-upload": "0",
                         "test-batch-size": "1",
-                        "test-upload-rate": "1",
+                        "test-upload-rate": "0",
                         "test-protocol": "UDP-IPV4",
                         "test-duration": "60 Sec",
                         "expected-throughput": pass_value,
@@ -189,7 +189,7 @@ class TestCountryUS80Mhz5G(object):
                         if os.path.exists(pdf):
                             result["result"] = "FAIL"
                             allure.attach.file(source=pdf,
-                                               name="Rate_Vs_Range_1GBPS_Upload_Throughput_UDP_Test",
+                                               name="Rate_Vs_Range_1GBPS_Download_Throughput_UDP_Test",
                                                attachment_type="PDF")
                         allure.attach(name="FAILED:Throughput Results: ", body=str(
                             "Failed Throughputs are: " + str(failed_throughput)) + "Passed Throughputs: " + str(
@@ -202,7 +202,7 @@ class TestCountryUS80Mhz5G(object):
                         print("Test passed successfully")
                         if os.path.exists(pdf):
                             allure.attach.file(source=pdf,
-                                               name="Rate_Vs_Range_1GBPS_Upload_Throughput_UDP_Test",
+                                               name="Rate_Vs_Range_1GBPS_Download_Throughput_UDP_Test",
                                                attachment_type="PDF")
                         allure.attach(name="Passed:Throughput Results:",
                                       body=str("Passed Throughputs are :" + str(passed_throughput)))
@@ -216,22 +216,22 @@ class TestCountryUS80Mhz5G(object):
             assert False, "Test failed due to no station ip"
 
     @allure.testcase(url="https://telecominfraproject.atlassian.net/browse/WIFI-2546", name="WIFI-6938")
-    @pytest.mark.wpa2_personal
+    @pytest.mark.open
     @pytest.mark.eightyMhz
     @pytest.mark.fiveg
     @pytest.mark.channel_149
-    @pytest.mark.tcp_upload
-    def test_client_wpa2_ch149_80Mhz_US_5g_tcp_upload(self, instantiate_profile, get_lf_logs,
+    @pytest.mark.udp_download
+    def test_client_open_ch149_80Mhz_US_5g_udp_download(self, instantiate_profile, get_lf_logs,
                                                                   lf_test, update_report,
                                                                   station_names_fiveg, lf_tools,
                                                                   test_cases, testbed, al_1, get_configuration,create_lanforge_chamberview_dut,get_attenuators):
         """
-           pytest -m "country_code and eightyMhz and wpa2 and fiveg and channel149"
+           pytest -m "country_code and eightyMhz and open and fiveg and channel149"
         """
-        profile_data = setup_params_general["ssid_modes"]["wpa2_personal"][0]
+        profile_data = setup_params_general["ssid_modes"]["open"][0]
         ssid_name = profile_data["ssid_name"]
         security_key = profile_data["security_key"]
-        security = "wpa2"
+        security = "open"
         mode = "NAT"
         band = "fiveg"
         vlan = 1
@@ -259,14 +259,14 @@ class TestCountryUS80Mhz5G(object):
                                          station_name=station_names_fiveg, vlan_id=vlan)
         # print("sta", station)
         # lf_tools.Chamber_View()
-        val = [['modes: Auto'], ['pkts: MTU'], ['directions: DUT Receive'], ['traffic_types:TCP'],
+        val = [['modes: Auto'], ['pkts: MTU'], ['directions: DUT Receive'], ['traffic_types:UDP'],
                ['bandw_options: AUTO'], ['spatial_streams: AUTO'], [f'attenuator: {attenuator}'],
                [f'attenuations: {main_attenuations2}'], ['chamber: 0'], ['tt_deg: 0']]
 
         if station:
             rvr_o = lf_test.ratevsrange(station_name=station_names_fiveg, mode=mode, download_rate="100%",
                                         duration='60000',
-                                        instance_name="RVR_Channel_149_80_Mhz_Tcp_Fiveg_Mode",
+                                        instance_name="RVR_Channel_149_80_Mhz_Udp_Fiveg_Mode",
                                         vlan_id=vlan, dut_name=lf_tools.dut_name, raw_lines=val, ssid_channel=channel)
             report_name = rvr_o.report_name[0]['LAST']["response"].split(":::")[1].split("/")[-1]
             print("report name ", report_name)
@@ -318,10 +318,10 @@ class TestCountryUS80Mhz5G(object):
                         "band": band,
                         "channel": channel,
                         "description": "RvR capacity test",
-                        "test-download": "0",
-                        "test-upload": "1Gbps",
+                        "test-download": "1Gbps",
+                        "test-upload": "0",
                         "test-batch-size": "1",
-                        "test-upload-rate": "1",
+                        "test-upload-rate": "0",
                         "test-protocol": "UDP-IPV4",
                         "test-duration": "60 Sec",
                         "expected-throughput": pass_value,
@@ -335,7 +335,7 @@ class TestCountryUS80Mhz5G(object):
                         if os.path.exists(pdf):
                             result["result"] = "FAIL"
                             allure.attach.file(source=pdf,
-                                               name="Rate_Vs_Range_1GBPS_Upload_Throughput_UDP_Test",
+                                               name="Rate_Vs_Range_1GBPS_Download_Throughput_UDP_Test",
                                                attachment_type="PDF")
                         allure.attach(name="FAILED:Throughput Results: ", body=str(
                             "Failed Throughputs are: " + str(failed_throughput)) + "Passed Throughputs: " + str(
@@ -348,7 +348,7 @@ class TestCountryUS80Mhz5G(object):
                         print("Test passed successfully")
                         if os.path.exists(pdf):
                             allure.attach.file(source=pdf,
-                                               name="Rate_Vs_Range_1GBPS_Upload_Throughput_UDP_Test",
+                                               name="Rate_Vs_Range_1GBPS_Download_Throughput_UDP_Test",
                                                attachment_type="PDF")
                         allure.attach(name="Passed:Throughput Results:",
                                       body=str("Passed Throughputs are :" + str(passed_throughput)))

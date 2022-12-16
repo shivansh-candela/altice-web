@@ -202,7 +202,7 @@ class TestCountryUS20Mhz5G(object):
                         print("Test passed successfully")
                         if os.path.exists(pdf):
                             allure.attach.file(source=pdf,
-                                               name="Rate_Vs_Range_1GBPS_Upoad_Throughput_UDP_Test",
+                                               name="Rate_Vs_Range_1GBPS_Upload_Throughput_UDP_Test",
                                                attachment_type="PDF")
                         allure.attach(name="Passed:Throughput Results:",
                                       body=str("Passed Throughputs are :" + str(passed_throughput)))
@@ -346,7 +346,7 @@ class TestCountryUS20Mhz5G(object):
                         print("Test passed successfully")
                         if os.path.exists(pdf):
                             allure.attach.file(source=pdf,
-                                               name="Rate_Vs_Range_1GBPS_Upoad_Throughput_UDP_5g_Test",
+                                               name="Rate_Vs_Range_1GBPS_Upload_Throughput_UDP_5g_Test",
                                                attachment_type="PDF")
                         allure.attach(name="Passed:Throughput Results:",
                                       body=str("Passed Throughputs are :" + str(passed_throughput)))
