@@ -199,7 +199,7 @@ class TestCountryUS20Mhz5G(object):
                         print("Test passed successfully")
                         if os.path.exists(pdf):
                             allure.attach.file(source=pdf,
-                                               name="Rate_Vs_Range_1GBPS_Upoad_Throughput_TCP_5g_Test",
+                                               name="Rate_Vs_Range_1GBPS_Upload_Throughput_TCP_5g_Test",
                                                attachment_type="PDF")
                         allure.attach(name="Passed:Throughput Results:",
                                       body=str("Passed Throughputs are:" + str(passed_throughput)))
@@ -232,8 +232,8 @@ class TestCountryUS20Mhz5G(object):
         mode = "NAT"
         band = "fiveg"
         vlan = 1
-        channel = setup_params_general['rf-5G-1']['5G']['channel']
-        channel_width = setup_params_general['rf-5G-1']['5G']['channel-width']
+        channel = setup_params_general['rf-5G-5']['5G']['channel']
+        channel_width = setup_params_general['rf-5G-5']['5G']['channel-width']
         pass_value = setup_params_general["expected-throughput"]
         print("PASSS VALLUES", pass_value)
         atn = pass_value.keys()
@@ -340,7 +340,7 @@ class TestCountryUS20Mhz5G(object):
                         print("Test passed successfully")
                         if os.path.exists(pdf):
                             allure.attach.file(source=pdf,
-                                               name="Rate_Vs_Range_1GBPS_Upoad_Throughput_TCP_5g_Test",
+                                               name="Rate_Vs_Range_1GBPS_Upload_Throughput_TCP_5g_Test",
                                                attachment_type="PDF")
                         allure.attach(name="Passed:Throughput Results:",
                                       body=str("Passed Throughputs are:" + str(passed_throughput)))
