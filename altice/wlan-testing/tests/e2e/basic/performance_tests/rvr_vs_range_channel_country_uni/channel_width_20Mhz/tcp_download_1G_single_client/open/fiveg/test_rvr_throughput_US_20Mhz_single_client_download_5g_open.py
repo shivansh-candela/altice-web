@@ -3,17 +3,17 @@ import pytest
 import allure
 import time
 
-pytestmark = [pytest.mark.country_code, pytest.mark.nat, pytest.mark.wpa2, pytest.mark.united_states,
+pytestmark = [pytest.mark.country_code, pytest.mark.nat, pytest.mark.open, pytest.mark.united_states,
               pytest.mark.bandwidth_20mhz, pytest.mark.al, pytest.mark.tcp, pytest.mark.rate_vs_range,
               pytest.mark.download, pytest.mark.tcp_download,
-              pytest.mark.wifi_capacity_wpa2_20mhz_all_channels_single_client_download_1gbps,
-              pytest.mark.rate_vs_range_throughput_wpa2_20mhz_all_channels_single_client_download_1gbps, pytest.mark.fiveg, pytest.mark.tcp]
+              pytest.mark.rate_vs_range_open_20mhz_all_channels_single_client_download_1gbps,
+              pytest.mark.rate_vs_range_throughput_open_20mhz_all_channels_single_client_download_1gbps, pytest.mark.fiveg, pytest.mark.tcp]
 
 setup_params_general = {
     "mode": "NAT",
     "ssid_modes": {
-        "wpa2_personal": [
-            {"ssid_name": "client_connectivity_al", "appliedRadios": ["5G"], "security_key": "something"}
+        "open": [
+            {"ssid_name": "client_connectivity_al", "appliedRadios": ["5G"], "security_key": ["BLANK"]}
         ]
     },
 
@@ -74,23 +74,23 @@ setup_params_general = {
 class TestCountryUS20Mhz5G(object):
 
     @allure.testcase(url="https://telecominfraproject.atlassian.net/browse/WIFI-2546", name="WIFI-6938")
-    @pytest.mark.wpa2_personal
+    @pytest.mark.open
     @pytest.mark.twentyMhz
     @pytest.mark.fiveg
     @pytest.mark.channel_36
     @pytest.mark.tcp_download
-    def test_client_wpa2_ch36_20Mhz_US_5g_tcp_download(self, instantiate_profile, get_lf_logs,
+    def test_client_open_ch36_20Mhz_US_5g_tcp_download(self, instantiate_profile, get_lf_logs,
                                                                   lf_test, update_report,
                                                                   station_names_fiveg, lf_tools,
                                                                   test_cases, testbed, al_1, get_configuration,
                                                                   create_lanforge_chamberview_dut, get_attenuators):
         """
-           pytest -m "country_code and twentyMhz and wpa2 and fiveg and channel149"
+           pytest -m "country_code and twentyMhz and open and fiveg and channel149"
         """
-        profile_data = setup_params_general["ssid_modes"]["wpa2_personal"][0]
+        profile_data = setup_params_general["ssid_modes"]["open"][0]
         ssid_name = profile_data["ssid_name"]
         security_key = profile_data["security_key"]
-        security = "wpa2"
+        security = "open"
         mode = "NAT"
         band = "fiveg"
         vlan = 1
@@ -112,8 +112,7 @@ class TestCountryUS20Mhz5G(object):
         station = lf_test.Client_Connect(ssid=ssid_name, security=security,
                                          passkey=security_key, mode=mode, band=band,
                                          station_name=station_names_fiveg, vlan_id=vlan)
-
-        val = [['modes: 802.11an-AX'], ['pkts: MTU'], ['directions: DUT Transmit'], ['traffic_types:TCP'],
+        val = [['modes: Auto'], ['pkts: MTU'], ['directions: DUT Transmit'], ['traffic_types:TCP'],
                ['bandw_options: AUTO'], ['spatial_streams: AUTO'], [f'attenuator: {attenuator}'],
                [f'attenuations: {main_attenuations2}'], ['chamber: 0'], ['tt_deg: 0']]
 
@@ -214,22 +213,22 @@ class TestCountryUS20Mhz5G(object):
             assert False, "Test failed due to no station ip"
 
     @allure.testcase(url="https://telecominfraproject.atlassian.net/browse/WIFI-2546", name="WIFI-6938")
-    @pytest.mark.wpa2_personal
+    @pytest.mark.open
     @pytest.mark.twentyMhz
     @pytest.mark.fiveg
     @pytest.mark.channel_149
     @pytest.mark.tcp_download
-    def test_client_wpa2_ch149_20Mhz_US_5g_tcp_download(self, instantiate_profile, get_lf_logs,
+    def test_client_open_ch149_20Mhz_US_5g_tcp_download(self, instantiate_profile, get_lf_logs,
                                                                   lf_test, update_report,
                                                                   station_names_fiveg, lf_tools,
                                                                   test_cases, testbed, al_1, get_configuration,create_lanforge_chamberview_dut,get_attenuators):
         """
-           pytest -m "country_code and twentyMhz and wpa2 and fiveg and channel149"
+           pytest -m "country_code and twentyMhz and open and fiveg and channel149"
         """
-        profile_data = setup_params_general["ssid_modes"]["wpa2_personal"][0]
+        profile_data = setup_params_general["ssid_modes"]["open"][0]
         ssid_name = profile_data["ssid_name"]
-        security_key = profile_data["security_key"]
-        security = "wpa2"
+        security_key = None
+        security = "open"
         mode = "NAT"
         band = "fiveg"
         vlan = 1
@@ -254,9 +253,8 @@ class TestCountryUS20Mhz5G(object):
         obj.check_and_set_ap_channel(radio="5G", band=channel_width, channel=channel)
         station = lf_test.Client_Connect(ssid=ssid_name, security=security,
                                          passkey=security_key, mode=mode, band=band,
-
-        val = [['modes: 802.11an-AX'], ['pkts: MTU'], ['directions: DUT Transmit'], ['traffic_types:TCP'],
-
+                                         station_name=station_names_fiveg, vlan_id=vlan)
+        val = [['modes: Auto'], ['pkts: MTU'], ['directions: DUT Transmit'], ['traffic_types:TCP'],
                ['bandw_options: AUTO'], ['spatial_streams: AUTO'], [f'attenuator: {attenuator}'],
                [f'attenuations: {main_attenuations2}'], ['chamber: 0'], ['tt_deg: 0']]
 
