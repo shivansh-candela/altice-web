@@ -112,7 +112,8 @@ class TestCountryUS20Mhz5G(object):
         station = lf_test.Client_Connect(ssid=ssid_name, security=security,
                                          passkey=security_key, mode=mode, band=band,
                                          station_name=station_names_fiveg, vlan_id=vlan)
-        val = [['modes: Auto'], ['pkts: MTU'], ['directions: DUT Transmit'], ['traffic_types:TCP'],
+
+        val = [['modes: 802.11an-AX'], ['pkts: MTU'], ['directions: DUT Transmit'], ['traffic_types:TCP'],
                ['bandw_options: AUTO'], ['spatial_streams: AUTO'], [f'attenuator: {attenuator}'],
                [f'attenuations: {main_attenuations2}'], ['chamber: 0'], ['tt_deg: 0']]
 
@@ -253,8 +254,9 @@ class TestCountryUS20Mhz5G(object):
         obj.check_and_set_ap_channel(radio="5G", band=channel_width, channel=channel)
         station = lf_test.Client_Connect(ssid=ssid_name, security=security,
                                          passkey=security_key, mode=mode, band=band,
-                                         station_name=station_names_fiveg, vlan_id=vlan)
-        val = [['modes: Auto'], ['pkts: MTU'], ['directions: DUT Transmit'], ['traffic_types:TCP'],
+
+        val = [['modes: 802.11an-AX'], ['pkts: MTU'], ['directions: DUT Transmit'], ['traffic_types:TCP'],
+
                ['bandw_options: AUTO'], ['spatial_streams: AUTO'], [f'attenuator: {attenuator}'],
                [f'attenuations: {main_attenuations2}'], ['chamber: 0'], ['tt_deg: 0']]
 

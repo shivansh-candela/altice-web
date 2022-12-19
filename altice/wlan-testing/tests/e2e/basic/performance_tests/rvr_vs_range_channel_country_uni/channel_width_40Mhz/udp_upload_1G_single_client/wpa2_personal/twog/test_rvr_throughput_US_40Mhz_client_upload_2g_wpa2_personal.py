@@ -102,7 +102,7 @@ class TestCountryUS40Mhz5G(object):
                                          station_name=station_names_twog, vlan_id=vlan)
         # print("sta", station)
         # lf_tools.Chamber_View()
-        val = [['modes: Auto'], ['pkts: MTU'], ['directions: DUT Receive'], ['traffic_types:UDP'],
+        val = [['modes: 802.11 bgn-AX'], ['pkts: MTU'], ['directions: DUT Receive'], ['traffic_types:UDP'],
                ['bandw_options: AUTO'], ['spatial_streams: AUTO'], [f'attenuator: {attenuator}'],
                [f'attenuations: {main_attenuations2}'], ['chamber: 0'], ['tt_deg: 0']]
 
