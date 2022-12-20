@@ -55,7 +55,7 @@ setup_params_general = {
     scope="class"
 )
 @pytest.mark.usefixtures("setup_profiles")
-class TestCountryUS40Mhz5G(object):
+class TestCountryUS40Mhz2G(object):
 
     @allure.testcase(url="https://telecominfraproject.atlassian.net/browse/WIFI-2546", name="WIFI-6938")
     @pytest.mark.wpa2_personal
