@@ -7,7 +7,7 @@ pytestmark = [pytest.mark.country_code, pytest.mark.nat, pytest.mark.wpa2, pytes
               pytest.mark.bandwidth_20mhz, pytest.mark.al, pytest.mark.tcp, pytest.mark.wifi_capacity_test,
               pytest.mark.download, pytest.mark.tcp_download, pytest.mark.wifi_capacity_single_client,
               pytest.mark.wifi_capacity_wpa2_20mhz_all_channels_single_client_download_1gbps,
-              pytest.mark.throughput_wpa2_20mhz_all_channels_single_client_download_1gbps, pytest.mark.fiveg]
+              pytest.mark.throughput_wpa2_20mhz_all_channels_single_client_download_1gbps, pytest.mark.fiveg, pytest.mark.rate_vs_range]
 
 setup_params_general = {
     "mode": "NAT",
@@ -228,7 +228,6 @@ class TestCountryUS20Mhz5G(object):
     @pytest.mark.fiveg
     @pytest.mark.channel_149
     @pytest.mark.tcp_download
-    @pytest.mark.ghj1234
     def test_client_wpa2_chn149_20Mhz_US_5g_tcp_download(self, instantiate_profile, get_lf_logs,
                                                                   lf_test, update_report,
                                                                   station_names_fiveg, lf_tools,
