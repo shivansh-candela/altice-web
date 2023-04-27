@@ -21,6 +21,7 @@ from test_client_admission import LoadLayer3
 from test_num_client import Station_Connect
 from one_station import Station
 from load_template import *
+lf_cleanup = importlib.import_module("py-scripts.lf_cleanup")
 
 
 class Attenuator:
@@ -228,6 +229,11 @@ class AP_Automate:
         ssh.close()
         # print('\n'.join(output))
         time.sleep(10)
+
+    def cleanup(self):
+        self.cx_profile = self.new_l3_cx_profile()
+        if len(self.cx_profile.created_cx) > 0:
+            self.cx_profile.cleanup()
 
 
 def main():
@@ -980,6 +986,7 @@ def main():
     }
     input_setup_info = {}
 
+    ap.cleanup()
     generate_report(date,
                     test_setup_info,
                     pass_fail_dict,
