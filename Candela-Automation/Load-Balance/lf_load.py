@@ -21,6 +21,7 @@ from test_client_admission import LoadLayer3
 from test_num_client import Station_Connect
 from one_station import Station
 from load_template import *
+lf_cleanup = importlib.import_module("py-scripts.lf_cleanup")
 
 
 class Attenuator:
@@ -229,6 +230,11 @@ class AP_Automate:
         # print('\n'.join(output))
         time.sleep(10)
 
+    def cleanup(self):
+        self.cx_profile = self.new_l3_cx_profile()
+        if len(self.cx_profile.created_cx) > 0:
+            self.cx_profile.cleanup()
+
 
 def main():
     global threshold
@@ -238,8 +244,8 @@ def main():
     parser.add_argument('-p', '--pswd', type=str, help='credential password')
     parser.add_argument('-hst', '--host', type=str, help='host name')
     parser.add_argument('-s', '--ssid', type=str, help='ssid for client')
-    parser.add_argument('-pwd', '--passwd', type=str, help='password to connect to ssid', default="[BLANK]")
-    parser.add_argument('-sec', '--security', type=str, help='security', default="open")
+    parser.add_argument('-pwd', '--password', type=str, help='password to connect to ssid', default="[BLANK]")
+    parser.add_argument('-sec', '--security', type=str, help='security Ex. wpa | wpa2 | wpa3', default="open")
     parser.add_argument('-rad', '--radio', type=str, help='radio at which client will be connected', default="wiphy3")
     parser.add_argument('--upstream', type=str, help="provide upstream name", default="eth1")
     parser.add_argument('-num_sta', '--num_sta', type=int, help='provide number of stations you want to create',
@@ -253,12 +259,12 @@ def main():
     parser.add_argument('-r2', '--rssi2', type=str, help='Threshold RSSI value for 2.4 ghz')
     parser.add_argument('-r5', '--rssi5l', type=str, help='Threshold RSSI value for 5 ghz low')
     parser.add_argument('-r5h', '--rssi5h', type=str, help='Threshold RSSI value for 5 ghz high')
-    parser.add_argument('--test', nargs="+", type=str, help='select type of test you want to perform',
+    parser.add_argument('--test', nargs="+", type=str, help='select type of test you want to perform, Eg. Client, Utilization, Rssi',
                         default=['Client', 'Utilization', 'Rssi'])
     parser.add_argument('--bands', nargs="+", type=str,
-                        help='select type of bands you want to perform the test on like 2.4G/5Glow/5GHIGH, Eg 2.4G 5G_low',
+                        help='select type of bands you want to perform the test on like 2.4G/5G_low/5G_high, Eg 2.4G 5G_low',
                         default=['2.4G', '5G_low', '5G_high'])
-    parser.add_argument('--add_attenuator', type=str, help="add the attenuator serial number on which erforming the test eg 2222")
+    parser.add_argument('--add_attenuator', type=str, help="add the attenuator serial number on which performing the test eg 2222")
 
     args = parser.parse_args()
     date1 = str(datetime.now()).split(",")[0].replace(" ", "-").split(".")[0]
@@ -980,6 +986,7 @@ def main():
     }
     input_setup_info = {}
 
+    ap.cleanup()
     generate_report(date,
                     test_setup_info,
                     pass_fail_dict,

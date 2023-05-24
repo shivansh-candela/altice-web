@@ -83,6 +83,7 @@ import paramiko
 import matplotlib.pyplot as plt
 import random
 import numpy as np
+import matplotlib
 
 
 
@@ -167,13 +168,25 @@ class DfsTest(Realm):
     # set channel to parent radio and start sniffing
     def start_sniffer(self, radio_channel=None, radio=None, test_name="dfs_csa_", duration=60):
         self.pcap_name = test_name + str(datetime.now().strftime("%Y-%m-%d-%H-%M")).replace(':', '-') + ".pcap"
-        self.pcap_obj_2 = sniff_radio.SniffRadio(lfclient_host=self.host, lfclient_port=self.port,
+        if self.more_option == "centre":
+            self.pcap_obj_2 = sniff_radio.SniffRadio(lfclient_host=self.host, lfclient_port=self.port,
                                                  radio=self.sniff_radio, channel=radio_channel, monitor_name="monitor", channel_bw="20")
-        self.pcap_obj_2.setup(0, 0, 0)
-        time.sleep(5)
-        self.pcap_obj_2.monitor.admin_up()
-        time.sleep(5)
-        self.pcap_obj_2.monitor.start_sniff(capname=self.pcap_name, duration_sec=duration)
+            self.pcap_obj_2.setup(1, 1, 1)
+            time.sleep(5)
+            self.pcap_obj_2.monitor.admin_up()
+            time.sleep(5)
+            self.pcap_obj_2.monitor.start_sniff(capname=self.pcap_name, duration_sec=duration)
+        elif self.more_option == "random":
+            self.pcap_obj_2 = sniff_radio.SniffRadio(lfclient_host=self.host, lfclient_port=self.port,
+                                                     radio=self.sniff_radio, channel=radio_channel,
+                                                     monitor_name="monitor", channel_bw="20")
+            self.pcap_obj_2.setup(1, 1, 1)
+            time.sleep(5)
+            self.pcap_obj_2.monitor.admin_up()
+            time.sleep(5)
+            self.pcap_obj_2.monitor.start_sniff(capname=self.pcap_name, duration_sec=duration)
+
+
 
     def station_data_query(self, station_name="wlan0", query="channel"):
         # print(station_name)
@@ -262,7 +275,7 @@ class DfsTest(Realm):
             exit(1)
             return False
 
-    def run_hackrf(self, width=1, pri=1428, count=18, freq=5500000):
+    def run_hackrf(self, width=1, pri=1428, count=18, freq=None):
         p = paramiko.SSHClient()
         p.set_missing_host_key_policy(
             paramiko.AutoAddPolicy())  # This script doesn't work for me unless this line is added!
@@ -307,237 +320,151 @@ class DfsTest(Realm):
     def main_logic(self):
         main_dict = dict.fromkeys(self.fcctypes)
         print(main_dict)
+        frequency = {"52": "5260000", "56": "5280000", "60": "5300000", "64": "5320000",
+                     "100": list(range(5490, 5511)),
+                     "104": "5520000", "108": "5540000", "112": "5560000", "116": "5580000",
+                     "120": "5600000",
+                     "124": "5620000",
+                     "128": "5640000", "132": "5660000", "136": "5680000", "140": "5700000"}
+
+        centre_freq = {"52": "5260000", "56": "5280000", "60": "5300000", "64": "5320000",
+                     "100": "5500000",
+                     "104": "5520000", "108": "5540000", "112": "5560000", "116": "5580000",
+                     "120": "5600000",
+                     "124": "5620000",
+                     "128": "5640000", "132": "5660000", "136": "5680000", "140": "5700000"}
+        print(frequency[self.channel])
+        new_list = []
+        for i in frequency[self.channel]:
+            new_list.append(str(int(i) * 1000))
+        print(new_list)
+        t_dict = dict.fromkeys(new_list)
+        for i in main_dict:
+            main_dict[i] = t_dict.copy()
+        print(main_dict)
         list_ = []
         for i in range(self.trials + self.extra_trials):
             var = 000
             var_1 = "Trial_" + str(var + i + 1)
             list_.append(var_1)
         sec_dict = dict.fromkeys(list_)
-        for i in main_dict:
-            main_dict[i] = sec_dict.copy()
+        for fcc in main_dict:
+            for i in new_list:
+                main_dict[fcc][i] = sec_dict.copy()
         print(main_dict)
+
+        #        fcc0 { freq : {tria:}}}
+        # ***************************************************
         width_, interval_, count_ = "", "", ""
+
         for fcc in self.fcctypes:
-            for tria in range(self.trials + self.extra_trials):
-                var = 000
-                var_1 = "Trial_" + str(var + tria + 1)
-                new_list = ["Burst", "Pulses", "Width", "PRI(US)", "Detected", "Frequency(MHz)", "Detection Time(sec)"]
-                third_dict = dict.fromkeys(new_list)
-                main_dict[fcc][var_1] = third_dict.copy()
-                print(main_dict)
+            for frq in new_list:
+                for tria in range(self.trials):
+                    var = 000
+                    var_1 = "Trial_" + str(var + tria + 1)
+                    new_list = ["Burst", "Pulses", "Width", "PRI(US)", "Detected", "Frequency(MHz)", "Detection Time(sec)", "Freq_offset"]
+                    third_dict = dict.fromkeys(new_list)
+                    main_dict[fcc][frq][var_1] = third_dict.copy()
+                    print(main_dict)
 
-                # standard = {"FCC0": {"width_": "1", "interval_": "1428", "count_": "18"}, "FCC1": {}}
+                    # standard = {"FCC0": {"width_": "1", "interval_": "1428", "count_": "18"}, "FCC1": {}}
 
-                if fcc == "FCC0":
-                    width_ = "1"
-                    interval_ = "1428"
-                    count_ = "18"
-                elif fcc == "FCC1":
-                    width_ = "1"
-                    interval_ = str(random.randint(518, 3066))
-                    # interval_ = "1163"
-                    count_ = str(random.randint(17, 102))
-                elif fcc == "FCC2":
-                    width_ = str(random.randint(1, 5))
-                    interval_ = str(random.randint(150, 230))
-                    count_ = str(random.randint(23, 29))
-                elif fcc == "FCC3":
-                    width_ = str(random.randint(6, 10))
-                    interval_ = str(random.randint(200, 500))
-                    count_ = str(random.randint(16, 18))
-                elif fcc == "FCC4":
-                    width_ = str(random.randint(11, 12))
-                    interval_ = str(random.randint(200, 500))
-                    count_ = str(random.randint(12, 16))
-                # elif fcc == "FCC5":
-                #     width_ = "70"
-                #     interval_ = "1975"
-                #     count_ = "3"
-                elif fcc == "ETSI0":
-                    width_ = "1"
-                    interval_ = "1429"
-                    count_ = "18"
-                elif fcc == "ETSI1":
-                    width_ = str(random.randint(1, 5))
-                    interval_ = str(random.randint(1000, 5000))
-                    count_ = "10"
-                elif fcc == "ETSI2":
-                    width_ = str(random.randint(1, 15))
-                    interval_ = str(random.randint(625, 5000))
-                    count_ = "15"
-                elif fcc == "ETSI3":
-                    width_ = str(random.randint(1, 15))
-                    interval_ = str(random.randint(250, 435))
-                    count_ = "25"
-                elif fcc == "ETSI4":
-                    width_ = str(random.randint(20, 30))
-                    interval_ = str(random.randint(250, 500))
-                    count_ = "20"
-                elif fcc == "ETSI5":
-                    width_ = str(random.randint(1, 2))
-                    interval_ = str(random.randint(2500, 3333))
-                    count_ = "10"
-                elif fcc == "ETSI6":
-                    width_ = str(random.randint(1, 2))
-                    interval_ = str(random.randint(833, 2500))
-                    count_ = "15"
-                elif fcc == "Japan-W53-1":
-                    width_ = 1
-                    interval_ = 1428
-                    count_ = 18
-                # elif fcc == "Japan-W53-2":
-                #     width_ = 2.5
-                #     interval_ = 3846
-                #     count_ = 18
-                elif fcc == "korea_1":
-                    width_ = 1
-                    interval_ = 1429
-                    count_ = 18
-                elif fcc == "korea_2":
-                    width_ = 1
-                    interval_ = 556
-                    count_ = 10
-                elif fcc == "korea_3":
-                    width_ = 2
-                    interval_ = 3030
-                    count_ = 70
-                elif fcc == "Japan-W56-2":
-                    width_ = 1
-                    interval_ = 1429
-                    count_ = 18
-                elif fcc == "Japan-W56-3":
-                    width_ = 2
-                    interval_ = 4000
-                    count_ = 18
-                elif fcc == "Japan-W56-4":
-                    width_ = str(random.randint(1, 5))
-                    interval_  = str(random.randint(150, 230))
-                    count_ = str(random.randint(23, 29))
-                elif fcc == "Japan-W56-5":
-                    width_ = str(random.randint(6, 10))
-                    interval_ = str(random.randint(200, 500))
-                    count_ = str(random.randint(16, 18))
-                elif fcc == "Japan-W56-6":
-                    width_ = str(random.randint(11, 20))
-                    interval_ = str(random.randint(200, 500))
-                    count_ = str(random.randint(12, 16))
+                    if fcc == "FCC0":
+                        width_ = "1"
+                        interval_ = "1428"
+                        count_ = "18"
 
 
-                main_dict[fcc][var_1]["Burst"] = "1"
-                main_dict[fcc][var_1]["Pulses"] = count_
-                main_dict[fcc][var_1]["Width"] = width_
-                main_dict[fcc][var_1]["PRI(US)"] = interval_
 
-                if self.more_option == "centre":
-                    frequency = {"52": "5260000", "56": "5280000", "60": "5300000", "64": "5320000", "100": "5500000",
-                                 "104": "5520000", "108": "5540000", "112": "5560000", "116": "5580000", "120": "5600000",
-                                 "124": "5620000",
-                                 "128": "5640000", "132": "5660000", "136": "5680000", "140": "5700000"}
-                if self.more_option == "random":
-                    frequency = {"52": "5260000", "56": "5280000", "60": "5300000", "64": "5320000", "100": str(random.randint(5490, 5510)),
-                                 "104": "5520000", "108": "5540000", "112": "5560000", "116": "5580000",
-                                 "120": "5600000",
-                                 "124": "5620000",
-                                 "128": "5640000", "132": "5660000", "136": "5680000", "140": "5700000"}
-                main_dict[fcc][var_1]["Frequency(MHz)"] = frequency[str(self.channel)]
+                    main_dict[fcc][frq][var_1]["Burst"] = "1"
+                    main_dict[fcc][frq][var_1]["Pulses"] = count_
+                    main_dict[fcc][frq][var_1]["Width"] = width_
+                    main_dict[fcc][frq][var_1]["PRI(US)"] = interval_
 
-                print("starting sniffer")
-                self.start_sniffer(radio_channel=self.channel, radio=self.sniff_radio,
-                                   test_name="dfs_csa_" + str(fcc) + "_" + str(var_1) + "_channel" + str(self.channel) + "_")
+                    main_dict[fcc][frq][var_1]["Frequency(MHz)"] = frq
+                    diff = (int(frq) - int(centre_freq[self.channel])) / 1000
+                    val = str(diff)
+                    main_dict[fcc][frq][var_1]["Freq_offset"] = val
+                    # if centre_freq[self.channel] < frq:
+                    #     diff = int(centre_freq[self.channel]) - int(frq)
+                    #     val = str(diff)
+                    #     main_dict[fcc][frq][var_1]["Freq_offset"] = val
+                    # else:
+                    #     diff = int(centre_freq[self.channel]) - int(frq)
+                    #     val = str(diff)
+                    #     main_dict[fcc][frq][var_1]["Freq_offset"] = val
 
-                current_time = datetime.now()
-                print("Current date and time : ")
-                current_time = current_time.strftime("%b %d, %Y  %H:%M:%S")
-                print("time stamp of radar send", current_time)
-                # print(type(current_time))
 
-                print("generate radar")
-                self.run_hackrf(width=width_, pri=interval_, count=count_, freq=frequency[str(self.channel)])
-                time.sleep(15)
-                print("stop sniffer")
-                file_name_ = self.stop_sniffer()
-                file_name = "./pcap/" + str(file_name_)
-                print("pcap file name", file_name)
+                    print("starting sniffer")
+                    self.start_sniffer(radio_channel=self.channel, radio=self.sniff_radio,
+                                       test_name="dfs_csa_" + str(fcc) + "_" + str(var_1) + "_channel" + str(self.channel) + "_")
 
-                # pcap read logic
 
-                csa_frame = self.pcap_obj.check_frame_present(
-                    pcap_file=str(file_name),
-                    filter='wlan.csa.channel_switch.count == 1 && wlan.ssid == "Candela_20MHz" ')
-                print("csa frame", csa_frame)
-                if len(csa_frame) != 0 and csa_frame != "empty":
-                    print("csa frame  is present")
-                    print("radar detected")
-                    main_dict[fcc][var_1]["Detected"] = "YES"
-                    csa_frame_time = self.pcap_obj.read_arrival_time(
+                    # print(type(current_time))
+
+                    print("generate radar")
+                    self.run_hackrf(width=width_, pri=interval_, count=count_, freq=frq)
+
+
+                    current_time = datetime.now()
+                    print("Current date and time : ")
+                    current_time = current_time.strftime("%b %d, %Y  %H:%M:%S")
+                    print("time stamp of radar send", current_time)
+                    time.sleep(15)
+                    print("stop sniffer")
+                    file_name_ = self.stop_sniffer()
+                    file_name = "./pcap/" + str(file_name_)
+                    print("pcap file name", file_name)
+
+                    # pcap read logic
+
+                    csa_frame = self.pcap_obj.check_frame_present(
                         pcap_file=str(file_name),
-                        filter='wlan.csa.channel_switch.count == 1 && wlan.ssid == "Candela_20MHz" ')
-                    print("csa frame  time is ", csa_frame_time)
-                    csa_time = str(csa_frame_time)
-                    csa_frame_time_ = None
-                    for i in csa_time:
-                        if i == ".":
-                            print("yes")
-                            ind = csa_time.index(".")
-                            csa_frame_time_ = csa_time[:ind]
-                    print("csa time", csa_frame_time_)
+                        filter='wlan.csa.channel_switch.count == 4 && wlan.ssid == "Candela_20MHz" ')
+                    print("csa frame", csa_frame)
+                    if len(csa_frame) != 0 and csa_frame != "empty":
+                        print("csa frame  is present")
+                        print("radar detected")
+                        main_dict[fcc][frq][var_1]["Detected"] = "YES"
+                        csa_frame_time = self.pcap_obj.read_arrival_time(
+                            pcap_file=str(file_name),
+                            filter='wlan.csa.channel_switch.count == 4  && wlan.ssid == "Candela_20MHz" ')
+                        print("csa frame  time is ", csa_frame_time)
+                        csa_time = str(csa_frame_time)
+                        csa_frame_time_ = None
+                        for i in csa_time:
+                            if i == ".":
+                                print("yes")
+                                ind = csa_time.index(".")
+                                csa_frame_time_ = csa_time[:ind]
+                        print("csa time", csa_frame_time_)
 
-                    print("calculate detection time")
-                    FMT = '%b %d, %Y %H:%M:%S'
-                    c_time = datetime.strptime(csa_frame_time_, FMT) - datetime.strptime(current_time, FMT)
-                    print("detection time ", c_time)
-                    lst = str(c_time).split(":")
-                    seconds = int(lst[0]) * 3600 + int(lst[1]) * 60 + int(lst[2])
-                    d_time = seconds
-                    print("detection time ", d_time)
-                    main_dict[fcc][var_1]["Detection Time(sec)"] = d_time
+                        print("calculate detection time")
+                        FMT = '%b %d, %Y %H:%M:%S'
+                        c_time = datetime.strptime(csa_frame_time_, FMT) - datetime.strptime(current_time, FMT)
+                        print("detection time ", c_time)
+                        lst = str(c_time).split(":")
+                        seconds = int(lst[0]) * 3600 + int(lst[1]) * 60 + int(lst[2])
+                        d_time = seconds
+                        print("detection time ", d_time)
+                        main_dict[fcc][frq][var_1]["Detection Time(sec)"] = d_time
 
 
-                else:
-                    print("csa frame is not present")
-                    print("radar not detected")
-                    main_dict[fcc][var_1]["Detected"] = "NO"
-                    main_dict[fcc][var_1]["Detection Time(sec)"] = "NA"
-
-
-                print(main_dict)
-                if str(tria+1) == str(self.trials):
-                    print("check desired trials percentage")
-                    detection_list = []
-                    for i in main_dict[fcc]:
-                        print(i)
-                        if main_dict[fcc][i] == None:
-                            print("/n")
-                        else:
-                            detection_list.append(main_dict[fcc][i]["Detected"])
-                    print("detection list", detection_list)
-                    m = None
-                    for i in detection_list:
-                        if i == 'YES':
-                            m = detection_list.count("YES")
-                            print(m)
-                        else:
-                            if len(detection_list) == 1:
-                                m = 0
-                                print("\n")
-                    result1 = all(element == "NO" for element in detection_list)
-                    if result1:
-                        m = 0
-                    if len(detection_list) == 0:
-                        print("/n")
                     else:
-                        percent = (m / len(detection_list)) * 100
-                        print(percent)
-                        if percent < float(self.desired_detection):
-                             continue
-                        else:
-                            break
+                        print("csa frame is not present")
+                        print("radar not detected")
+                        main_dict[fcc][frq][var_1]["Detected"] = "NO"
+                        main_dict[fcc][frq][var_1]["Detection Time(sec)"] = "NA"
+
+
+                    print(main_dict)
 
         print("final dict", main_dict)
         return main_dict
 
 
     def run(self):
+        print(self.fcctypes)
         test_time = datetime.now()
         test_time = test_time.strftime("%b %d %H:%M:%S")
         print("Test started at ", test_time)
@@ -569,97 +496,67 @@ class DfsTest(Realm):
         s2 = test_end  # for example
         FMT = '%b %d %H:%M:%S'
         test_duration = datetime.strptime(s2, FMT) - datetime.strptime(s1, FMT)
+        print(test_duration)
         self.generate_report(test_duration= test_duration, main_dict=main)
 
 
-    def generate_hori_graph(self, graph_dict=None):
-        # graph_dict = {'FCC0': 90.0}
+
+    def test_graph(self, graph_dict=None):
+        self.graph_image_name = "overall"
         x = []
         for i in graph_dict:
             x.append(i)
-        pass_per = []
+        pass_per =[]
         fail_per = []
         for i in graph_dict:
+
             pass_per.append(graph_dict[i])
-            fail_per.append(float(100 - graph_dict[i]))
-        self.graph_image_name = "overall"
-        # create data
-        # pass_per = [10, 30]
-        # fail_per = [20, 25]
-        y1 = np.array(pass_per)
-        y2 = np.array(fail_per)
-        fig = plt.figure(figsize=(12, 4))
-        ax  = plt.subplots()
+            fail_per.append(round((float(100 - graph_dict[i])), 1))
 
-        # plot bars in stack manner
-        ax1 = plt.bar(x, y1, color='g', label="PASS")
-        plt.yticks([])
-        ax2 = plt.bar(x, y2, bottom=y1, color='r', label="FAIL")
+        plt.rcParams["figure.figsize"] = [15, 7]
+        plt.rcParams["figure.autolayout"] = True
 
-        plt.xlabel("Radar Types", fontweight='bold')
-        plt.ylabel("Detection %", fontweight='bold')
-        plt.legend( loc='best')
-        plt.box(False)
+        year =x
+        issues_addressed = pass_per
+        issues_pending =fail_per
 
+        b1 = plt.barh(year, issues_addressed, color="green")
 
+        b2 = plt.barh(year, issues_pending, left=issues_addressed, color="red")
+        for i, v in enumerate(issues_addressed):
+            if v != 0:
+                plt.text(v * 0.45, i + .145, "%s%s" % (v, "%"), color='white', fontweight='bold', fontsize=10,
+                         ha='center', va='center')
+        for i, v in enumerate(issues_pending):
+            if v != 0:
+                plt.text(v * 0.45 + issues_addressed[i], i + .145, "%s%s" % (v, "%"), color='white', fontweight='bold',
+                         fontsize=10,
+                         ha='center', va='center')
 
-
-        plt.title("Detection Summary Graph")
-        for r1, r2 in zip(ax1, ax2):
-            h1 = r1.get_height()
-            h2 = r2.get_height()
-            plt.text(r1.get_x() + r1.get_width() / 2., h1 / 2., "%d" % h1, ha="center", va="center", color="white",
-                     fontsize=16, fontweight="bold")
-            plt.text(r2.get_x() + r2.get_width() / 2., h1 + h2 / 2., "%d" % h2, ha="center", va="center", color="white",
-                     fontsize=16, fontweight="bold")
-        plt.savefig("%s.png" % self.graph_image_name, dpi=96)
-        print("graph name {}".format(self.graph_image_name))
-        return "%s.png" % self.graph_image_name
-
-
-    def generate_graph(self, graph_dict):
-        self.graph_image_name = "overall"
-
-        x_axis = []
-        for i in graph_dict:
-            x_axis.append(i)
-        y_axis = []
-        for i in graph_dict:
-            y_axis.append(graph_dict[i])
-        fig = plt.figure(figsize=(12, 4))
-
-        # creating the bar plot
-        plt.bar(x_axis, y_axis, color=('plum', 'lawngreen', 'skyblue', 'pink', 'yellow', "cyan"),
-                width=0.4)
-        for item, value in enumerate(y_axis):
-            plt.text(item, value, "{value}".format(value=value), ha='center', rotation=30, fontsize=8)
-
-        plt.xlabel("Radar Types", fontweight='bold', fontsize=15)
-        plt.ylabel("Detection %", fontweight='bold', fontsize=15)
-        plt.title("Detection Summary Graph")
+        plt.legend([b1, b2], ["PASS", "FAIL"], title="Issues", bbox_to_anchor=(1.05, 1.0), loc="upper left")
+        plt.xticks([])
         plt.savefig("%s.png" % self.graph_image_name, dpi=96)
         return "%s.png" % self.graph_image_name
 
-    def generate_report(self, test_duration=None,  main_dict=None):
-        # main_dict = {'FCC0': {
-        #     'Trial_1': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES',
-        #                 'Frequency(MHz)': '5500000', 'Detection Time(sec)': 16},
-        #     'Trial_2': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES',
-        #                 'Frequency(MHz)': '5500000', 'Detection Time(sec)': 15}}}
-        report = lf_report_pdf.lf_report(_path="", _results_dir_name="Detection Probability Test", _output_html="dpt.html",
+
+
+    def generate_report(self, test_duration="1:26:07",  main_dict=None):
+        main_dict = {'FCC0': {'5490000': {'Trial_1': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(MHz)': '5490000', 'Detection Time(sec)': 17, 'Freq_offset': '-10.0'}, 'Trial_2': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(MHz)': '5490000', 'Detection Time(sec)': 18, 'Freq_offset': '-10.0'}}, '5491000': {'Trial_1': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(MHz)': '5491000', 'Detection Time(sec)': 18, 'Freq_offset': '-9.0'}, 'Trial_2': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(MHz)': '5491000', 'Detection Time(sec)': 18, 'Freq_offset': '-9.0'}}, '5492000': {'Trial_1': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(MHz)': '5492000', 'Detection Time(sec)': 18, 'Freq_offset': '-8.0'}, 'Trial_2': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(MHz)': '5492000', 'Detection Time(sec)': 18, 'Freq_offset': '-8.0'}}, '5493000': {'Trial_1': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(MHz)': '5493000', 'Detection Time(sec)': 18, 'Freq_offset': '-7.0'}, 'Trial_2': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(MHz)': '5493000', 'Detection Time(sec)': 17, 'Freq_offset': '-7.0'}}, '5494000': {'Trial_1': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(MHz)': '5494000', 'Detection Time(sec)': 17, 'Freq_offset': '-6.0'}, 'Trial_2': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(MHz)': '5494000', 'Detection Time(sec)': 17, 'Freq_offset': '-6.0'}}, '5495000': {'Trial_1': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'NO', 'Frequency(MHz)': '5495000', 'Detection Time(sec)': 'NA', 'Freq_offset': '-5.0'}, 'Trial_2': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(MHz)': '5495000', 'Detection Time(sec)': 18, 'Freq_offset': '-5.0'}}, '5496000': {'Trial_1': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(MHz)': '5496000', 'Detection Time(sec)': 17, 'Freq_offset': '-4.0'}, 'Trial_2': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(MHz)': '5496000', 'Detection Time(sec)': 18, 'Freq_offset': '-4.0'}}, '5497000': {'Trial_1': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(MHz)': '5497000', 'Detection Time(sec)': 18, 'Freq_offset': '-3.0'}, 'Trial_2': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(MHz)': '5497000', 'Detection Time(sec)': 18, 'Freq_offset': '-3.0'}}, '5498000': {'Trial_1': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(MHz)': '5498000', 'Detection Time(sec)': 18, 'Freq_offset': '-2.0'}, 'Trial_2': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(MHz)': '5498000', 'Detection Time(sec)': 18, 'Freq_offset': '-2.0'}}, '5499000': {'Trial_1': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(MHz)': '5499000', 'Detection Time(sec)': 17, 'Freq_offset': '-1.0'}, 'Trial_2': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(MHz)': '5499000', 'Detection Time(sec)': 18, 'Freq_offset': '-1.0'}},'5500000': {'Trial_1': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(MHz)': '5500000', 'Detection Time(sec)': 17, 'Freq_offset': '0.0'}, 'Trial_2': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(MHz)': '5500000', 'Detection Time(sec)': 18, 'Freq_offset': '0.0'}},'5501000': {'Trial_1': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(MHz)': '5501000', 'Detection Time(sec)': 17, 'Freq_offset': '1.0'}, 'Trial_2': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(MHz)': '5501000', 'Detection Time(sec)': 18, 'Freq_offset': '1.0'}},'5502000': {'Trial_1':{'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(MHz)': '5502000', 'Detection Time(sec)': 17, 'Freq_offset': '2.0'}, 'Trial_2': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(MHz)': '5502000', 'Detection Time(sec)': 18, 'Freq_offset': '2.0'}}, '5503000': {'Trial_1': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(MHz)': '5503000', 'Detection Time(sec)': 17, 'Freq_offset': '3.0'}, 'Trial_2':{'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(MHz)': '5503000', 'Detection Time(sec)': 18, 'Freq_offset': '3.0'}}, '5504000': {'Trial_1': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(MHz)': '5504000', 'Detection Time(sec)': 17, 'Freq_offset': '4.0'}, 'Trial_2': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(MHz)': '5504000', 'Detection Time(sec)': 18, 'Freq_offset': '4.0'}},'5505000': {'Trial_1': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(MHz)': '5505000', 'Detection Time(sec)': 17, 'Freq_offset': '5.0'}, 'Trial_2': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(MHz)': '5505000', 'Detection Time(sec)': 18, 'Freq_offset': '5.0'}},'5506000': {'Trial_1': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(MHz)': '5506000', 'Detection Time(sec)': 17, 'Freq_offset': '6.0'}, 'Trial_2': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(MHz)': '5506000', 'Detection Time(sec)': 18, 'Freq_offset': '6.0'}},'5507000': {'Trial_1': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(MHz)': '5507000', 'Detection Time(sec)': 17, 'Freq_offset': '7.0'}, 'Trial_2': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(MHz)': '5507000', 'Detection Time(sec)': 18, 'Freq_offset': '7.0'}},'5508000': {'Trial_1': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(MHz)': '5508000', 'Detection Time(sec)': 17, 'Freq_offset': '8.0'}, 'Trial_2':{'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(MHz)': '5508000', 'Detection Time(sec)': 18, 'Freq_offset': '8.0'}},'5509000': {'Trial_1':{'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(MHz)': '5509000', 'Detection Time(sec)': 17, 'Freq_offset': '9.0'}, 'Trial_2': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(MHz)': '5509000', 'Detection Time(sec)': 18, 'Freq_offset': '9.0'}},'5510000': {'Trial_1':{'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(MHz)': '5510000', 'Detection Time(sec)': 17, 'Freq_offset': '10.0'}, 'Trial_2': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(MHz)': '5510000', 'Detection Time(sec)': 18, 'Freq_offset': '10.0'}}}}
+        print("test duration", test_duration)
+        report = lf_report_pdf.lf_report(_path="", _results_dir_name="Detection Bandwidth Test", _output_html="dpt.html",
                                          _output_pdf="dpt.pdf")
-        # self.test_duration = "xyz"
+
         date = str(datetime.now()).split(",")[0].replace(" ", "-").split(".")[0]
         report_path = report.get_report_path()
         print(report_path)
-        report.move_data(directory_name="pcap")
+        # report.move_data(directory_name="pcap")
 
         test_setup_info = {
             "DUT Name": "NXP_AP",
             "SSID": self.ssid,
             "Test Duration": test_duration,
         }
-        report.set_title("Detection Probability Test Report")
+        report.set_title("Detection Bandwidth  Test Report")
         report.set_date(date)
         report.build_banner()
         report.set_table_title("Test Setup Information")
@@ -668,9 +565,9 @@ class DfsTest(Realm):
         report.test_setup_table(value="Device under test", test_setup_data=test_setup_info)
 
         report.set_obj_html("Objective", "Detection Probability Test  is compilance to the Dynamic Frequency Selection"
-                                         " (DFS) Regulation, it creates regulatory specified radar pulses "
-                                         " to the DUT repeatedly to measure the probability "
-                                         "of detection.")
+                                         " (DFS) Regulation, The purpose of this test is to subject the DUT  to a Type 0 FCC radar pulse"
+                                         "while moving the frequency of the radar signal through the channel to characterized range of frequencies over which"
+                                         "the DUT can detect the radar pulse.")
         report.build_objective()
         report.set_obj_html("Result Summary", "The below graph provides information regarding detection probability percentage for various RADAR Types.")
         report.build_objective()
@@ -681,7 +578,8 @@ class DfsTest(Realm):
                 if main_dict[fcc][i] == None:
                     print("/n")
                 else:
-                    detection_list.append(main_dict[fcc][i]["Detected"])
+                    for j in main_dict[fcc][i]:
+                        detection_list.append(main_dict[fcc][i][j]["Detected"])
             print("detection list", detection_list)
             m = None
             for i in detection_list:
@@ -700,13 +598,13 @@ class DfsTest(Realm):
                 graph_dict[fcc] = "0"
 
             else:
-                percent = (m / len(detection_list)) * 100
+                percent = round(((m / len(detection_list)) * 100), 1)
                 print(percent)
                 graph_dict[fcc] = percent
 
         print("graph dict", graph_dict)
 
-        graph2 = self.generate_hori_graph(graph_dict=graph_dict)
+        graph2 = self.test_graph(graph_dict=graph_dict)
         # graph1 = self.generate_per_station_graph()
         report.set_graph_image(graph2)
         report.move_graph_image()
@@ -737,17 +635,15 @@ class DfsTest(Realm):
                 if main_dict[fcc][i] == None:
                     print("/n")
                 else:
-                    detection_list.append(main_dict[fcc][i]["Detected"])
+                    for j in main_dict[fcc][i]:
+                        detection_list.append(main_dict[fcc][i][j]["Detected"])
             print("detection list", detection_list)
             m = None
-            for i in detection_list:
-                if i == 'YES':
-                    m = detection_list.count("YES")
-                    print(m)
-                else:
-                    if len(detection_list) == 1:
-                        m = 0
-                        print("\n")
+
+            if 'YES' in detection_list:
+                m = detection_list.count("YES")
+                print(m)
+            else:
                 result1 = all(element == "NO" for element in detection_list)
                 if result1:
                     m = 0
@@ -755,7 +651,7 @@ class DfsTest(Realm):
                 print("/n")
                 pd_per.append("0")
             else:
-                percent = (m / len(detection_list)) * 100
+                percent =round(( (m / len(detection_list)) * 100), 1)
                 print(percent)
                 pd_per.append(percent)
                 if percent >= self.desired_detection:
@@ -764,13 +660,7 @@ class DfsTest(Realm):
                     result.append("FAILED")
 
             pd_req.append(required_percent[fcc])
-            length= []
-            for i in main_dict[fcc]:
-                if main_dict[fcc][i] == None:
-                    print("\n")
-                else:
-                    length.append(i)
-            tring.append(len(length))
+
 
             # average detection time
             detection_list = []
@@ -778,7 +668,8 @@ class DfsTest(Realm):
                 if main_dict[fcc][i] == None:
                     print("/n")
                 else:
-                    detection_list.append(main_dict[fcc][i]['Detection Time(sec)'])
+                    for j in main_dict[fcc][i]:
+                        detection_list.append(main_dict[fcc][i][j]['Detection Time(sec)'])
             print("detection list", detection_list)
             result1 = all(element == "NA" for element in detection_list)
             if len(detection_list) == 0:
@@ -788,7 +679,6 @@ class DfsTest(Realm):
                 if result1:
                     avg_detect.append(0)
                 else:
-
                     sum = 0
                     for i in detection_list:
                         val = None
@@ -798,29 +688,114 @@ class DfsTest(Realm):
                             val = i
 
                         sum = sum + int(val)
+                        print(sum)
 
-                    av = (sum / len(detection_list))
+                    av = round(((sum / len(detection_list))), 1)
                     print(av)
                     avg_detect.append(av)
         print("table")
         print(wave)
         print(pd_per)
         print(pd_req)
-        print(tring)
         print(avg_detect)
         print(result)
 
         table_1 = {
             "WaveForm Name": wave,
-            "Pd %": pd_per,
-            "Pd Required Percentage %": pd_req,
-            "Num Trials": tring,
+            "Detected BW": "20mhz ( -10 : 0: +10)",
+            "% BW detected": pd_per,
+            "Required Percentage ": self.desired_detection,
             "Average Detect Time (secs)": avg_detect,
             "Result": result,
         }
         test_setup = pd.DataFrame(table_1)
         report.set_table_dataframe(test_setup)
         report.build_table()
+
+        centre_freq = {"52": "5260000", "56": "5280000", "60": "5300000", "64": "5320000",
+                       "100": "5500000",
+                       "104": "5520000", "108": "5540000", "112": "5560000", "116": "5580000",
+                       "120": "5600000",
+                       "124": "5620000",
+                       "128": "5640000", "132": "5660000", "136": "5680000", "140": "5700000"}
+
+        for fcc in self.fcctypes:
+
+            Trials, avg_det_time, pass_per, Result, pri, frequency, det_time, frq_offset = [], [], [], [], [], [], [], []
+            off_set = []
+            for i in main_dict[fcc]:
+                d_list = []
+                detect = []
+                frequency.append(i)
+
+                val = (int(i) - int(centre_freq[self.channel])) / 1000
+                print(val)
+                off_set.append(int(val))
+                Trials.append(self.trials)
+                for j in main_dict[fcc][i]:
+                    print(j)
+                    d_list.append(main_dict[fcc][i][j]['Detection Time(sec)'])
+                    detect.append(main_dict[fcc][i][j]['Detected'])
+                print("detection time ", d_list)
+                det_time.append(d_list[0])
+                print("detection time ", det_time)
+
+                print("detect list", detect)
+
+
+                # avg
+                sum = 0
+                for m in d_list:
+                    val = None
+                    if m == "NA":
+                        val = 0
+                    else:
+                        val = m
+                    sum = sum + int(val)
+                avg = sum / len(d_list)
+                print(avg)
+                avg_det_time.append(avg)
+
+                # detect percen
+                sum = 0
+                for i in detect:
+                    val = None
+                    if i == "NO":
+                        val = 0
+                    else:
+                        val = 1
+
+                    sum = sum + int(val)
+                    print(sum)
+                # sum = 0
+                # if "YES" in detect:
+                #     sum = sum + 1
+
+                per = round(((sum / len(detect)) * 100), 1)
+                print(per)
+                pass_per.append(per)
+
+                if float(per) >= self.desired_detection:
+                    Result.append("PASSED")
+                else:
+                    Result.append("FAILED")
+
+            report.set_obj_html("Per Radar Type Summary Table",
+                                "The below table provides detailed information  RADAR Type FCC0.")
+            report.build_objective()
+
+
+            table_3 = {
+                "Frequency(MHz)": frequency,
+                "Frequency Offset": off_set,
+                "No of Trials": Trials,
+                "Average Detect Time": avg_det_time,
+                "Pass %": pass_per,
+                "Result": Result,
+            }
+            test_setup = pd.DataFrame(table_3)
+            report.set_table_dataframe(test_setup)
+            report.build_table()
 
         report.set_obj_html("Detailed Result Table",
                             "The below tables provides detailed information for per trials run for each RADAR Types")
@@ -830,37 +805,47 @@ class DfsTest(Realm):
                                 "The below table provides detailed information for per trials run for " + str(fcc) + "RADAR Type")
             report.build_objective()
 
-            Trials, burst, pulse, width, pri, detect, frequency, det_time = [], [],[], [], [], [], [], []
+            Trials, burst, pulse, width, pri, detect, frequency, det_time, frq_offset = [], [],[], [], [], [], [], [], []
 
             for i in main_dict[fcc]:
+                print(i)
                 if main_dict[fcc][i] == None:
                     print("ignore")
 
+
                 else:
-                    Trials.append(i)
-                    burst.append(main_dict[fcc][i]['Burst'])
-                    pulse.append(main_dict[fcc][i]['Pulses'])
-                    width.append(main_dict[fcc][i]['Width'])
-                    pri.append(main_dict[fcc][i]['PRI(US)'])
-                    detect.append(main_dict[fcc][i]['Detected'])
-                    frequency.append(main_dict[fcc][i]['Frequency(MHz)'])
-                    det_time.append(main_dict[fcc][i]['Detection Time(sec)'])
+                    for j in main_dict[fcc][i]:
+                        Trials.append(j)
+                        burst.append(main_dict[fcc][i][j]['Burst'])
+                        pulse.append(main_dict[fcc][i][j]['Pulses'])
+                        width.append(main_dict[fcc][i][j]['Width'])
+                        pri.append(main_dict[fcc][i][j]['PRI(US)'])
+                        detect.append(main_dict[fcc][i][j]['Detected'])
+                        frequency.append(main_dict[fcc][i][j]['Frequency(MHz)'])
+                        det_time.append(main_dict[fcc][i][j]['Detection Time(sec)'])
+                        frq_offset.append(main_dict[fcc][i][j]['Freq_offset'])
 
             print("trial", Trials)
             table_2 = {
                 "Trials": Trials,
+                "Frequency (MHz)": frequency,
+                "Frequency offset": frq_offset,
                 "Num Bursts": burst,
                 "Num Pulses": pulse,
                 "Pulse Width (us)": width,
                 "PRI(us)": pri,
                 "Detected": detect,
-                "Frequency (MHz)": frequency,
                 "Detection Time(secs)": det_time
             }
             test_setup_ = pd.DataFrame(table_2)
             report.set_table_dataframe(test_setup_)
             report.build_table()
 
+        freq_option= None
+        if self.more_option == "centre":
+            freq_option =  "Stay at centre freq for all Trials"
+        elif self.more_option == "random":
+            freq_option = "Stay at random frequency between the bandwidth for all trials"
         test_input_infor = {
             "Parameters": "Values",
             "LANforge ip": self.host,
@@ -868,11 +853,10 @@ class DfsTest(Realm):
             "Radar Types": self.fcctypes,
             "Radar Hardware": "ct712",
             "Freq Channel Number": self.channel,
-            "Desired Pass Percentage": "80%",
-            "Max Number of extra trials": "1",
+            "Desired Pass Percentage": str(self.desired_detection) + str("%"),
             "Time interval between Trials (secs)": "2",
             "Run Traffic": False,
-            "Frequency step option": "Stay at centre freq for all Trials",
+
             "Contact": "support@candelatech.com"
         }
         report.set_table_title("Test basic Information")
@@ -920,8 +904,9 @@ def main():
     parser.add_argument('--upstream', type=str, help='provide eth1/eth2', default='eth1')
 
     parser.add_argument('--fcctypes', nargs="+",
-                        default=["FCC0", "FCC1", "FCC2", "FCC3", "FCC4", "FCC5", "ETSI1", "ETSI2", "ETSI3", "ETSI4",
-                                 "ETSI5", "ETSI6"],
+                        default=["FCC0", "FCC1", "FCC2", "FCC3", "FCC4", "ETSI0", "ETSI1", "ETSI2", "ETSI3", "ETSI4",
+                                 "ETSI5", "ETSI6", "Japan-W53-1","Japan-W56-2", "Japan-W56-3", "Japan-W56-4", "Japan-W56-5", "Japan-W56-6",
+                                 "korea_1",  "korea_2",  "korea_3"],
                         help='types needed to be tested {FCC0/FCC1/FCC2/FCC3/FCC4/FCC5/ETSI1/ETSI2/ETSI3/ETSI4/ETSI5/ETSI6}')
 
     parser.add_argument('--channel', type=str, default="100",
@@ -940,6 +925,8 @@ def main():
                                                                              "which test you need to perform [shift, centre, random]")
 
     parser.add_argument("--time_int", default="0", help="provide time interval in seconds between each trials")
+
+    parser.add_argument("--bw_test", default=False, help="set to true when detection bandwidth test need to be performed")
 
 
 
@@ -964,9 +951,9 @@ def main():
                   more_option = args.more_option,
                   time_int = args.time_int,
                   trials = args.trials)
-    obj.run()
-    # obj.generate_report()
+    # obj.run()
+    obj.generate_report()
     # obj.generate_hori_graph()
-
+    # obj.test_graph()
 if __name__ == '__main__':
     main()
