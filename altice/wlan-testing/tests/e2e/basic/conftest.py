@@ -10,7 +10,7 @@ sys.path.append(
 if "libs" not in sys.path:
     sys.path.append(f'../libs')
 
-from controller.controller_1x.controller import ProfileUtility
+# from controller.controller_1x.controller import ProfileUtility
 from controller.controller_2x.controller import UProfileUtility
 from controller.controller_3x.controller import CController
 from controller.controller_4x.controller import AController
@@ -22,12 +22,10 @@ import allure
 
 @pytest.fixture(scope="session")
 def instantiate_profile(request):
-    if request.config.getoption("1.x"):
-        yield ProfileUtility
+    if request.config.getoption("al.1"):
+        yield AController
     elif request.config.getoption("cc.1"):
         yield CController
-    elif request.config.getoption("al.1"):
-        yield AController
     else:
         yield UProfileUtility
 
