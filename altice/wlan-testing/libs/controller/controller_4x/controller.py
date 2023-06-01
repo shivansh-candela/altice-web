@@ -65,10 +65,10 @@ class AController:
 
         print("IN APNOS: libs/apnos/apnos.py")
 
-        self.owrt_args = "--prompt " + self.ap_prompt + " -s serial --log stdout --user " + self.ap_username + " --passwd " + self.ap_password
-        self.sdk = sdk
-        if sdk == "2.x":
-            self.owrt_args = "--prompt " + self.ap_prompt + self.serial + " -s serial --log stdout --user " + self.ap_username + " --passwd " + self.ap_password
+        # self.owrt_args = "--prompt " + self.ap_prompt + " -s serial --log stdout --user " + self.ap_username + " --passwd " + self.ap_password
+        # self.sdk = sdk
+        # if sdk == "2.x":
+        #     self.owrt_args = "--prompt " + self.ap_prompt + self.serial + " -s serial --log stdout --user " + self.ap_username + " --passwd " + self.ap_password
         if credentials is None:
             print("No credentials Given")
             exit()
@@ -78,10 +78,14 @@ class AController:
         self.port = credentials['port']  # if mode=1, enter jumphost ssh port else ap ssh port
         self.mode = credentials['jumphost']  # 1 for jumphost, 0 for direct ssh
 
+        if "use_ssh" in credentials:
+            self.use_ssh = credentials['use_ssh']
+
         if 'mode' in credentials:
             self.type = credentials['mode']
 
-        if self.mode:
+
+        if not (self.use_ssh) and self.mode:
             self.tty = credentials['jumphost_tty']  # /dev/ttyAP1
             # kill minicom instance
             client = self.ssh_cli_connect()
@@ -119,7 +123,8 @@ class AController:
             else:
                 print("APNOS Serial Setup Fail")
 
-        self.setup_cli_connection()
+        if not (self.use_ssh) and self.mode:
+            self.setup_cli_connection()
 
     def setup_cli_connection(self, cmd="cli"):
         output = self.run_generic_cli_command("cli")
@@ -138,33 +143,49 @@ class AController:
 
     def run_generic_cli_command(self, cmd=""):
         print("Command: ",cmd)
-        try:
-            client = self.ssh_cli_connect()
-            cmd = cmd
-            if cmd=="cli":
-                self.owrt_args = "--prompt " + "root@GEN8" + " -s serial --log stdout --user " + self.ap_username + " --passwd " + self.ap_password
-            else:
-                self.owrt_args = "--prompt " + "/cli" + " -s serial --log stdout --user " + self.ap_username + " --passwd " + self.ap_password
-            print("run generic command:",self.owrt_args)
-            print("SELF.mode",self.mode)
-            if self.mode:
-                cmd = f"cd ~/cicd-git/ && ./openwrt_ctl.py {self.owrt_args} -t /dev/ttyUSB0 --action " \
-                      f"cmd --value \"{cmd}\" "
-            #./openwrt_ctl.py --prompt /cli -s serial -l stdout -u admin -p DustBunnyRoundup9# -s serial --tty /dev/ttyUSB0 --action cmd --value /cli
-            stdin, stdout, stderr = client.exec_command(cmd)
-            output = stdout.read()
-            print("Run Generic Command Output:",output)
-            # print(output.decode('utf-8'))
-            # status = output.decode('utf-8').splitlines()
-            status = re.sub("[^a-zA-Z_/0-9=> :\\^-]+", "", output.decode('utf-8'))
-            # print("status: 122",status)
-            status = status.split(" ")
-            # print("status: 124",status)
-            client.close()
-        except Exception as e:
-            print(e)
-            status = " ** Error ** "
-        return status
+        if not (self.use_ssh) and self.mode:
+            try:
+                client = self.ssh_cli_connect()
+                cmd = cmd
+                if cmd=="cli":
+                    self.owrt_args = "--prompt " + "root@GEN8" + " -s serial --log stdout --user " + self.ap_username + " --passwd " + self.ap_password
+                else:
+                    self.owrt_args = "--prompt " + "/cli" + " -s serial --log stdout --user " + self.ap_username + " --passwd " + self.ap_password
+                print("run generic command:",self.owrt_args)
+                print("SELF.mode",self.mode)
+                if self.mode:
+                    cmd = f"cd ~/cicd-git/ && ./openwrt_ctl.py {self.owrt_args} -t /dev/ttyUSB0 --action " \
+                          f"cmd --value \"{cmd}\" "
+                #./openwrt_ctl.py --prompt /cli -s serial -l stdout -u admin -p DustBunnyRoundup9# -s serial --tty /dev/ttyUSB0 --action cmd --value /cli
+                stdin, stdout, stderr = client.exec_command(cmd)
+                output = stdout.read()
+                print("Run Generic Command Output:",output)
+                # print(output.decode('utf-8'))
+                # status = output.decode('utf-8').splitlines()
+                status = re.sub("[^a-zA-Z_/0-9=> :\\^-]+", "", output.decode('utf-8'))
+                # print("status: 122",status)
+                status = status.split(" ")
+                # print("status: 124",status)
+                client.close()
+            except Exception as e:
+                print(e)
+                status = " ** Error ** "
+            return status
+
+        else:
+            try:
+                if self.use_ssh:
+                    cmd = f"../libs/apnos/altice_helper.sh -send_commands {cmd} "
+                    output = os.popen(cmd).read()
+                status = output.splitlines()
+                print("status: ", status)
+                status = re.sub("[^a-zA-Z_/0-9=> :\\^-]+", "", output)
+                status = status.split(" ")
+                print(status)
+            except Exception as e:
+                print(e)
+                status = " ** Error ** "
+            return status
 
     def run_generic_ap_prompt_command(self, cmd=""):
         print("Command: ",cmd)

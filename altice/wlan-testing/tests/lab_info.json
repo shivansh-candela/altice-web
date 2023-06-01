@@ -1,6 +1,6 @@
 {
     "CONFIGURATION": {
-        "testbed_43": {
+        "test-bed-53": {
             "controller": {
                 "url": "asd",
                 "username": "asdsa",
@@ -8,17 +8,17 @@
             },
             "access_point": [
                 {
-                    "id": 1,
-                    "model": "local-tb2",
+                    "id": 5,
+                    "model": "AlticeAP",
                     "mode": "wifi6",
                     "serial": "",
                     "jumphost": "true",
-                    "ip": "192.168.200.43",
+                    "ip": "192.168.200.53",
                     "username": "lanforge",
                     "password": "lanforge",
                     "port": "22",
                     "jumphost_tty": "/dev/ttyUSB0",
-                    "version": "next-latest",
+                    "version": "",
                     "ap_username": "admin",
                     "ap_password": "DustBunnyRoundup9#",
                     "ap_prompt": "root@GEN8",
@@ -27,7 +27,119 @@
                 }
             ],
             "traffic_generator": {
-                "name": "lanforge2",
+                "name": "lanforge_53",
+                "details": {
+                    "ip": "192.168.200.53",
+                    "port": "8080",
+                    "ssh_port": "22",
+                    "2.4G-Radio": [
+                        "1.1.wiphy2"
+                    ],
+                    "5G-Radio": [
+                        "1.1.wiphy2"
+                    ],
+                    "AX-Radio": [
+                        ""
+                    ],
+                    "upstream": "1.1.eth1",
+                    "lan-upstream": "",
+                    "upstream_subnet": "",
+                    "uplink": "",
+                    "2.4G-Station-Name": "altice_2.4",
+                    "5G-Station-Name": "altice_5",
+                    "AX-Station-Name": "",
+                    "attenuation_connected_serial": [
+                        "3258"
+                    ],
+                    "attenuation_selected_serial": [
+                        "3258"
+                    ]
+                }
+            }
+        },
+        "testbed_211": {
+            "controller": {
+                "url": "asd",
+                "username": "asdsa",
+                "password": "dasd"
+            },
+            "access_point": [
+                {
+                    "id": 7,
+                    "model": "AlticeAP1",
+                    "mode": "wifi6",
+                    "serial": "",
+                    "jumphost": "true",
+                    "ip": "192.168.200.211",
+                    "username": "lanforge",
+                    "password": "lanforge",
+                    "port": "22",
+                    "jumphost_tty": "/dev/ttyUSB0",
+                    "version": "",
+                    "ap_username": "admin",
+                    "ap_password": "DustBunnyRoundup9#",
+                    "ap_prompt": "root@GEN8",
+                    "image": "images/Altice_AP.png",
+                    "attached": true
+                }
+            ],
+            "traffic_generator": {
+                "name": "Lanforge_211",
+                "details": {
+                    "ip": "192.168.200.211",
+                    "port": "8080",
+                    "ssh_port": "22",
+                    "2.4G-Radio": [
+                        "1.1.wiphy1"
+                    ],
+                    "5G-Radio": [
+                        "1.1.wiphy1"
+                    ],
+                    "AX-Radio": [
+                        ""
+                    ],
+                    "upstream": "1.1.eth1",
+                    "lan-upstream": "",
+                    "upstream_subnet": "",
+                    "uplink": "",
+                    "2.4G-Station-Name": "sta2.4",
+                    "5G-Station-Name": "sta5",
+                    "AX-Station-Name": "",
+                    "attenuation_connected_serial": "",
+                    "attenuation_selected_serial": ""
+                }
+            }
+        },
+        "testbed-43": {
+            "controller": {
+                "url": "asd",
+                "username": "asdsa",
+                "password": "dasd"
+            },
+            "access_point": [
+                {
+                    "id": 3,
+                    "model": "local-tb2",
+                    "mode": "wifi6",
+                    "serial": "",
+                    "jumphost": "true",
+                    "ip": "192.168.200.43",
+                    "username": "lanforge",
+                    "password": "lanforge",
+                    "ap_ip": "192.168.200.103",
+                    "port": "22",
+                    "jumphost_tty": "/dev/ttyUSB0",
+                    "version": "next-latest",
+                    "ap_username": "admin",
+                    "ap_password": "DustBunnyRoundup9#",
+                    "ap_prompt": "root@GEN8",
+                    "image": "",
+                    "attached": true,
+                    "use_ssh": true
+                }
+            ],
+            "traffic_generator": {
+                "name": "lanforge-43",
                 "details": {
                     "ip": "192.168.200.43",
                     "port": "8080",
@@ -42,17 +154,17 @@
                         "1.1.wiphy1"
                     ],
                     "upstream": "1.1.eth1",
-                    "lan-upstream": "1.1.eth1",
+                    "lan-upstream": "1.1eth1",
                     "upstream_subnet": "",
                     "uplink": "",
-                    "2.4G-Station-Name": "wlan0",
-                    "5G-Station-Name": "wlan1",
+                    "2.4G-Station-Name": "2G",
+                    "5G-Station-Name": "5G",
                     "AX-Station-Name": "ax",
                     "attenuation_connected_serial": [
-                        "1031"
+                        "1006"
                     ],
                     "attenuation_selected_serial": [
-                        "1031"
+                        "1006"
                     ]
                 }
             }
