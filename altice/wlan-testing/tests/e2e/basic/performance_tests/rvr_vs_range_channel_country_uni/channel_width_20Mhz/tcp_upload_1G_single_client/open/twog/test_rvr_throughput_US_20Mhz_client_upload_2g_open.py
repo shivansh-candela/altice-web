@@ -5,7 +5,7 @@ import time
 
 pytestmark = [pytest.mark.country_code, pytest.mark.nat, pytest.mark.open, pytest.mark.united_states,
               pytest.mark.bandwidth_20mhz, pytest.mark.al, pytest.mark.tcp, pytest.mark.rate_vs_range,
-              pytest.mark.upload, pytest.mark.tcp_upload, pytest.mark.wifi_capacity_single_client,
+              pytest.mark.upload, pytest.mark.tcp_upload,
               pytest.mark.rate_vs_range_open_20mhz_all_channels_single_client_upload_1gbps,
               pytest.mark.rate_vs_range_throughput_open_20mhz_all_channels_single_client_upload_1gbps, pytest.mark.twog, pytest.mark.tcp]
 

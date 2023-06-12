@@ -4,9 +4,8 @@ import allure
 import time
 
 pytestmark = [pytest.mark.country_code, pytest.mark.nat, pytest.mark.wpa2, pytest.mark.united_states,
-              pytest.mark.bandwidth_20mhz, pytest.mark.al, pytest.mark.tcp, pytest.mark.wifi_capacity_test,
-              pytest.mark.bidirectional, pytest.mark.tcp_bidirectional, pytest.mark.wifi_capacity_single_client,
-              pytest.mark.wifi_capacity_wpa2_20mhz_all_channels_single_client_bidirectional_1gbps,
+              pytest.mark.bandwidth_20mhz, pytest.mark.al, pytest.mark.tcp,
+              pytest.mark.bidirectional, pytest.mark.tcp_bidirectional, pytest.mark.rate_vs_range,
               pytest.mark.throughput_wpa2_20mhz_all_channels_single_client_bidirectional_1gbps, pytest.mark.fiveg]
 
 setup_params_general = {

@@ -6,7 +6,6 @@ import time
 pytestmark = [pytest.mark.country_code, pytest.mark.nat, pytest.mark.wpa2, pytest.mark.united_states,
               pytest.mark.bandwidth_40mhz, pytest.mark.al, pytest.mark.tcp, pytest.mark.rate_vs_range,
               pytest.mark.download, pytest.mark.tcp_download,
-              pytest.mark.wifi_capacity_wpa2_40mhz_all_channels_single_client_download_1gbps,
               pytest.mark.rate_vs_range_throughput_wpa2_40mhz_all_channels_single_client_download_1gbps, pytest.mark.fiveg, pytest.mark.tcp]
 
 setup_params_general = {
