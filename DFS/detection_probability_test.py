@@ -7,7 +7,8 @@
  run : - python3 lf_detection_probability_test.py  --host 192.168.1.31 --ssid Candela_20MHz --passwd [BLANK] --security open --trials 1   --more_option centre --fcctypes FCC0
 
     Examples:
-        1. test for FCC0 - python3 lf_dpt.py  --host 192.168.100.221 --port 8080 --ssid MFG-5GTEST --passwd [BLANK] --security open  --radio 1.1.wiphy5 --sniff_radio 1.1.wiphy1  --fcctypes FCC0 --channel 100 --trials 1 --lf_hackrf 25766ec3
+        1. test for FCC0/FCC1/FCC2/FCC3/FCC4 (JUST REPLACE fcc0 with 1,2,3 or 4) - python3 lf_dpt.py  --host 192.168.100.221 --port 8080 --ssid MFG-5GTEST --passwd [BLANK] --security open  --radio 1.1.wiphy5 --sniff_radio 1.1.wiphy1  --fcctypes FCC0 --channel 100 --trials 1 --lf_hackrf 25766ec3
+        2. test for combine FCC0-4 - python3 lf_dpt.py  --host 192.168.100.221 --port 8080 --ssid MFG-5GTEST --passwd [BLANK] --security open  --radio 1.1.wiphy5 --sniff_radio 1.1.wiphy1  --fcctypes FCC0 FCC1 FCC2 FCC3 FCC4 --channel 100 --trials 1 --lf_hackrf 25766ec3
 Note:
     client creation is commented for testing
 """
@@ -295,10 +296,10 @@ class DfsTest(Realm):
             command = "sudo python3 lf_hackrf_dfs.py --freq " + str(freq) + " --hop --log_level debug "
         if type == "fcc5":
             command = "sudo python3 lf_hackrf_dfs.py --freq " + str(freq) + "--gain 14 --lf_gain 20 --tx_sample_rate 8 --radar_type FCC5,10,10,0,0,20 --log_level debug "
-        if type == "fcc0":
-            command = "sudo python3 lf_hackrf_dfs.py --pulse_width 1 --pulse_interval 1428 --pulse_count 18 --sweep_time 1000 --one_burst --freq " + str(freq) + \
-                      "  --lf_hackrf " + str(self.lf_hackrf)
+        if type == "fcc":
+            command = f"sudo python3 lf_hackrf_dfs.py --pulse_width {width} --pulse_interval {pri} --pulse_count {count} --sweep_time 1000 --one_burst --freq {freq} --lf_hackrf {self.lf_hackrf}"
         else:
+            # OLDER
             command = "sudo python lf_hackrf.py --pulse_width " + str(width) + " --pulse_interval " + str(
                 pri) + " --pulse_count " + str(count) + " --sweep_time 1000 --freq " + str(freq) + " --one_burst"
         stdin, stdout, stderr = p.exec_command(str(command), get_pty=True)
@@ -611,8 +612,8 @@ class DfsTest(Realm):
                         self.run_hackrf(width=width_, pri=interval_, count=count_, freq=str(frequency[str(self.channel)]))
                     if fcc == "FCC5":
                         self.run_hackrf(type="fcc5", freq=str(frequency[str(self.channel)]))
-                    if fcc == "FCC0":
-                        self.run_hackrf(type="fcc0", freq=str(frequency[str(self.channel)]))
+                    if fcc == "FCC0" or fcc == "FCC1" or fcc == "FCC2" or fcc == "FCC3" or fcc == "FCC4":
+                        self.run_hackrf(type="fcc", width=width_, pri=interval_, count=count_, freq=str(frequency[str(self.channel)]) )
 
                     else:
                         self.run_hackrf(width=width_, pri=interval_, count=count_,
