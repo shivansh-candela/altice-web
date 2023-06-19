@@ -1,0 +1,344 @@
+INFO:root:check if station is at expected channel
+INFO:root:68:7D:B4:5F:5C:3F
+INFO:root:station is at expected channel
+INFO:root:Radar Test started at Jun 19 16:50:46
+INFO:root:run particular logic for given  trials
+INFO:root:{'FCC4': None, 'FCC1': None, 'FCC2': None, 'FCC3': None, 'FCC0': None}
+INFO:root:{'FCC4': {'Trial_1': None}, 'FCC1': {'Trial_1': None}, 'FCC2': {'Trial_1': None}, 'FCC3': {'Trial_1': None}, 'FCC0': {'Trial_1': None}}
+INFO:root:0
+INFO:root:result data{'FCC4': {'Trial_1': {'Burst': None, 'Pulses': None, 'Width': None, 'PRI(US)': None, 'Detected': None, 'Frequency(KHz)': None, 'Detection Time(sec)': None}}, 'FCC1': {'Trial_1': None}, 'FCC2': {'Trial_1': None}, 'FCC3': {'Trial_1': None}, 'FCC0': {'Trial_1': None}}
+INFO:root:starting sniffer
+INFO:py-scripts.lf_sniff_radio:channel: 100  frequency: 5500
+INFO:root:generate radar
+INFO:paramiko.transport:Connected (version 2.0, client OpenSSH_8.8)
+INFO:paramiko.transport:Authentication (publickey) failed.
+INFO:paramiko.transport:Authentication (publickey) failed.
+INFO:paramiko.transport:Authentication (password) successful!
+INFO:root:[sudo] password for lanforge: 
+starting
+
+gr-osmosdr 0.2.0.0 (0.2.0) gnuradio 3.10.1.0
+built-in sink types: uhd hackrf soapy redpitaya file 
+[0;32m[INFO] [UHD] [0;39mlinux; GNU C++ version 12.0.1 20220129 (Red Hat 12.0.1-0); Boost_107600; UHD_4.1.0.5
+Using HackRF One with firmware 2023.01.1
+started
+
+complete
+stopping
+
+stopped
+
+exiting
+
+
+INFO:paramiko.transport:Connected (version 2.0, client OpenSSH_8.8)
+INFO:paramiko.transport:Authentication (publickey) failed.
+INFO:paramiko.transport:Authentication (publickey) failed.
+INFO:paramiko.transport:Authentication (password) successful!
+INFO:root:[sudo] password for lanforge: 
+starting
+
+gr-osmosdr 0.2.0.0 (0.2.0) gnuradio 3.10.1.0
+built-in sink types: uhd hackrf soapy redpitaya file 
+Using HackRF One with firmware 2023.01.1
+started
+
+complete
+stopping
+
+stopped
+
+exiting
+
+
+INFO:root: stop_sniffer
+INFO:paramiko.transport:Connected (version 2.0, client OpenSSH_8.8)
+INFO:paramiko.transport:Authentication (password) successful!
+INFO:root:pcap file name./pcap/dfs_csa_FCC4_Trial_1_channel100_2023-06-19-16-50.pcap
+INFO:root:scapy frame  is present
+INFO:root:csa frame  time is Jun 19, 2023 16:51:17.466352337 IST
+INFO:root:yes
+INFO:root:scapy timeJun 19, 2023 16:51:17
+INFO:root:csa framepresent
+INFO:root:csa frame  is present
+INFO:root:radar detected
+INFO:root:csa frame  time is Jun 19, 2023 16:51:21.862007284 IST
+INFO:root:yes
+INFO:root:csa timeJun 19, 2023 16:51:21
+INFO:root:calculate detection time
+INFO:root:detection time 0:00:04
+INFO:root:detection time 4
+INFO:root:{'FCC4': {'Trial_1': {'Burst': '1', 'Pulses': '12', 'Width': '16', 'PRI(US)': '201', 'Detected': 'YES', 'Frequency(KHz)': '5500000', 'Detection Time(sec)': 4}}, 'FCC1': {'Trial_1': None}, 'FCC2': {'Trial_1': None}, 'FCC3': {'Trial_1': None}, 'FCC0': {'Trial_1': None}}
+INFO:root:check desired trials percentage
+INFO:root:0
+INFO:root:result data{'FCC4': {'Trial_1': {'Burst': '1', 'Pulses': '12', 'Width': '16', 'PRI(US)': '201', 'Detected': 'YES', 'Frequency(KHz)': '5500000', 'Detection Time(sec)': 4}}, 'FCC1': {'Trial_1': {'Burst': None, 'Pulses': None, 'Width': None, 'PRI(US)': None, 'Detected': None, 'Frequency(KHz)': None, 'Detection Time(sec)': None}}, 'FCC2': {'Trial_1': None}, 'FCC3': {'Trial_1': None}, 'FCC0': {'Trial_1': None}}
+INFO:root:since given trials are less than 30 TestB is considered
+INFO:root:starting sniffer
+INFO:py-scripts.lf_sniff_radio:channel: 100  frequency: 5500
+INFO:root:generate radar
+INFO:paramiko.transport:Connected (version 2.0, client OpenSSH_8.8)
+INFO:paramiko.transport:Authentication (publickey) failed.
+INFO:paramiko.transport:Authentication (publickey) failed.
+INFO:paramiko.transport:Authentication (password) successful!
+INFO:root:[sudo] password for lanforge: 
+starting
+
+gr-osmosdr 0.2.0.0 (0.2.0) gnuradio 3.10.1.0
+built-in sink types: uhd hackrf soapy redpitaya file 
+[0;32m[INFO] [UHD] [0;39mlinux; GNU C++ version 12.0.1 20220129 (Red Hat 12.0.1-0); Boost_107600; UHD_4.1.0.5
+Using HackRF One with firmware 2023.01.1
+started
+
+complete
+stopping
+
+stopped
+
+exiting
+
+
+INFO:paramiko.transport:Connected (version 2.0, client OpenSSH_8.8)
+INFO:paramiko.transport:Authentication (publickey) failed.
+INFO:paramiko.transport:Authentication (publickey) failed.
+INFO:paramiko.transport:Authentication (password) successful!
+INFO:root:[sudo] password for lanforge: 
+starting
+
+gr-osmosdr 0.2.0.0 (0.2.0) gnuradio 3.10.1.0
+built-in sink types: uhd hackrf soapy redpitaya file 
+Using HackRF One with firmware 2023.01.1
+started
+
+complete
+stopping
+
+stopped
+
+exiting
+
+
+INFO:root: stop_sniffer
+INFO:paramiko.transport:Connected (version 2.0, client OpenSSH_8.8)
+INFO:paramiko.transport:Authentication (password) successful!
+INFO:root:pcap file name./pcap/dfs_csa_FCC1_Trial_1_channel100_2023-06-19-16-51.pcap
+INFO:root:scapy frame  is present
+INFO:root:csa frame  time is Jun 19, 2023 16:52:13.069339773 IST
+INFO:root:yes
+INFO:root:scapy timeJun 19, 2023 16:52:13
+INFO:root:csa framepresent
+INFO:root:csa frame  is present
+INFO:root:radar detected
+INFO:root:csa frame  time is Jun 19, 2023 16:52:16.543942395 IST
+INFO:root:yes
+INFO:root:csa timeJun 19, 2023 16:52:16
+INFO:root:calculate detection time
+INFO:root:detection time 0:00:03
+INFO:root:detection time 3
+INFO:root:{'FCC4': {'Trial_1': {'Burst': '1', 'Pulses': '12', 'Width': '16', 'PRI(US)': '201', 'Detected': 'YES', 'Frequency(KHz)': '5500000', 'Detection Time(sec)': 4}}, 'FCC1': {'Trial_1': {'Burst': '1', 'Pulses': '55', 'Width': '1', 'PRI(US)': '976', 'Detected': 'YES', 'Frequency(KHz)': '5500000', 'Detection Time(sec)': 3}}, 'FCC2': {'Trial_1': None}, 'FCC3': {'Trial_1': None}, 'FCC0': {'Trial_1': None}}
+INFO:root:check desired trials percentage
+INFO:root:0
+INFO:root:result data{'FCC4': {'Trial_1': {'Burst': '1', 'Pulses': '12', 'Width': '16', 'PRI(US)': '201', 'Detected': 'YES', 'Frequency(KHz)': '5500000', 'Detection Time(sec)': 4}}, 'FCC1': {'Trial_1': {'Burst': '1', 'Pulses': '55', 'Width': '1', 'PRI(US)': '976', 'Detected': 'YES', 'Frequency(KHz)': '5500000', 'Detection Time(sec)': 3}}, 'FCC2': {'Trial_1': {'Burst': None, 'Pulses': None, 'Width': None, 'PRI(US)': None, 'Detected': None, 'Frequency(KHz)': None, 'Detection Time(sec)': None}}, 'FCC3': {'Trial_1': None}, 'FCC0': {'Trial_1': None}}
+INFO:root:starting sniffer
+INFO:py-scripts.lf_sniff_radio:channel: 100  frequency: 5500
+INFO:root:generate radar
+INFO:paramiko.transport:Connected (version 2.0, client OpenSSH_8.8)
+INFO:paramiko.transport:Authentication (publickey) failed.
+INFO:paramiko.transport:Authentication (publickey) failed.
+INFO:paramiko.transport:Authentication (password) successful!
+INFO:root:[sudo] password for lanforge: 
+starting
+
+gr-osmosdr 0.2.0.0 (0.2.0) gnuradio 3.10.1.0
+built-in sink types: uhd hackrf soapy redpitaya file 
+[0;32m[INFO] [UHD] [0;39mlinux; GNU C++ version 12.0.1 20220129 (Red Hat 12.0.1-0); Boost_107600; UHD_4.1.0.5
+Using HackRF One with firmware 2023.01.1
+started
+
+complete
+stopping
+
+stopped
+
+exiting
+
+
+INFO:paramiko.transport:Connected (version 2.0, client OpenSSH_8.8)
+INFO:paramiko.transport:Authentication (publickey) failed.
+INFO:paramiko.transport:Authentication (publickey) failed.
+INFO:paramiko.transport:Authentication (password) successful!
+INFO:root:[sudo] password for lanforge: 
+starting
+
+gr-osmosdr 0.2.0.0 (0.2.0) gnuradio 3.10.1.0
+built-in sink types: uhd hackrf soapy redpitaya file 
+Using HackRF One with firmware 2023.01.1
+started
+
+complete
+stopping
+
+stopped
+
+exiting
+
+
+INFO:root: stop_sniffer
+INFO:paramiko.transport:Connected (version 2.0, client OpenSSH_8.8)
+INFO:paramiko.transport:Authentication (password) successful!
+INFO:root:pcap file name./pcap/dfs_csa_FCC2_Trial_1_channel100_2023-06-19-16-52.pcap
+INFO:root:scapy frame  is present
+INFO:root:csa frame  time is Jun 19, 2023 16:53:07.857318864 IST
+INFO:root:yes
+INFO:root:scapy timeJun 19, 2023 16:53:07
+INFO:root:csa framepresent
+INFO:root:csa frame  is present
+INFO:root:radar detected
+INFO:root:csa frame  time is Jun 19, 2023 16:53:11.635477246 IST
+INFO:root:yes
+INFO:root:csa timeJun 19, 2023 16:53:11
+INFO:root:calculate detection time
+INFO:root:detection time 0:00:04
+INFO:root:detection time 4
+INFO:root:{'FCC4': {'Trial_1': {'Burst': '1', 'Pulses': '12', 'Width': '16', 'PRI(US)': '201', 'Detected': 'YES', 'Frequency(KHz)': '5500000', 'Detection Time(sec)': 4}}, 'FCC1': {'Trial_1': {'Burst': '1', 'Pulses': '55', 'Width': '1', 'PRI(US)': '976', 'Detected': 'YES', 'Frequency(KHz)': '5500000', 'Detection Time(sec)': 3}}, 'FCC2': {'Trial_1': {'Burst': '1', 'Pulses': '23', 'Width': '1', 'PRI(US)': '171', 'Detected': 'YES', 'Frequency(KHz)': '5500000', 'Detection Time(sec)': 4}}, 'FCC3': {'Trial_1': None}, 'FCC0': {'Trial_1': None}}
+INFO:root:check desired trials percentage
+INFO:root:0
+INFO:root:result data{'FCC4': {'Trial_1': {'Burst': '1', 'Pulses': '12', 'Width': '16', 'PRI(US)': '201', 'Detected': 'YES', 'Frequency(KHz)': '5500000', 'Detection Time(sec)': 4}}, 'FCC1': {'Trial_1': {'Burst': '1', 'Pulses': '55', 'Width': '1', 'PRI(US)': '976', 'Detected': 'YES', 'Frequency(KHz)': '5500000', 'Detection Time(sec)': 3}}, 'FCC2': {'Trial_1': {'Burst': '1', 'Pulses': '23', 'Width': '1', 'PRI(US)': '171', 'Detected': 'YES', 'Frequency(KHz)': '5500000', 'Detection Time(sec)': 4}}, 'FCC3': {'Trial_1': {'Burst': None, 'Pulses': None, 'Width': None, 'PRI(US)': None, 'Detected': None, 'Frequency(KHz)': None, 'Detection Time(sec)': None}}, 'FCC0': {'Trial_1': None}}
+INFO:root:starting sniffer
+INFO:py-scripts.lf_sniff_radio:channel: 100  frequency: 5500
+INFO:root:generate radar
+INFO:paramiko.transport:Connected (version 2.0, client OpenSSH_8.8)
+INFO:paramiko.transport:Authentication (publickey) failed.
+INFO:paramiko.transport:Authentication (publickey) failed.
+INFO:paramiko.transport:Authentication (password) successful!
+INFO:root:[sudo] password for lanforge: 
+starting
+
+gr-osmosdr 0.2.0.0 (0.2.0) gnuradio 3.10.1.0
+built-in sink types: uhd hackrf soapy redpitaya file 
+[0;32m[INFO] [UHD] [0;39mlinux; GNU C++ version 12.0.1 20220129 (Red Hat 12.0.1-0); Boost_107600; UHD_4.1.0.5
+Using HackRF One with firmware 2023.01.1
+started
+
+complete
+stopping
+
+stopped
+
+exiting
+
+
+INFO:paramiko.transport:Connected (version 2.0, client OpenSSH_8.8)
+INFO:paramiko.transport:Authentication (publickey) failed.
+INFO:paramiko.transport:Authentication (publickey) failed.
+INFO:paramiko.transport:Authentication (password) successful!
+INFO:root:[sudo] password for lanforge: 
+starting
+
+gr-osmosdr 0.2.0.0 (0.2.0) gnuradio 3.10.1.0
+built-in sink types: uhd hackrf soapy redpitaya file 
+Using HackRF One with firmware 2023.01.1
+started
+
+complete
+stopping
+
+stopped
+
+exiting
+
+
+INFO:root: stop_sniffer
+INFO:paramiko.transport:Connected (version 2.0, client OpenSSH_8.8)
+INFO:paramiko.transport:Authentication (password) successful!
+INFO:root:pcap file name./pcap/dfs_csa_FCC3_Trial_1_channel100_2023-06-19-16-53.pcap
+INFO:root:scapy frame  is present
+INFO:root:csa frame  time is Jun 19, 2023 16:54:03.983321366 IST
+INFO:root:yes
+INFO:root:scapy timeJun 19, 2023 16:54:03
+INFO:root:csa framepresent
+INFO:root:csa frame  is present
+INFO:root:radar detected
+INFO:root:csa frame  time is Jun 19, 2023 16:54:07.443762218 IST
+INFO:root:yes
+INFO:root:csa timeJun 19, 2023 16:54:07
+INFO:root:calculate detection time
+INFO:root:detection time 0:00:04
+INFO:root:detection time 4
+INFO:root:{'FCC4': {'Trial_1': {'Burst': '1', 'Pulses': '12', 'Width': '16', 'PRI(US)': '201', 'Detected': 'YES', 'Frequency(KHz)': '5500000', 'Detection Time(sec)': 4}}, 'FCC1': {'Trial_1': {'Burst': '1', 'Pulses': '55', 'Width': '1', 'PRI(US)': '976', 'Detected': 'YES', 'Frequency(KHz)': '5500000', 'Detection Time(sec)': 3}}, 'FCC2': {'Trial_1': {'Burst': '1', 'Pulses': '23', 'Width': '1', 'PRI(US)': '171', 'Detected': 'YES', 'Frequency(KHz)': '5500000', 'Detection Time(sec)': 4}}, 'FCC3': {'Trial_1': {'Burst': '1', 'Pulses': '18', 'Width': '10', 'PRI(US)': '268', 'Detected': 'YES', 'Frequency(KHz)': '5500000', 'Detection Time(sec)': 4}}, 'FCC0': {'Trial_1': None}}
+INFO:root:check desired trials percentage
+INFO:root:0
+INFO:root:result data{'FCC4': {'Trial_1': {'Burst': '1', 'Pulses': '12', 'Width': '16', 'PRI(US)': '201', 'Detected': 'YES', 'Frequency(KHz)': '5500000', 'Detection Time(sec)': 4}}, 'FCC1': {'Trial_1': {'Burst': '1', 'Pulses': '55', 'Width': '1', 'PRI(US)': '976', 'Detected': 'YES', 'Frequency(KHz)': '5500000', 'Detection Time(sec)': 3}}, 'FCC2': {'Trial_1': {'Burst': '1', 'Pulses': '23', 'Width': '1', 'PRI(US)': '171', 'Detected': 'YES', 'Frequency(KHz)': '5500000', 'Detection Time(sec)': 4}}, 'FCC3': {'Trial_1': {'Burst': '1', 'Pulses': '18', 'Width': '10', 'PRI(US)': '268', 'Detected': 'YES', 'Frequency(KHz)': '5500000', 'Detection Time(sec)': 4}}, 'FCC0': {'Trial_1': {'Burst': None, 'Pulses': None, 'Width': None, 'PRI(US)': None, 'Detected': None, 'Frequency(KHz)': None, 'Detection Time(sec)': None}}}
+INFO:root:starting sniffer
+INFO:py-scripts.lf_sniff_radio:channel: 100  frequency: 5500
+INFO:root:generate radar
+INFO:paramiko.transport:Connected (version 2.0, client OpenSSH_8.8)
+INFO:paramiko.transport:Authentication (publickey) failed.
+INFO:paramiko.transport:Authentication (publickey) failed.
+INFO:paramiko.transport:Authentication (password) successful!
+INFO:root:[sudo] password for lanforge: 
+starting
+
+gr-osmosdr 0.2.0.0 (0.2.0) gnuradio 3.10.1.0
+built-in sink types: uhd hackrf soapy redpitaya file 
+[0;32m[INFO] [UHD] [0;39mlinux; GNU C++ version 12.0.1 20220129 (Red Hat 12.0.1-0); Boost_107600; UHD_4.1.0.5
+Using HackRF One with firmware 2023.01.1
+started
+
+complete
+stopping
+
+stopped
+
+exiting
+
+
+INFO:paramiko.transport:Connected (version 2.0, client OpenSSH_8.8)
+INFO:paramiko.transport:Authentication (publickey) failed.
+INFO:paramiko.transport:Authentication (publickey) failed.
+INFO:paramiko.transport:Authentication (password) successful!
+INFO:root:[sudo] password for lanforge: 
+starting
+
+gr-osmosdr 0.2.0.0 (0.2.0) gnuradio 3.10.1.0
+built-in sink types: uhd hackrf soapy redpitaya file 
+Using HackRF One with firmware 2023.01.1
+started
+
+complete
+stopping
+
+stopped
+
+exiting
+
+
+INFO:root: stop_sniffer
+INFO:paramiko.transport:Connected (version 2.0, client OpenSSH_8.8)
+INFO:paramiko.transport:Authentication (password) successful!
+INFO:root:pcap file name./pcap/dfs_csa_FCC0_Trial_1_channel100_2023-06-19-16-54.pcap
+INFO:root:scapy frame  is present
+INFO:root:csa frame  time is Jun 19, 2023 16:55:01.315315585 IST
+INFO:root:yes
+INFO:root:scapy timeJun 19, 2023 16:55:01
+INFO:root:csa framepresent
+INFO:root:csa frame  is present
+INFO:root:radar detected
+INFO:root:csa frame  time is Jun 19, 2023 16:55:05.095365399 IST
+INFO:root:yes
+INFO:root:csa timeJun 19, 2023 16:55:05
+INFO:root:calculate detection time
+INFO:root:detection time 0:00:04
+INFO:root:detection time 4
+INFO:root:{'FCC4': {'Trial_1': {'Burst': '1', 'Pulses': '12', 'Width': '16', 'PRI(US)': '201', 'Detected': 'YES', 'Frequency(KHz)': '5500000', 'Detection Time(sec)': 4}}, 'FCC1': {'Trial_1': {'Burst': '1', 'Pulses': '55', 'Width': '1', 'PRI(US)': '976', 'Detected': 'YES', 'Frequency(KHz)': '5500000', 'Detection Time(sec)': 3}}, 'FCC2': {'Trial_1': {'Burst': '1', 'Pulses': '23', 'Width': '1', 'PRI(US)': '171', 'Detected': 'YES', 'Frequency(KHz)': '5500000', 'Detection Time(sec)': 4}}, 'FCC3': {'Trial_1': {'Burst': '1', 'Pulses': '18', 'Width': '10', 'PRI(US)': '268', 'Detected': 'YES', 'Frequency(KHz)': '5500000', 'Detection Time(sec)': 4}}, 'FCC0': {'Trial_1': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(KHz)': '5500000', 'Detection Time(sec)': 4}}}
+INFO:root:check desired trials percentage
+INFO:root:final dict{'FCC4': {'Trial_1': {'Burst': '1', 'Pulses': '12', 'Width': '16', 'PRI(US)': '201', 'Detected': 'YES', 'Frequency(KHz)': '5500000', 'Detection Time(sec)': 4}}, 'FCC1': {'Trial_1': {'Burst': '1', 'Pulses': '55', 'Width': '1', 'PRI(US)': '976', 'Detected': 'YES', 'Frequency(KHz)': '5500000', 'Detection Time(sec)': 3}}, 'FCC2': {'Trial_1': {'Burst': '1', 'Pulses': '23', 'Width': '1', 'PRI(US)': '171', 'Detected': 'YES', 'Frequency(KHz)': '5500000', 'Detection Time(sec)': 4}}, 'FCC3': {'Trial_1': {'Burst': '1', 'Pulses': '18', 'Width': '10', 'PRI(US)': '268', 'Detected': 'YES', 'Frequency(KHz)': '5500000', 'Detection Time(sec)': 4}}, 'FCC0': {'Trial_1': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(KHz)': '5500000', 'Detection Time(sec)': 4}}}
+INFO:root:Test ended at Jun 19 16:55:27
+INFO:root:Test ended at Jun 19 16:55:27
+INFO:root:test duration0:04:41
+INFO:py-scripts.lf_report:path set: 
+INFO:py-scripts.lf_report:path_date_time 2023-06-19-16-55-27_Detection Probability Test
+INFO:py-scripts.lf_report:report path : 2023-06-19-16-55-27_Detection Probability Test
+INFO:root:graph dict{'FCC4': 100.0, 'FCC1': 100.0, 'FCC2': 100.0, 'FCC3': 100.0, 'FCC0': 100.0}
+INFO:py-scripts.lf_report:graph_src_file: image_name2.png
+INFO:py-scripts.lf_report:graph_dst_file: 2023-06-19-16-55-27_Detection Probability Test/image_name2.png
+INFO:py-scripts.lf_report:write_output_html: 2023-06-19-16-55-27_Detection Probability Test/dpt.html
