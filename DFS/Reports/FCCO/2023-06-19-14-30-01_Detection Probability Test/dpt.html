@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+       <html lang='en'>
+           <head>
+        <meta charset='UTF-8'>
+        <meta name='viewport' content='width=device-width, initial-scale=1' />
+        <style>
+        body { margin: 0; padding: 0; }
+        </style>
+        <link rel='stylesheet' href='report.css' />
+        <link rel='stylesheet' href='custom.css' />
+        <title>Detection Probability Test Report</title>
+    </head>
+           <body>
+               <div id='BannerBack' style='height: 100%; max-height: 100%;'>
+                   <div id='BannerLeft' style="margin: 0%; background-size: 100%; max-height: 100%; max-width: 100%; width: 100%; height: 100%;">
+                       <img id='BannerLogo' align='right' src="CandelaLogo2-90dpi-200x90-trans.png" border='0'/>
+                       <div class='HeaderStyle'>
+                           <h1 class='TitleFontPrint' style='color:darkgreen;'>Detection Probability Test Report</h1>
+                           <h4 class='TitleFontPrintSub' style='color:darkgreen;'>2023-06-19-14:30:01</h4>
+                       </div>
+                   </div>
+               </div>
+                        
+                    <!-- Table Title-->
+                    <h3 align='left'>Test Setup Information</h3> 
+                    
+                            <!-- Test Setup Information -->
+                            <table width='700px' border='1' cellpadding='2' cellspacing='0' style='border-top-color: gray; border-top-style: solid; border-top-width: 1px; border-right-color: gray; border-right-style: solid; border-right-width: 1px; border-bottom-color: gray; border-bottom-style: solid; border-bottom-width: 1px; border-left-color: gray; border-left-style: solid; border-left-width: 1px'>
+                                
+                                <tr>
+                                  <td>Device under test</td>
+                                  <td>
+                                    <table width='100%' border='0' cellpadding='2' cellspacing='0' style='border-top-color: gray; border-top-style: solid; border-top-width: 1px; border-right-color: gray; border-right-style: solid; border-right-width: 1px; border-bottom-color: gray; border-bottom-style: solid; border-bottom-width: 1px; border-left-color: gray; border-left-style: solid; border-left-width: 1px'>
+                                      <tr><td>DUT Name</td><td colspan='3'>Test_AP</td></tr><tr><td>SSID</td><td colspan='3'>MFG-5GTEST</td></tr><tr><td>Test Duration</td><td colspan='3'>0:00:59</td></tr>
+                                    </table>
+                                  </td>
+                                </tr>
+                            </table>
+
+                            <br>
+                            
+            <!-- Test Objective -->
+            <h3 align='left'>Objective</h3> 
+            <p align='left' width='900'>Detection Probability Test  is compilance to the Dynamic Frequency Selection (DFS) Regulation, it creates regulatory specified radar pulses  to the DUT repeatedly to measure the probability of detection.</p>
+            
+            <!-- Test Objective -->
+            <h3 align='left'>Result Summary</h3> 
+            <p align='left' width='900'>The below graph provides information regarding detection probability percentage for various RADAR Types.</p>
+            
+              <img align='left' style='padding:15px;margin:5px 5px 2em 5px;width:1000px;' src='image_name2.png' border='0' />
+            
+            <!-- Test Objective -->
+            <h3 align='left'>Summary Table</h3> 
+            <p align='left' width='900'>The below table provides detailed information regarding detection probability percentage for various RADAR Types.</p>
+            <table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: center;">
+      <th>WaveForm Name</th>
+      <th>Pd %</th>
+      <th>Desired Percentage %</th>
+      <th>Pd Required Percentage %</th>
+      <th>Num Trials</th>
+      <th>Average Detect Time (secs)</th>
+      <th>Result</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>FCC0</td>
+      <td>100.0</td>
+      <td>80</td>
+      <td>60%</td>
+      <td>1</td>
+      <td>4.0</td>
+      <td>PASSED</td>
+    </tr>
+  </tbody>
+</table>
+            <!-- Test Objective -->
+            <h3 align='left'>Detailed Result Table</h3> 
+            <p align='left' width='900'>The below tables provides detailed information for per trials run for each RADAR Types</p>
+            
+            <!-- Test Objective -->
+            <h3 align='left'>Detailed Result Table for FCC0</h3> 
+            <p align='left' width='900'>The below table provides detailed information for per trials run for FCC0RADAR Type</p>
+            <table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: center;">
+      <th>Trials</th>
+      <th>Num Bursts</th>
+      <th>Num Pulses</th>
+      <th>Pulse Width (us)</th>
+      <th>PRI(us)</th>
+      <th>Detected</th>
+      <th>Frequency (KHz)</th>
+      <th>Detection Time(secs)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Trial_1</td>
+      <td>1</td>
+      <td>18</td>
+      <td>1</td>
+      <td>1428</td>
+      <td>YES</td>
+      <td>5500000</td>
+      <td>4</td>
+    </tr>
+  </tbody>
+</table>
+                    <!-- Table Title-->
+                    <h3 align='left'>Test basic Information</h3> 
+                    
+                            <!-- Test Setup Information -->
+                            <table width='700px' border='1' cellpadding='2' cellspacing='0' style='border-top-color: gray; border-top-style: solid; border-top-width: 1px; border-right-color: gray; border-right-style: solid; border-right-width: 1px; border-bottom-color: gray; border-bottom-style: solid; border-bottom-width: 1px; border-left-color: gray; border-left-style: solid; border-left-width: 1px'>
+                                
+                                <tr>
+                                  <td>Information</td>
+                                  <td>
+                                    <table width='100%' border='0' cellpadding='2' cellspacing='0' style='border-top-color: gray; border-top-style: solid; border-top-width: 1px; border-right-color: gray; border-right-style: solid; border-right-width: 1px; border-bottom-color: gray; border-bottom-style: solid; border-bottom-width: 1px; border-left-color: gray; border-left-style: solid; border-left-width: 1px'>
+                                      <tr><td>Parameters</td><td colspan='3'>Values</td></tr><tr><td>LANforge ip</td><td colspan='3'>192.168.100.221</td></tr><tr><td>LANforge port</td><td colspan='3'>8080</td></tr><tr><td>Radar Types</td><td colspan='3'>['FCC0']</td></tr><tr><td>Radar Hardware</td><td colspan='3'>ct712</td></tr><tr><td>Freq Channel Number</td><td colspan='3'>100</td></tr><tr><td>Tx Power of radar in dbm</td><td colspan='3'>-38.61</td></tr><tr><td>Desired Pass Percentage</td><td colspan='3'>80%</td></tr><tr><td>Max Number of extra trials</td><td colspan='3'>0</td></tr><tr><td>Time interval between Trials (secs)</td><td colspan='3'>0</td></tr><tr><td>Run Traffic</td><td colspan='3'>False</td></tr><tr><td>Frequency step option</td><td colspan='3'>Stay at centre freq for all Trials</td></tr><tr><td>Contact</td><td colspan='3'>support@candelatech.com</td></tr>
+                                    </table>
+                                  </td>
+                                </tr>
+                            </table>
+
+                            <br>
+                            
+    <footer class='FooterStyle'>
+        <a href="https://www.candelatech.com/"><img 
+            id='BannerLogoFooter' align='right' src="candela_swirl_small-72h.png" border='0'/></a>
+        <p>Generated by Candela Technologies LANforge network testing tool</p>
+        <p><a href="https://www.candelatech.com">www.candelatech.com</a><p>
+    </footer>
+        
