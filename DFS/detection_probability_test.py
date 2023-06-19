@@ -9,6 +9,7 @@
     Examples:
         1. test for FCC0/FCC1/FCC2/FCC3/FCC4 (JUST REPLACE fcc0 with 1,2,3 or 4) - python3 lf_dpt.py  --host 192.168.100.221 --port 8080 --ssid MFG-5GTEST --passwd [BLANK] --security open  --radio 1.1.wiphy5 --sniff_radio 1.1.wiphy1  --fcctypes FCC0 --channel 100 --trials 1 --lf_hackrf 25766ec3
         2. test for combine FCC0-4 - python3 lf_dpt.py  --host 192.168.100.221 --port 8080 --ssid MFG-5GTEST --passwd [BLANK] --security open  --radio 1.1.wiphy5 --sniff_radio 1.1.wiphy1  --fcctypes FCC0 FCC1 FCC2 FCC3 FCC4 --channel 100 --trials 1 --lf_hackrf 25766ec3
+        3. for FCC5 - python3 lf_dpt.py  --host 192.168.100.221 --port 8080 --ssid MFG-5GTEST --passwd [BLANK] --security open  --radio 1.1.wiphy5 --sniff_radio 1.1.wiphy1  --fcctypes FCC5  --channel 100 --trials 30  --more_option centre --lf_hackrf 25766ec3
 Note:
     client creation is commented for testing
 """
@@ -259,24 +260,10 @@ class DfsTest(Realm):
             logging.error("Stations failed to get IPs")
             exit(1)
 
-    def send_frame(self):
-        # Set the source and destination addresses
-        src_address = "00:11:22:33:44:55"
-        dst_address = "66:77:88:99:aa:bb"
-
-        # Set the network interface to use
-        iface = "monitor"
-
-        # Create a wireless frame with the specified source and destination addresses
-        frame = RadioTap() / Dot11(addr1=dst_address, addr2=src_address)
-
-        # Send the frame over the specified network interface
-        sendp(frame, iface=iface)
-
-    def run_hackrf(self, width=1, pri=1428, count=18, freq=None, type=None):
-
+    def run_hackrf(self, width=None, pri=None, count=None, freq=None, type=None, burst=None, trial_centre=None, trial_low=None,
+                   trial_high=None, uut_channel=None, freq_modulatin=None, tx_sample_rate=None):
+        print(type)
         # send frame to note t1
-
 
         p = paramiko.SSHClient()
         p.set_missing_host_key_policy(paramiko.AutoAddPolicy())  # This script doesn't work for me unless this line is added!
@@ -295,13 +282,16 @@ class DfsTest(Realm):
         if type == "fcc6":
             command = "sudo python3 lf_hackrf_dfs.py --freq " + str(freq) + " --hop --log_level debug "
         if type == "fcc5":
-            command = "sudo python3 lf_hackrf_dfs.py --freq " + str(freq) + "--gain 14 --lf_gain 20 --tx_sample_rate 8 --radar_type FCC5,10,10,0,0,20 --log_level debug "
+            command = f"sudo python3 lf_hackrf_dfs.py --freq {freq} --rf_type FCC5,{burst},{trial_centre},{trial_low},{trial_high},{uut_channel},{freq_modulatin},{tx_sample_rate} --log_level debug --lf_hackrf {self.lf_hackrf}"
+            print(command)
+
+                # f"sudo python3 lf_hackrf_dfs.py --freq " + str(freq) + "--gain 14 --lf_gain 20 --tx_sample_rate 8 --radar_type FCC5,10,10,0,0,20 --log_level debug "
         if type == "fcc":
             command = f"sudo python3 lf_hackrf_dfs.py --pulse_width {width} --pulse_interval {pri} --pulse_count {count} --sweep_time 1000 --one_burst --freq {freq} --lf_hackrf {self.lf_hackrf}"
-        else:
-            # OLDER
-            command = "sudo python lf_hackrf.py --pulse_width " + str(width) + " --pulse_interval " + str(
-                pri) + " --pulse_count " + str(count) + " --sweep_time 1000 --freq " + str(freq) + " --one_burst"
+        # else:
+        #     # OLDER
+        #     command = "sudo python lf_hackrf.py --pulse_width " + str(width) + " --pulse_interval " + str(
+        #         pri) + " --pulse_count " + str(count) + " --sweep_time 1000 --freq " + str(freq) + " --one_burst"
         stdin, stdout, stderr = p.exec_command(str(command), get_pty=True)
         stdin.write(str(self.ssh_password) + "\n")
         stdin.flush()
@@ -347,7 +337,7 @@ class DfsTest(Realm):
             main_dict[i] = sec_dict.copy()
         print(main_dict)
         logging.info(str(main_dict))
-        width_, interval_, count_ = "", "", ""
+        width_, interval_, count_ , burst_, trial_centre, trial_low, trial_high, uut_channel, freq_modulatin, tx_sample_rate = "", "", "", "", "", "", "","", "", ""
         fcc1_list = None
         if "FCC1" in self.fcctypes:
             random1 = [518, 538, 558, 578, 598, 618, 638, 658, 678, 698, 718, 738, 758, 778, 798, 818, 838, 858, 878,
@@ -377,11 +367,17 @@ class DfsTest(Realm):
 
         for fcc in self.fcctypes:
             for tria in range(self.trials + self.extra_trials):
+                print("tria", tria)
                 logging.info(str(tria))
                 time.sleep(int(self.time_int))
                 var = 000
                 var_1 = "Trial_" + str(var + tria + 1)
-                new_list = ["Burst", "Pulses", "Width", "PRI(US)", "Detected", "Frequency(KHz)", "Detection Time(sec)"]
+                if fcc == "FCC5":
+                    time.sleep(25)
+                    new_list = ["Burst", "Trial Centre", "Trial Low", "Trial High","UUT Channel",  "Frequency Modulating", "Tx sample rate", "Detected", "Frequency(KHz)",
+                                "Detection Time(sec)"]
+                else:
+                    new_list = ["Burst", "Pulses", "Width", "PRI(US)", "Detected", "Frequency(KHz)", "Detection Time(sec)"]
                 third_dict = dict.fromkeys(new_list)
                 main_dict[fcc][var_1] = third_dict.copy()
                 print("result data", main_dict)
@@ -403,7 +399,7 @@ class DfsTest(Realm):
                         count_ = str(int(formula) + 1)
                         print(count_)
                     else:
-                        print("since given trials are greater than or equal to  30 both TEstA andTestB is considered")
+                        print("since given trials are greater than or equal to  30 both TestA and TestB is considered")
                         logging.info("since given trials are greater than or equal to  30 both TEstA andTestB is considered")
                         width_ = "1"
                         if tria > 30:
@@ -428,6 +424,28 @@ class DfsTest(Realm):
                     width_ = str(random.randint(11, 20))
                     interval_ = str(random.randint(200, 500))
                     count_ = str(random.randint(12, 16))
+                elif fcc == "FCC5":
+                    if tria in range(0,10):
+                        print(tria)
+                        trial_centre = str(1)
+                        trial_low = str(0)
+                        trial_high = str(0)
+                    if tria in range(10,20):
+                        print(tria)
+                        trial_centre = str(0)
+                        trial_low = str(1)
+                        trial_high = str(0)
+                    if tria in range(20, 31):
+                        print(tria)
+                        trial_centre = str(0)
+                        trial_low = str(0)
+                        trial_high = str(1)
+                    burst_ = str(random.randint(8, 20))
+                    # trial_low = str(1)
+                    # trial_high= str(1)
+                    uut_channel = str(self.bandwidth)
+                    freq_modulatin = str(random.randint(5, 20))
+                    tx_sample_rate = str(20)
                 elif fcc == "FCC6":
                     width_ = "1"
                     interval_ = "333"
@@ -501,14 +519,22 @@ class DfsTest(Realm):
                     interval_ = str(random.randint(200, 500))
                     count_ = str(random.randint(12, 16))
 
-
+                if fcc == "FCC5":
+                    print(burst_)
+                    main_dict[fcc][var_1]["Burst"] = burst_
+                    main_dict[fcc][var_1]["Trial Centre"] = trial_centre
+                    main_dict[fcc][var_1]["Trial Low"] = trial_low
+                    main_dict[fcc][var_1]["Trial High"] = trial_high
+                    main_dict[fcc][var_1]["UUT Channel"] = uut_channel
+                    main_dict[fcc][var_1]["Frequency Modulating"] = freq_modulatin
+                    main_dict[fcc][var_1]["Tx sample rate"] = tx_sample_rate
                 if fcc == "FCC6":
                     main_dict[fcc][var_1]["Burst"] = "100"
-                else:
+                if fcc == "FCC0" or fcc == "FCC1" or fcc == "FCC2" or fcc == "FCC3" or fcc == "FCC4":
                     main_dict[fcc][var_1]["Burst"] = "1"
-                main_dict[fcc][var_1]["Pulses"] = count_
-                main_dict[fcc][var_1]["Width"] = width_
-                main_dict[fcc][var_1]["PRI(US)"] = interval_
+                    main_dict[fcc][var_1]["Pulses"] = count_
+                    main_dict[fcc][var_1]["Width"] = width_
+                    main_dict[fcc][var_1]["PRI(US)"] = interval_
 
                 if self.more_option == "centre":
                     if self.bandwidth == "20":
@@ -608,10 +634,11 @@ class DfsTest(Realm):
                 if self.more_option == "centre":
                     if fcc == "FCC6":
                         self.run_hackrf(type="fcc6", freq=str(frequency[str(self.channel)]))
-                    else:
-                        self.run_hackrf(width=width_, pri=interval_, count=count_, freq=str(frequency[str(self.channel)]))
+                    # else:
+                    #     self.run_hackrf(width=width_, pri=interval_, count=count_, freq=str(frequency[str(self.channel)]))
                     if fcc == "FCC5":
-                        self.run_hackrf(type="fcc5", freq=str(frequency[str(self.channel)]))
+                        self.run_hackrf(type="fcc5", freq=str(frequency[str(self.channel)]), burst=burst_, trial_centre=trial_centre, trial_low=trial_low,
+                                        trial_high=trial_high, uut_channel=uut_channel, freq_modulatin=freq_modulatin, tx_sample_rate=tx_sample_rate)
                     if fcc == "FCC0" or fcc == "FCC1" or fcc == "FCC2" or fcc == "FCC3" or fcc == "FCC4":
                         self.run_hackrf(type="fcc", width=width_, pri=interval_, count=count_, freq=str(frequency[str(self.channel)]) )
 
@@ -1064,12 +1091,26 @@ class DfsTest(Realm):
                                 "The below table provides detailed information for per trials run for " + str(
                                     fcc) + "RADAR Type")
             report.build_objective()
-
-            Trials, burst, pulse, width, pri, detect, frequency, det_time = [], [], [], [], [], [], [], []
+            if fcc == "FCC5":
+                Trials, burst, trial_centre, trial_low, trial_high, uut_channel, freq_modulatin, tx_sample_rate, detect,frequency, det_time = [], [], [], [], [], [], [], [], [], [], []
+            else:
+                Trials, burst, pulse, width, pri, detect, frequency, det_time = [], [], [], [], [], [], [], []
 
             for i in main_dict[fcc]:
                 if main_dict[fcc][i] is None:
                     print("ignore")
+                if fcc == "FCC5":
+                    Trials.append(i)
+                    burst.append(main_dict[fcc][i]['Burst'])
+                    trial_centre.append(main_dict[fcc][i]['Trial Centre'])
+                    trial_low.append(main_dict[fcc][i]['Trial Low'])
+                    trial_high.append(main_dict[fcc][i]['Trial High'])
+                    uut_channel.append(main_dict[fcc][i]['UUT Channel'])
+                    freq_modulatin.append(main_dict[fcc][i]['Frequency Modulating'])
+                    tx_sample_rate.append(main_dict[fcc][i]['Tx sample rate'])
+                    detect.append(main_dict[fcc][i]['Detected'])
+                    frequency.append(main_dict[fcc][i]['Frequency(KHz)'])
+                    det_time.append(main_dict[fcc][i]['Detection Time(sec)'])
                 else:
                     Trials.append(i)
                     burst.append(main_dict[fcc][i]['Burst'])
@@ -1081,16 +1122,31 @@ class DfsTest(Realm):
                     det_time.append(main_dict[fcc][i]['Detection Time(sec)'])
 
             print("trial", Trials)
-            table_2 = {
-                "Trials": Trials,
-                "Num Bursts": burst,
-                "Num Pulses": pulse,
-                "Pulse Width (us)": width,
-                "PRI(us)": pri,
-                "Detected": detect,
-                "Frequency (KHz)": frequency,
-                "Detection Time(secs)": det_time
-            }
+            if fcc == "FCC5":
+                table_2 = {
+                    "Trials": Trials,
+                    "Num Bursts": burst,
+                    "Trial centre": trial_centre,
+                    "Trial Low": trial_low,
+                    "Trial High": trial_high,
+                    "UUT Channel": uut_channel,
+                    "Freq Modulating": freq_modulatin,
+                    "TX Sample Rate": tx_sample_rate,
+                    "Detected": detect,
+                    "Frequency (KHz)": frequency,
+                    "Detection Time(secs)": det_time
+                }
+            else:
+                table_2 = {
+                    "Trials": Trials,
+                    "Num Bursts": burst,
+                    "Num Pulses": pulse,
+                    "Pulse Width (us)": width,
+                    "PRI(us)": pri,
+                    "Detected": detect,
+                    "Frequency (KHz)": frequency,
+                    "Detection Time(secs)": det_time
+                }
             test_setup_ = pd.DataFrame(table_2)
             report.set_table_dataframe(test_setup_)
             report.build_table()
