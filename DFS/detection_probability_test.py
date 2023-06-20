@@ -10,6 +10,7 @@
         1. test for FCC0/FCC1/FCC2/FCC3/FCC4 (JUST REPLACE fcc0 with 1,2,3 or 4) - python3 lf_dpt.py  --host 192.168.100.221 --port 8080 --ssid MFG-5GTEST --passwd [BLANK] --security open  --radio 1.1.wiphy5 --sniff_radio 1.1.wiphy1  --fcctypes FCC0 --channel 100 --trials 1 --lf_hackrf 25766ec3
         2. test for combine FCC0-4 - python3 lf_dpt.py  --host 192.168.100.221 --port 8080 --ssid MFG-5GTEST --passwd [BLANK] --security open  --radio 1.1.wiphy5 --sniff_radio 1.1.wiphy1  --fcctypes FCC0 FCC1 FCC2 FCC3 FCC4 --channel 100 --trials 1 --lf_hackrf 25766ec3
         3. for FCC5 - python3 lf_dpt.py  --host 192.168.100.221 --port 8080 --ssid MFG-5GTEST --passwd [BLANK] --security open  --radio 1.1.wiphy5 --sniff_radio 1.1.wiphy1  --fcctypes FCC5  --channel 100 --trials 30  --more_option centre --lf_hackrf 25766ec3
+        4.for FCC6 - python3 lf_dpt.py  --host 192.168.100.221 --port 8080 --ssid MFG-5GTEST --passwd [BLANK] --security open  --radio 1.1.wiphy5 --sniff_radio 1.1.wiphy1  --fcctypes FCC6 --channel 100 --trials 1 --lf_hackrf 25766ec3
 Note:
     client creation is commented for testing
 """
@@ -280,16 +281,14 @@ class DfsTest(Realm):
         time.sleep(1)
         command = None
         if type == "fcc6":
-            command = "sudo python3 lf_hackrf_dfs.py --freq " + str(freq) + " --hop --log_level debug "
+            command = f"sudo python3 lf_hackrf_dfs.py --tx_sample_rate 20 --radar_type FCC6,100 --log_level debug --lf_hackrf {self.lf_hackrf}"
         if type == "fcc5":
             command = f"sudo python3 lf_hackrf_dfs.py --freq {freq} --rf_type FCC5,{burst},{trial_centre},{trial_low},{trial_high},{uut_channel},{freq_modulatin},{tx_sample_rate} --log_level debug --lf_hackrf {self.lf_hackrf}"
             print(command)
-
-                # f"sudo python3 lf_hackrf_dfs.py --freq " + str(freq) + "--gain 14 --lf_gain 20 --tx_sample_rate 8 --radar_type FCC5,10,10,0,0,20 --log_level debug "
         if type == "fcc":
             command = f"sudo python3 lf_hackrf_dfs.py --pulse_width {width} --pulse_interval {pri} --pulse_count {count} --sweep_time 1000 --one_burst --freq {freq} --lf_hackrf {self.lf_hackrf}"
         # else:
-        #     # OLDER
+        #     # OLDER for python2
         #     command = "sudo python lf_hackrf.py --pulse_width " + str(width) + " --pulse_interval " + str(
         #         pri) + " --pulse_count " + str(count) + " --sweep_time 1000 --freq " + str(freq) + " --one_burst"
         stdin, stdout, stderr = p.exec_command(str(command), get_pty=True)
@@ -530,6 +529,9 @@ class DfsTest(Realm):
                     main_dict[fcc][var_1]["Tx sample rate"] = tx_sample_rate
                 if fcc == "FCC6":
                     main_dict[fcc][var_1]["Burst"] = "100"
+                    main_dict[fcc][var_1]["Pulses"] = count_
+                    main_dict[fcc][var_1]["Width"] = width_
+                    main_dict[fcc][var_1]["PRI(US)"] = interval_
                 if fcc == "FCC0" or fcc == "FCC1" or fcc == "FCC2" or fcc == "FCC3" or fcc == "FCC4":
                     main_dict[fcc][var_1]["Burst"] = "1"
                     main_dict[fcc][var_1]["Pulses"] = count_
