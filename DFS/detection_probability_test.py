@@ -287,7 +287,7 @@ class DfsTest(Realm):
         if type == "fcc5":
             command = f"sudo python3 lf_hackrf_dfs.py --freq {freq} --rf_type FCC5,{burst},{trial_centre},{trial_low},{trial_high},{uut_channel},{freq_modulatin},{tx_sample_rate} --log_level debug --lf_hackrf {self.lf_hackrf}"
             print(command)
-        if type == "etsi1" or type == "etsi2":
+        if type == "etsi1" or type == "etsi2" or type == "etsi3":
             if type == "etsi1":
                 var = "ETSI1"
             if type == "etsi2":
@@ -577,7 +577,7 @@ class DfsTest(Realm):
                     main_dict[fcc][var_1]["Pulses"] = count_
                     main_dict[fcc][var_1]["Width"] = width_
                     main_dict[fcc][var_1]["PRI(US)"] = interval_
-                if fcc == "FCC0" or fcc == "FCC1" or fcc == "FCC2" or fcc == "FCC3" or fcc == "FCC4" or fcc == "ETSI0" or fcc == "ETSI1"or fcc == "ETSI2":
+                if fcc == "FCC0" or fcc == "FCC1" or fcc == "FCC2" or fcc == "FCC3" or fcc == "FCC4" or fcc == "ETSI0" or fcc == "ETSI1"or fcc == "ETSI2" or fcc == "ETSI3" or fcc == "ETSI4":
                     main_dict[fcc][var_1]["Burst"] = "1"
                     main_dict[fcc][var_1]["Pulses"] = count_
                     main_dict[fcc][var_1]["Width"] = width_
@@ -686,9 +686,11 @@ class DfsTest(Realm):
                     if fcc == "FCC5":
                         self.run_hackrf(type="fcc5", freq=str(frequency[str(self.channel)]), burst=burst_, trial_centre=trial_centre, trial_low=trial_low,
                                         trial_high=trial_high, uut_channel=uut_channel, freq_modulatin=freq_modulatin, tx_sample_rate=tx_sample_rate)
-                    if fcc == "FCC0" or fcc == "FCC1" or fcc == "FCC2" or fcc == "FCC3" or fcc == "FCC4" or fcc == "ETSI0" or fcc == "ETSI1"  or fcc == "ETSI2":
+                    if fcc == "FCC0" or fcc == "FCC1" or fcc == "FCC2" or fcc == "FCC3" or fcc == "FCC4" or fcc == "ETSI0" or fcc == "ETSI1" or fcc == "ETSI2" or fcc == "ETSI3" or fcc == "ETSI4":
                         if self.legacy == "True":
                             self.run_hackrf(type="legacy", width=width_, pri=interval_, count=count_, freq=str(frequency[str(self.channel)]) )
+                        elif (fcc == "ETSI0" or fcc == "ETSI4") and self.legacy == "False":
+                            self.run_hackrf(type="legacy", width=width_, pri=interval_, count=count_ , freq=str(frequency[str(self.channel)]))
                         elif fcc == "ETSI1":
                             self.run_hackrf(type="etsi1", width=width_, pri=interval_,
                                             freq=str(frequency[str(self.channel)]))
