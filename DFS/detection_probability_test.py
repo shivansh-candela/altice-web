@@ -287,10 +287,15 @@ class DfsTest(Realm):
         if type == "fcc5":
             command = f"sudo python3 lf_hackrf_dfs.py --freq {freq} --rf_type FCC5,{burst},{trial_centre},{trial_low},{trial_high},{uut_channel},{freq_modulatin},{tx_sample_rate} --log_level debug --lf_hackrf {self.lf_hackrf}"
             print(command)
-        if type == "etsi1":
-            command = f"sudo python3 lf_hackrf_dfs.py --freq {freq} --rf_type ETSI1,{width},{pri},8 --pulse_count {count} --log_level debug --lf_hackrf {self.lf_hackrf}"
-        if type == "etsi2":
-            command = f"sudo python3 lf_hackrf_dfs.py --freq {freq} --rf_type ETSI2,{width},{pri},8 --pulse_count {count} --log_level debug --lf_hackrf {self.lf_hackrf}"
+        if type == "etsi1" or type == "etsi2":
+            if type == "etsi1":
+                var = "ETSI1"
+            if type == "etsi2":
+                var = "ETSI2"
+            if type == "etsi3":
+                var = "ETSI3"
+            command = f"sudo python3 lf_hackrf_dfs.py --freq {freq} --rf_type {var},{width},{pri},8 --pulse_count {count} --log_level debug --lf_hackrf {self.lf_hackrf}"
+
         if type == "legacy":
             command = f"sudo python3 lf_hackrf_dfs.py --pulse_width {width} --pulse_interval {pri} --pulse_count {count} --sweep_time 1000 --one_burst --freq {freq} --lf_hackrf {self.lf_hackrf}"
         # else:
@@ -484,9 +489,27 @@ class DfsTest(Realm):
                         tx_sample_rate = "8"
                         count_ = "15"
                 elif fcc == "ETSI3":
-                    width_ = str(random.randint(1, 15))
-                    interval_ = str(random.randint(250, 435))
-                    count_ = "25"
+                    if self.legacy == "True":
+                        width_ = str(random.randint(1, 15))
+                        interval_ = str(random.randint(250, 435))
+                        count_ = "25"
+                    else:
+                        etsi3_width_range = [0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9,
+                                             2.0, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 3.0, 3.1, 3.2, 3.3, 3.4,
+                                             3.5, 3.6, 3.7, 3.8, 3.9, 4.0, 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.7, 4.8, 4.9,
+                                             5.0, 5.1, 5.2, 5.3, 5.4, 5.5, 5.6, 5.7, 5.8, 5.9, 6.0, 6.1, 6.2, 6.3, 6.4,
+                                             6.5, 6.6, 6.7, 6.8, 6.9, 7.0, 7.1, 7.2, 7.3, 7.4, 7.5, 7.6, 7.7, 7.8, 7.9,
+                                             8.0, 8.1, 8.2, 8.3, 8.4, 8.5, 8.6, 8.7, 8.8, 8.9, 9.0, 9.1, 9.2, 9.3, 9.4,
+                                             9.5, 9.6, 9.7, 9.8, 9.9, 10.0, 10.1, 10.2, 10.3, 10.4, 10.5, 10.6, 10.7,
+                                             10.8, 10.9, 11.0, 11.1, 11.2, 11.3, 11.4, 11.5, 11.6, 11.7, 11.8, 11.9,
+                                             12.0, 12.1, 12.2, 12.3, 12.4, 12.5, 12.6, 12.7, 12.8, 12.9, 13.0, 13.1,
+                                             13.2, 13.3, 13.4, 13.5, 13.6, 13.7, 13.8, 13.9, 14.0, 14.1, 14.2, 14.3,
+                                             14.4, 14.5, 14.6, 14.7, 14.8, 14.9, 15.0]
+                        random_number = random.choice(etsi3_width_range)
+                        width_ = random_number
+                        interval_ = str(random.randint(2300, 4000))
+                        tx_sample_rate = "8"
+                        count_ = "25"
                 elif fcc == "ETSI4":
                     width_ = str(random.randint(20, 30))
                     interval_ = str(random.randint(250, 500))
@@ -671,6 +694,9 @@ class DfsTest(Realm):
                                             freq=str(frequency[str(self.channel)]))
                         elif fcc == "ETSI2":
                             self.run_hackrf(type="etsi2", width=width_, pri=interval_,
+                                            freq=str(frequency[str(self.channel)]))
+                        elif fcc == "ETSI3":
+                            self.run_hackrf(type="etsi3", width=width_, pri=interval_,
                                             freq=str(frequency[str(self.channel)]))
                     else:
                         self.run_hackrf(width=width_, pri=interval_, count=count_,
