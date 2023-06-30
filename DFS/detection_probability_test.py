@@ -295,7 +295,7 @@ class DfsTest(Realm):
             if type == "etsi3":
                 var = "ETSI3"
             command = f"sudo python3 lf_hackrf_dfs.py --freq {freq} --rf_type {var},{width},{pri},8 --pulse_count {count} --log_level debug --lf_hackrf {self.lf_hackrf}"
-
+            print(command)
         if type == "legacy":
             command = f"sudo python3 lf_hackrf_dfs.py --pulse_width {width} --pulse_interval {pri} --pulse_count {count} --sweep_time 1000 --one_burst --freq {freq} --lf_hackrf {self.lf_hackrf}"
         # else:
@@ -669,7 +669,7 @@ class DfsTest(Realm):
                 self.start_sniffer(radio_channel=self.channel, radio=self.sniff_radio,
                                    test_name="dfs_csa_" + str(fcc) + "_" + str(var_1) + "_channel" + str(
                                        self.channel) + "_")
-                time.sleep(10)
+                time.sleep(1)
                 print("generate radar")
                 logging.info("generate radar")
                 # current_time = datetime.now()
@@ -691,15 +691,16 @@ class DfsTest(Realm):
                             self.run_hackrf(type="legacy", width=width_, pri=interval_, count=count_, freq=str(frequency[str(self.channel)]) )
                         elif (fcc == "ETSI0" or fcc == "ETSI4") and self.legacy == "False":
                             self.run_hackrf(type="legacy", width=width_, pri=interval_, count=count_ , freq=str(frequency[str(self.channel)]))
-                        elif fcc == "ETSI1":
+                        elif fcc == "ETSI1" and self.legacy== "False":
+                            print("hi")
                             self.run_hackrf(type="etsi1", width=width_, pri=interval_,
-                                            freq=str(frequency[str(self.channel)]))
+                                            freq=str(frequency[str(self.channel)]),  count=count_)
                         elif fcc == "ETSI2":
                             self.run_hackrf(type="etsi2", width=width_, pri=interval_,
-                                            freq=str(frequency[str(self.channel)]))
+                                            freq=str(frequency[str(self.channel)]),  count=count_)
                         elif fcc == "ETSI3":
                             self.run_hackrf(type="etsi3", width=width_, pri=interval_,
-                                            freq=str(frequency[str(self.channel)]))
+                                            freq=str(frequency[str(self.channel)]), count=count_ )
                     else:
                         self.run_hackrf(width=width_, pri=interval_, count=count_,
                                         freq=str(frequency[str(self.channel)]))
@@ -716,6 +717,7 @@ class DfsTest(Realm):
                                         freq=str(int(frequency[str(self.channel)]) * 1000))
 
                 print("stop sniffer")
+                time.sleep(5)
                 file_name_ = self.stop_sniffer()
                 file_name = "./pcap/" + str(file_name_)
                 print("pcap file name", file_name)
