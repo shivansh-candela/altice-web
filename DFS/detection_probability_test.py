@@ -264,7 +264,7 @@ class DfsTest(Realm):
             exit(1)
 
     def run_hackrf(self, width=None, pri=None, count=None, freq=None, type=None, burst=None, trial_centre=None, trial_low=None,
-                   trial_high=None, uut_channel=None, freq_modulatin=None, tx_sample_rate=None):
+                   trial_high=None, uut_channel=None, freq_modulatin=None, tx_sample_rate=None, prf_1=None, prf_2=None, prf_3=None):
         print(type)
         # send frame to note t1
 
@@ -298,7 +298,13 @@ class DfsTest(Realm):
                 var = "ETSI4"
             command = f"sudo python3 lf_hackrf_dfs.py --freq {freq} --rf_type {var},{width},{pri},8 --pulse_count {count} --log_level debug --lf_hackrf {self.lf_hackrf}"
             print(command)
-
+        if type == "etsi5" or type == "etsi6":
+            if type == "etsi5":
+                var = "ETSI5"
+            if type == "etsi6":
+                var = "ETSI6"
+            command = f"sudo python3 lf_hackrf_dfs.py --freq {freq} --radar_type {var},{width},{prf_1},{prf_2},{prf_3},8 --log_level debug --lf_hackrf {self.lf_hackrf}"
+            print(command)
         if type == "legacy":
             command = f"sudo python3 lf_hackrf_dfs.py --pulse_width {width} --pulse_interval {pri} --pulse_count {count} --sweep_time 1000 --one_burst --freq {freq} --lf_hackrf {self.lf_hackrf}"
         # else:
@@ -350,7 +356,7 @@ class DfsTest(Realm):
             main_dict[i] = sec_dict.copy()
         print(main_dict)
         logging.info(str(main_dict))
-        width_, interval_, count_ , burst_, trial_centre, trial_low, trial_high, uut_channel, freq_modulatin, tx_sample_rate = "", "", "", "", "", "", "","", "", ""
+        width_, interval_, count_ , burst_, trial_centre, trial_low, trial_high, uut_channel, freq_modulatin, tx_sample_rate, prf_1_, prf_2_, prf_3_  = "", "", "", "", "", "", "","", "", "", "", "", ""
         fcc1_list = None
         if "FCC1" in self.fcctypes:
             random1 = [518, 538, 558, 578, 598, 618, 638, 658, 678, 698, 718, 738, 758, 778, 798, 818, 838, 858, 878,
@@ -388,6 +394,9 @@ class DfsTest(Realm):
                 if fcc == "FCC5":
                     time.sleep(25)
                     new_list = ["Burst", "Trial Centre", "Trial Low", "Trial High","UUT Channel",  "Frequency Modulating", "Tx sample rate", "Detected", "Frequency(KHz)",
+                                "Detection Time(sec)"]
+                if fcc == "ETSI5" or fcc == "ETSI6":
+                    new_list = ["Burst", "prf_1", "prf_2", "prf_3", "Width", "Pulses",   "Detected", "Frequency(KHz)",
                                 "Detection Time(sec)"]
                 else:
                     new_list = ["Burst", "Pulses", "Width", "PRI(US)", "Detected", "Frequency(KHz)", "Detection Time(sec)"]
@@ -518,13 +527,122 @@ class DfsTest(Realm):
                     interval_ = str(random.randint(2300, 4000))
                     count_ = "20"
                 elif fcc == "ETSI5":
-                    width_ = str(random.randint(1, 2))
-                    interval_ = str(random.randint(2500, 3333))
-                    count_ = "10"
+                    if self.legacy == "True":
+                        width_ = str(random.randint(1, 2))
+                        interval_ = str(random.randint(2500, 3333))
+                        count_ = "10"
+                    else:
+                        etsi5_pulse_width_range = [0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9,2.0]
+                        random_number = random.choice(etsi5_pulse_width_range)
+                        width_ = str(random_number)
+                        pulse_burst = random.randint(2, 3)
+                        if pulse_burst == 2:
+                            count_ = "20"
+                            # difference = random.randint(20, 50)
+                            prf_2 = random.randint(300, 400)
+                            prf_1 = None
+                            prf_3 = 0
+                            while True:
+                                diff = random.randint(20, 50)
+                                print(diff)
+                                prf_1 = prf_2 - diff
+                                print("pr_1", prf_1)
+                                if prf_1 in range(300, 400):
+                                    prf_1 = prf_1
+                                    break
+                                else:
+                                    continue
+
+
+                        elif pulse_burst == 3:
+                            count_ = "30"
+                            prf_3 = random.randint(300, 400)
+                            prf_1 = None
+                            prf_2 = None
+                            while True:
+                                diff = random.randint(20, 50)
+                                print(diff)
+                                prf_2 = prf_3 - diff
+                                print("pr_2", prf_2)
+                                if prf_2 in range(300, 400):
+                                    prf_2 = prf_2
+                                    break
+                                else:
+                                    continue
+                            while True:
+                                diff = random.randint(20, 50)
+                                print(diff)
+                                prf_1 = prf_2 - diff
+                                print("pr_1", prf_1)
+                                if prf_1 in range(300, 400):
+                                    prf_1 = prf_1
+                                    break
+                                else:
+                                    continue
+                        prf_1_ = prf_1
+                        prf_2_ = prf_2
+                        prf_3_ = prf_3
+                        burst_ = pulse_burst
+
                 elif fcc == "ETSI6":
-                    width_ = str(random.randint(1, 2))
-                    interval_ = str(random.randint(833, 2500))
-                    count_ = "15"
+                    if self.legacy == "True":
+                        width_ = str(random.randint(1, 2))
+                        interval_ = str(random.randint(833, 2500))
+                        count_ = "15"
+                    else:
+                        etsi6_pulse_width_range = [0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8,
+                                                   1.9, 2.0]
+                        random_number = random.choice(etsi6_pulse_width_range)
+                        width_ = str(random_number)
+                        pulse_burst = random.randint(2, 3)
+                        if pulse_burst == 2:
+                            count_ = "30"
+                            # difference = random.randint(20, 50)
+                            prf_2 = random.randint(400, 1200)
+                            prf_1 = None
+                            prf_3 = 0
+                            while True:
+                                diff = random.randint(80, 400)
+                                print(diff)
+                                prf_1 = prf_2 - diff
+                                print("pr_1", prf_1)
+                                if prf_1 in range(400, 1200):
+                                    prf_1 = prf_1
+                                    break
+                                else:
+                                    continue
+
+
+                        elif pulse_burst == 3:
+                            count_ = "40"
+                            prf_3 = random.randint(400, 1200)
+                            prf_1 = None
+                            prf_2 = None
+                            while True:
+                                diff = random.randint(80, 400)
+                                print(diff)
+                                prf_2 = prf_3 - diff
+                                print("pr_2", prf_2)
+                                if prf_2 in range(400, 1200):
+                                    prf_2 = prf_2
+                                    break
+                                else:
+                                    continue
+                            while True:
+                                diff = random.randint(80, 400)
+                                print(diff)
+                                prf_1 = prf_2 - diff
+                                print("pr_1", prf_1)
+                                if prf_1 in range(400, 1200):
+                                    prf_1 = prf_1
+                                    break
+                                else:
+                                    continue
+                        prf_1_ = prf_1
+                        prf_2_ = prf_2
+                        prf_3_ = prf_3
+                        burst_ = pulse_burst
+
                 elif fcc == "Japan-W53-1":
                     width_ = 1
                     interval_ = 1428
@@ -585,6 +703,13 @@ class DfsTest(Realm):
                     main_dict[fcc][var_1]["Pulses"] = count_
                     main_dict[fcc][var_1]["Width"] = width_
                     main_dict[fcc][var_1]["PRI(US)"] = interval_
+                if fcc == "ETSI5" or fcc == "ETSI6":
+                    main_dict[fcc][var_1]["Burst"] = burst_
+                    main_dict[fcc][var_1]["Pulses"] = count_
+                    main_dict[fcc][var_1]["Width"] = width_
+                    main_dict[fcc][var_1]["prf_1"] = prf_1_
+                    main_dict[fcc][var_1]["prf_2"] = prf_2_
+                    main_dict[fcc][var_1]["prf_3"] = prf_3_
 
                 if self.more_option == "centre":
                     if self.bandwidth == "20":
@@ -706,6 +831,13 @@ class DfsTest(Realm):
                                             freq=str(frequency[str(self.channel)]), count=count_ )
                         elif fcc == "ETSI4":
                             self.run_hackrf(type="etsi4", width=width_, pri=interval_,
+                                            freq=str(frequency[str(self.channel)]), count=count_)
+                    if fcc == "ETSI5" or fcc == "ETSI6":
+                        if fcc == "ETSI5":
+                            self.run_hackrf(type="etsi5", width=width_, prf_1=prf_1_, prf_2 = prf_2_, prf_3 = prf_3_,
+                                        freq=str(frequency[str(self.channel)]), count=count_)
+                        if fcc == "ETSI6":
+                            self.run_hackrf(type="etsi6", width=width_, prf_1=prf_1_, prf_2=prf_2_, prf_3=prf_3_,
                                             freq=str(frequency[str(self.channel)]), count=count_)
                     else:
                         self.run_hackrf(width=width_, pri=interval_, count=count_,
@@ -1159,6 +1291,9 @@ class DfsTest(Realm):
             report.build_objective()
             if fcc == "FCC5":
                 Trials, burst, trial_centre, trial_low, trial_high, uut_channel, freq_modulatin, tx_sample_rate, detect,frequency, det_time = [], [], [], [], [], [], [], [], [], [], []
+
+            if fcc == "ETSI5" or fcc == "ETSI6":
+                Trials, burst, pulse, width, prf_1, prf_2, prf_3, detect, frequency, det_time = [], [], [], [], [], [], [], [], [], []
             else:
                 Trials, burst, pulse, width, pri, detect, frequency, det_time = [], [], [], [], [], [], [], []
 
@@ -1174,6 +1309,18 @@ class DfsTest(Realm):
                     uut_channel.append(main_dict[fcc][i]['UUT Channel'])
                     freq_modulatin.append(main_dict[fcc][i]['Frequency Modulating'])
                     tx_sample_rate.append(main_dict[fcc][i]['Tx sample rate'])
+                    detect.append(main_dict[fcc][i]['Detected'])
+                    frequency.append(main_dict[fcc][i]['Frequency(KHz)'])
+                    det_time.append(main_dict[fcc][i]['Detection Time(sec)'])
+
+                if fcc == "ETSI5" or fcc == "ETSI6":
+                    Trials.append(i)
+                    burst.append(main_dict[fcc][i]['Burst'])
+                    pulse.append(main_dict[fcc][i]['Pulses'])
+                    width.append(main_dict[fcc][i]['Width'])
+                    prf_1.append(main_dict[fcc][i]['prf_1'])
+                    prf_2.append(main_dict[fcc][i]['prf_2'])
+                    prf_3.append(main_dict[fcc][i]['prf_3'])
                     detect.append(main_dict[fcc][i]['Detected'])
                     frequency.append(main_dict[fcc][i]['Frequency(KHz)'])
                     det_time.append(main_dict[fcc][i]['Detection Time(sec)'])
@@ -1198,6 +1345,19 @@ class DfsTest(Realm):
                     "UUT Channel": uut_channel,
                     "Freq Modulating": freq_modulatin,
                     "TX Sample Rate": tx_sample_rate,
+                    "Detected": detect,
+                    "Frequency (KHz)": frequency,
+                    "Detection Time(secs)": det_time
+                }
+            if fcc == "ETSI5" or fcc == "ETSI6":
+                table_2 = {
+                    "Trials": Trials,
+                    "Num Bursts": burst,
+                    "Num Pulses": pulse,
+                    "Pulse Width (us)": width,
+                    "PRF_1": prf_1,
+                    "PRF_2": prf_2,
+                    "PRF_3":prf_3 ,
                     "Detected": detect,
                     "Frequency (KHz)": frequency,
                     "Detection Time(secs)": det_time
