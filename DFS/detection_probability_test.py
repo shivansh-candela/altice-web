@@ -1313,7 +1313,7 @@ class DfsTest(Realm):
                     frequency.append(main_dict[fcc][i]['Frequency(KHz)'])
                     det_time.append(main_dict[fcc][i]['Detection Time(sec)'])
 
-                if fcc == "ETSI5" or fcc == "ETSI6":
+                elif fcc == "ETSI5" or fcc == "ETSI6":
                     Trials.append(i)
                     burst.append(main_dict[fcc][i]['Burst'])
                     pulse.append(main_dict[fcc][i]['Pulses'])
