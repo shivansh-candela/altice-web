@@ -1349,7 +1349,7 @@ class DfsTest(Realm):
                     "Frequency (KHz)": frequency,
                     "Detection Time(secs)": det_time
                 }
-            if fcc == "ETSI5" or fcc == "ETSI6":
+            elif fcc == "ETSI5" or fcc == "ETSI6":
                 table_2 = {
                     "Trials": Trials,
                     "Num Bursts": burst,
