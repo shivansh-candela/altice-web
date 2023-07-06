@@ -342,6 +342,31 @@ class DfsTest(Realm):
                                report_dir="pcap")
         return self.pcap_name
 
+    def select_values(self, n, fcc):
+        if fcc == "etsi5":
+            while True:
+                prf_1 = random.randint(300, 400)
+                prf_2 = prf_1 + random.randint(20, 50)
+                prf_3 = prf_2 + random.randint(20, 50)
+                if n == 3:
+                    if 300 <= prf_3 <= 400:
+                        return prf_1, prf_2, prf_3
+                elif n == 2:
+                    if 300 <= prf_2 <= 400:
+                        return prf_1, prf_2
+        if fcc == "etsi6":
+            while True:
+                prf_1 = random.randint(400, 1200)
+                prf_2 = prf_1 + random.randint(80, 400)
+                prf_3 = prf_2 + random.randint(80, 400)
+                if n == 3:
+                    if 400 <= prf_3 <= 1200:
+                        return prf_1, prf_2, prf_3
+                elif n == 2:
+                    if 400 <= prf_2 <= 1200:
+                        return prf_1, prf_2
+
+
     def main_logic(self, bssid=None):
         main_dict = dict.fromkeys(self.fcctypes)
         print(main_dict)
@@ -538,47 +563,18 @@ class DfsTest(Realm):
                         pulse_burst = random.randint(2, 3)
                         if pulse_burst == 2:
                             count_ = "20"
-                            # difference = random.randint(20, 50)
-                            prf_2 = random.randint(300, 400)
-                            prf_1 = None
+                            prf_1, prf_2 = self.select_values(n=2, fcc="etsi5")
+                            print(f"prf_1: {prf_1}")
+                            print(f"prf_2: {prf_2}")
                             prf_3 = 0
-                            while True:
-                                diff = random.randint(20, 50)
-                                print(diff)
-                                prf_1 = prf_2 - diff
-                                print("pr_1", prf_1)
-                                if prf_1 in range(300, 400):
-                                    prf_1 = prf_1
-                                    break
-                                else:
-                                    continue
-
 
                         elif pulse_burst == 3:
                             count_ = "30"
-                            prf_3 = random.randint(300, 400)
-                            prf_1 = None
-                            prf_2 = None
-                            while True:
-                                diff = random.randint(20, 50)
-                                print(diff)
-                                prf_2 = prf_3 - diff
-                                print("pr_2", prf_2)
-                                if prf_2 in range(300, 400):
-                                    prf_2 = prf_2
-                                    break
-                                else:
-                                    continue
-                            while True:
-                                diff = random.randint(20, 50)
-                                print(diff)
-                                prf_1 = prf_2 - diff
-                                print("pr_1", prf_1)
-                                if prf_1 in range(300, 400):
-                                    prf_1 = prf_1
-                                    break
-                                else:
-                                    continue
+                            prf_1, prf_2, prf_3 = self.select_values(n=3, fcc="etsi5")
+                            print(f"prf_1: {prf_1}")
+                            print(f"prf_2: {prf_2}")
+                            print(f"prf_3: {prf_3}")
+
                         prf_1_ = prf_1
                         prf_2_ = prf_2
                         prf_3_ = prf_3
@@ -597,47 +593,18 @@ class DfsTest(Realm):
                         pulse_burst = random.randint(2, 3)
                         if pulse_burst == 2:
                             count_ = "30"
-                            # difference = random.randint(20, 50)
-                            prf_2 = random.randint(400, 1200)
-                            prf_1 = None
+                            prf_1, prf_2 = self.select_values(n=2, fcc="etsi6")
+                            print(f"prf_1: {prf_1}")
+                            print(f"prf_2: {prf_2}")
                             prf_3 = 0
-                            while True:
-                                diff = random.randint(80, 400)
-                                print(diff)
-                                prf_1 = prf_2 - diff
-                                print("pr_1", prf_1)
-                                if prf_1 in range(400, 1200):
-                                    prf_1 = prf_1
-                                    break
-                                else:
-                                    continue
-
 
                         elif pulse_burst == 3:
                             count_ = "40"
-                            prf_3 = random.randint(400, 1200)
-                            prf_1 = None
-                            prf_2 = None
-                            while True:
-                                diff = random.randint(80, 400)
-                                print(diff)
-                                prf_2 = prf_3 - diff
-                                print("pr_2", prf_2)
-                                if prf_2 in range(400, 1200):
-                                    prf_2 = prf_2
-                                    break
-                                else:
-                                    continue
-                            while True:
-                                diff = random.randint(80, 400)
-                                print(diff)
-                                prf_1 = prf_2 - diff
-                                print("pr_1", prf_1)
-                                if prf_1 in range(400, 1200):
-                                    prf_1 = prf_1
-                                    break
-                                else:
-                                    continue
+                            prf_1, prf_2, prf_3 = self.select_values(n=3, fcc="etsi6")
+                            print(f"prf_1: {prf_1}")
+                            print(f"prf_2: {prf_2}")
+                            print(f"prf_3: {prf_3}")
+
                         prf_1_ = prf_1
                         prf_2_ = prf_2
                         prf_3_ = prf_3
