@@ -348,9 +348,13 @@ class DfsTest(Realm):
                 prf_1 = random.randint(300, 400)
                 prf_2 = prf_1 + random.randint(20, 50)
                 prf_3 = prf_2 + random.randint(20, 50)
+                diff_1 = prf_2 - prf_1
+                diff_2 = prf_3 - prf_2
+                diff_3 = prf_3 - prf_1
                 if n == 3:
-                    if 300 <= prf_3 <= 400:
-                        return prf_1, prf_2, prf_3
+                    if (300 <= prf_2 <= 400) and (diff_1 in range(20, 50)):
+                        if (300 <= prf_3 <= 400) and (diff_2 in range(20, 50)) and (diff_3 in range(20, 50)):
+                            return prf_1, prf_2, prf_3
                 elif n == 2:
                     if 300 <= prf_2 <= 400:
                         return prf_1, prf_2
@@ -359,9 +363,13 @@ class DfsTest(Realm):
                 prf_1 = random.randint(400, 1200)
                 prf_2 = prf_1 + random.randint(80, 400)
                 prf_3 = prf_2 + random.randint(80, 400)
+                diff_1 = prf_2 - prf_1
+                diff_2 = prf_3 - prf_2
+                diff_3 = prf_3 - prf_1
                 if n == 3:
-                    if 400 <= prf_3 <= 1200:
-                        return prf_1, prf_2, prf_3
+                    if (400 <= prf_2 <= 1200) and (diff_1 in range(20, 50)):
+                        if (400 <= prf_3 <= 1200) and (diff_2 in range(20, 50)) and (diff_3 in range(20, 50)):
+                            return prf_1, prf_2, prf_3
                 elif n == 2:
                     if 400 <= prf_2 <= 1200:
                         return prf_1, prf_2
