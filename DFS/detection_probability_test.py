@@ -367,8 +367,8 @@ class DfsTest(Realm):
                 diff_2 = prf_3 - prf_2
                 diff_3 = prf_3 - prf_1
                 if n == 3:
-                    if (400 <= prf_2 <= 1200) and (diff_1 in range(20, 50)):
-                        if (400 <= prf_3 <= 1200) and (diff_2 in range(20, 50)) and (diff_3 in range(20, 50)):
+                    if (400 <= prf_2 <= 1200) and (diff_1 in range(80, 400)):
+                        if (400 <= prf_3 <= 1200) and (diff_2 in range(80, 400)) and (diff_3 in range(80, 400)):
                             return prf_1, prf_2, prf_3
                 elif n == 2:
                     if 400 <= prf_2 <= 1200:
