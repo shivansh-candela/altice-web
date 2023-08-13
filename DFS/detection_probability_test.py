@@ -11,6 +11,7 @@
         2. test for combine FCC0-4 - python3 lf_dpt.py  --host 192.168.100.221 --port 8080 --ssid MFG-5GTEST --passwd [BLANK] --security open  --radio 1.1.wiphy5 --sniff_radio 1.1.wiphy1  --fcctypes FCC0 FCC1 FCC2 FCC3 FCC4 --channel 100 --trials 1 --lf_hackrf 25766ec3
         3. for FCC5 - python3 lf_dpt.py  --host 192.168.100.221 --port 8080 --ssid MFG-5GTEST --passwd [BLANK] --security open  --radio 1.1.wiphy5 --sniff_radio 1.1.wiphy1  --fcctypes FCC5  --channel 100 --trials 30  --more_option centre --lf_hackrf 25766ec3
         4.for FCC6 - python3 lf_dpt.py  --host 192.168.100.221 --port 8080 --ssid MFG-5GTEST --passwd [BLANK] --security open  --radio 1.1.wiphy5 --sniff_radio 1.1.wiphy1  --fcctypes FCC6 --channel 100 --trials 1 --lf_hackrf 25766ec3
+        5. for Japan-w53-3 --> python3 lf_dpt.py  --host 192.168.200.91  --port 8080 --ssid candelatest  --passwd candelatest  --security wpa2  --radio 1.1.wiphy1 --sniff_radio 1.1.wiphy0  --fcctypes Japan-w53-3 --channel 52  --trials 1 --lf_hackrf 30a28607
 Note:
     client creation is commented for testing
 """
@@ -264,7 +265,10 @@ class DfsTest(Realm):
             exit(1)
 
     def run_hackrf(self, width=None, pri=None, count=None, freq=None, type=None, burst=None, trial_centre=None, trial_low=None,
-                   trial_high=None, uut_channel=None, freq_modulatin=None, tx_sample_rate=None, prf_1=None, prf_2=None, prf_3=None):
+                   trial_high=None, uut_channel=None, freq_modulatin=None, tx_sample_rate=None, prf_1=None, prf_2=None,
+                   prf_3=None, blank_time=None,long_pulse_width=None, chirp_width=None,
+                   prf=None,num_con_pair=None ):
+
         print(type)
         # send frame to note t1
 
@@ -311,6 +315,9 @@ class DfsTest(Realm):
         #     # OLDER for python2
         #     command = "sudo python lf_hackrf.py --pulse_width " + str(width) + " --pulse_interval " + str(
         #         pri) + " --pulse_count " + str(count) + " --sweep_time 1000 --freq " + str(freq) + " --one_burst"
+        if type == "w53-3":
+            command = f"sudo python3 lf_hackrf_dfs.py --radar_type W53CHIRP,{width},{blank_time},{long_pulse_width},{chirp_width},{prf},{num_con_pair},{freq},20 --one_burst --lf_hackrf {self.lf_hackrf} --log_level debug "
+            print(command)
         stdin, stdout, stderr = p.exec_command(str(command), get_pty=True)
         stdin.write(str(self.ssh_password) + "\n")
         stdin.flush()
@@ -390,6 +397,7 @@ class DfsTest(Realm):
         print(main_dict)
         logging.info(str(main_dict))
         width_, interval_, count_ , burst_, trial_centre, trial_low, trial_high, uut_channel, freq_modulatin, tx_sample_rate, prf_1_, prf_2_, prf_3_  = "", "", "", "", "", "", "","", "", "", "", "", ""
+        blank_time, long_pulse_width, chirp_width, prf, num_con_pair = "", "", "", "", ""
         fcc1_list = None
         if "FCC1" in self.fcctypes:
             random1 = [518, 538, 558, 578, 598, 618, 638, 658, 678, 698, 718, 738, 758, 778, 798, 818, 838, 858, 878,
@@ -431,6 +439,9 @@ class DfsTest(Realm):
                 if fcc == "ETSI5" or fcc == "ETSI6":
                     new_list = ["Burst", "prf_1", "prf_2", "prf_3", "Width", "Pulses",   "Detected", "Frequency(KHz)",
                                 "Detection Time(sec)"]
+                if fcc == "Japan-w53-3":
+                    new_list = ["Burst", "Frequency(KHz)", "Pulse Width", "Blank Time(us)", "Long Pulse Width(us)",
+                                "Chirp Width(MHz)", "Pri(Hz)", "No of Continuous Pairs of Pulses", "Detection Time(sec)"]
                 else:
                     new_list = ["Burst", "Pulses", "Width", "PRI(US)", "Detected", "Frequency(KHz)", "Detection Time(sec)"]
                 third_dict = dict.fromkeys(new_list)
@@ -622,6 +633,20 @@ class DfsTest(Realm):
                     width_ = 1
                     interval_ = 1428
                     count_ = 18
+
+                elif fcc == "Japan-w53-3":
+                    w53_6_width_range = [0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0,
+                                         2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 3.0, 3.1, 3.2, 3.3, 3.4, 3.5, 3.6,
+                                         3.7, 3.8, 3.9, 4.0, 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.7, 4.8, 4.9, 5.0]
+                    random_number = random.choice(w53_6_width_range)
+                    width_  = random_number
+                    blank_time = random.randint(70, 120)
+                    long_pulse_width = random.randint(20, 110)
+                    chirp_width_range = [1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0]
+                    chirp_width = random.choice(chirp_width_range)
+                    prf = random.randint(200, 1000)
+                    num_con_pair = random.randint(22, 40)
+                    tx_sample_rate = "20"
                 elif fcc == "Japan-W53-2":
                     width_ = random.randint(1, 15)
                     interval_ = 3846
@@ -685,6 +710,14 @@ class DfsTest(Realm):
                     main_dict[fcc][var_1]["prf_1"] = prf_1_
                     main_dict[fcc][var_1]["prf_2"] = prf_2_
                     main_dict[fcc][var_1]["prf_3"] = prf_3_
+                if fcc == "Japan-w53-3":
+                    main_dict[fcc][var_1]["Burst"] = "1"
+                    main_dict[fcc][var_1]["Width"] = width_
+                    main_dict[fcc][var_1]["Blank Time(us)"] = blank_time
+                    main_dict[fcc][var_1]["Long Pulse Width(us)"] = long_pulse_width
+                    main_dict[fcc][var_1]["Chirp Width(MHz)"] = chirp_width
+                    main_dict[fcc][var_1]["Pri(Hz)"] = prf
+                    main_dict[fcc][var_1]["No of Continuous Pairs of Pulses"] = num_con_pair
 
                 if self.more_option == "centre":
                     if self.bandwidth == "20":
@@ -814,6 +847,11 @@ class DfsTest(Realm):
                         if fcc == "ETSI6":
                             self.run_hackrf(type="etsi6", width=width_, prf_1=prf_1_, prf_2=prf_2_, prf_3=prf_3_,
                                             freq=str(frequency[str(self.channel)]), count=count_)
+                    if fcc == "Japan-w53-3":
+                        self.run_hackrf(type="w53-3", width=width_, blank_time=blank_time,
+                                        long_pulse_width=long_pulse_width, chirp_width=chirp_width,
+                                        prf=prf, num_con_pair=num_con_pair,
+                                        freq=str(frequency[str(self.channel)])[:4])
                     else:
                         self.run_hackrf(width=width_, pri=interval_, count=count_,
                                         freq=str(frequency[str(self.channel)]))
@@ -986,6 +1024,7 @@ class DfsTest(Realm):
         # print("create client")
         # logging.info("create client")
         # self.create_client()
+
         print("check if station is at expected channel")
         logging.info("check if station is at expected channel")
         sta_list = self.get_station_list()
@@ -1107,7 +1146,7 @@ class DfsTest(Realm):
                             "ETSI0": "NA", "ETSI1": "60%", "ETSI2": "60%", "ETSI3": "60%", "ETSI4": "60%",
                             "ETSI5": "60%", "ETSI6": "60%",
                             "korea_1": "60%", "korea_2": "60%", "korea_3": "60%",
-                            "Japan-W53-1": "60%", "Japan-W53-2": "60%", "Japan-W56-2": "60%", "Japan-W56-3": "60%",
+                            "Japan-W53-1": "60%", "Japan-w53-3": "60%",  "Japan-W53-2": "60%", "Japan-W56-2": "60%", "Japan-W56-3": "60%",
                             "Japan-W56-4": "60%", "Japan-W56-5": "60%", "Japan-W56-6": "60%"}
 
         report.set_obj_html("Summary Table",
@@ -1269,6 +1308,8 @@ class DfsTest(Realm):
 
             if fcc == "ETSI5" or fcc == "ETSI6":
                 Trials, burst, pulse, width, prf_1, prf_2, prf_3, detect, frequency, det_time = [], [], [], [], [], [], [], [], [], []
+            if fcc == "Japan-w53-3":
+                Trials, burst, width, blank_t, long_pulse_wdth, chirp_width, pri, no_c_pulse,  detect, frequency, det_time = [], [], [], [], [], [], [], [], [], [], []
             else:
                 Trials, burst, pulse, width, pri, detect, frequency, det_time = [], [], [], [], [], [], [], []
 
@@ -1296,6 +1337,18 @@ class DfsTest(Realm):
                     prf_1.append(main_dict[fcc][i]['prf_1'])
                     prf_2.append(main_dict[fcc][i]['prf_2'])
                     prf_3.append(main_dict[fcc][i]['prf_3'])
+                    detect.append(main_dict[fcc][i]['Detected'])
+                    frequency.append(main_dict[fcc][i]['Frequency(KHz)'])
+                    det_time.append(main_dict[fcc][i]['Detection Time(sec)'])
+                elif fcc == "Japan-w53-3":
+                    Trials.append(i)
+                    burst.append(main_dict[fcc][i]['Burst'])
+                    width.append(main_dict[fcc][i]['Width'])
+                    blank_t.append(main_dict[fcc][i]["Blank Time(us)"])
+                    long_pulse_wdth.append(main_dict[fcc][i]["Long Pulse Width(us)"])
+                    chirp_width.append(main_dict[fcc][i]["Chirp Width(MHz)"])
+                    pri.append(main_dict[fcc][i][ "Pri(Hz)"])
+                    no_c_pulse.append(main_dict[fcc][i]["No of Continuous Pairs of Pulses"])
                     detect.append(main_dict[fcc][i]['Detected'])
                     frequency.append(main_dict[fcc][i]['Frequency(KHz)'])
                     det_time.append(main_dict[fcc][i]['Detection Time(sec)'])
@@ -1333,6 +1386,20 @@ class DfsTest(Realm):
                     "PRF_1": prf_1,
                     "PRF_2": prf_2,
                     "PRF_3":prf_3 ,
+                    "Detected": detect,
+                    "Frequency (KHz)": frequency,
+                    "Detection Time(secs)": det_time
+                }
+            elif fcc == "Japan-w53-3":
+                table_2 = {
+                    "Trials": Trials,
+                    "Num Bursts": burst,
+                    "Pulse Width (us)": width,
+                    "Blank Time(us)" : blank_t,
+                    "Long Pulse Width(us)": long_pulse_wdth,
+                    "Chirp Width(MHz)": chirp_width,
+                    "Pri(Hz)": pri,
+                    "No of Continuous Pairs of Pulses": no_c_pulse,
                     "Detected": detect,
                     "Frequency (KHz)": frequency,
                     "Detection Time(secs)": det_time
@@ -1424,10 +1491,10 @@ def main():
 
     parser.add_argument('--fcctypes', nargs="+",
                         default=["FCC0", "FCC1", "FCC2", "FCC3", "FCC4", "ETSI0", "ETSI1", "ETSI2", "ETSI3", "ETSI4",
-                                 "ETSI5", "ETSI6", "Japan-W53-1", "Japan-W56-2", "Japan-W56-3", "Japan-W56-4",
+                                 "ETSI5", "ETSI6", "Japan-W53-1", "Japan-w53-3",  "Japan-W56-2", "Japan-W56-3", "Japan-W56-4",
                                  "Japan-W56-5", "Japan-W56-6",
                                  "korea_1", "korea_2", "korea_3"],
-                        help='types needed to be tested {FCC0/FCC1/FCC2/FCC3/FCC4/FCC5/ETSI0/ETSI1/ETSI2/ETSI3/ETSI4/ETSI5/ETSI6}')
+                        help='types needed to be tested {FCC0/FCC1/FCC2/FCC3/FCC4/FCC5/ETSI0/ETSI1/ETSI2/ETSI3/ETSI4/ETSI5/ETSI6/Japan-w53-3}')
 
     parser.add_argument('--channel', type=str, default="100",
                         help='channel options need to be tested {52, 56, 60, 64, 100, 104, 108, 112, 116, 120, 124 ,128, 132, 136, 140}')
