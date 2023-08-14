@@ -646,7 +646,7 @@ class DfsTest(Realm):
                             prf = random.randint(928, 932)
                             min_ = min(max(22, (0.026 * prf)), 30)
                             # print("min", min_)
-                            num_con_pair = random.randint(min_, 40)
+                            num_con_pair = round(random.uniform(min_, 40.0), 1)
                         elif fcc == "Japan-w53-7":
                             prf = random.randint(886, 890)
                             num_con_pair = random.randint(24, 40)
@@ -657,7 +657,7 @@ class DfsTest(Realm):
                             prf = random.randint(1114, 1118)
                             min_ = min(max(22, (0.026 * prf)), 30)
                             print("min", min_)
-                            num_con_pair = random.randint(min_, 40)
+                            num_con_pair = round(random.uniform(min_, 40.0), 1)
                     else:
                         w53_3_width_range = [0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0,
                                              2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 3.0, 3.1, 3.2, 3.3, 3.4, 3.5, 3.6,
@@ -1176,7 +1176,7 @@ class DfsTest(Realm):
                             "ETSI5": "60%", "ETSI6": "60%",
                             "korea_1": "60%", "korea_2": "60%", "korea_3": "60%",
                             "Japan-W53-1": "60%", "Japan-w53-3": "60%",  "Japan-w53-4": "60%",  "Japan-w53-7": "60%",
-                            "Japan-w53-7": "60%",
+                            "Japan-w53-8": "60%",
                             "Japan-w53-6": "60%", "Japan-w53-5": "60%",
                             "Japan-W53-2": "60%", "Japan-W56-2": "60%", "Japan-W56-3": "60%",
                             "Japan-W56-4": "60%", "Japan-W56-5": "60%", "Japan-W56-6": "60%"}
