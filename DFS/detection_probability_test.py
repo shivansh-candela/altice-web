@@ -1398,7 +1398,7 @@ class DfsTest(Realm):
                     "Blank Time(us)" : blank_t,
                     "Long Pulse Width(us)": long_pulse_wdth,
                     "Chirp Width(MHz)": chirp_width,
-                    "Pri(Hz)": pri,
+                    "PRF(Hz)": pri,
                     "No of Continuous Pairs of Pulses": no_c_pulse,
                     "Detected": detect,
                     "Frequency (KHz)": frequency,
