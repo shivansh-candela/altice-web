@@ -439,7 +439,7 @@ class DfsTest(Realm):
                 if fcc == "ETSI5" or fcc == "ETSI6":
                     new_list = ["Burst", "prf_1", "prf_2", "prf_3", "Width", "Pulses",   "Detected", "Frequency(KHz)",
                                 "Detection Time(sec)"]
-                if fcc == "Japan-w53-3" or fcc == "Japan-w53-4":
+                if fcc == "Japan-w53-3" or fcc == "Japan-w53-4" or fcc == "Japan-w53-5":
                     new_list = ["Burst", "Frequency(KHz)", "Pulse Width", "Blank Time(us)", "Long Pulse Width(us)",
                                 "Chirp Width(MHz)", "Pri(Hz)", "No of Continuous Pairs of Pulses", "Detection Time(sec)"]
                 else:
@@ -634,21 +634,33 @@ class DfsTest(Realm):
                     interval_ = 1428
                     count_ = 18
 
-                elif fcc == "Japan-w53-3" or fcc == "Japan-w53-4":
-                    w53_3_width_range = [0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0,
-                                         2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 3.0, 3.1, 3.2, 3.3, 3.4, 3.5, 3.6,
-                                         3.7, 3.8, 3.9, 4.0, 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.7, 4.8, 4.9, 5.0]
-                    random_number = random.choice(w53_3_width_range)
-                    width_ = random_number
-                    blank_time = random.randint(70, 120)
-                    long_pulse_width = random.randint(20, 110)
-                    chirp_width_range = [1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0]
-                    chirp_width = random.choice(chirp_width_range)
+                elif fcc == "Japan-w53-3" or fcc == "Japan-w53-4" or fcc == "Japan-w53-5":
+                    if fcc == "Japan-w53-5":
+                        w53__width_range = [0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5]
+                        random_number = random.choice(w53__width_range)
+                        width_ = random_number
+                        blank_time = random.randint(50, 240)
+                        long_pulse_width = random.randint(30, 32)
+                        prf = random.randint(1114, 1118)
+                        min = min(max(22, (0.026 * prf)), 30)
+                        print("min", min)
+                        num_con_pair = random.randint(min, 40)
+                    else:
+                        w53_3_width_range = [0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0,
+                                             2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 3.0, 3.1, 3.2, 3.3, 3.4, 3.5, 3.6,
+                                             3.7, 3.8, 3.9, 4.0, 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.7, 4.8, 4.9, 5.0]
+                        random_number = random.choice(w53_3_width_range)
+                        width_ = random_number
+                        blank_time = random.randint(70, 120)
+                        long_pulse_width = random.randint(20, 110)
                     if fcc == "Japan-w53-4":
                         prf = random.randint(200, 1600)
+                        num_con_pair = random.randint(22, 40)
                     elif fcc == "Japan-w53-3":
                         prf = random.randint(200, 1000)
-                    num_con_pair = random.randint(22, 40)
+                        num_con_pair = random.randint(22, 40)
+                    chirp_width_range = [1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0]
+                    chirp_width = random.choice(chirp_width_range)
                     tx_sample_rate = "20"
 
                 elif fcc == "Japan-W53-2":
@@ -714,7 +726,7 @@ class DfsTest(Realm):
                     main_dict[fcc][var_1]["prf_1"] = prf_1_
                     main_dict[fcc][var_1]["prf_2"] = prf_2_
                     main_dict[fcc][var_1]["prf_3"] = prf_3_
-                if fcc == "Japan-w53-3" or fcc ==  "Japan-w53-4":
+                if fcc == "Japan-w53-3" or fcc == "Japan-w53-4" or fcc == "Japan-w53-5":
                     main_dict[fcc][var_1]["Burst"] = "1"
                     main_dict[fcc][var_1]["Width"] = width_
                     main_dict[fcc][var_1]["Blank Time(us)"] = blank_time
@@ -851,7 +863,7 @@ class DfsTest(Realm):
                         if fcc == "ETSI6":
                             self.run_hackrf(type="etsi6", width=width_, prf_1=prf_1_, prf_2=prf_2_, prf_3=prf_3_,
                                             freq=str(frequency[str(self.channel)]), count=count_)
-                    if fcc == "Japan-w53-3" or fcc ==  "Japan-w53-4":
+                    if fcc == "Japan-w53-3" or fcc ==  "Japan-w53-4" or fcc == "Japan-w53-5":
                         self.run_hackrf(type="w53-3", width=width_, blank_time=blank_time,
                                         long_pulse_width=long_pulse_width, chirp_width=chirp_width,
                                         prf=prf, num_con_pair=num_con_pair,
@@ -1150,7 +1162,8 @@ class DfsTest(Realm):
                             "ETSI0": "NA", "ETSI1": "60%", "ETSI2": "60%", "ETSI3": "60%", "ETSI4": "60%",
                             "ETSI5": "60%", "ETSI6": "60%",
                             "korea_1": "60%", "korea_2": "60%", "korea_3": "60%",
-                            "Japan-W53-1": "60%", "Japan-w53-3": "60%",  "Japan-w53-4": "60%",  "Japan-W53-2": "60%", "Japan-W56-2": "60%", "Japan-W56-3": "60%",
+                            "Japan-W53-1": "60%", "Japan-w53-3": "60%",  "Japan-w53-4": "60%", "Japan-w53-5": "60%",
+                            "Japan-W53-2": "60%", "Japan-W56-2": "60%", "Japan-W56-3": "60%",
                             "Japan-W56-4": "60%", "Japan-W56-5": "60%", "Japan-W56-6": "60%"}
 
         report.set_obj_html("Summary Table",
@@ -1312,7 +1325,7 @@ class DfsTest(Realm):
 
             if fcc == "ETSI5" or fcc == "ETSI6":
                 Trials, burst, pulse, width, prf_1, prf_2, prf_3, detect, frequency, det_time = [], [], [], [], [], [], [], [], [], []
-            if fcc == "Japan-w53-3" or fcc ==  "Japan-w53-4":
+            if fcc == "Japan-w53-3" or fcc == "Japan-w53-4" or fcc == "Japan-w53-5":
                 Trials, burst, width, blank_t, long_pulse_wdth, chirp_width, pri, no_c_pulse,  detect, frequency, det_time = [], [], [], [], [], [], [], [], [], [], []
             else:
                 Trials, burst, pulse, width, pri, detect, frequency, det_time = [], [], [], [], [], [], [], []
@@ -1332,7 +1345,6 @@ class DfsTest(Realm):
                     detect.append(main_dict[fcc][i]['Detected'])
                     frequency.append(main_dict[fcc][i]['Frequency(KHz)'])
                     det_time.append(main_dict[fcc][i]['Detection Time(sec)'])
-
                 elif fcc == "ETSI5" or fcc == "ETSI6":
                     Trials.append(i)
                     burst.append(main_dict[fcc][i]['Burst'])
@@ -1344,7 +1356,7 @@ class DfsTest(Realm):
                     detect.append(main_dict[fcc][i]['Detected'])
                     frequency.append(main_dict[fcc][i]['Frequency(KHz)'])
                     det_time.append(main_dict[fcc][i]['Detection Time(sec)'])
-                elif fcc == "Japan-w53-3" or fcc == "Japan-w53-4":
+                elif fcc == "Japan-w53-3" or fcc == "Japan-w53-4" or fcc == "Japan-w53-5":
                     Trials.append(i)
                     burst.append(main_dict[fcc][i]['Burst'])
                     width.append(main_dict[fcc][i]['Width'])
@@ -1394,7 +1406,7 @@ class DfsTest(Realm):
                     "Frequency (KHz)": frequency,
                     "Detection Time(secs)": det_time
                 }
-            elif fcc == "Japan-w53-3" or fcc ==  "Japan-w53-4":
+            elif fcc == "Japan-w53-3" or fcc ==  "Japan-w53-4" or fcc == "Japan-w53-5":
                 table_2 = {
                     "Trials": Trials,
                     "Num Bursts": burst,
@@ -1495,7 +1507,8 @@ def main():
 
     parser.add_argument('--fcctypes', nargs="+",
                         default=["FCC0", "FCC1", "FCC2", "FCC3", "FCC4", "ETSI0", "ETSI1", "ETSI2", "ETSI3", "ETSI4",
-                                 "ETSI5", "ETSI6", "Japan-W53-1", "Japan-w53-3",  "Japan-w53-4",  "Japan-W56-2", "Japan-W56-3", "Japan-W56-4",
+                                 "ETSI5", "ETSI6", "Japan-W53-1", "Japan-w53-3",  "Japan-w53-4", "Japan-w53-5",
+                                 "Japan-W56-2", "Japan-W56-3", "Japan-W56-4",
                                  "Japan-W56-5", "Japan-W56-6",
                                  "korea_1", "korea_2", "korea_3"],
                         help='types needed to be tested {FCC0/FCC1/FCC2/FCC3/FCC4/FCC5/ETSI0/ETSI1/ETSI2/ETSI3/ETSI4/ETSI5/ETSI6/Japan-w53-3/Japan-w53-4}')
