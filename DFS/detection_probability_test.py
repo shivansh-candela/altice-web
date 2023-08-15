@@ -644,9 +644,9 @@ class DfsTest(Realm):
                         long_pulse_width = random.randint(30, 32)
                         if fcc == "Japan-w53-6":
                             prf = random.randint(928, 932)
-                            min_ = min(max(22, (0.026 * prf)), 30)
+                            min_ = int(min(max(22, (0.026 * prf)), 30))
                             # print("min", min_)
-                            num_con_pair = round(random.uniform(min_, 40.0), 1)
+                            num_con_pair = random.randint(min_, 40)
                         elif fcc == "Japan-w53-7":
                             prf = random.randint(886, 890)
                             num_con_pair = random.randint(24, 40)
@@ -655,9 +655,9 @@ class DfsTest(Realm):
                             num_con_pair = random.randint(20, 40)
                         else:
                             prf = random.randint(1114, 1118)
-                            min_ = min(max(22, (0.026 * prf)), 30)
+                            min_ = int(min(max(22, (0.026 * prf)), 30))
                             print("min", min_)
-                            num_con_pair = round(random.uniform(min_, 40.0), 1)
+                            num_con_pair = random.randint(min_, 40)
                     else:
                         w53_3_width_range = [0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0,
                                              2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 3.0, 3.1, 3.2, 3.3, 3.4, 3.5, 3.6,
