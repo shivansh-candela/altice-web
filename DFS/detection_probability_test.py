@@ -29,6 +29,7 @@ import paramiko
 import random
 from scapy.all import *
 from scapy.layers.dot11 import Dot11
+from dateutil import parser
 
 
 if sys.version_info[0] != 3:
@@ -951,11 +952,11 @@ class DfsTest(Realm):
                     scapy_time = str(scapy_frame_time)
 
                     for i in scapy_time:
-                        if i == ".":
+                        if i == "I":
                             print("yes")
                             logging.info("yes")
-                            ind = scapy_time.index(".")
-                            scapy_frame_time_  = scapy_time[:ind]
+                            ind = scapy_time.index("I")
+                            scapy_frame_time_ = scapy_time[:int(ind) -1]
                     print("scapy time", scapy_frame_time_)
                     logging.info("scapy time" + str(scapy_frame_time_))
 
@@ -980,11 +981,11 @@ class DfsTest(Realm):
                     csa_time = str(csa_frame_time)
                     csa_frame_time_ = None
                     for i in csa_time:
-                        if i == ".":
+                        if i == "I":
                             print("yes")
                             logging.info("yes")
-                            ind = csa_time.index(".")
-                            csa_frame_time_ = csa_time[:ind]
+                            ind = csa_time.index("I")
+                            csa_frame_time_ = csa_time[:int(ind) - 1]
                     print("csa time", csa_frame_time_)
                     logging.info("csa time" + str(csa_frame_time_))
 
@@ -995,16 +996,17 @@ class DfsTest(Realm):
                     print(type(csa_frame_time_))
                     print("calculate detection time")
                     logging.info("calculate detection time")
-                    FMT = '%b %d, %Y %H:%M:%S.%f'
-                    c_time = datetime.strptime(csa_frame_time_, FMT) - datetime.strptime(scapy_frame_time_, FMT)
-                    print("detection time ", c_time)
-                    logging.info("detection time " + str(c_time))
-                    lst = str(c_time).split(":")
-                    seconds = float(lst[0]) * 3600 + float(lst[1]) * 60 + float(lst[2])
-                    d_time = seconds
-                    print("detection time ", d_time)
-                    logging.info("detection time " + str(d_time))
-                    main_dict[fcc][var_1]["Detection Time(sec)"] = d_time
+                    csa_datetime = parser.parse(csa_frame_time_)
+                    scapy_datetime = parser.parse(scapy_frame_time_)
+
+                    # Calculate the time difference
+                    time_difference = round((csa_datetime - scapy_datetime).total_seconds(), 1)
+
+                    print(time_difference)
+
+                    print("detection time ", time_difference)
+                    logging.info("detection time " + str(time_difference))
+                    main_dict[fcc][var_1]["Detection Time(sec)"] = time_difference
 
                 else:
                     print("csa frame is not present")
@@ -1418,7 +1420,7 @@ class DfsTest(Realm):
                     Trials.append(i)
                     pulse.append(main_dict[fcc][i]['Pulses'])
                     width.append(main_dict[fcc][i]['Width'])
-                    pri.append(main_dict[fcc][i]['PRF'])
+                    prf.append(main_dict[fcc][i]['PRF'])
                     detect.append(main_dict[fcc][i]['Detected'])
                     frequency.append(main_dict[fcc][i]['Frequency(KHz)'])
                     det_time.append(main_dict[fcc][i]['Detection Time(sec)'])
