@@ -971,7 +971,7 @@ class DfsTest(Realm):
                     print("detection time ", c_time)
                     logging.info("detection time " + str(c_time))
                     lst = str(c_time).split(":")
-                    seconds = int(lst[0]) * 3600 + int(lst[1]) * 60 + int(lst[2])
+                    seconds = float(lst[0]) * 3600 + float(lst[1]) * 60 + float(lst[2])
                     d_time = seconds
                     print("detection time ", d_time)
                     logging.info("detection time " + str(d_time))
