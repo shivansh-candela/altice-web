@@ -995,7 +995,7 @@ class DfsTest(Realm):
                     print(type(csa_frame_time_))
                     print("calculate detection time")
                     logging.info("calculate detection time")
-                    FMT = '%b %d, %Y %H:%M:%S'
+                    FMT = '%b %d, %Y %H:%M:%S.%f'
                     c_time = datetime.strptime(csa_frame_time_, FMT) - datetime.strptime(scapy_frame_time_, FMT)
                     print("detection time ", c_time)
                     logging.info("detection time " + str(c_time))
