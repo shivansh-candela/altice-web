@@ -1131,9 +1131,11 @@ class DfsTest(Realm):
     def generate_report(self, test_duration=None, main_dict=None):
 
         print("test duration", test_duration)
-        report = lf_report_pdf.lf_report(_path="", _results_dir_name="Detection Probability Test",
+        var_name = "_".join(self.fcctypes)
+        report = lf_report_pdf.lf_report(_path="",
+                                         _results_dir_name=f"{var_name}_ch{self.channel}_bw{self.bandwidth}_Detection Probability Test",
                                          _output_html="dpt.html",
-                                         _output_pdf="dpt.pdf")
+                                         _output_pdf=f"{var_name}_ch{self.channel}_bw{self.bandwidth}_dpt.pdf")
         # self.test_duration = "xyz"
         date = str(datetime.now()).split(",")[0].replace(" ", "-").split(".")[0]
         report_path = report.get_report_path()
