@@ -715,7 +715,7 @@ class DfsTest(Realm):
                     width_ = 2
                     interval_ = 3030
                     count_ = 70
-                elif fcc == "Japan-W56-2":
+                elif fcc == "Japan-w56-2":
                     width_ = 1
                     interval_ = 1429
                     count_ = 18
@@ -911,6 +911,9 @@ class DfsTest(Realm):
                     if fcc == "Japan-w53-1" or fcc == "Japan-w53-2":
                         self.run_hackrf(type="w53-1", width=width_, prf=prf, count=count_,
                                         freq=str(frequency[str(self.channel)]))
+                    if fcc == "Japan-w56-2":
+                        if self.legacy == "True":
+                            self.run_hackrf(type="legacy", width=width_, pri=interval_, count=count_, freq=str(frequency[str(self.channel)]))
                     else:
                         self.run_hackrf(width=width_, pri=interval_, count=count_,
                                         freq=str(frequency[str(self.channel)]))
@@ -1211,7 +1214,7 @@ class DfsTest(Realm):
                             "Japan-w53-1": "60%", "Japan-w53-3": "60%",  "Japan-w53-4": "60%",  "Japan-w53-7": "60%",
                             "Japan-w53-8": "60%",
                             "Japan-w53-6": "60%", "Japan-w53-5": "60%",
-                            "Japan-w53-2": "60%", "Japan-W56-2": "60%", "Japan-W56-3": "60%",
+                            "Japan-w53-2": "60%", "Japan-w56-2": "60%", "Japan-W56-3": "60%",
                             "Japan-W56-4": "60%", "Japan-W56-5": "60%", "Japan-W56-6": "60%"}
 
         report.set_obj_html("Summary Table",
@@ -1577,7 +1580,7 @@ def main():
                         default=["FCC0", "FCC1", "FCC2", "FCC3", "FCC4", "ETSI0", "ETSI1", "ETSI2", "ETSI3", "ETSI4",
                                  "ETSI5", "ETSI6","Japan-W53-1", "Japan-W53-2", "Japan-w53-3",  "Japan-w53-4", "Japan-w53-5",
                                  "Japan-w53-6",  "Japan-w53-7",  "Japan-w53-8",
-                                 "Japan-W56-2", "Japan-W56-3", "Japan-W56-4",
+                                 "Japan-w56-2", "Japan-W56-3", "Japan-W56-4",
                                  "Japan-W56-5", "Japan-W56-6",
                                  "korea_1", "korea_2", "korea_3"],
                         help='types needed to be tested {FCC0/FCC1/FCC2/FCC3/FCC4/FCC5/ETSI0/ETSI1/ETSI2/ETSI3/ETSI4/ETSI5/ETSI6/Japan-W53-1/Japan-W53-2/Japan-w53-3/Japan-w53-4/Japan-w53-5/Japan-w53-6}')
