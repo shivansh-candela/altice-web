@@ -719,19 +719,19 @@ class DfsTest(Realm):
                     width_ = 1
                     interval_ = 1429
                     count_ = 18
-                elif fcc == "Japan-W56-3":
+                elif fcc == "Japan-w56-3":
                     width_ = 2
                     interval_ = 4000
                     count_ = 18
-                elif fcc == "Japan-W56-4":
+                elif fcc == "Japan-w56-4":
                     width_ = str(random.randint(1, 5))
                     interval_ = str(random.randint(150, 230))
                     count_ = str(random.randint(23, 29))
-                elif fcc == "Japan-W56-5":
+                elif fcc == "Japan-w56-5":
                     width_ = str(random.randint(6, 10))
                     interval_ = str(random.randint(200, 500))
                     count_ = str(random.randint(16, 18))
-                elif fcc == "Japan-W56-6":
+                elif fcc == "Japan-w56-6":
                     width_ = str(random.randint(11, 20))
                     interval_ = str(random.randint(200, 500))
                     count_ = str(random.randint(12, 16))
@@ -911,7 +911,7 @@ class DfsTest(Realm):
                     if fcc == "Japan-w53-1" or fcc == "Japan-w53-2":
                         self.run_hackrf(type="w53-1", width=width_, prf=prf, count=count_,
                                         freq=str(frequency[str(self.channel)]))
-                    if fcc == "Japan-w56-2":
+                    if fcc == "Japan-w56-2" or fcc == "Japan-w56-3" or fcc == "Japan-w56-4" or fcc == "Japan-w56-5" or fcc == "Japan-w56-6":
                         if self.legacy == "True":
                             self.run_hackrf(type="legacy", width=width_, pri=interval_, count=count_, freq=str(frequency[str(self.channel)]))
                     else:
@@ -1214,8 +1214,8 @@ class DfsTest(Realm):
                             "Japan-w53-1": "60%", "Japan-w53-3": "60%",  "Japan-w53-4": "60%",  "Japan-w53-7": "60%",
                             "Japan-w53-8": "60%",
                             "Japan-w53-6": "60%", "Japan-w53-5": "60%",
-                            "Japan-w53-2": "60%", "Japan-w56-2": "60%", "Japan-W56-3": "60%",
-                            "Japan-W56-4": "60%", "Japan-W56-5": "60%", "Japan-W56-6": "60%"}
+                            "Japan-w53-2": "60%", "Japan-w56-2": "60%", "Japan-w56-3": "60%",
+                            "Japan-w56-4": "60%", "Japan-w56-5": "60%", "Japan-w56-6": "60%"}
 
         report.set_obj_html("Summary Table",
                             "The below table provides detailed information regarding detection probability percentage for various RADAR Types.")
@@ -1580,8 +1580,8 @@ def main():
                         default=["FCC0", "FCC1", "FCC2", "FCC3", "FCC4", "ETSI0", "ETSI1", "ETSI2", "ETSI3", "ETSI4",
                                  "ETSI5", "ETSI6","Japan-W53-1", "Japan-W53-2", "Japan-w53-3",  "Japan-w53-4", "Japan-w53-5",
                                  "Japan-w53-6",  "Japan-w53-7",  "Japan-w53-8",
-                                 "Japan-w56-2", "Japan-W56-3", "Japan-W56-4",
-                                 "Japan-W56-5", "Japan-W56-6",
+                                 "Japan-w56-2", "Japan-w56-3", "Japan-w56-4",
+                                 "Japan-w56-5", "Japan-w56-6",
                                  "korea_1", "korea_2", "korea_3"],
                         help='types needed to be tested {FCC0/FCC1/FCC2/FCC3/FCC4/FCC5/ETSI0/ETSI1/ETSI2/ETSI3/ETSI4/ETSI5/ETSI6/Japan-W53-1/Japan-W53-2/Japan-w53-3/Japan-w53-4/Japan-w53-5/Japan-w53-6}')
 
