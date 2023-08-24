@@ -312,6 +312,8 @@ class DfsTest(Realm):
             print(command)
         if type == "legacy":
             command = f"sudo python3 lf_hackrf_dfs.py --pulse_width {width} --pulse_interval {pri} --pulse_count {count} --sweep_time 1000 --one_burst --freq {freq} --lf_hackrf {self.lf_hackrf}"
+        if type == "legacy_w56-1":
+            command = f"python3 lf_hackrf_dfs.py --pulse_width {width} --pulse_interval {pri} --pulse_count {count} --tx_sample_rate 2 --sweep_time 1000 --freq {freq} --one_burst --lf_hackrf {self.lf_hackrf}"
         # else:
         #     # OLDER for python2
         #     command = "sudo python lf_hackrf.py --pulse_width " + str(width) + " --pulse_interval " + str(
@@ -715,6 +717,10 @@ class DfsTest(Realm):
                     width_ = 2
                     interval_ = 3030
                     count_ = 70
+                elif fcc == "Japan-w56-1":
+                    width_ = 1
+                    interval_ = 2778
+                    count_ = 18
                 elif fcc == "Japan-w56-2":
                     width_ = 1
                     interval_ = 1429
@@ -750,7 +756,9 @@ class DfsTest(Realm):
                     main_dict[fcc][var_1]["Pulses"] = count_
                     main_dict[fcc][var_1]["Width"] = width_
                     main_dict[fcc][var_1]["PRI(US)"] = interval_
-                if fcc == "FCC0" or fcc == "FCC1" or fcc == "FCC2" or fcc == "FCC3" or fcc == "FCC4" or fcc == "ETSI0" or fcc == "ETSI1"or fcc == "ETSI2" or fcc == "ETSI3" or fcc == "ETSI4":
+                if (fcc == "FCC0" or fcc == "FCC1" or fcc == "FCC2" or fcc == "FCC3" or fcc == "FCC4"
+                        or fcc == "ETSI0" or fcc == "ETSI1"or fcc == "ETSI2" or fcc == "ETSI3" or fcc == "ETSI4"
+                or fcc == "Japan-w56-1" or fcc == "Japan-w56-2" or fcc == "Japan-w56-3"or fcc == "Japan-w56-4" or fcc == "Japan-w56-5" or fcc == "Japan-w56-6"):
                     main_dict[fcc][var_1]["Burst"] = "1"
                     main_dict[fcc][var_1]["Pulses"] = count_
                     main_dict[fcc][var_1]["Width"] = width_
@@ -911,9 +919,12 @@ class DfsTest(Realm):
                     if fcc == "Japan-w53-1" or fcc == "Japan-w53-2":
                         self.run_hackrf(type="w53-1", width=width_, prf=prf, count=count_,
                                         freq=str(frequency[str(self.channel)]))
-                    if fcc == "Japan-w56-2" or fcc == "Japan-w56-3" or fcc == "Japan-w56-4" or fcc == "Japan-w56-5" or fcc == "Japan-w56-6":
+                    if fcc == "Japan-w56-1" or fcc == "Japan-w56-2" or fcc == "Japan-w56-3" or fcc == "Japan-w56-4" or fcc == "Japan-w56-5" or fcc == "Japan-w56-6":
                         if self.legacy == "True":
-                            self.run_hackrf(type="legacy", width=width_, pri=interval_, count=count_, freq=str(frequency[str(self.channel)]))
+                            if fcc == "Japan-w56-1":
+                                self.run_hackrf(type="legacy_w56-1", width=width_, pri=interval_, count=count_, freq=str(frequency[str(self.channel)]))
+                            else:
+                                self.run_hackrf(type="legacy", width=width_, pri=interval_, count=count_, freq=str(frequency[str(self.channel)]))
                     else:
                         self.run_hackrf(width=width_, pri=interval_, count=count_,
                                         freq=str(frequency[str(self.channel)]))
@@ -1214,7 +1225,7 @@ class DfsTest(Realm):
                             "Japan-w53-1": "60%", "Japan-w53-3": "60%",  "Japan-w53-4": "60%",  "Japan-w53-7": "60%",
                             "Japan-w53-8": "60%",
                             "Japan-w53-6": "60%", "Japan-w53-5": "60%",
-                            "Japan-w53-2": "60%", "Japan-w56-2": "60%", "Japan-w56-3": "60%",
+                            "Japan-w53-2": "60%", "Japan-w56-1": "60%",  "Japan-w56-2": "60%", "Japan-w56-3": "60%",
                             "Japan-w56-4": "60%", "Japan-w56-5": "60%", "Japan-w56-6": "60%"}
 
         report.set_obj_html("Summary Table",
@@ -1579,7 +1590,7 @@ def main():
     parser.add_argument('--fcctypes', nargs="+",
                         default=["FCC0", "FCC1", "FCC2", "FCC3", "FCC4", "ETSI0", "ETSI1", "ETSI2", "ETSI3", "ETSI4",
                                  "ETSI5", "ETSI6","Japan-W53-1", "Japan-W53-2", "Japan-w53-3",  "Japan-w53-4", "Japan-w53-5",
-                                 "Japan-w53-6",  "Japan-w53-7",  "Japan-w53-8",
+                                 "Japan-w53-6",  "Japan-w53-7",  "Japan-w53-8", "Japan-w56-1",
                                  "Japan-w56-2", "Japan-w56-3", "Japan-w56-4",
                                  "Japan-w56-5", "Japan-w56-6",
                                  "korea_1", "korea_2", "korea_3"],
