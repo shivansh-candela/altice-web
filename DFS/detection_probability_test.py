@@ -146,7 +146,8 @@ class DfsTest(Realm):
                  bandwidth=None,
                  ap_name=None,
                  lf_hackrf=None,
-                 legacy=None
+                 legacy=None,
+                 create_client=None
                  ):
         super().__init__(host, port)
         self.host = host
@@ -182,6 +183,7 @@ class DfsTest(Realm):
         self.local_realm = realm.Realm(lfclient_host=self.host, lfclient_port=self.port)
         self.pcap_obj = lf_pcap.LfPcap()
         self.cx_profile = self.local_realm.new_l3_cx_profile()
+        self.create_client = create_client
         logging.basicConfig(filename='dpt.log', filemode='w', level=logging.INFO, force=True)
         if self.desired_detection < 60:
             print("please specify desired detection percentage value equal to or greater than the required percentage detection")
@@ -977,7 +979,6 @@ class DfsTest(Realm):
                         if (fcc == "ETSI0") and self.legacy == "False":
                             self.run_hackrf(type="legacy", width=width_, pri=interval_, count=count_ , freq=str(frequency[str(self.channel)]))
                         elif fcc == "ETSI1" and self.legacy == "False":
-                            print("hi")
                             self.run_hackrf(type="etsi1", width=width_, pri=interval_,
                                             freq=str(frequency[str(self.channel)]),  count=count_)
                         elif fcc == "ETSI2":
@@ -1177,14 +1178,16 @@ class DfsTest(Realm):
     def run(self):
         print(self.enable_traffic)
         print(self.fcctypes)
-        # print("clean all stations before the test")
-        # logging.info("clean all stations before the test")
-        # self.precleanup()
-        #
-        # print("create client")
-        # logging.info("create client")
-        # self.create_client()
+        if self.create_client == "True":
+            print("clean all stations before the test")
+            logging.info("clean all stations before the test")
+            self.precleanup()
 
+            print("create client")
+            logging.info("create client")
+            self.create_client()
+        else:
+            print("client already exists")
         print("check if station is at expected channel")
         logging.info("check if station is at expected channel")
         sta_list = self.get_station_list()
@@ -1780,6 +1783,7 @@ def main():
     parser.add_argument("--tx_power", help='manually provide tx power of radar sent')
     parser.add_argument("--lf_hackrf", help='provide serial number og tx hackrf eg 30a28607')
     parser.add_argument("--legacy", help='stores true for legacy mode by default', default=True)
+    parser.add_argument("--create_client", help='stores True/False if client creation is needed', default=False)
 
     args = parser.parse_args()
     obj = DfsTest(host=args.host,
@@ -1808,7 +1812,8 @@ def main():
                   bandwidth=args.bw,
                   ap_name=args.ap_name,
                   lf_hackrf=args.lf_hackrf,
-                  legacy=args.legacy)
+                  legacy=args.legacy,
+                  create_client=args.create_client)
     obj.run()
 
 if __name__ == '__main__':
