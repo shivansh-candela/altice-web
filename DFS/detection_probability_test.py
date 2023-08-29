@@ -7,11 +7,11 @@
  run : - python3 lf_detection_probability_test.py  --host 192.168.1.31 --ssid Candela_20MHz --passwd [BLANK] --security open --trials 1   --more_option centre --fcctypes FCC0
 
     Examples:
-        1. test for FCC0/FCC1/FCC2/FCC3/FCC4 (JUST REPLACE fcc0 with 1,2,3 or 4) - python3 lf_dpt.py  --host 192.168.100.221 --port 8080 --ssid MFG-5GTEST --passwd [BLANK] --security open  --radio 1.1.wiphy5 --sniff_radio 1.1.wiphy1  --fcctypes FCC0 --channel 100 --trials 1 --lf_hackrf 25766ec3
-        2. test for combine FCC0-4 - python3 lf_dpt.py  --host 192.168.100.221 --port 8080 --ssid MFG-5GTEST --passwd [BLANK] --security open  --radio 1.1.wiphy5 --sniff_radio 1.1.wiphy1  --fcctypes FCC0 FCC1 FCC2 FCC3 FCC4 --channel 100 --trials 1 --lf_hackrf 25766ec3
-        3. for FCC5 - python3 lf_dpt.py  --host 192.168.100.221 --port 8080 --ssid MFG-5GTEST --passwd [BLANK] --security open  --radio 1.1.wiphy5 --sniff_radio 1.1.wiphy1  --fcctypes FCC5  --channel 100 --trials 30  --more_option centre --lf_hackrf 25766ec3
-        4.for FCC6 - python3 lf_dpt.py  --host 192.168.100.221 --port 8080 --ssid MFG-5GTEST --passwd [BLANK] --security open  --radio 1.1.wiphy5 --sniff_radio 1.1.wiphy1  --fcctypes FCC6 --channel 100 --trials 1 --lf_hackrf 25766ec3
-        5. for Japan-w53-3 --> python3 lf_dpt.py  --host 192.168.200.91  --port 8080 --ssid candelatest  --passwd candelatest  --security wpa2  --radio 1.1.wiphy1 --sniff_radio 1.1.wiphy0  --fcctypes Japan-w53-3 --channel 52  --trials 1 --lf_hackrf 30a28607
+        1. test for FCC0/FCC1/FCC2/FCC3/FCC4 (JUST REPLACE fcc0 with 1,2,3 or 4) - python3 detection_probability_test.py  --host 192.168.100.221 --port 8080 --ssid MFG-5GTEST --passwd [BLANK] --security open  --radio 1.1.wiphy5 --sniff_radio 1.1.wiphy1  --fcctypes FCC0 --channel 100 --trials 1 --lf_hackrf 25766ec3
+        2. test for combine FCC0-4 - python3 detection_probability_test.py  --host 192.168.100.221 --port 8080 --ssid MFG-5GTEST --passwd [BLANK] --security open  --radio 1.1.wiphy5 --sniff_radio 1.1.wiphy1  --fcctypes FCC0 FCC1 FCC2 FCC3 FCC4 --channel 100 --trials 1 --lf_hackrf 25766ec3
+        3. for FCC5 - python3 detection_probability_test.py  --host 192.168.100.221 --port 8080 --ssid MFG-5GTEST --passwd [BLANK] --security open  --radio 1.1.wiphy5 --sniff_radio 1.1.wiphy1  --fcctypes FCC5  --channel 100 --trials 30  --more_option centre --lf_hackrf 25766ec3
+        4.for FCC6 - python3 detection_probability_test.py  --host 192.168.100.221 --port 8080 --ssid MFG-5GTEST --passwd [BLANK] --security open  --radio 1.1.wiphy5 --sniff_radio 1.1.wiphy1  --fcctypes FCC6 --channel 100 --trials 1 --lf_hackrf 25766ec3
+        5. for Japan-w53-3 --> python3 detection_probability_test.py  --host 192.168.200.91  --port 8080 --ssid candelatest  --passwd candelatest  --security wpa2  --radio 1.1.wiphy1 --sniff_radio 1.1.wiphy0  --fcctypes Japan-w53-3 --channel 52  --trials 1 --lf_hackrf 30a28607
 Note:
     client creation is commented for testing
 """
@@ -314,7 +314,7 @@ class DfsTest(Realm):
             command = f"sudo python3 lf_hackrf_dfs.py --pulse_width {width} --pulse_interval {pri} --pulse_count {count} --sweep_time 1000 --one_burst --freq {freq} --lf_hackrf {self.lf_hackrf}"
         if type == "legacy_w56-1":
             command = f"python3 lf_hackrf_dfs.py --pulse_width {width} --pulse_interval {pri} --pulse_count {count} --tx_sample_rate 2 --sweep_time 1000 --freq {freq} --one_burst --lf_hackrf {self.lf_hackrf}"
-        if type == "FCC0" or  type == "FCC1" or type == "FCC2" or  type == "FCC3" or  type == "FCC4":
+        if type == "FCC0" or type == "FCC1" or type == "FCC2" or type == "FCC3" or type == "FCC4":
             command = f"python3 lf_hackrf_dfs.py --rf_type {type},{width},{pri},{count},20 --lf_hackrf {self.lf_hackrf} --freq {freq} --one_burst --log_level debug"
         # else:
 
@@ -1569,86 +1569,145 @@ class DfsTest(Realm):
 
 
 def main():
-    desc = """ detection probability  test 
+    description = """
+    detection_probability_test.py
+    --------------------
 
-        """
+    Summary :
+    ----------
+    Detection Probability Test  is compilance to the Dynamic Frequency Selection(DFS) Regulation, it creates regulatory
+    specified radar pulses to the DUT repeatedly to measure the probability of detection.
+
+    execution: This script is executed in following way
+    1. create a client on 5GHZ band
+    2. check if the client is on expected DFS channel or not
+    3. if not terminate the script
+    4. if yes then it will start sniffer on client channel
+    5. once the client is associated respective regulation radar is generated from hackrf
+    6. stop sniffer
+    7. check for csa frame 
+    8. report 
+
+    ############################################
+    # Examples Commands for different scenarios 
+    ############################################
+
+    --> for full test (all regulation)
+       ./detection_probability_test.py  --host 192.168.1.31 --ssid Candela_20MHz --passwd [BLANK] --security open --trials 1   --more_option centre 
+
+    *** LEGACY MODE (older) ******        
+
+    --> FCC Regulation :
+
+       Try to replace 0 IN FCC0 with 1, 2, 3, 4, 5 and 6
+
+       ./detection_probability_test.py  --host 192.168.200.91 --ssid candelatest --passwd candelatest --security wpa2 
+       --sniff_radio 1.1.wiphy1 --radio 1.1.wiphy0 --fcctypes FCC0 --channel 52  --trials 1  --desired_detection 60
+        --enable_traffic False --static False --more_option centre --bw 20 --lf_hackrf 30a28607 --legacy True
+
+    --> ETSI Regulation
+
+       From ETSI0 to ETSI6
+
+       ./detection_probability_test.py  --host 192.168.200.91 --ssid candelatest --passwd candelatest --security wpa2 
+       --sniff_radio 1.1.wiphy1 --radio 1.1.wiphy0 --fcctypes ETSI0 --channel 52  --trials 1  --desired_detection 60
+        --enable_traffic False --static False --more_option centre --bw 20 --lf_hackrf 30a28607 --legacy True
+
+    --> JAPAN Regulation
+
+       Japan-w53-1/6 and Japan-w56-1/6
+
+       ./detection_probability_test.py  --host 192.168.200.91 --ssid candelatest --passwd candelatest --security wpa2 
+       --sniff_radio 1.1.wiphy1 --radio 1.1.wiphy0 --fcctypes Japan-w53-1 --channel 52  --trials 1  --desired_detection 60
+        --enable_traffic False --static False --more_option centre --bw 20 --lf_hackrf 30a28607 --legacy True
+
+    --> Korea Regulation
+
+       coming soon...
+
+    **** NON LEGACY MODE ****
+
+    --> FCC Regulation
+
+    Try to replace 0 IN FCC0 with 1, 2, 3, 4, 5 and 6
+
+       ./detection_probability_test.py  --host 192.168.200.91 --ssid candelatest --passwd candelatest --security wpa2 
+       --sniff_radio 1.1.wiphy1 --radio 1.1.wiphy0 --fcctypes FCC0 --channel 52  --trials 1  --desired_detection 60
+        --enable_traffic False --static False --more_option centre --bw 20 --lf_hackrf 30a28607 --legacy False
+
+    --> ETSI Regulation
+
+       From ETSI0 to ETSI6
+
+       ./detection_probability_test.py  --host 192.168.200.91 --ssid candelatest --passwd candelatest --security wpa2 
+       --sniff_radio 1.1.wiphy1 --radio 1.1.wiphy0 --fcctypes ETSI0 --channel 52  --trials 1  --desired_detection 60
+        --enable_traffic False --static False --more_option centre --bw 20 --lf_hackrf 30a28607 --legacy False
+
+    --> JAPAN Regulation
+
+       Japan-w53-1/6 and Japan-w56-1/6
+
+       ./detection_probability_test.py  --host 192.168.200.91 --ssid candelatest --passwd candelatest --security wpa2 
+       --sniff_radio 1.1.wiphy1 --radio 1.1.wiphy0 --fcctypes Japan-w53-1 --channel 52  --trials 1  --desired_detection 60
+        --enable_traffic False --static False --more_option centre --bw 20 --lf_hackrf 30a28607 --legacy False
+
+    --> Korea Regulation
+       coming soon...
+
+    ===============================================================================  
+    """
     parser = argparse.ArgumentParser(
-        prog=__file__,
+        prog='detection_probability_test.py',
         formatter_class=argparse.RawTextHelpFormatter,
-        description=desc)
+        description=description)
 
-    parser.add_argument("--host", default='192.168.1.31',
-                        help='specify the GUI ip to connect to')
-
-    parser.add_argument("--port", default=8080, help="specify scripting port of LANforge")
-
+    parser.add_argument("--host", help='specify the GUI ip to connect to', default='192.168.1.31')
+    parser.add_argument("--port", help='specify scripting port of LANforge', default=8080)
     parser.add_argument('--ssid', type=str, help='ssid for client')
-
     parser.add_argument('--passwd', type=str, help='password to connect to ssid', default='[BLANK]')
-
     parser.add_argument('--security', type=str, help='security', default='open')
-
     parser.add_argument('--radio', type=str, help='radio at which client will be connected', default='1.1.wiphy1')
-
-    parser.add_argument("--sniff_radio", default="1.1.wiphy0", help="radio at which wireshark will be started")
-
-    parser.add_argument("--static", default=True, help="True if client will be created with static ip")
-
-    parser.add_argument("--static_ip", default="192.168.2.100",
-                        help="if static option is True provide static ip to client")
-
-    parser.add_argument("--ip_mask", default="255.255.255.0", help="if static is true provide ip mask to client")
-
-    parser.add_argument("--gateway_ip", default="192.168.2.50", help="if static is true provide gateway ip")
-
+    parser.add_argument("--sniff_radio", help='radio at which wireshark will be started', default="1.1.wiphy0")
+    parser.add_argument("--static", help='True if client will be created with static ip', default=True)
+    parser.add_argument("--static_ip", help='if static option is True provide static ip to client',
+                        default="192.168.2.100")
+    parser.add_argument("--ip_mask", help='if static is true provide ip mask to client', default="255.255.255.0")
+    parser.add_argument("--gateway_ip", help='if static is true provide gateway ip', default="192.168.2.50")
     parser.add_argument('--upstream', type=str, help='provide eth1/eth2', default='eth1')
-
     parser.add_argument('--fcctypes', nargs="+",
+                        help='types needed to be tested FCC0/FCC1/FCC2/FCC3/FCC4/FCC5/ETSI0/ETSI1/ETSI2/ETSI3/ETSI4/ETSI5/ETSI6/Japan-W53-1/Japan-W53-2/Japan-w53-3/Japan-w53-4/Japan-w53-5/Japan-w53-6',
                         default=["FCC0", "FCC1", "FCC2", "FCC3", "FCC4", "ETSI0", "ETSI1", "ETSI2", "ETSI3", "ETSI4",
-                                 "ETSI5", "ETSI6","Japan-W53-1", "Japan-W53-2", "Japan-w53-3",  "Japan-w53-4", "Japan-w53-5",
-                                 "Japan-w53-6",  "Japan-w53-7",  "Japan-w53-8", "Japan-w56-1",
+                                 "ETSI5", "ETSI6", "Japan-W53-1", "Japan-W53-2", "Japan-w53-3", "Japan-w53-4",
+                                 "Japan-w53-5",
+                                 "Japan-w53-6", "Japan-w53-7", "Japan-w53-8", "Japan-w56-1",
                                  "Japan-w56-2", "Japan-w56-3", "Japan-w56-4",
                                  "Japan-w56-5", "Japan-w56-6",
-                                 "korea_1", "korea_2", "korea_3"],
-                        help='types needed to be tested {FCC0/FCC1/FCC2/FCC3/FCC4/FCC5/ETSI0/ETSI1/ETSI2/ETSI3/ETSI4/ETSI5/ETSI6/Japan-W53-1/Japan-W53-2/Japan-w53-3/Japan-w53-4/Japan-w53-5/Japan-w53-6}')
-
-    parser.add_argument('--channel', type=str, default="100",
-                        help='channel options need to be tested {52, 56, 60, 64, 100, 104, 108, 112, 116, 120, 124 ,128, 132, 136, 140}')
-
-    parser.add_argument("--enable_traffic", default=False,
-                        help="set to True if traffic needs to be added while testing")
-
-    parser.add_argument("--trials", type=int, default=30,
-                        help="provide the number of trials you want to test default is 30")
-
-    parser.add_argument("--desired_detection", type=int, default=80,
-                        help="provide the percentage value for desired detection eg 80, which means 80%")
-
-    parser.add_argument("--extra_trials", type=int, default=0,
-                        help="provide the number of extra trials need to be performed if the test doesnot reach the expected"
-                             "or desired value")
-
-    parser.add_argument("--more_option", default="centre", help="select from the list of more options "
-                                                                "which test you need to perform [shift, centre, random]")
-
-    parser.add_argument("--time_int", default="0", help="provide time interval in seconds between each trials")
-
-    parser.add_argument("--ssh_username", default="lanforge", help="provide username for doing ssh into LANforge")
-
-    parser.add_argument("--ssh_password", default="lanforge", help="provide password for doing ssh into LANforge")
-
-    parser.add_argument("--bw", default="20",
-                        help="provide bandwidth over which you want to start test eith 20/40/80 Mhz")
-
-    parser.add_argument("--traffic_type", default="lf_udp", help="mention the traffic type you want to run eg lf_udp")
-
-    parser.add_argument("--ap_name", default="Test_AP", help="provide model of dut")
-
-    parser.add_argument("--tx_power", help= "manually provide tx power of radar sent")
-
-    parser.add_argument("--lf_hackrf", help="provide serial number og tx hackrf eg 30a28607")
-
-    parser.add_argument("--legacy", help="stores true for legacy mode by default", default=True)
+                                 "korea_1", "korea_2", "korea_3"])
+    parser.add_argument('--channel', type=str,
+                        help='channel options need to be tested 52, 56, 60, 64, 100, 104, 108, 112, 116, 120, 124 ,128, 132, 136, 140',
+                        default="100")
+    parser.add_argument("--enable_traffic",
+                        help='set to True if traffic needs to be added while testing', default=False)
+    parser.add_argument("--trials", type=int,
+                        help='provide the number of trials you want to test default is 30', default=30)
+    parser.add_argument("--desired_detection", type=int,
+                        help='provide the percentage value for desired detection eg 80, which means 80%%', default=80)
+    parser.add_argument("--extra_trials", type=int,
+                        help='provide the number of extra trials need to be performed if the test doesnot reach the expected or desired value',
+                        default=0)
+    parser.add_argument("--more_option",
+                        help='select from the list of more options which test you need to perform shift, centre, random',
+                        default="centre")
+    parser.add_argument("--time_int", help='provide time interval in seconds between each trials', default="0")
+    parser.add_argument("--ssh_username", help='provide username for doing ssh into LANforge', default="lanforge")
+    parser.add_argument("--ssh_password", help='provide password for doing ssh into LANforge', default="lanforge")
+    parser.add_argument("--bw",
+                        help='provide bandwidth over which you want to start test eith 20/40/80 Mhz', default="20")
+    parser.add_argument("--traffic_type", help='mention the traffic type you want to run eg lf_udp', default="lf_udp")
+    parser.add_argument("--ap_name", help='provide model of dut', default="Test_AP")
+    parser.add_argument("--tx_power", help='manually provide tx power of radar sent')
+    parser.add_argument("--lf_hackrf", help='provide serial number og tx hackrf eg 30a28607')
+    parser.add_argument("--legacy", help='stores true for legacy mode by default', default=True)
 
     args = parser.parse_args()
     obj = DfsTest(host=args.host,
@@ -1679,7 +1738,6 @@ def main():
                   lf_hackrf=args.lf_hackrf,
                   legacy=args.legacy)
     obj.run()
-    # obj.generate_report(test_duration="1:43:02", main_dict={'FCC0': {'Trial_1': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 4}, 'Trial_2': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 4}, 'Trial_3': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 4}, 'Trial_4': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 4}, 'Trial_5': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 4}, 'Trial_6': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 4}, 'Trial_7': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 4}, 'Trial_8': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 4}, 'Trial_9': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 4}, 'Trial_10': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 4}, 'Trial_11': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 4}, 'Trial_12': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 4}, 'Trial_13': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 5}, 'Trial_14': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 4}, 'Trial_15': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 4}, 'Trial_16': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 4}, 'Trial_17': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 4}, 'Trial_18': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 4}, 'Trial_19': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 5}, 'Trial_20': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_21': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_22': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_23': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_24': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_25': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_26': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_27': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_28': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_29': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 4}, 'Trial_30': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 4}}, 'FCC1': {'Trial_1': {'Burst': '1', 'Pulses': '57', 'Width': '1', 'PRI(US)': '938', 'Detected': 'YES', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 4}, 'Trial_2': {'Burst': '1', 'Pulses': '95', 'Width': '1', 'PRI(US)': '558', 'Detected': 'YES', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 5}, 'Trial_3': {'Burst': '1', 'Pulses': '83', 'Width': '1', 'PRI(US)': '638', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_4': {'Burst': '1', 'Pulses': '78', 'Width': '1', 'PRI(US)': '678', 'Detected': 'YES', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 6}, 'Trial_5': {'Burst': '1', 'Pulses': '86', 'Width': '1', 'PRI(US)': '618', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_6': {'Burst': '1', 'Pulses': '76', 'Width': '1', 'PRI(US)': '698', 'Detected': 'YES', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 4}, 'Trial_7': {'Burst': '1', 'Pulses': '99', 'Width': '1', 'PRI(US)': '538', 'Detected': 'YES', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 5}, 'Trial_8': {'Burst': '1', 'Pulses': '61', 'Width': '1', 'PRI(US)': '878', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_9': {'Burst': '1', 'Pulses': '102', 'Width': '1', 'PRI(US)': '518', 'Detected': 'YES', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 4}, 'Trial_10': {'Burst': '1', 'Pulses': '72', 'Width': '1', 'PRI(US)': '738', 'Detected': 'YES', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 4}, 'Trial_11': {'Burst': '1', 'Pulses': '67', 'Width': '1', 'PRI(US)': '798', 'Detected': 'YES', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 4}, 'Trial_12': {'Burst': '1', 'Pulses': '59', 'Width': '1', 'PRI(US)': '898', 'Detected': 'YES', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 5}, 'Trial_13': {'Burst': '1', 'Pulses': '62', 'Width': '1', 'PRI(US)': '858', 'Detected': 'YES', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 4}, 'Trial_14': {'Burst': '1', 'Pulses': '89', 'Width': '1', 'PRI(US)': '598', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_15': {'Burst': '1', 'Pulses': '74', 'Width': '1', 'PRI(US)': '718', 'Detected': 'YES', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 4}, 'Trial_16': {'Burst': '1', 'Pulses': '73', 'Width': '1', 'PRI(US)': '726', 'Detected': 'YES', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 5}, 'Trial_17': {'Burst': '1', 'Pulses': '40', 'Width': '1', 'PRI(US)': '1340', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_18': {'Burst': '1', 'Pulses': '93', 'Width': '1', 'PRI(US)': '568', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_19': {'Burst': '1', 'Pulses': '51', 'Width': '1', 'PRI(US)': '1047', 'Detected': 'YES', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 4}, 'Trial_20': {'Burst': '1', 'Pulses': '68', 'Width': '1', 'PRI(US)': '780', 'Detected': 'YES', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 5}, 'Trial_21': {'Burst': '1', 'Pulses': '93', 'Width': '1', 'PRI(US)': '568', 'Detected': 'YES', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 4}, 'Trial_22': {'Burst': '1', 'Pulses': '21', 'Width': '1', 'PRI(US)': '2595', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_23': {'Burst': '1', 'Pulses': '40', 'Width': '1', 'PRI(US)': '1352', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_24': {'Burst': '1', 'Pulses': '29', 'Width': '1', 'PRI(US)': '1832', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_25': {'Burst': '1', 'Pulses': '26', 'Width': '1', 'PRI(US)': '2081', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_26': {'Burst': '1', 'Pulses': '43', 'Width': '1', 'PRI(US)': '1252', 'Detected': 'YES', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 4}, 'Trial_27': {'Burst': '1', 'Pulses': '26', 'Width': '1', 'PRI(US)': '2052', 'Detected': 'YES', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 4}, 'Trial_28': {'Burst': '1', 'Pulses': '69', 'Width': '1', 'PRI(US)': '765', 'Detected': 'YES', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 4}, 'Trial_29': {'Burst': '1', 'Pulses': '19', 'Width': '1', 'PRI(US)': '2901', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_30': {'Burst': '1', 'Pulses': '20', 'Width': '1', 'PRI(US)': '2700', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}}, 'FCC2': {'Trial_1': {'Burst': '1', 'Pulses': '26', 'Width': '5', 'PRI(US)': '153', 'Detected': 'YES', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 5}, 'Trial_2': {'Burst': '1', 'Pulses': '28', 'Width': '5', 'PRI(US)': '211', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_3': {'Burst': '1', 'Pulses': '29', 'Width': '4', 'PRI(US)': '158', 'Detected': 'YES', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 4}, 'Trial_4': {'Burst': '1', 'Pulses': '25', 'Width': '5', 'PRI(US)': '220', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_5': {'Burst': '1', 'Pulses': '26', 'Width': '2', 'PRI(US)': '170', 'Detected': 'YES', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 4}, 'Trial_6': {'Burst': '1', 'Pulses': '27', 'Width': '3', 'PRI(US)': '178', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_7': {'Burst': '1', 'Pulses': '24', 'Width': '2', 'PRI(US)': '208', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_8': {'Burst': '1', 'Pulses': '23', 'Width': '4', 'PRI(US)': '197', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_9': {'Burst': '1', 'Pulses': '25', 'Width': '2', 'PRI(US)': '228', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_10': {'Burst': '1', 'Pulses': '23', 'Width': '5', 'PRI(US)': '184', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_11': {'Burst': '1', 'Pulses': '23', 'Width': '4', 'PRI(US)': '200', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_12': {'Burst': '1', 'Pulses': '24', 'Width': '4', 'PRI(US)': '173', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_13': {'Burst': '1', 'Pulses': '25', 'Width': '3', 'PRI(US)': '206', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_14': {'Burst': '1', 'Pulses': '29', 'Width': '3', 'PRI(US)': '155', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_15': {'Burst': '1', 'Pulses': '27', 'Width': '1', 'PRI(US)': '229', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_16': {'Burst': '1', 'Pulses': '23', 'Width': '5', 'PRI(US)': '160', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_17': {'Burst': '1', 'Pulses': '24', 'Width': '1', 'PRI(US)': '219', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_18': {'Burst': '1', 'Pulses': '27', 'Width': '5', 'PRI(US)': '208', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_19': {'Burst': '1', 'Pulses': '24', 'Width': '3', 'PRI(US)': '230', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_20': {'Burst': '1', 'Pulses': '24', 'Width': '2', 'PRI(US)': '166', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_21': {'Burst': '1', 'Pulses': '26', 'Width': '1', 'PRI(US)': '160', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_22': {'Burst': '1', 'Pulses': '25', 'Width': '4', 'PRI(US)': '175', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_23': {'Burst': '1', 'Pulses': '28', 'Width': '5', 'PRI(US)': '159', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_24': {'Burst': '1', 'Pulses': '26', 'Width': '5', 'PRI(US)': '166', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_25': {'Burst': '1', 'Pulses': '23', 'Width': '3', 'PRI(US)': '160', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_26': {'Burst': '1', 'Pulses': '26', 'Width': '1', 'PRI(US)': '230', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_27': {'Burst': '1', 'Pulses': '28', 'Width': '3', 'PRI(US)': '175', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_28': {'Burst': '1', 'Pulses': '24', 'Width': '2', 'PRI(US)': '179', 'Detected': 'YES', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 4}, 'Trial_29': {'Burst': '1', 'Pulses': '26', 'Width': '3', 'PRI(US)': '192', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_30': {'Burst': '1', 'Pulses': '29', 'Width': '3', 'PRI(US)': '158', 'Detected': 'YES', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 4}}, 'FCC3': {'Trial_1': {'Burst': '1', 'Pulses': '16', 'Width': '9', 'PRI(US)': '218', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_2': {'Burst': '1', 'Pulses': '17', 'Width': '9', 'PRI(US)': '394', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_3': {'Burst': '1', 'Pulses': '18', 'Width': '7', 'PRI(US)': '483', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_4': {'Burst': '1', 'Pulses': '17', 'Width': '9', 'PRI(US)': '227', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_5': {'Burst': '1', 'Pulses': '16', 'Width': '7', 'PRI(US)': '210', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_6': {'Burst': '1', 'Pulses': '16', 'Width': '6', 'PRI(US)': '297', 'Detected': 'YES', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 4}, 'Trial_7': {'Burst': '1', 'Pulses': '17', 'Width': '10', 'PRI(US)': '338', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_8': {'Burst': '1', 'Pulses': '17', 'Width': '9', 'PRI(US)': '445', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_9': {'Burst': '1', 'Pulses': '18', 'Width': '10', 'PRI(US)': '351', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_10': {'Burst': '1', 'Pulses': '16', 'Width': '10', 'PRI(US)': '363', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_11': {'Burst': '1', 'Pulses': '17', 'Width': '6', 'PRI(US)': '307', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_12': {'Burst': '1', 'Pulses': '18', 'Width': '6', 'PRI(US)': '362', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_13': {'Burst': '1', 'Pulses': '16', 'Width': '8', 'PRI(US)': '357', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_14': {'Burst': '1', 'Pulses': '17', 'Width': '7', 'PRI(US)': '487', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_15': {'Burst': '1', 'Pulses': '16', 'Width': '8', 'PRI(US)': '337', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_16': {'Burst': '1', 'Pulses': '18', 'Width': '10', 'PRI(US)': '392', 'Detected': 'YES', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 4}, 'Trial_17': {'Burst': '1', 'Pulses': '18', 'Width': '7', 'PRI(US)': '362', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_18': {'Burst': '1', 'Pulses': '17', 'Width': '7', 'PRI(US)': '280', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_19': {'Burst': '1', 'Pulses': '16', 'Width': '8', 'PRI(US)': '365', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_20': {'Burst': '1', 'Pulses': '17', 'Width': '9', 'PRI(US)': '245', 'Detected': 'YES', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 4}, 'Trial_21': {'Burst': '1', 'Pulses': '17', 'Width': '10', 'PRI(US)': '202', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_22': {'Burst': '1', 'Pulses': '16', 'Width': '7', 'PRI(US)': '493', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_23': {'Burst': '1', 'Pulses': '18', 'Width': '9', 'PRI(US)': '259', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_24': {'Burst': '1', 'Pulses': '16', 'Width': '6', 'PRI(US)': '335', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_25': {'Burst': '1', 'Pulses': '17', 'Width': '10', 'PRI(US)': '332', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_26': {'Burst': '1', 'Pulses': '16', 'Width': '7', 'PRI(US)': '323', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_27': {'Burst': '1', 'Pulses': '16', 'Width': '6', 'PRI(US)': '463', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_28': {'Burst': '1', 'Pulses': '17', 'Width': '8', 'PRI(US)': '266', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_29': {'Burst': '1', 'Pulses': '18', 'Width': '10', 'PRI(US)': '323', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_30': {'Burst': '1', 'Pulses': '17', 'Width': '7', 'PRI(US)': '205', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}}, 'FCC4': {'Trial_1': {'Burst': '1', 'Pulses': '13', 'Width': '15', 'PRI(US)': '452', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_2': {'Burst': '1', 'Pulses': '14', 'Width': '19', 'PRI(US)': '354', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_3': {'Burst': '1', 'Pulses': '13', 'Width': '19', 'PRI(US)': '450', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_4': {'Burst': '1', 'Pulses': '12', 'Width': '17', 'PRI(US)': '374', 'Detected': 'YES', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 4}, 'Trial_5': {'Burst': '1', 'Pulses': '14', 'Width': '20', 'PRI(US)': '229', 'Detected': 'YES', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 4}, 'Trial_6': {'Burst': '1', 'Pulses': '12', 'Width': '12', 'PRI(US)': '459', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_7': {'Burst': '1', 'Pulses': '12', 'Width': '16', 'PRI(US)': '362', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_8': {'Burst': '1', 'Pulses': '14', 'Width': '13', 'PRI(US)': '324', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_9': {'Burst': '1', 'Pulses': '12', 'Width': '12', 'PRI(US)': '336', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_10': {'Burst': '1', 'Pulses': '12', 'Width': '14', 'PRI(US)': '399', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_11': {'Burst': '1', 'Pulses': '14', 'Width': '19', 'PRI(US)': '442', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_12': {'Burst': '1', 'Pulses': '14', 'Width': '14', 'PRI(US)': '210', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_13': {'Burst': '1', 'Pulses': '12', 'Width': '12', 'PRI(US)': '285', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_14': {'Burst': '1', 'Pulses': '16', 'Width': '18', 'PRI(US)': '232', 'Detected': 'YES', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 5}, 'Trial_15': {'Burst': '1', 'Pulses': '16', 'Width': '12', 'PRI(US)': '481', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_16': {'Burst': '1', 'Pulses': '14', 'Width': '18', 'PRI(US)': '378', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_17': {'Burst': '1', 'Pulses': '16', 'Width': '19', 'PRI(US)': '256', 'Detected': 'YES', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 4}, 'Trial_18': {'Burst': '1', 'Pulses': '16', 'Width': '20', 'PRI(US)': '274', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_19': {'Burst': '1', 'Pulses': '13', 'Width': '16', 'PRI(US)': '295', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_20': {'Burst': '1', 'Pulses': '16', 'Width': '16', 'PRI(US)': '309', 'Detected': 'YES', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 5}, 'Trial_21': {'Burst': '1', 'Pulses': '15', 'Width': '20', 'PRI(US)': '278', 'Detected': 'YES', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 4}, 'Trial_22': {'Burst': '1', 'Pulses': '16', 'Width': '12', 'PRI(US)': '438', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_23': {'Burst': '1', 'Pulses': '12', 'Width': '11', 'PRI(US)': '449', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_24': {'Burst': '1', 'Pulses': '15', 'Width': '20', 'PRI(US)': '467', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_25': {'Burst': '1', 'Pulses': '13', 'Width': '16', 'PRI(US)': '460', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_26': {'Burst': '1', 'Pulses': '15', 'Width': '12', 'PRI(US)': '252', 'Detected': 'YES', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 5}, 'Trial_27': {'Burst': '1', 'Pulses': '14', 'Width': '12', 'PRI(US)': '494', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_28': {'Burst': '1', 'Pulses': '12', 'Width': '14', 'PRI(US)': '447', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_29': {'Burst': '1', 'Pulses': '15', 'Width': '12', 'PRI(US)': '477', 'Detected': 'YES', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 4}, 'Trial_30': {'Burst': '1', 'Pulses': '12', 'Width': '12', 'PRI(US)': '470', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}}, 'FCC6': {'Trial_1': {'Burst': '100', 'Pulses': '9', 'Width': '1', 'PRI(US)': '333', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_2': {'Burst': '100', 'Pulses': '9', 'Width': '1', 'PRI(US)': '333', 'Detected': 'YES', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 0}, 'Trial_3': {'Burst': '100', 'Pulses': '9', 'Width': '1', 'PRI(US)': '333', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_4': {'Burst': '100', 'Pulses': '9', 'Width': '1', 'PRI(US)': '333', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_5': {'Burst': '100', 'Pulses': '9', 'Width': '1', 'PRI(US)': '333', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_6': {'Burst': '100', 'Pulses': '9', 'Width': '1', 'PRI(US)': '333', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_7': {'Burst': '100', 'Pulses': '9', 'Width': '1', 'PRI(US)': '333', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_8': {'Burst': '100', 'Pulses': '9', 'Width': '1', 'PRI(US)': '333', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_9': {'Burst': '100', 'Pulses': '9', 'Width': '1', 'PRI(US)': '333', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_10': {'Burst': '100', 'Pulses': '9', 'Width': '1', 'PRI(US)': '333', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_11': {'Burst': '100', 'Pulses': '9', 'Width': '1', 'PRI(US)': '333', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_12': {'Burst': '100', 'Pulses': '9', 'Width': '1', 'PRI(US)': '333', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_13': {'Burst': '100', 'Pulses': '9', 'Width': '1', 'PRI(US)': '333', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_14': {'Burst': '100', 'Pulses': '9', 'Width': '1', 'PRI(US)': '333', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_15': {'Burst': '100', 'Pulses': '9', 'Width': '1', 'PRI(US)': '333', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_16': {'Burst': '100', 'Pulses': '9', 'Width': '1', 'PRI(US)': '333', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_17': {'Burst': '100', 'Pulses': '9', 'Width': '1', 'PRI(US)': '333', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_18': {'Burst': '100', 'Pulses': '9', 'Width': '1', 'PRI(US)': '333', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_19': {'Burst': '100', 'Pulses': '9', 'Width': '1', 'PRI(US)': '333', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_20': {'Burst': '100', 'Pulses': '9', 'Width': '1', 'PRI(US)': '333', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_21': {'Burst': '100', 'Pulses': '9', 'Width': '1', 'PRI(US)': '333', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_22': {'Burst': '100', 'Pulses': '9', 'Width': '1', 'PRI(US)': '333', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_23': {'Burst': '100', 'Pulses': '9', 'Width': '1', 'PRI(US)': '333', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_24': {'Burst': '100', 'Pulses': '9', 'Width': '1', 'PRI(US)': '333', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_25': {'Burst': '100', 'Pulses': '9', 'Width': '1', 'PRI(US)': '333', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_26': {'Burst': '100', 'Pulses': '9', 'Width': '1', 'PRI(US)': '333', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_27': {'Burst': '100', 'Pulses': '9', 'Width': '1', 'PRI(US)': '333', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_28': {'Burst': '100', 'Pulses': '9', 'Width': '1', 'PRI(US)': '333', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}, 'Trial_29': {'Burst': '100', 'Pulses': '9', 'Width': '1', 'PRI(US)': '333', 'Detected': 'YES', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 44}, 'Trial_30': {'Burst': '100', 'Pulses': '9', 'Width': '1', 'PRI(US)': '333', 'Detected': 'NO', 'Frequency(KHz)': '5260000', 'Detection Time(sec)': 'NA'}}})
 
 if __name__ == '__main__':
     main()
