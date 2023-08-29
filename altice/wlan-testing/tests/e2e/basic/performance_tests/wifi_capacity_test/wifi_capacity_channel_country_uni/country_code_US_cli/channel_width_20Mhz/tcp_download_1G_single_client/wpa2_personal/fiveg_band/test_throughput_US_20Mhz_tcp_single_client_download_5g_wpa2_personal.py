@@ -82,7 +82,6 @@ class TestCountryUS20Mhz5G(object):
     @pytest.mark.fiveg
     @pytest.mark.channel_36
     @pytest.mark.tcp_download
-    @pytest.mark.ssss
     def test_client_nat_wpa2_chn36_20Mhz_US_5g_tcp_download(self, instantiate_profile, get_lf_logs,
                                                  lf_test, update_report,
                                                  station_names_fiveg, lf_tools,

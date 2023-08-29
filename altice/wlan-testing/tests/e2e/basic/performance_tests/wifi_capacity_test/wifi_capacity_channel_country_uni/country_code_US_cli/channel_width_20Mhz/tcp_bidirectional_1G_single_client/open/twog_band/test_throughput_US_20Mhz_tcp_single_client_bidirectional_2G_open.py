@@ -68,7 +68,6 @@ class TestCountryUS20Mhz2g(object):
     @pytest.mark.twog
     @pytest.mark.channel_1
     @pytest.mark.tcp_bidirectional
-    @pytest.mark.ss112
     def test_client_nat_open_chn1_20Mhz_US_2g_tcp_bidirectional(self, instantiate_profile, get_lf_logs,
                                               lf_test, update_report,
                                               station_names_twog, lf_tools,
