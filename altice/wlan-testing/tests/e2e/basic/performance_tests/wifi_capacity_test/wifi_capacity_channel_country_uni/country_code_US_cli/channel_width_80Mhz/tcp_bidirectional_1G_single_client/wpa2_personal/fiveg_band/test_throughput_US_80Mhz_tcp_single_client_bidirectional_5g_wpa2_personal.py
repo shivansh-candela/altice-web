@@ -179,8 +179,8 @@ class TestCountryUS80Mhz5G(object):
                                                                   individual_station_throughput=False, kpi_csv=True,
                                                                   file_name="/kpi.csv", batch_size=str(batch_size))
         print(csv_val)
-        print(f"Bidirectional Traffic Throughput: {csv_val['Both']['UL+DL Mbps - 1 STA']}")
-        actual_throughput = csv_val['Both']['UL+DL Mbps - 1 STA']
+        print(f"Bidirectional Traffic Throughput: {csv_val['Both']['UL+DL 2000000000bps pdu AUTO - 1 STA']}")
+        actual_throughput = csv_val['Both']['UL+DL 2000000000bps pdu AUTO - 1 STA']
 
         result = {
 
@@ -328,8 +328,8 @@ class TestCountryUS80Mhz5G(object):
                                                                   individual_station_throughput=False, kpi_csv=True,
                                                                   file_name="/kpi.csv", batch_size=str(batch_size))
         print(csv_val)
-        print(f"Bidirectional Traffic Throughput: {csv_val['Both']['UL+DL Mbps - 1 STA']}")
-        actual_throughput = csv_val['Both']['UL+DL Mbps - 1 STA']
+        print(f"Bidirectional Traffic Throughput: {csv_val['Both']['UL+DL 2000000000bps pdu AUTO - 1 STA']}")
+        actual_throughput = csv_val['Both']['UL+DL 2000000000bps pdu AUTO - 1 STA']
 
         result = {
 

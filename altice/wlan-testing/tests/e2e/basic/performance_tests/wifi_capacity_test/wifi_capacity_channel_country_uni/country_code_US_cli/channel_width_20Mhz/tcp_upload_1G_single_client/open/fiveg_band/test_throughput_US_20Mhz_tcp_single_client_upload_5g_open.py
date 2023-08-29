@@ -180,8 +180,8 @@ class TestCountryUS20Mhz5G(object):
                                                                   individual_station_throughput=False, kpi_csv=True,
                                                                   file_name="/kpi.csv", batch_size=str(batch_size))
         print(csv_val)
-        print(f"Upload Traffic Throughput: {csv_val['Up']['UL Mbps - 1 STA']}")
-        actual_throughput = csv_val['Up']['UL Mbps - 1 STA']
+        print(f"Upload Traffic Throughput: {csv_val['Up']['UL 1000000000bps pdu AUTO - 1 STA']}")
+        actual_throughput = csv_val['Up']['UL 1000000000bps pdu AUTO - 1 STA']
 
         result = {
 
@@ -330,8 +330,8 @@ class TestCountryUS20Mhz5G(object):
                                                                   individual_station_throughput=False, kpi_csv=True,
                                                                   file_name="/kpi.csv", batch_size=str(batch_size))
         print(csv_val)
-        print(f"Upload Traffic Throughput: {csv_val['Up']['UL Mbps - 1 STA']}")
-        actual_throughput = csv_val['Up']['UL Mbps - 1 STA']
+        print(f"Upload Traffic Throughput: {csv_val['Up']['UL 1000000000bps pdu AUTO - 1 STA']}")
+        actual_throughput = csv_val['Up']['UL 1000000000bps pdu AUTO - 1 STA']
 
         result = {
 
