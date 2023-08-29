@@ -314,7 +314,7 @@ class DfsTest(Realm):
             command = f"sudo python3 lf_hackrf_dfs.py --pulse_width {width} --pulse_interval {pri} --pulse_count {count} --sweep_time 1000 --one_burst --freq {freq} --lf_hackrf {self.lf_hackrf}"
         if type == "legacy_w56-1":
             command = f"python3 lf_hackrf_dfs.py --pulse_width {width} --pulse_interval {pri} --pulse_count {count} --tx_sample_rate 2 --sweep_time 1000 --freq {freq} --one_burst --lf_hackrf {self.lf_hackrf}"
-        if type == "FCC0" or  type == "FCC1" or  type == "FCC3" or  type == "FCC4":
+        if type == "FCC0" or  type == "FCC1" or type == "FCC2" or  type == "FCC3" or  type == "FCC4":
             command = f"python3 lf_hackrf_dfs.py --rf_type {type},{width},{pri},{count},20 --lf_hackrf {self.lf_hackrf} --freq {freq} --one_burst --log_level debug"
         # else:
 
