@@ -832,7 +832,9 @@ class DfsTest(Realm):
                     main_dict[fcc][var_1]["PRI(US)"] = interval_
                 if (fcc == "FCC0" or fcc == "FCC1" or fcc == "FCC2" or fcc == "FCC3" or fcc == "FCC4"
                         or fcc == "ETSI0" or fcc == "ETSI1"or fcc == "ETSI2" or fcc == "ETSI3" or fcc == "ETSI4"
-                or fcc == "Japan-w56-1" or fcc == "Japan-w56-2" or fcc == "Japan-w56-3"or fcc == "Japan-w56-4" or fcc == "Japan-w56-5" or fcc == "Japan-w56-6"):
+                        or fcc == "Japan-w56-1" or fcc == "Japan-w56-2" or fcc == "Japan-w56-3"or fcc == "Japan-w56-4" or fcc == "Japan-w56-5" or fcc == "Japan-w56-6"
+                        or fcc == "korea_1" or fcc == "korea_2" or fcc == "korea_3"
+                ):
                     main_dict[fcc][var_1]["Burst"] = "1"
                     main_dict[fcc][var_1]["Pulses"] = count_
                     main_dict[fcc][var_1]["Width"] = width_
@@ -946,12 +948,7 @@ class DfsTest(Realm):
                 time.sleep(1)
                 print("generate radar")
                 logging.info("generate radar")
-                # current_time = datetime.now()
-                # print("Current date and time : ")
-                # logging.info("Current date and time : ")
-                # current_time = current_time.strftime("%b %d, %Y  %H:%M:%S")
-                # print("time stamp of radar send", current_time)
-                # logging.info("time stamp of radar send" + str(current_time))
+
                 if self.more_option == "centre":
                     if fcc == "FCC6":
                         self.run_hackrf(type="fcc6", freq=str(frequency[str(self.channel)]))
@@ -960,7 +957,8 @@ class DfsTest(Realm):
                     if fcc == "FCC5":
                         self.run_hackrf(type="fcc5", freq=str(frequency[str(self.channel)]), burst=burst_, trial_centre=trial_centre, trial_low=trial_low,
                                         trial_high=trial_high, uut_channel=uut_channel, freq_modulatin=freq_modulatin, tx_sample_rate=tx_sample_rate)
-                    if fcc == "FCC0" or fcc == "FCC1" or fcc == "FCC2" or fcc == "FCC3" or fcc == "FCC4" or fcc == "ETSI0" or fcc == "ETSI1" or fcc == "ETSI2" or fcc == "ETSI3" or fcc == "ETSI4":
+                    if fcc == "FCC0" or fcc == "FCC1" or fcc == "FCC2" or fcc == "FCC3" or fcc == "FCC4" or fcc == "ETSI0" or fcc == "ETSI1" or fcc == "ETSI2" or fcc == "ETSI3" or fcc == "ETSI4"\
+                            or fcc == "korea_1" or fcc == "korea_2"  or fcc == "korea_3":
                         if self.legacy == "True":
                             self.run_hackrf(type="legacy", width=width_, pri=interval_, count=count_, freq=str(frequency[str(self.channel)]))
                         else:
