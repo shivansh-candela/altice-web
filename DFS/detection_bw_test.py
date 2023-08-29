@@ -951,8 +951,8 @@ def main():
                   more_option = args.more_option,
                   time_int = args.time_int,
                   trials = args.trials)
-    # obj.run()
-    obj.generate_report()
+    obj.run()
+    # obj.generate_report()
     # obj.generate_hori_graph()
     # obj.test_graph()
 if __name__ == '__main__':
