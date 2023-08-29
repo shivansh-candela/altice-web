@@ -1,19 +1,90 @@
 #!/usr/bin/env python3
 """
- NOTE : Detection Probability Test  is compilance to the Dynamic Frequency Selection(DFS) Regulation, it creates regulatory specified radar pulses
-                                         to the DUT repeatedly to measure the probability
-                                         of detection.
+detection_probability_test.py
+    --------------------
 
- run : - python3 lf_detection_probability_test.py  --host 192.168.1.31 --ssid Candela_20MHz --passwd [BLANK] --security open --trials 1   --more_option centre --fcctypes FCC0
+    Summary :
+    ----------
+    Detection Probability Test  is compilance to the Dynamic Frequency Selection(DFS) Regulation, it creates regulatory
+    specified radar pulses to the DUT repeatedly to measure the probability of detection.
 
-    Examples:
-        1. test for FCC0/FCC1/FCC2/FCC3/FCC4 (JUST REPLACE fcc0 with 1,2,3 or 4) - python3 detection_probability_test.py  --host 192.168.100.221 --port 8080 --ssid MFG-5GTEST --passwd [BLANK] --security open  --radio 1.1.wiphy5 --sniff_radio 1.1.wiphy1  --fcctypes FCC0 --channel 100 --trials 1 --lf_hackrf 25766ec3
-        2. test for combine FCC0-4 - python3 detection_probability_test.py  --host 192.168.100.221 --port 8080 --ssid MFG-5GTEST --passwd [BLANK] --security open  --radio 1.1.wiphy5 --sniff_radio 1.1.wiphy1  --fcctypes FCC0 FCC1 FCC2 FCC3 FCC4 --channel 100 --trials 1 --lf_hackrf 25766ec3
-        3. for FCC5 - python3 detection_probability_test.py  --host 192.168.100.221 --port 8080 --ssid MFG-5GTEST --passwd [BLANK] --security open  --radio 1.1.wiphy5 --sniff_radio 1.1.wiphy1  --fcctypes FCC5  --channel 100 --trials 30  --more_option centre --lf_hackrf 25766ec3
-        4.for FCC6 - python3 detection_probability_test.py  --host 192.168.100.221 --port 8080 --ssid MFG-5GTEST --passwd [BLANK] --security open  --radio 1.1.wiphy5 --sniff_radio 1.1.wiphy1  --fcctypes FCC6 --channel 100 --trials 1 --lf_hackrf 25766ec3
-        5. for Japan-w53-3 --> python3 detection_probability_test.py  --host 192.168.200.91  --port 8080 --ssid candelatest  --passwd candelatest  --security wpa2  --radio 1.1.wiphy1 --sniff_radio 1.1.wiphy0  --fcctypes Japan-w53-3 --channel 52  --trials 1 --lf_hackrf 30a28607
-Note:
-    client creation is commented for testing
+    execution: This script is executed in following way
+    1. create a client on 5GHZ band
+    2. check if the client is on expected DFS channel or not
+    3. if not terminate the script
+    4. if yes then it will start sniffer on client channel
+    5. once the client is associated respective regulation radar is generated from hackrf
+    6. stop sniffer
+    7. check for csa frame
+    8. report
+
+    ############################################
+    # Examples Commands for different scenarios
+    ############################################
+
+    --> for full test (all regulation)
+       ./detection_probability_test.py  --host 192.168.1.31 --ssid Candela_20MHz --passwd [BLANK] --security open --trials 1   --more_option centre
+
+    *** LEGACY MODE (older) ******
+
+    --> FCC Regulation :
+
+       Try to replace 0 IN FCC0 with 1, 2, 3, 4, 5 and 6
+
+       ./detection_probability_test.py  --host 192.168.200.91 --ssid candelatest --passwd candelatest --security wpa2
+       --sniff_radio 1.1.wiphy1 --radio 1.1.wiphy0 --fcctypes FCC0 --channel 52  --trials 1  --desired_detection 60
+        --enable_traffic False --static False --more_option centre --bw 20 --lf_hackrf 30a28607 --legacy True
+
+    --> ETSI Regulation
+
+       From ETSI0 to ETSI6
+
+       ./detection_probability_test.py  --host 192.168.200.91 --ssid candelatest --passwd candelatest --security wpa2
+       --sniff_radio 1.1.wiphy1 --radio 1.1.wiphy0 --fcctypes ETSI0 --channel 52  --trials 1  --desired_detection 60
+        --enable_traffic False --static False --more_option centre --bw 20 --lf_hackrf 30a28607 --legacy True
+
+    --> JAPAN Regulation
+
+       Japan-w53-1/6 and Japan-w56-1/6
+
+       ./detection_probability_test.py  --host 192.168.200.91 --ssid candelatest --passwd candelatest --security wpa2
+       --sniff_radio 1.1.wiphy1 --radio 1.1.wiphy0 --fcctypes Japan-w53-1 --channel 52  --trials 1  --desired_detection 60
+        --enable_traffic False --static False --more_option centre --bw 20 --lf_hackrf 30a28607 --legacy True
+
+    --> Korea Regulation
+
+       coming soon...
+
+    **** NON LEGACY MODE ****
+
+    --> FCC Regulation
+
+    Try to replace 0 IN FCC0 with 1, 2, 3, 4, 5 and 6
+
+       ./detection_probability_test.py  --host 192.168.200.91 --ssid candelatest --passwd candelatest --security wpa2
+       --sniff_radio 1.1.wiphy1 --radio 1.1.wiphy0 --fcctypes FCC0 --channel 52  --trials 1  --desired_detection 60
+        --enable_traffic False --static False --more_option centre --bw 20 --lf_hackrf 30a28607 --legacy False
+
+    --> ETSI Regulation
+
+       From ETSI0 to ETSI6
+
+       ./detection_probability_test.py  --host 192.168.200.91 --ssid candelatest --passwd candelatest --security wpa2
+       --sniff_radio 1.1.wiphy1 --radio 1.1.wiphy0 --fcctypes ETSI0 --channel 52  --trials 1  --desired_detection 60
+        --enable_traffic False --static False --more_option centre --bw 20 --lf_hackrf 30a28607 --legacy False
+
+    --> JAPAN Regulation
+
+       Japan-w53-1/6 and Japan-w56-1/6
+
+       ./detection_probability_test.py  --host 192.168.200.91 --ssid candelatest --passwd candelatest --security wpa2
+       --sniff_radio 1.1.wiphy1 --radio 1.1.wiphy0 --fcctypes Japan-w53-1 --channel 52  --trials 1  --desired_detection 60
+        --enable_traffic False --static False --more_option centre --bw 20 --lf_hackrf 30a28607 --legacy False
+
+    --> Korea Regulation
+       coming soon...
+
+    ===============================================================================
 """
 
 import sys
@@ -27,10 +98,7 @@ from datetime import datetime
 import pandas as pd
 import paramiko
 import random
-from scapy.all import *
-from scapy.layers.dot11 import Dot11
 from dateutil import parser
-
 
 if sys.version_info[0] != 3:
     logging.critical("This script requires Python 3")
@@ -119,6 +187,7 @@ class DfsTest(Realm):
             print("please specify desired detection percentage value equal to or greater than the required percentage detection")
             exit(1)
 
+    # get station list
     def get_station_list(self):
         sta = self.staConnect.station_list()
         if sta == "no response":
@@ -147,6 +216,7 @@ class DfsTest(Realm):
             self.pcap_obj_2.monitor.admin_up()
             self.pcap_obj_2.monitor.start_sniff(capname=self.pcap_name, duration_sec=duration)
 
+    # query station data like channel etc
     def station_data_query(self, station_name="wlan0", query="channel"):
         sta = station_name.split(".")
         url = f"/port/{sta[0]}/{sta[1]}/{sta[2]}?fields={query}"
@@ -158,6 +228,7 @@ class DfsTest(Realm):
         y = response["interface"][query]
         return y
 
+    # precleans everything before test start
     def precleanup(self):
         obj = lf_clean.lf_clean(host=self.host,
                                 port=self.port,
@@ -165,9 +236,9 @@ class DfsTest(Realm):
                                 clean_endp=True)
         obj.resource = "all"
         obj.cxs_clean()
-        # obj.sta_clean()
         obj.port_mgr_clean()
 
+    # create a layer3 connection
     def create_layer3(self, side_a_min_rate, side_a_max_rate, side_b_min_rate, side_b_max_rate, side_a_min_pdu,
                       side_b_min_pdu,
                       traffic_type, sta_list):
@@ -193,6 +264,7 @@ class DfsTest(Realm):
                                side_b=self.upstream, sleep_time=0)
         self.cx_profile.start_cx()
 
+    # create client
     def create_client(self, start_id=0, sta_prefix="wlan", num_sta=1):
         local_realm = realm.Realm(lfclient_host=self.host, lfclient_port=self.port)
         station_profile = local_realm.new_station_profile()
@@ -265,13 +337,12 @@ class DfsTest(Realm):
             logging.error("Stations failed to get IPs")
             exit(1)
 
+    # this function is used for running hackrf script with different regulation inputs
     def run_hackrf(self, width=None, pri=None, count=None, freq=None, type=None, burst=None, trial_centre=None, trial_low=None,
                    trial_high=None, uut_channel=None, freq_modulatin=None, tx_sample_rate=None, prf_1=None, prf_2=None,
                    prf_3=None, blank_time=None,long_pulse_width=None, chirp_width=None,
                    prf=None,num_con_pair=None ):
 
-        print(type)
-        # send frame to note t1
 
         p = paramiko.SSHClient()
         p.set_missing_host_key_policy(paramiko.AutoAddPolicy())  # This script doesn't work for me unless this line is added!
@@ -279,7 +350,7 @@ class DfsTest(Realm):
         p.get_transport()
 
         # send frames
-        # Execute the first command
+        # Execute the first command for scapy logic
         stdin, stdout, stderr = p.exec_command("sudo python scapy_frame.py", get_pty=True)
         stdin.write(str(self.ssh_password) + "\n")
         stdin.flush()
@@ -316,16 +387,12 @@ class DfsTest(Realm):
             command = f"python3 lf_hackrf_dfs.py --pulse_width {width} --pulse_interval {pri} --pulse_count {count} --tx_sample_rate 2 --sweep_time 1000 --freq {freq} --one_burst --lf_hackrf {self.lf_hackrf}"
         if type == "FCC0" or type == "FCC1" or type == "FCC2" or type == "FCC3" or type == "FCC4":
             command = f"python3 lf_hackrf_dfs.py --rf_type {type},{width},{pri},{count},20 --lf_hackrf {self.lf_hackrf} --freq {freq} --one_burst --log_level debug"
-        # else:
-
-        #     # OLDER for python2
-        #     command = "sudo python lf_hackrf.py --pulse_width " + str(width) + " --pulse_interval " + str(
-        #         pri) + " --pulse_count " + str(count) + " --sweep_time 1000 --freq " + str(freq) + " --one_burst"
         if type == "w53-3":
             command = f"sudo python3 lf_hackrf_dfs.py --radar_type W53CHIRP,{width},{blank_time},{long_pulse_width},{chirp_width},{prf},{num_con_pair},{freq},20 --one_burst --lf_hackrf {self.lf_hackrf} --log_level debug "
             print(command)
         if type == "w53-1":
             command = f"sudo python3 lf_hackrf_dfs.py --rf_type W53PULSE,{width},{prf},{count},20 --freq {freq} --one_burst --lf_hackrf {self.lf_hackrf} --log_level debug"
+        # execute second command
         stdin, stdout, stderr = p.exec_command(str(command), get_pty=True)
         stdin.write(str(self.ssh_password) + "\n")
         stdin.flush()
@@ -335,6 +402,7 @@ class DfsTest(Realm):
         logging.info(opt)
         p.close()
 
+    # stop sniffing
     def stop_sniffer(self):
         print(" stop_sniffer")
         logging.info(" stop_sniffer")
@@ -357,6 +425,7 @@ class DfsTest(Realm):
                                report_dir="pcap")
         return self.pcap_name
 
+    # a function used for certain value calculation search for its use
     def select_values(self, n, fcc):
         if fcc == "etsi5":
             while True:
@@ -389,7 +458,7 @@ class DfsTest(Realm):
                     if 400 <= prf_2 <= 1200:
                         return prf_1, prf_2
 
-
+    # main logic used for passing correct value to run hackrf function with respect to regulations
     def main_logic(self, bssid=None):
         main_dict = dict.fromkeys(self.fcctypes)
         print(main_dict)
@@ -1104,6 +1173,7 @@ class DfsTest(Realm):
         logging.info("final dict" + str(main_dict))
         return main_dict
 
+    # this is called first
     def run(self):
         print(self.enable_traffic)
         print(self.fcctypes)
@@ -1152,12 +1222,14 @@ class DfsTest(Realm):
         logging.info("test duration" + str(test_duration))
         self.generate_report(test_duration=test_duration, main_dict=main)
 
+    # graphing function
     def generate_graph(self, data):
         obj = lf_graph.lf_stacked_graph(_data_set=data, _xaxis_name="", _yaxis_name="", _enable_csv=False,
                                         _remove_border=True)
         img = obj.build_stacked_graph()
         return img
 
+    # report generation function
     def generate_report(self, test_duration=None, main_dict=None):
 
         print("test duration", test_duration)
