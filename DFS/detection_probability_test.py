@@ -147,7 +147,13 @@ class DfsTest(Realm):
                  ap_name=None,
                  lf_hackrf=None,
                  legacy=None,
-                 create_client=None
+                 create_client=None,
+                 side_a_min_rate=None,
+                 side_a_max_rate=None,
+                 side_b_min_rate=None,
+                 side_b_max_rate=None,
+                 side_a_min_pdu=None,
+                 side_b_min_pdu=None
                  ):
         super().__init__(host, port)
         self.host = host
@@ -184,6 +190,12 @@ class DfsTest(Realm):
         self.pcap_obj = lf_pcap.LfPcap()
         self.cx_profile = self.local_realm.new_l3_cx_profile()
         self.create_client = create_client
+        self.side_a_min_rate = side_a_min_rate
+        self.side_a_max_rate = side_a_max_rate
+        self.side_b_min_rate = side_b_min_rate
+        self.side_b_max_rate = side_b_max_rate
+        self.side_a_min_pdu = side_a_min_pdu
+        self.side_b_min_pdu = side_b_min_pdu
         logging.basicConfig(filename='dpt.log', filemode='w', level=logging.INFO, force=True)
         if self.desired_detection < 60:
             print("please specify desired detection percentage value equal to or greater than the required percentage detection")
@@ -241,9 +253,7 @@ class DfsTest(Realm):
         obj.port_mgr_clean()
 
     # create a layer3 connection
-    def create_layer3(self, side_a_min_rate, side_a_max_rate, side_b_min_rate, side_b_max_rate, side_a_min_pdu,
-                      side_b_min_pdu,
-                      traffic_type, sta_list):
+    def create_layer3(self, traffic_type, sta_list):
         # checked
         print(sta_list)
         logging.info("station list : " + str(sta_list))
@@ -252,18 +262,18 @@ class DfsTest(Realm):
         self.cx_profile.host = self.host
         self.cx_profile.port = self.port
         # layer3_cols = ['name', 'tx bytes', 'rx bytes', 'tx rate', 'rx rate']
-        self.cx_profile.side_a_min_bps = side_a_min_rate
-        self.cx_profile.side_a_max_bps = side_a_max_rate
-        self.cx_profile.side_b_min_bps = side_b_min_rate
-        self.cx_profile.side_b_max_bps = side_b_max_rate
-        self.cx_profile.side_a_min_pdu = side_a_min_pdu,
-        self.cx_profile.side_b_min_pdu = side_b_min_pdu,
+        self.cx_profile.side_a_min_bps = self.side_a_min_rate
+        self.cx_profile.side_a_max_bps = self.side_a_max_rate
+        self.cx_profile.side_b_min_bps = self.side_b_min_rate
+        self.cx_profile.side_b_max_bps = self.side_b_max_rate
+        self.cx_profile.side_a_min_pdu = self.side_a_min_pdu
+        self.cx_profile.side_b_min_pdu = self.side_b_min_pdu
 
         # create
         print("Creating endpoints")
         logging.info("Creating endpoints")
-        self.cx_profile.create(endp_type=traffic_type, side_a=sta_list,
-                               side_b=self.upstream, sleep_time=0)
+        self.cx_profile.create(endp_type=traffic_type, side_a=self.upstream,
+                               side_b=sta_list, sleep_time=0)
         self.cx_profile.start_cx()
 
     # create client
@@ -330,10 +340,7 @@ class DfsTest(Realm):
             logging.info("All stations got IPs")
             if self.enable_traffic == "True":
                 logging.info("create layer3 traffic")
-                self.create_layer3(side_a_min_rate=1000000, side_a_max_rate=0, side_b_min_rate=1000000,
-                                   side_b_max_rate=0,
-                                   sta_list=sta_list, traffic_type=self.traffic_type, side_a_min_pdu=1250,
-                                   side_b_min_pdu=1250)
+                self.create_layer3(sta_list=sta_list, traffic_type=self.traffic_type)
         else:
             print("Stations failed to get IPs")
             logging.error("Stations failed to get IPs")
@@ -1782,6 +1789,12 @@ def main():
     parser.add_argument("--lf_hackrf", help='provide serial number og tx hackrf eg 30a28607')
     parser.add_argument("--legacy", help='stores true for legacy mode by default', default=True)
     parser.add_argument("--create_client", help='stores True/False if client creation is needed', default=False)
+    parser.add_argument("--side_a_min_rate", type=int, help='for layer3 provide side a min tx rate', default=1000000)
+    parser.add_argument("--side_a_max_rate", type=int,  help='for layer3 provide side a max tx rate', default=0)
+    parser.add_argument("--side_b_min_rate",type=int,  help='for layer3 provide side b min tx rate', default=1000000)
+    parser.add_argument("--side_b_max_rate", type=int, help='for layer3 provide side b max tx rate', default=0)
+    parser.add_argument("--side_a_min_pdu", type=int, help='for layer3 provide side a min pdu size', default=1250)
+    parser.add_argument("--side_b_min_pdu", type=int, help='for layer3 provide side b min pdu size', default=1250)
 
     args = parser.parse_args()
     obj = DfsTest(host=args.host,
@@ -1811,7 +1824,14 @@ def main():
                   ap_name=args.ap_name,
                   lf_hackrf=args.lf_hackrf,
                   legacy=args.legacy,
-                  create_client=args.create_client)
+                  create_client=args.create_client,
+                  side_a_min_rate=args.side_a_min_rate,
+                  side_a_max_rate=args.side_a_max_rate,
+                  side_b_min_rate=args.side_b_min_rate,
+                  side_b_max_rate=args.side_b_max_rate,
+                  side_a_min_pdu=args.side_a_min_pdu,
+                  side_b_min_pdu=args.side_b_min_pdu
+                  )
     obj.run()
 
 if __name__ == '__main__':
