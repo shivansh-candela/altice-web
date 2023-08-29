@@ -68,6 +68,7 @@ class TestCountryUS20Mhz2g(object):
     @pytest.mark.twog
     @pytest.mark.channel_1
     @pytest.mark.tcp_bidirectional
+    @pytest.mark.ss112
     def test_client_nat_open_chn1_20Mhz_US_2g_tcp_bidirectional(self, instantiate_profile, get_lf_logs,
                                               lf_test, update_report,
                                               station_names_twog, lf_tools,
@@ -160,13 +161,14 @@ class TestCountryUS20Mhz2g(object):
 
         lf_tools.attach_report_graphs(report_name=report_name)
         lf_tools.attach_report_kpi(report_name=report_name)
+        print(report_name,"LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL")
 
         csv_val = lf_tools.read_csv_individual_station_throughput(dir_name=report_name, option=None,
                                                                   individual_station_throughput=False, kpi_csv=True,
                                                                   file_name="/kpi.csv", batch_size=str(batch_size))
-        print(csv_val)
-        print(f"Bidirectional Traffic Throughput: {csv_val['Both']['UL+DL Mbps - 1 STA']}")
-        actual_throughput = csv_val['Both']['UL+DL Mbps - 1 STA']
+        print(csv_val,"#####################################################")
+        print(f"Bidirectional Traffic Throughput: {csv_val['Both']['UL+DL 2000000000bps pdu AUTO - 1 STA']}")
+        actual_throughput = csv_val['Both']['UL+DL 2000000000bps pdu AUTO - 1 STA']
 
         result = {
 
@@ -316,8 +318,8 @@ class TestCountryUS20Mhz2g(object):
                                                                   individual_station_throughput=False, kpi_csv=True,
                                                                   file_name="/kpi.csv", batch_size=str(batch_size))
         print(csv_val)
-        print(f"Bidirectional Traffic Throughput: {csv_val['Both']['UL+DL Mbps - 1 STA']}")
-        actual_throughput = csv_val['Both']['UL+DL Mbps - 1 STA']
+        print(f"Bidirectional Traffic Throughput: {csv_val['Both']['UL+DL 2000000000bps pdu AUTO - 1 STA']}")
+        actual_throughput = csv_val['Both']['UL+DL 2000000000bps pdu AUTO - 1 STA']
 
         result = {
 
@@ -465,8 +467,8 @@ class TestCountryUS20Mhz2g(object):
                                                                   individual_station_throughput=False, kpi_csv=True,
                                                                   file_name="/kpi.csv", batch_size=str(batch_size))
         print(csv_val)
-        print(f"Bidirectional Traffic Throughput: {csv_val['Both']['UL+DL Mbps - 1 STA']}")
-        actual_throughput = csv_val['Both']['UL+DL Mbps - 1 STA']
+        print(f"Bidirectional Traffic Throughput: {csv_val['Both']['UL+DL 2000000000bps pdu AUTO - 1 STA']}")
+        actual_throughput = csv_val['Both']['UL+DL 2000000000bps pdu AUTO - 1 STA']
 
         result = {
 
