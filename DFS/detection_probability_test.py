@@ -221,14 +221,32 @@ class DfsTest(Realm):
                                                      monitor_name="monitor", channel_bw="20")
             self.pcap_obj_2.setup(0, 0, 0)
             self.pcap_obj_2.monitor.admin_up()
-            self.pcap_obj_2.monitor.start_sniff(capname=self.pcap_name, duration_sec=duration)
+            print("Waiting until ports appear...")
+            x = LFUtils.wait_until_ports_appear(base_url=f"http://{self.host}:{self.port}", port_list="monitor", debug=True, timeout=300)
+            if x is True:
+                print("monitor is up ")
+                print("start sniffing")
+                self.pcap_obj_2.monitor.start_sniff(capname=self.pcap_name, duration_sec=duration)
+            else:
+                print("some problem with monitor not being up")
+                exit()
         elif self.more_option == "random":
             self.pcap_obj_2 = sniff_radio.SniffRadio(lfclient_host=self.host, lfclient_port=self.port,
                                                      radio=self.sniff_radio, channel=radio_channel,
                                                      monitor_name="monitor", channel_bw="20")
             self.pcap_obj_2.setup(1, 1, 1)
             self.pcap_obj_2.monitor.admin_up()
-            self.pcap_obj_2.monitor.start_sniff(capname=self.pcap_name, duration_sec=duration)
+            print("Waiting until ports appear...")
+            x = LFUtils.wait_until_ports_appear(base_url=f"http://{self.host}:{self.port}", port_list="monitor",
+                                                debug=True, timeout=300)
+            if x is True:
+                print("monitor is up ")
+                print("start sniffing")
+                self.pcap_obj_2.monitor.start_sniff(capname=self.pcap_name, duration_sec=duration)
+            else:
+                print("some problem with monitor not being up")
+                exit()
+
 
     # query station data like channel etc
     def station_data_query(self, station_name="wlan0", query="channel"):
@@ -1120,25 +1138,6 @@ class DfsTest(Realm):
                     logging.info("radar not detected")
                     main_dict[fcc][var_1]["Detected"] = "NO"
                     main_dict[fcc][var_1]["Detection Time(sec)"] = "NA"
-
-                # print("csa fra")
-                # print(scapy_frame_time_)
-                # print(type(scapy_frame_time_))
-                # print("csa_frame,", csa_frame_time_)
-                # print(type(csa_frame_time_))
-                # print("calculate detection time")
-                # logging.info("calculate detection time")
-                # FMT = '%b %d, %Y %H:%M:%S'
-                # c_time = datetime.strptime(csa_frame_time_, FMT) - datetime.strptime(scapy_frame_time_, FMT)
-                # print("detection time ", c_time)
-                # logging.info("detection time " + str(c_time))
-                # lst = str(c_time).split(":")
-                # seconds = int(lst[0]) * 3600 + int(lst[1]) * 60 + int(lst[2])
-                # d_time = seconds
-                # print("detection time ", d_time)
-                # logging.info("detection time " + str(d_time))
-                # main_dict[fcc][var_1]["Detection Time(sec)"] = d_time
-
 
                 print(main_dict)
                 logging.info(str(main_dict))
