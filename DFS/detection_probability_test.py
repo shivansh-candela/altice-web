@@ -295,7 +295,7 @@ class DfsTest(Realm):
         self.cx_profile.start_cx()
 
     # create client
-    def create_client(self, start_id=0, sta_prefix="wlan", num_sta=1):
+    def create_client_(self, start_id=0, sta_prefix="wlan", num_sta=1):
         local_realm = realm.Realm(lfclient_host=self.host, lfclient_port=self.port)
         station_profile = local_realm.new_station_profile()
         sta_list = self.get_station_list()
@@ -1189,7 +1189,7 @@ class DfsTest(Realm):
 
             print("create client")
             logging.info("create client")
-            self.create_client()
+            self.create_client_()
         else:
             print("client already exists")
         print("check if station is at expected channel")
@@ -1701,7 +1701,6 @@ def main():
         --enable_traffic False --static False --more_option centre --bw 20 --lf_hackrf 30a28607 --legacy True
 
     --> Korea Regulation
-
        coming soon...
 
     **** NON LEGACY MODE ****
