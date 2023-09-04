@@ -412,7 +412,7 @@ class DfsTest(Realm):
             command = f"sudo python3 lf_hackrf_dfs.py --pulse_width {width} --pulse_interval {pri} --pulse_count {count} --sweep_time 1000 --one_burst --freq {freq} --lf_hackrf {self.lf_hackrf}"
         if type == "legacy_w56-1":
             command = f"python3 lf_hackrf_dfs.py --pulse_width {width} --pulse_interval {pri} --pulse_count {count} --tx_sample_rate 2 --sweep_time 1000 --freq {freq} --one_burst --lf_hackrf {self.lf_hackrf}"
-        if type == "FCC0" or type == "FCC1" or type == "FCC2" or type == "FCC3" or type == "FCC4":
+        if type == "FCC0" or type == "FCC1" or type == "FCC2" or type == "FCC3" or type == "FCC4" or type == "KOREA":
             command = f"python3 lf_hackrf_dfs.py --rf_type {type},{width},{pri},{count},20 --lf_hackrf {self.lf_hackrf} --freq {freq} --one_burst --log_level debug"
         if type == "w53-3":
             command = f"sudo python3 lf_hackrf_dfs.py --radar_type W53CHIRP,{width},{blank_time},{long_pulse_width},{chirp_width},{prf},{num_con_pair},{freq},20 --one_burst --lf_hackrf {self.lf_hackrf} --log_level debug "
@@ -807,9 +807,14 @@ class DfsTest(Realm):
                     chirp_width = random.choice(chirp_width_range)
                     tx_sample_rate = "20"
                 elif fcc == "korea_1":
-                    width_ = 1
-                    interval_ = 1429
-                    count_ = 18
+                    if self.legacy == "True":
+                        width_ = 1
+                        interval_ = 1429
+                        count_ = 18
+                    else:
+                        width_ = 1
+                        prf = 700
+                        count_ = 18
                 elif fcc == "korea_2":
                     width_ = 1
                     interval_ = 556
@@ -999,6 +1004,8 @@ class DfsTest(Realm):
                                 var = "FCC3"
                             if fcc == "FCC4":
                                 var = "FCC4"
+                            if fcc == "Korea_1":
+                                var = "KOREA"
                             self.run_hackrf(type=var, width=width_, pri=interval_, count=count_,
                                                 freq=str(frequency[str(self.channel)]))
                         if (fcc == "ETSI0") and self.legacy == "False":
@@ -1286,7 +1293,7 @@ class DfsTest(Realm):
                             lst.append("Korea")
         print(lst)
 
-        var_name = "_".join(self.lst)
+        var_name = "_".join(lst)
         report = lf_report_pdf.lf_report(_path="",
                                          _results_dir_name=f"{var_name}_ch{self.channel}_bw{self.bandwidth}_Detection Probability Test",
                                          _output_html="dpt.html",
