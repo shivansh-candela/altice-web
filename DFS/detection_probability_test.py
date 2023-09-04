@@ -1242,7 +1242,51 @@ class DfsTest(Realm):
     def generate_report(self, test_duration=None, main_dict=None):
 
         print("test duration", test_duration)
-        var_name = "_".join(self.fcctypes)
+        lst =[]
+        for i in self.fcctypes:
+            print(i)
+            if "FCC" in i:
+                if len(lst) == 0:
+                    lst.append("FCC")
+                else:
+                    for x in lst:
+                        if "FCC" in lst:
+                            pass
+                        else:
+                            lst.append("FCC")
+
+            elif "ETSI" in i:
+                if len(lst) == 0:
+                    lst.append("ETSI")
+                else:
+                    for x in lst:
+                        if "ETSI" in lst:
+                            pass
+                        else:
+                            lst.append("ETSI")
+            elif "Japan" in i:
+                if len(lst) == 0:
+                    lst.append("Japan")
+                else:
+                    for x in lst:
+                        if "Japan" in lst:
+                            print("yo")
+                            pass
+                        else:
+                            print("b")
+                            lst.append("Japan")
+            elif "Korea" in i:
+                if len(lst) == 0:
+                    lst.append("Korea")
+                else:
+                    for x in lst:
+                        if "Korea" in lst:
+                            pass
+                        else:
+                            lst.append("Korea")
+        print(lst)
+
+        var_name = "_".join(self.lst)
         report = lf_report_pdf.lf_report(_path="",
                                          _results_dir_name=f"{var_name}_ch{self.channel}_bw{self.bandwidth}_Detection Probability Test",
                                          _output_html="dpt.html",
