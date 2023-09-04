@@ -469,24 +469,8 @@ class DfsTest(Realm):
         test_time = test_time.strftime("%b %d %H:%M:%S")
         print("Test started at ", test_time)
         logging.info("Test started at " + str(test_time))
-
-        print("clean all stations before the test")
-        self.precleanup()
-
-        print("create client")
-        self.create_client()
-        print("check if station is at expected channel")
-        sta_list = self.get_station_list()
-        channel = self.station_data_query(station_name=sta_list[0], query="channel")
-        # channel = self.station_data_query(station_name="wlan0000", query="channel")
-        if channel == self.channel:
-            print("station is at expected channel")
-        else:
-            print("station is not at expected channel")
-            exit(1)
-
          # starting dpt logic
-        print("run particular logic for given  trials")
+
         main = self.main_logic
         test_end = datetime.now()
         test_end = test_end.strftime("%b %d %H:%M:%S")
