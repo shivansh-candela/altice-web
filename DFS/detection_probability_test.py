@@ -825,9 +825,14 @@ class DfsTest(Realm):
                         interval_ = 1800
                         count_ = 10
                 elif fcc == "korea_3":
-                    width_ = 2
-                    interval_ = 3030
-                    count_ = 70
+                    if self.legacy == "True":
+                        width_ = 2
+                        interval_ = 3030
+                        count_ = 70
+                    else:
+                        width_ = 2
+                        interval_ = 330
+                        count_ = 70
                 elif fcc == "Japan-w56-1":
                     width_ = 1
                     interval_ = 2778
@@ -1009,7 +1014,7 @@ class DfsTest(Realm):
                                 var = "FCC3"
                             if fcc == "FCC4":
                                 var = "FCC4"
-                            if fcc == "Korea_1" or fcc == "Korea_2":
+                            if fcc == "Korea_1" or fcc == "Korea_2" or fcc == "Korea_3":
                                 var = "KOREA"
                             self.run_hackrf(type=var, width=width_, pri=interval_, count=count_,
                                                 freq=str(frequency[str(self.channel)]))
