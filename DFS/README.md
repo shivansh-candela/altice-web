@@ -2,13 +2,21 @@ RELEASE 1.0
 
 This release following regulations:
 1. FCC
-       FCC     | STATUS
-    A. FCC0    | 
-    B. FCC1
-    C. FCC2
-    D. FCC4
-    E. FCC5
-    E. FCC6
+
+       FCC     |  Legacy  |  Non Legacy
+       -----------------------------------------------
+       FCC0    |  works   | works
+       -----------------------------------------------
+       FCC1    |  works   | works
+       -----------------------------------------------
+       FCC2    |  works   | works
+       ------------------------------------------------
+       FCC4    |  works   | works
+       -------------------------------------------------
+       FCC5    |  n/a     | under development(70% works)
+       -------------------------------------------------
+       FCC6    |  n/a     | under development(70% works)
+       --------------------------------------------------
 This product supports two type of test of dynamic frequency selection
 
 1. Detection Probability Test
