@@ -370,7 +370,6 @@ class DfsTest(Realm):
                    prf_3=None, blank_time=None,long_pulse_width=None, chirp_width=None,
                    prf=None,num_con_pair=None ):
 
-
         p = paramiko.SSHClient()
         p.set_missing_host_key_policy(paramiko.AutoAddPolicy())  # This script doesn't work for me unless this line is added!
         p.connect(self.host, port=22, username=self.ssh_username, password=self.ssh_password)
@@ -1753,6 +1752,7 @@ class DfsTest(Realm):
             "Radar Types": self.fcctypes,
             "Radar Hardware": "ct712",
             "Freq Channel Number": self.channel,
+            "Bandwidth": self.bandwidth + " (MHz)",
             "Tx Power of radar in dbm": tx_power[str(self.channel)],
             "Desired Pass Percentage": str(self.desired_detection) + str("%"),
             "Max Number of extra trials": self.extra_trials,
