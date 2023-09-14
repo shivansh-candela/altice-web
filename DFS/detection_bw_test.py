@@ -80,12 +80,11 @@ import datetime
 from datetime import datetime
 import pandas as pd
 import paramiko
+from dateutil import parser
 import matplotlib.pyplot as plt
 import random
 import numpy as np
 import matplotlib
-
-
 
 if sys.version_info[0] != 3:
     logging.critical("This script requires Python 3")
@@ -109,6 +108,10 @@ class DfsTest(Realm):
     def __init__(self,
                  host=None,
                  port=None,
+                 ssh_username=None,
+                 ssh_passwd=None,
+                 lf_hackrf=None,
+                 ap_name=None,
                  ssid=None,
                  passwd=None,
                  security=None,
@@ -126,29 +129,34 @@ class DfsTest(Realm):
                  extra_trials=None,
                  more_option=None,
                  time_int=None,
-                 trials=None
-                 ):
+                 trials=None,
+                 bandwidth=None):
         super().__init__(host, port)
         self.host = host
         self.port = port
-        self.ssid = ssid
-        self.passwd = passwd
-        self.security = security
+        self.ssh_username = ssh_username
+        self.ssh_password = ssh_passwd
+        self.lf_hackrf = lf_hackrf
+        self.ap_name = ap_name
+        # self.ssid = ssid
+        # self.passwd = passwd
+        # self.security = security
         self.radio = radio
         self.upstream = upstream
         self.fcctypes = fcctypes
         self.channel = channel
         self.sniff_radio = sniff_radio
-        self.static = static
-        self.static_ip = static_ip
-        self.ip_mask = ip_mask
-        self.gateway_ip = gateway_ip
-        self.enable_traffic = enable_traffic
+        # self.static = static
+        # self.static_ip = static_ip
+        # self.ip_mask = ip_mask
+        # self.gateway_ip = gateway_ip
+        # self.enable_traffic = enable_traffic
         self.desired_detection = desired_detection
         self.extra_trials = extra_trials
         self.more_option = more_option
         self.time_int = time_int
         self.trials = trials
+        self.bandwidth = bandwidth
         self.pcap_name = None
         self.pcap_obj_2 = None
         self.staConnect = sta_connect.StaConnect2(self.host, self.port, outfile="staconnect2.csv")
@@ -170,23 +178,36 @@ class DfsTest(Realm):
         self.pcap_name = test_name + str(datetime.now().strftime("%Y-%m-%d-%H-%M")).replace(':', '-') + ".pcap"
         if self.more_option == "centre":
             self.pcap_obj_2 = sniff_radio.SniffRadio(lfclient_host=self.host, lfclient_port=self.port,
-                                                 radio=self.sniff_radio, channel=radio_channel, monitor_name="monitor", channel_bw="20")
-            self.pcap_obj_2.setup(1, 1, 1)
-            time.sleep(5)
+                                                     radio=self.sniff_radio, channel=radio_channel,
+                                                     monitor_name="monitor", channel_bw="20")
+            self.pcap_obj_2.setup(0, 0, 0)
             self.pcap_obj_2.monitor.admin_up()
-            time.sleep(5)
-            self.pcap_obj_2.monitor.start_sniff(capname=self.pcap_name, duration_sec=duration)
+            print("Waiting until ports appear...")
+            x = LFUtils.wait_until_ports_appear(base_url=f"http://{self.host}:{self.port}", port_list="monitor",
+                                                debug=True, timeout=300)
+            if x is True:
+                print("monitor is up ")
+                print("start sniffing")
+                self.pcap_obj_2.monitor.start_sniff(capname=self.pcap_name, duration_sec=duration)
+            else:
+                print("some problem with monitor not being up")
+                exit()
         elif self.more_option == "random":
             self.pcap_obj_2 = sniff_radio.SniffRadio(lfclient_host=self.host, lfclient_port=self.port,
                                                      radio=self.sniff_radio, channel=radio_channel,
                                                      monitor_name="monitor", channel_bw="20")
             self.pcap_obj_2.setup(1, 1, 1)
-            time.sleep(5)
             self.pcap_obj_2.monitor.admin_up()
-            time.sleep(5)
-            self.pcap_obj_2.monitor.start_sniff(capname=self.pcap_name, duration_sec=duration)
-
-
+            print("Waiting until ports appear...")
+            x = LFUtils.wait_until_ports_appear(base_url=f"http://{self.host}:{self.port}", port_list="monitor",
+                                                debug=True, timeout=300)
+            if x is True:
+                print("monitor is up ")
+                print("start sniffing")
+                self.pcap_obj_2.monitor.start_sniff(capname=self.pcap_name, duration_sec=duration)
+            else:
+                print("some problem with monitor not being up")
+                exit()
 
     def station_data_query(self, station_name="wlan0", query="channel"):
         # print(station_name)
@@ -214,7 +235,6 @@ class DfsTest(Realm):
         obj.port_mgr_clean()
 
     def create_client(self, start_id=0, sta_prefix="wlan", num_sta=1):
-
         local_realm = realm.Realm(lfclient_host=self.host, lfclient_port=self.port)
         station_profile = local_realm.new_station_profile()
 
@@ -275,22 +295,47 @@ class DfsTest(Realm):
             exit(1)
             return False
 
-    def run_hackrf(self, width=1, pri=1428, count=18, freq=None):
+    # def run_hackrf(self, width=1, pri=1428, count=18, freq=None):
+    #     p = paramiko.SSHClient()
+    #     p.set_missing_host_key_policy(
+    #         paramiko.AutoAddPolicy())  # This script doesn't work for me unless this line is added!
+    #     p.connect(self.host, port=22, username="lanforge", password="lanforge")
+    #     p.get_transport()
+    #     command = "sudo python lf_hackrf.py --pulse_width " + str(width) + " --pulse_interval " + str(pri) + " --pulse_count " + str(count) + " --sweep_time 1000 --freq " + str(freq) + " --one_burst"
+    #     stdin, stdout, stderr = p.exec_command(str(command), get_pty=True)
+    #     stdin.write("lanforge\n")
+    #     stdin.flush()
+    #     opt = stdout.readlines()
+    #     opt = "".join(opt)
+    #     print(opt)
+    #     p.close()
+
+    def run_hackrf(self, freq=None):
         p = paramiko.SSHClient()
-        p.set_missing_host_key_policy(
-            paramiko.AutoAddPolicy())  # This script doesn't work for me unless this line is added!
-        p.connect(self.host, port=22, username="lanforge", password="lanforge")
+        p.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        p.connect(self.host, port=22, username=self.ssh_username, password=self.ssh_password)
         p.get_transport()
-        command = "sudo python lf_hackrf.py --pulse_width " + str(width) + " --pulse_interval " + str(pri) + " --pulse_count " + str(count) + " --sweep_time 1000 --freq " + str(freq) + " --one_burst"
+
+        # send frames
+        # Execute the first command for scapy logic
+        stdin, stdout, stderr = p.exec_command("sudo python scapy_frame.py", get_pty=True)
+        stdin.write(str(self.ssh_password) + "\n")
+        stdin.flush()
+        # Print the output of the first command
+        print(stdout.read().decode())
+        time.sleep(1)
+
+        command = f"python3 lf_hackrf_dfs.py --rf_type FCC0,1,1428,18,20 --lf_hackrf {self.lf_hackrf} --freq {freq} --one_burst --log_level debug"
+
+        # execute second command
         stdin, stdout, stderr = p.exec_command(str(command), get_pty=True)
-        stdin.write("lanforge\n")
+        stdin.write(str(self.ssh_password) + "\n")
         stdin.flush()
         opt = stdout.readlines()
         opt = "".join(opt)
         print(opt)
+        logging.info(opt)
         p.close()
-
-        # return current_time
 
     def stop_sniffer(self):
         print("in stop_sniffer")
@@ -313,26 +358,21 @@ class DfsTest(Realm):
                                report_location="/home/lanforge/" + self.pcap_name,
                                report_dir="pcap")
         time.sleep(10)
-
         return self.pcap_name
 
     @property
     def main_logic(self):
         main_dict = dict.fromkeys(self.fcctypes)
         print(main_dict)
-        frequency = {"52": "5260000", "56": "5280000", "60": "5300000", "64": "5320000",
-                     "100": list(range(5490, 5511)),
-                     "104": "5520000", "108": "5540000", "112": "5560000", "116": "5580000",
-                     "120": "5600000",
-                     "124": "5620000",
-                     "128": "5640000", "132": "5660000", "136": "5680000", "140": "5700000"}
+        frequency = {"52": list(range(5250, 5270)), "56": list(range(5270, 5290)), "60": list(range(5290, 5310)),
+                     "64": list(range(5310, 5330)), "100": list(range(5490, 5510)), "104": list(range(5510, 5530)),
+                     "108": list(range(5530, 5550)), "112": list(range(5550, 5570)), "116": list(range(5570, 5590)),
+                     "120": list(range(5590, 5610)), "124": list(range(5610, 5630)), "128": list(range(5630, 5650)),
+                     "132": list(range(5650, 5670)), "136": list(range(5670, 5690)), "140": list(range(5690, 5710))}
 
-        centre_freq = {"52": "5260000", "56": "5280000", "60": "5300000", "64": "5320000",
-                     "100": "5500000",
-                     "104": "5520000", "108": "5540000", "112": "5560000", "116": "5580000",
-                     "120": "5600000",
-                     "124": "5620000",
-                     "128": "5640000", "132": "5660000", "136": "5680000", "140": "5700000"}
+        centre_freq = {"52": "5260000", "56": "5280000", "60": "5300000", "64": "5320000", "100": "5500000",
+                       "104": "5520000", "108": "5540000", "112": "5560000", "116": "5580000", "120": "5600000",
+                       "124": "5620000", "128": "5640000", "132": "5660000", "136": "5680000", "140": "5700000"}
         print(frequency[self.channel])
         new_list = []
         for i in frequency[self.channel]:
@@ -362,7 +402,8 @@ class DfsTest(Realm):
                 for tria in range(self.trials):
                     var = 000
                     var_1 = "Trial_" + str(var + tria + 1)
-                    new_list = ["Burst", "Pulses", "Width", "PRI(US)", "Detected", "Frequency(MHz)", "Detection Time(sec)", "Freq_offset"]
+                    new_list = ["Burst", "Pulses", "Width", "PRI(US)", "Detected", "Frequency(MHz)",
+                                "Detection Time(sec)", "Freq_offset"]
                     third_dict = dict.fromkeys(new_list)
                     main_dict[fcc][frq][var_1] = third_dict.copy()
                     print(main_dict)
@@ -373,8 +414,6 @@ class DfsTest(Realm):
                         width_ = "1"
                         interval_ = "1428"
                         count_ = "18"
-
-
 
                     main_dict[fcc][frq][var_1]["Burst"] = "1"
                     main_dict[fcc][frq][var_1]["Pulses"] = count_
@@ -394,17 +433,15 @@ class DfsTest(Realm):
                     #     val = str(diff)
                     #     main_dict[fcc][frq][var_1]["Freq_offset"] = val
 
-
                     print("starting sniffer")
                     self.start_sniffer(radio_channel=self.channel, radio=self.sniff_radio,
-                                       test_name="dfs_csa_" + str(fcc) + "_" + str(var_1) + "_channel" + str(self.channel) + "_")
-
+                                       test_name="dfs_csa_" + str(fcc) + "_" + str(var_1) + "_channel" + str(
+                                           self.channel) + "_")
 
                     # print(type(current_time))
 
                     print("generate radar")
-                    self.run_hackrf(width=width_, pri=interval_, count=count_, freq=frq)
-
+                    self.run_hackrf(freq=frq)
 
                     current_time = datetime.now()
                     print("Current date and time : ")
@@ -418,50 +455,125 @@ class DfsTest(Realm):
 
                     # pcap read logic
 
+                    # csa_frame = self.pcap_obj.check_frame_present(
+                    #     pcap_file=str(file_name),
+                    #     filter='wlan.csa.channel_switch.count ')
+                    # print("csa frame", csa_frame)
+                    # if len(csa_frame) != 0 and csa_frame != "empty":
+                    #     print("csa frame  is present")
+                    #     print("radar detected")
+                    #     main_dict[fcc][frq][var_1]["Detected"] = "YES"
+                    #     csa_frame_time = self.pcap_obj.read_arrival_time(
+                    #         pcap_file=str(file_name),
+                    #         filter='wlan.csa.channel_switch.count ')
+                    #     print("csa frame  time is ", csa_frame_time)
+                    #     csa_time = str(csa_frame_time)
+                    #     csa_frame_time_ = None
+                    #     for i in csa_time:
+                    #         if i == ".":
+                    #             print("yes")
+                    #             ind = csa_time.index(".")
+                    #             csa_frame_time_ = csa_time[:ind]
+                    #     print("csa time", csa_frame_time_)
+                    #
+                    #     print("calculate detection time")
+                    #     FMT = '%b %d, %Y %H:%M:%S'
+                    #     print("$$$$", datetime.strptime(csa_frame_time_, FMT))
+                    #     print("^^^6", datetime.strptime(current_time, FMT))
+                    #     c_time = datetime.strptime(csa_frame_time_, FMT) - datetime.strptime(current_time, FMT)
+                    #     print("detection time ", c_time)
+                    #     lst = str(c_time).split(":")
+                    #     seconds = int(lst[0]) * 3600 + int(lst[1]) * 60 + int(lst[2])
+                    #     d_time = seconds
+                    #     print("detection time ", d_time)
+                    #     main_dict[fcc][frq][var_1]["Detection Time(sec)"] = d_time
+
+                    scapy_frame = self.pcap_obj.check_frame_present(pcap_file=str(file_name),
+                                                                    filter="(wlan.sa == 00:11:22:33:44:55)")
+                    print("scapy frame +", scapy_frame)
+                    scapy_frame_time_ = None
+                    if len(scapy_frame) != 0 and scapy_frame != "empty":
+                        print("scapy frame  is present")
+                        logging.info("scapy frame  is present")
+
+                        scapy_frame_time = self.pcap_obj.read_arrival_time(
+                            pcap_file=str(file_name),
+                            filter="(wlan.sa == 00:11:22:33:44:55)")
+                        print("scapy frame  time is ", scapy_frame_time)
+                        logging.info("csa frame  time is " + str(scapy_frame_time))
+                        scapy_time = str(scapy_frame_time)
+
+                        for i in scapy_time:
+                            if i == "I":
+                                print("yes")
+                                logging.info("yes")
+                                ind = scapy_time.index("I")
+                                scapy_frame_time_ = scapy_time[:int(ind) - 1]
+                        print("scapy time", scapy_frame_time_)
+                        logging.info("scapy time" + str(scapy_frame_time_))
+
                     csa_frame = self.pcap_obj.check_frame_present(
                         pcap_file=str(file_name),
-                        filter='wlan.csa.channel_switch.count ')
+                        filter="wlan.csa.channel_switch.count")
                     print("csa frame", csa_frame)
+                    logging.info("csa frame" + str(csa_frame))
                     if len(csa_frame) != 0 and csa_frame != "empty":
                         print("csa frame  is present")
+                        logging.info("csa frame  is present")
                         print("radar detected")
+                        logging.info("radar detected")
                         main_dict[fcc][frq][var_1]["Detected"] = "YES"
                         csa_frame_time = self.pcap_obj.read_arrival_time(
                             pcap_file=str(file_name),
-                            filter='wlan.csa.channel_switch.count ')
+                            filter="wlan.csa.channel_switch.count")
                         print("csa frame  time is ", csa_frame_time)
+                        logging.info("csa frame  time is " + str(csa_frame_time))
                         csa_time = str(csa_frame_time)
                         csa_frame_time_ = None
                         for i in csa_time:
-                            if i == ".":
+                            if i == "I":
                                 print("yes")
-                                ind = csa_time.index(".")
-                                csa_frame_time_ = csa_time[:ind]
+                                logging.info("yes")
+                                ind = csa_time.index("I")
+                                csa_frame_time_ = csa_time[:int(ind) - 1]
                         print("csa time", csa_frame_time_)
+                        logging.info("csa time" + str(csa_frame_time_))
 
+                        print("csa fra")
+                        print(scapy_frame_time_)
+                        print(type(scapy_frame_time_))
+                        print("csa_frame,", csa_frame_time_)
+                        print(type(csa_frame_time_))
                         print("calculate detection time")
-                        FMT = '%b %d, %Y %H:%M:%S'
-                        c_time = datetime.strptime(csa_frame_time_, FMT) - datetime.strptime(current_time, FMT)
-                        print("detection time ", c_time)
-                        lst = str(c_time).split(":")
-                        seconds = int(lst[0]) * 3600 + int(lst[1]) * 60 + int(lst[2])
-                        d_time = seconds
-                        print("detection time ", d_time)
-                        main_dict[fcc][frq][var_1]["Detection Time(sec)"] = d_time
+                        logging.info("calculate detection time")
+                        csa_datetime = parser.parse(csa_frame_time_)
+                        scapy_datetime = parser.parse(scapy_frame_time_)
 
+                        # Calculate the time difference
+                        time_difference = round((csa_datetime - scapy_datetime).total_seconds(), 1)
+
+                        print(time_difference)
+
+                        print("detection time ", time_difference)
+                        logging.info("detection time " + str(time_difference))
+                        main_dict[fcc][frq][var_1]["Detection Time(sec)"] = time_difference
 
                     else:
+                        # print("csa frame is not present")
+                        # print("radar not detected")
+                        # main_dict[fcc][frq][var_1]["Detected"] = "NO"
+                        # main_dict[fcc][frq][var_1]["Detection Time(sec)"] = "NA"
                         print("csa frame is not present")
+                        logging.info("csa frame is not present")
                         print("radar not detected")
+                        logging.info("radar not detected")
                         main_dict[fcc][frq][var_1]["Detected"] = "NO"
                         main_dict[fcc][frq][var_1]["Detection Time(sec)"] = "NA"
-
 
                     print(main_dict)
 
         print("final dict", main_dict)
         return main_dict
-
 
     def run(self):
         print(self.fcctypes)
@@ -469,7 +581,7 @@ class DfsTest(Realm):
         test_time = test_time.strftime("%b %d %H:%M:%S")
         print("Test started at ", test_time)
         logging.info("Test started at " + str(test_time))
-         # starting dpt logic
+        # starting dpt logic
 
         main = self.main_logic
         test_end = datetime.now()
@@ -481,28 +593,25 @@ class DfsTest(Realm):
         FMT = '%b %d %H:%M:%S'
         test_duration = datetime.strptime(s2, FMT) - datetime.strptime(s1, FMT)
         print(test_duration)
-        self.generate_report(test_duration= test_duration, main_dict=main)
-
-
+        self.generate_report(test_duration=test_duration, main_dict=main)
 
     def test_graph(self, graph_dict=None):
         self.graph_image_name = "overall"
         x = []
         for i in graph_dict:
             x.append(i)
-        pass_per =[]
+        pass_per = []
         fail_per = []
         for i in graph_dict:
-
             pass_per.append(graph_dict[i])
             fail_per.append(round((float(100 - graph_dict[i])), 1))
 
         plt.rcParams["figure.figsize"] = [15, 7]
         plt.rcParams["figure.autolayout"] = True
 
-        year =x
+        year = x
         issues_addressed = pass_per
-        issues_pending =fail_per
+        issues_pending = fail_per
 
         b1 = plt.barh(year, issues_addressed, color="green")
 
@@ -522,12 +631,11 @@ class DfsTest(Realm):
         plt.savefig("%s.png" % self.graph_image_name, dpi=96)
         return "%s.png" % self.graph_image_name
 
-
-
-    def generate_report(self, test_duration="1:26:07",  main_dict=None):
+    def generate_report(self, test_duration="1:26:07", main_dict=None):
         # main_dict = {'FCC0': {'5490000': {'Trial_1': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(MHz)': '5490000', 'Detection Time(sec)': 17, 'Freq_offset': '-10.0'}, 'Trial_2': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(MHz)': '5490000', 'Detection Time(sec)': 18, 'Freq_offset': '-10.0'}}, '5491000': {'Trial_1': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(MHz)': '5491000', 'Detection Time(sec)': 18, 'Freq_offset': '-9.0'}, 'Trial_2': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(MHz)': '5491000', 'Detection Time(sec)': 18, 'Freq_offset': '-9.0'}}, '5492000': {'Trial_1': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(MHz)': '5492000', 'Detection Time(sec)': 18, 'Freq_offset': '-8.0'}, 'Trial_2': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(MHz)': '5492000', 'Detection Time(sec)': 18, 'Freq_offset': '-8.0'}}, '5493000': {'Trial_1': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(MHz)': '5493000', 'Detection Time(sec)': 18, 'Freq_offset': '-7.0'}, 'Trial_2': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(MHz)': '5493000', 'Detection Time(sec)': 17, 'Freq_offset': '-7.0'}}, '5494000': {'Trial_1': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(MHz)': '5494000', 'Detection Time(sec)': 17, 'Freq_offset': '-6.0'}, 'Trial_2': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(MHz)': '5494000', 'Detection Time(sec)': 17, 'Freq_offset': '-6.0'}}, '5495000': {'Trial_1': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'NO', 'Frequency(MHz)': '5495000', 'Detection Time(sec)': 'NA', 'Freq_offset': '-5.0'}, 'Trial_2': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(MHz)': '5495000', 'Detection Time(sec)': 18, 'Freq_offset': '-5.0'}}, '5496000': {'Trial_1': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(MHz)': '5496000', 'Detection Time(sec)': 17, 'Freq_offset': '-4.0'}, 'Trial_2': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(MHz)': '5496000', 'Detection Time(sec)': 18, 'Freq_offset': '-4.0'}}, '5497000': {'Trial_1': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(MHz)': '5497000', 'Detection Time(sec)': 18, 'Freq_offset': '-3.0'}, 'Trial_2': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(MHz)': '5497000', 'Detection Time(sec)': 18, 'Freq_offset': '-3.0'}}, '5498000': {'Trial_1': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(MHz)': '5498000', 'Detection Time(sec)': 18, 'Freq_offset': '-2.0'}, 'Trial_2': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(MHz)': '5498000', 'Detection Time(sec)': 18, 'Freq_offset': '-2.0'}}, '5499000': {'Trial_1': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(MHz)': '5499000', 'Detection Time(sec)': 17, 'Freq_offset': '-1.0'}, 'Trial_2': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(MHz)': '5499000', 'Detection Time(sec)': 18, 'Freq_offset': '-1.0'}},'5500000': {'Trial_1': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(MHz)': '5500000', 'Detection Time(sec)': 17, 'Freq_offset': '0.0'}, 'Trial_2': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(MHz)': '5500000', 'Detection Time(sec)': 18, 'Freq_offset': '0.0'}},'5501000': {'Trial_1': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(MHz)': '5501000', 'Detection Time(sec)': 17, 'Freq_offset': '1.0'}, 'Trial_2': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(MHz)': '5501000', 'Detection Time(sec)': 18, 'Freq_offset': '1.0'}},'5502000': {'Trial_1':{'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(MHz)': '5502000', 'Detection Time(sec)': 17, 'Freq_offset': '2.0'}, 'Trial_2': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(MHz)': '5502000', 'Detection Time(sec)': 18, 'Freq_offset': '2.0'}}, '5503000': {'Trial_1': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(MHz)': '5503000', 'Detection Time(sec)': 17, 'Freq_offset': '3.0'}, 'Trial_2':{'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(MHz)': '5503000', 'Detection Time(sec)': 18, 'Freq_offset': '3.0'}}, '5504000': {'Trial_1': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(MHz)': '5504000', 'Detection Time(sec)': 17, 'Freq_offset': '4.0'}, 'Trial_2': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(MHz)': '5504000', 'Detection Time(sec)': 18, 'Freq_offset': '4.0'}},'5505000': {'Trial_1': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(MHz)': '5505000', 'Detection Time(sec)': 17, 'Freq_offset': '5.0'}, 'Trial_2': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(MHz)': '5505000', 'Detection Time(sec)': 18, 'Freq_offset': '5.0'}},'5506000': {'Trial_1': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(MHz)': '5506000', 'Detection Time(sec)': 17, 'Freq_offset': '6.0'}, 'Trial_2': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(MHz)': '5506000', 'Detection Time(sec)': 18, 'Freq_offset': '6.0'}},'5507000': {'Trial_1': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(MHz)': '5507000', 'Detection Time(sec)': 17, 'Freq_offset': '7.0'}, 'Trial_2': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(MHz)': '5507000', 'Detection Time(sec)': 18, 'Freq_offset': '7.0'}},'5508000': {'Trial_1': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(MHz)': '5508000', 'Detection Time(sec)': 17, 'Freq_offset': '8.0'}, 'Trial_2':{'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(MHz)': '5508000', 'Detection Time(sec)': 18, 'Freq_offset': '8.0'}},'5509000': {'Trial_1':{'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(MHz)': '5509000', 'Detection Time(sec)': 17, 'Freq_offset': '9.0'}, 'Trial_2': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(MHz)': '5509000', 'Detection Time(sec)': 18, 'Freq_offset': '9.0'}},'5510000': {'Trial_1':{'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(MHz)': '5510000', 'Detection Time(sec)': 17, 'Freq_offset': '10.0'}, 'Trial_2': {'Burst': '1', 'Pulses': '18', 'Width': '1', 'PRI(US)': '1428', 'Detected': 'YES', 'Frequency(MHz)': '5510000', 'Detection Time(sec)': 18, 'Freq_offset': '10.0'}}}}
         print("test duration", test_duration)
-        report = lf_report_pdf.lf_report(_path="", _results_dir_name="Detection Bandwidth Test", _output_html="dpt.html",
+        report = lf_report_pdf.lf_report(_path="", _results_dir_name="Detection Bandwidth Test",
+                                         _output_html="dpt.html",
                                          _output_pdf="dpt.pdf")
 
         date = str(datetime.now()).split(",")[0].replace(" ", "-").split(".")[0]
@@ -535,25 +643,42 @@ class DfsTest(Realm):
         print(report_path)
         # report.move_data(directory_name="pcap")
 
-        test_setup_info = {
-            "DUT Name": "NXP_AP",
-            "SSID": self.ssid,
-            "Test Duration": test_duration,
-        }
         report.set_title("Detection Bandwidth  Test Report")
         report.set_date(date)
-        report.build_banner()
-        report.set_table_title("Test Setup Information")
-        report.build_table_title()
+        report.build_banner_cover()
+        test_setup_info = {
+            "DUT Name": self.ap_name,
+            # "SSID": self.ssid,
+            "Test Duration": test_duration,
+        }
+        # report.set_table_title("Test Setup Information")
+        # report.build_table_title()
+        # report.test_setup_table(value="Device under test", test_setup_data=test_setup_info)
 
-        report.test_setup_table(value="Device under test", test_setup_data=test_setup_info)
+        test_input_infor = {
+            "DUT Name": self.ap_name,
+            "LANforge ip": self.host,
+            "LANforge port": self.port,
+            "Radar Types": self.fcctypes,
+            "Radar Hardware": "ct712",
+            "Freq Channel Number": self.channel,
+            "Desired Pass Percentage": str(self.desired_detection) + " %",
+            "Time interval between Trials": self.time_int + " (secs)",
+            # "Run Traffic": False,
+            "Test Duration": test_duration,
+            # "Contact": "support@candelatech.com"
+        }
+        report.set_table_title("Basic Test Information")
+        report.build_table_title()
+        report.test_setup_table(value="Test Information", test_setup_data=test_input_infor)
 
         report.set_obj_html("Objective", "Detection Probability Test  is compilance to the Dynamic Frequency Selection"
                                          " (DFS) Regulation, The purpose of this test is to subject the DUT  to a Type 0 FCC radar pulse"
                                          "while moving the frequency of the radar signal through the channel to characterized range of frequencies over which"
                                          "the DUT can detect the radar pulse.")
         report.build_objective()
-        report.set_obj_html("Result Summary", "The below graph provides information regarding detection probability percentage for various RADAR Types.")
+        report.set_obj_html("Result Summary",
+                            "The below graph provides information regarding detection probability percentage for various RADAR Types.")
         report.build_objective()
         graph_dict = dict.fromkeys(self.fcctypes)
         for fcc in self.fcctypes:
@@ -597,18 +722,17 @@ class DfsTest(Realm):
         # graph ka code
 
         # various atandards
-        required_percent = {"FCC0": "60%", "FCC1":"60%", "FCC2": "60%", "FCC3": "60%", "FCC4": "80%", "FCC5": "70%",
-                            "ETSI0": "NA", "ETSI1": "60%", "ETSI2": "60%", "ETSI3": "60%", "ETSI4": "60%", "ETSI5": "60%", "ETSI6": "60%",
+        required_percent = {"FCC0": "60%", "FCC1": "60%", "FCC2": "60%", "FCC3": "60%", "FCC4": "80%", "FCC5": "70%",
+                            "ETSI0": "NA", "ETSI1": "60%", "ETSI2": "60%", "ETSI3": "60%", "ETSI4": "60%",
+                            "ETSI5": "60%", "ETSI6": "60%",
                             "korea_1": "60%", "korea_2": "60%", "korea_3": "60%",
-                            "Japan-W53-1": "60%", "Japan-W53-2": "60%", "Japan-W56-2": "60%", "Japan-W56-3": "60%", "Japan-W56-4": "60%", "Japan-W56-5": "60%", "Japan-W56-6": "60%"}
-
-
+                            "Japan-W53-1": "60%", "Japan-W53-2": "60%", "Japan-W56-2": "60%", "Japan-W56-3": "60%",
+                            "Japan-W56-4": "60%", "Japan-W56-5": "60%", "Japan-W56-6": "60%"}
 
         report.set_obj_html("Summary Table",
                             "The below table provides detailed information regarding detection probability percentage for various RADAR Types.")
         report.build_objective()
         wave, pd_per, pd_req, tring, avg_detect, result = [], [], [], [], [], []
-
 
         for fcc in self.fcctypes:
             wave.append(fcc)
@@ -635,7 +759,7 @@ class DfsTest(Realm):
                 print("/n")
                 pd_per.append("0")
             else:
-                percent =round(( (m / len(detection_list)) * 100), 1)
+                percent = round(((m / len(detection_list)) * 100), 1)
                 print(percent)
                 pd_per.append(percent)
                 if percent >= self.desired_detection:
@@ -644,7 +768,6 @@ class DfsTest(Realm):
                     result.append("FAILED")
 
             pd_req.append(required_percent[fcc])
-
 
             # average detection time
             detection_list = []
@@ -686,7 +809,7 @@ class DfsTest(Realm):
 
         table_1 = {
             "WaveForm Name": wave,
-            "Detected BW": "20mhz ( -10 : 0: +10)",
+            "Detected BW": self.bandwidth + " mhz ( -10 : 0: +10)",
             "% BW detected": pd_per,
             "Required Percentage ": self.desired_detection,
             "Average Detect Time (secs)": avg_detect,
@@ -696,12 +819,9 @@ class DfsTest(Realm):
         report.set_table_dataframe(test_setup)
         report.build_table()
 
-        centre_freq = {"52": "5260000", "56": "5280000", "60": "5300000", "64": "5320000",
-                       "100": "5500000",
-                       "104": "5520000", "108": "5540000", "112": "5560000", "116": "5580000",
-                       "120": "5600000",
-                       "124": "5620000",
-                       "128": "5640000", "132": "5660000", "136": "5680000", "140": "5700000"}
+        centre_freq = {"52": "5260000", "56": "5280000", "60": "5300000", "64": "5320000", "100": "5500000",
+                       "104": "5520000", "108": "5540000", "112": "5560000", "116": "5580000", "120": "5600000",
+                       "124": "5620000", "128": "5640000", "132": "5660000", "136": "5680000", "140": "5700000"}
 
         for fcc in self.fcctypes:
 
@@ -725,7 +845,6 @@ class DfsTest(Realm):
                 print("detection time ", det_time)
 
                 print("detect list", detect)
-
 
                 # avg
                 sum = 0
@@ -768,7 +887,6 @@ class DfsTest(Realm):
                                 "The below table provides detailed information  RADAR Type FCC0.")
             report.build_objective()
 
-
             table_3 = {
                 "Frequency(MHz)": frequency,
                 "Frequency Offset": off_set,
@@ -786,10 +904,11 @@ class DfsTest(Realm):
         report.build_objective()
         for fcc in self.fcctypes:
             report.set_obj_html("Detailed Result Table for " + str(fcc),
-                                "The below table provides detailed information for per trials run for " + str(fcc) + "RADAR Type")
+                                "The below table provides detailed information for per trials run for " + str(
+                                    fcc) + "RADAR Type")
             report.build_objective()
 
-            Trials, burst, pulse, width, pri, detect, frequency, det_time, frq_offset = [], [],[], [], [], [], [], [], []
+            Trials, burst, pulse, width, pri, detect, frequency, det_time, frq_offset = [], [], [], [], [], [], [], [], []
 
             for i in main_dict[fcc]:
                 print(i)
@@ -825,116 +944,137 @@ class DfsTest(Realm):
             report.set_table_dataframe(test_setup_)
             report.build_table()
 
-        freq_option= None
+        freq_option = None
         if self.more_option == "centre":
-            freq_option =  "Stay at centre freq for all Trials"
+            freq_option = "Stay at centre freq for all Trials"
         elif self.more_option == "random":
             freq_option = "Stay at random frequency between the bandwidth for all trials"
-        test_input_infor = {
-            "Parameters": "Values",
-            "LANforge ip": self.host,
-            "LANforge port": self.port,
-            "Radar Types": self.fcctypes,
-            "Radar Hardware": "ct712",
-            "Freq Channel Number": self.channel,
-            "Desired Pass Percentage": str(self.desired_detection) + str("%"),
-            "Time interval between Trials (secs)": "2",
-            "Run Traffic": False,
-
-            "Contact": "support@candelatech.com"
-        }
-        report.set_table_title("Test basic Information")
-        report.build_table_title()
-        report.test_setup_table(value="Information", test_setup_data=test_input_infor)
 
         report.build_footer()
         report.write_html()
-        report.write_pdf_with_timestamp(_page_size='A4', _orientation='Landscape')
-
+        report.write_pdf_with_timestamp(_page_size='A4', _orientation='Portrait')
 
 
 def main():
-    desc = """ detection probability  test 
-        run: lf_interop_port_reset_test.py --host 192.168.1.31
-        """
-    parser = argparse.ArgumentParser(
-        prog=__file__,
-        formatter_class=argparse.RawTextHelpFormatter,
-        description=desc)
+    parser = argparse.ArgumentParser(prog=__file__,
+                                     formatter_class=argparse.RawTextHelpFormatter,
+                                     description="""
+NAME: detection_bw_test.py
 
-    parser.add_argument("--host", default='192.168.1.31',
-                        help='specify the GUI ip to connect to')
+PURPOSE:
+         Need to Update the purpose...
 
-    parser.add_argument("--port", default=8080, help="specify scripting port of LANforge")
+EXAMPLE:
+        # To run the bandwidth test on bandwidth 20MHz.
 
-    parser.add_argument('--ssid', type=str, help='ssid for client')
+             ./detection_bw_test.py --host 192.168.200.91 --sniff_radio 1.1.wiphy1 --fcctypes FCC0 --channel 64 
+             --trial 1 --desired_detection 90 --more_option centre --bw 20
 
-    parser.add_argument('--passwd', type=str, help='password to connect to ssid', default='[BLANK]')
+SCRIPT_CLASSIFICATION: Report Generation
 
-    parser.add_argument('--security', type=str, help='security', default='open')
+SCRIPT_CATEGORIES: Bandwidth Testing 
 
-    parser.add_argument('--radio', type=str, help='radio at which client will be connected', default='1.1.wiphy1')
+NOTES:
 
-    parser.add_argument("--sniff_radio", default="1.1.wiphy0", help="radio at which wireshark will be started")
+STATUS: Functional
 
-    parser.add_argument("--static", default=True, help="True if client will be created with static ip")
+VERIFIED_ON:   14-SEP-2023,
+             GUI Version:  5.4.6
+             Kernel Version: 5.19.17+
 
-    parser.add_argument("--static_ip", default="192.168.2.100", help="if static option is True provide static ip to client")
+LICENSE:
+          Free to distribute and modify. LANforge systems must be licensed.
+          Copyright 2023 Candela Technologies Inc
 
-    parser.add_argument("--ip_mask", default="255.255.255.0", help="if static is true provide ip mask to client")
+INCLUDE_IN_README: False
+""")
 
-    parser.add_argument("--gateway_ip", default="192.168.2.50", help="if static is true provide gateway ip")
+    parser.add_argument("--host", help='specify the GUI ip to connect to', default='192.168.1.31')
 
-    parser.add_argument('--upstream', type=str, help='provide eth1/eth2', default='eth1')
+    parser.add_argument("--port", help="specify scripting port of LANforge", default=8080)
 
-    parser.add_argument('--fcctypes', nargs="+",
-                        default=["FCC0", "FCC1", "FCC2", "FCC3", "FCC4", "ETSI0", "ETSI1", "ETSI2", "ETSI3", "ETSI4",
-                                 "ETSI5", "ETSI6", "Japan-W53-1","Japan-W56-2", "Japan-W56-3", "Japan-W56-4", "Japan-W56-5", "Japan-W56-6",
-                                 "korea_1",  "korea_2",  "korea_3"],
-                        help='types needed to be tested {FCC0/FCC1/FCC2/FCC3/FCC4/FCC5/ETSI1/ETSI2/ETSI3/ETSI4/ETSI5/ETSI6}')
+    parser.add_argument("--ssh_username", help='provide username for doing ssh into LANforge', default="lanforge")
 
-    parser.add_argument('--channel', type=str, default="100",
-                        help='channel options need to be tested {52, 56, 60, 64, 100, 104, 108, 112, 116, 120, 124 ,128, 132, 136, 140}')
+    parser.add_argument("--ssh_password", help='provide password for doing ssh into LANforge', default="lanforge")
 
-    parser.add_argument("--enable_traffic", default=False, help="set to True if traffic needs to be added while testing")
+    parser.add_argument("--lf_hackrf", help='provide serial number og tx hackrf eg 30a28607', default="30a28607")
 
-    parser.add_argument("--trials", type=int, default=30, help="provide the number of trials you want to test default is 30")
+    parser.add_argument("--ap_name", help='provied the dut name, which need to be test.', default="Relay2 RA620")
 
-    parser.add_argument("--desired_detection", type=int, default=80, help="provide the percentage value for desired detection eg 80, which means 80%")
+    parser.add_argument("--sniff_radio", help="radio at which wireshark will be started", default="1.1.wiphy0")
 
-    parser.add_argument("--extra_trials", type=int, default=0, help="provide the number of extra trials need to be performed if the test doesnot reach the expected"
-                                                                    "or desired value")
+    parser.add_argument('--fcctypes', help='types needed to be tested FCC0', nargs="+", default=["FCC0"])
 
-    parser.add_argument("--more_option", default="centre", help="select from the list of more options "
-                                                                             "which test you need to perform [shift, centre, random]")
+    parser.add_argument('--channel',
+                        help='channel options need to be tested {52, 56, 60, 64, 100, 104, 108, 112, 116, 120, 124 ,128, 132, 136, 140}',
+                        type=str, default="100")
+
+    parser.add_argument("--trials", help="provide the number of trials you want to test default is 30", type=int,
+                        default=30)
+
+    parser.add_argument("--desired_detection",
+                        help="provide the percentage value for desired detection eg 80, which means 80%%", type=int,
+                        default=80)
+
+    parser.add_argument("--extra_trials",
+                        help="provide the number of extra trials need to be performed if the test doesnot reach the expected or desired value",
+                        type=int, default=0)
+
+    parser.add_argument("--more_option",
+                        help="select from the list of more options which test you need to perform [centre, random]",
+                        default="centre")
 
     parser.add_argument("--time_int", default="0", help="provide time interval in seconds between each trials")
 
-    parser.add_argument("--bw_test", default=False, help="set to true when detection bandwidth test need to be performed")
+    parser.add_argument("--bw", help="Setting the bandwidth", default="20")
 
+    # parser.add_argument('--ssid', type=str, help='ssid for client')
+    #
+    # parser.add_argument('--passwd', type=str, help='password to connect to ssid', default='[BLANK]')
+    #
+    # parser.add_argument('--security', type=str, help='security', default='open')
 
+    # parser.add_argument('--radio', type=str, help='radio at which client will be connected', default='1.1.wiphy1')
+
+    # parser.add_argument("--static", default=True, help="True if client will be created with static ip")
+
+    # parser.add_argument("--static_ip", default="192.168.2.100", help="if static option is True provide static ip to client")
+    #
+    # parser.add_argument("--ip_mask", default="255.255.255.0", help="if static is true provide ip mask to client")
+    #
+    # parser.add_argument("--gateway_ip", default="192.168.2.50", help="if static is true provide gateway ip")
+
+    # parser.add_argument('--upstream', type=str, help='provide eth1/eth2', default='eth1')
+
+    # parser.add_argument("--enable_traffic", help="set to True if traffic needs to be added while testing",
+    #                     default=False)
 
     args = parser.parse_args()
     obj = DfsTest(host=args.host,
                   port=args.port,
-                  ssid=args.ssid,
-                  passwd=args.passwd,
-                  security=args.security,
-                  radio=args.radio,
-                  upstream=args.upstream,
+                  ssh_username=args.ssh_username,
+                  ssh_passwd=args.ssh_password,
+                  lf_hackrf=args.lf_hackrf,
+                  ap_name=args.ap_name,
+                  sniff_radio=args.sniff_radio,
+                  # ssid=args.ssid,
+                  # passwd=args.passwd,
+                  # security=args.security,
+                  # radio=args.radio,
+                  # upstream=args.upstream,
                   fcctypes=args.fcctypes,
                   channel=args.channel,
-                  sniff_radio = args.sniff_radio,
-                  static = args.static,
-                  static_ip = args.static_ip,
-                  ip_mask = args.ip_mask,
-                  gateway_ip = args.gateway_ip,
-                  enable_traffic=args.enable_traffic,
-                  desired_detection = args.desired_detection,
-                  extra_trials = args.extra_trials,
-                  more_option = args.more_option,
-                  time_int = args.time_int,
-                  trials = args.trials)
+                  trials=args.trials,
+                  # static=args.static,
+                  # static_ip=args.static_ip,
+                  # ip_mask=args.ip_mask,
+                  # gateway_ip=args.gateway_ip,
+                  # enable_traffic=args.enable_traffic,
+                  desired_detection=args.desired_detection,
+                  extra_trials=args.extra_trials,
+                  more_option=args.more_option,
+                  time_int=args.time_int,
+                  bandwidth=args.bw)
     obj.run()
 
 if __name__ == '__main__':
