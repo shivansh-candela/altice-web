@@ -735,7 +735,7 @@ class DfsTest(Realm):
                             prf_3 = 0
 
                         elif pulse_burst == 3:
-                            count_ = "40"
+                            count_ = "45"
                             prf_1, prf_2, prf_3 = self.select_values(n=3, fcc="etsi6")
                             print(f"prf_1: {prf_1}")
                             print(f"prf_2: {prf_2}")
