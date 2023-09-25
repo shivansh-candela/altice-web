@@ -685,7 +685,7 @@ class DfsTest(Realm):
                         count_ = "25"
                 elif fcc == "ETSI4":
                     width_ = str(random.randint(20, 30))
-                    interval_ = str(random.randint(2300, 4000))
+                    interval_ = str(random.randint(2000, 4000))
                     count_ = "20"
                 elif fcc == "ETSI5":
                     if self.legacy == "True":
