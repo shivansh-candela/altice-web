@@ -6,8 +6,10 @@ import copy
 import logging
 import pandas as pd
 import xlsxwriter
+import math
 import ap_stats
 import multiprocessing
+from statistics import mode
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +33,7 @@ from datetime import datetime, timedelta
 import requests
 import json
 
-
+AP_data = []
 class throughputheat(Realm):
     def __init__(self,
                  ssid=None,
@@ -395,98 +397,27 @@ class throughputheat(Realm):
 
         return clientChannel, clientMac, clientSignal, clientRxrate, clientTxrate, startTime, avg_dw, avg_up, upload, download, ssid
 
-    def convert_into_df(self, all_data_achieved):
-        points = []
-        rx_throughput_data = []
-        avg_tp_upload = []
-        avg_tp_download = []
-        tx_rate = []
-        rx_rate = []
-        rssi = []
-        channel = []
-        mac = []
-        start_time = []
-        stop_time = []
-        total_upload_data = []
-        total_download_data = []
-
-        for data in all_data_achieved:
-            point_str = data[0]
-            throughput_data = data[1]
-            rx_throughput_data.append(data[1][6][0])
-            end_time = data[2]
-            print("POINT_STR IS:", point_str)
-            print("throughput data is:", throughput_data)
-            print("end_times is:", end_time)
-
-            mac_str = throughput_data[1]
-            rssi_value = throughput_data[2]
-            upload_through = throughput_data[7][0]
-            download_through = throughput_data[6][0]
-            start_timestamp = throughput_data[5]
-            tx_values = throughput_data[4]
-            rx_values = throughput_data[3]
-            total_upload_info = throughput_data[8]
-            total_download_info = throughput_data[9]
-
-            points.append(point_str)
-            avg_tp_upload.append(upload_through)
-            avg_tp_download.append(download_through)
-            tx_rate.append(tx_values)
-            rx_rate.append(rx_values)
-            total_upload_data.append(total_upload_info)
-            total_download_data.append(total_download_info)
-            rssi.append(rssi_value)
-            mac.append(mac_str)
-            start_time.append(start_timestamp)
-            stop_time.append(end_time)
-            channel.append(throughput_data[0])
-
+    def update_sheet(self, distance, AP_tx, AP_rx, AP_rssi, client_rssi, Upload, Download):
+        print('Updating the sheet!')
         data = {
-            'Distance': points,
-            'Max-throughput upload': avg_tp_upload,
-            'Max-Throughput download': avg_tp_download,
-            'RSSI': rssi,
-            'channel': channel,
-            'tx_rate': tx_rate,
-            'rx_rate': rx_rate,
-            'start-time': start_time,
-            'stop-time': stop_time,
+            'Distance': distance,
+            'AP_TX rate': AP_tx,
+            'AP_RX rate': AP_rx,
+            'AP_RSSI': AP_rssi,
+            'Client RSSI': client_rssi,
+            'Upload throughput': Upload,
+            'Download Throughput': Download
         }
+        print("updating sheet with following data", data)
 
         df = pd.DataFrame(data)
-
-        data1 = {
-            'client type': ['Android'] * len(all_data_achieved),
-            'Client mac': mac,
-            'Access Point': ['Eero Jupiter'] * len(all_data_achieved),
-            'SSID': ['eero_wifi_2-6G-37'] * len(all_data_achieved),
-        }
-
-        df1 = pd.DataFrame(data1)
-
-        data2 = {
-            'Distance': points,
-            'upload data': total_upload_data,
-            'Download data': total_download_data
-        }
-        df2 = pd.DataFrame(data2)
-        with pd.ExcelWriter('eeroHeat.xlsx', engine='xlsxwriter') as writer:
-            workbook = writer.book
-            worksheet = workbook.add_worksheet('Sheet1')
-
-            # Write headers for both tables
-            worksheet.write('A1', 'Table 1: Client Data')
-            df1.to_excel(writer, sheet_name='Sheet1', startrow=2, index=False)
-            worksheet.write('A7', 'Table 2: My Data')
-            df.to_excel(writer, sheet_name='Sheet1', startrow=8, index=False)
-            worksheet = writer.book.add_worksheet('Sheet2')
-            worksheet.write('A1', 'Table 3:  Data')
-            df2.to_excel(writer, sheet_name='Sheet2', startrow=2, index=False)
+        df.to_csv("eero_results.csv")
+        return "done"
 
 
 clientChannel = 0
 all_data_achieved = []
+ap_log_flag = multiprocessing.Value('i', False)
 avg_dw = 0
 distance_from_ap_is = 0
 avg_up = 0
@@ -534,8 +465,6 @@ class CanbeeRobotController:
         except Exception as e:
             print('An error occurred:', str(e))
 
-    # class.function()
-
     def get_distance_from_canbee(self):
         try:
             response = requests.get(self.base_url + '/readNfc')
@@ -558,14 +487,8 @@ class CanbeeRobotController:
             return
 
 
-duration = []
-
-
 def main():
-    # throughputheat(host='192.168.200.161').convert_into_df(all_data_achieved=[[6, ['11', '0c:60:46:d7:b6:5a', '-57', '72 Mbps', '72 Mbps', 'Aug 23 13:15:43', [102.66666666666667], [214.66666666666666]], 'Aug 23 13:15:53'], [12, ['11', '0c:60:46:d7:b6:5a', '-58', '72 Mbps', '72 Mbps', 'Aug 23 13:16:14', [402.4], [401.4]], 'Aug 23 13:16:24']])
-    # exit()
-    distances = [6, 12]
-    # distances = [6, 12, 18, 24, 30, 36, 42, 48, 54, 60, 66]
+    distances = [1, 2]  # , 6, 12, 18, 24, 30, 54, 60, 66
     parser = argparse.ArgumentParser(
         prog='throughput_QOS.py',
         formatter_class=argparse.RawTextHelpFormatter,
@@ -607,43 +530,13 @@ def main():
     required.add_argument('--roboip', type=str, help='IP address for Canbee Controller')
     required.add_argument('--roboport', type=int, help='Port number for Canbee Controller')
     required.add_argument('--speed', type=int, help='Speed value for Canbee Controller')
-    parser.add_argument('--channel_utilization', "--chu", "-chu",
-                        help='--channel_utilization: This provides channel utilization value',
-                        action='store_true')
-    parser.add_argument('--memory_utilization', "--mu", "-mu",
-                        help='--memory_utilization: This provides memory utilization value',
-                        action='store_true')
-    parser.add_argument('--cpu_utilization', "--cpu", "-cpu",
-                        help='--cpu_utilization: This provides CPU utilization value',
-                        action='store_true')
-    parser.add_argument('--temp', "--t", "-t",
-                        help='--temp: This provides Temp value',
-                        action='store_true')
-    # This arguments are mandatory
-    parser.add_argument("--interval", "-i", "--i",
-                        required=True,
-                        help="Interval in the format 'h' for hours, 'm' for minutes, or 's' for seconds. ex. 10m",
-                        default="1m")
-
-    parser.add_argument("--duration", "-dur", "--dur",
-                        help="Total test duration, Duration in the format 'h' for hours, 'm' for minutes, or 's' for seconds. ex. 1h")
-
-    parser.add_argument("--count", "--c", "-c",
-                        help="This can be used instead of duration, This tells script to take how many readings of interval difference"
-                             "ex. if count is 2 then 2 values will be captured with user provided time interval",
-                        default=1,
-                        type=int)
 
     args = parser.parse_args()
     print("--------------------------------------------")
     print(args)
     print("--------------------------------------------")
 
-    test_results = {'test_results': []}
-
     loads = {}
-    station_list = []
-    data = {}
 
     if args.download and args.upload:
         loads = {'upload': str(args.upload).split(","), 'download': str(args.download).split(",")}
@@ -701,42 +594,108 @@ def main():
                                         traffic_type=args.traffic_type,
                                         _debug_on=args.debug)
 
-    #---------------------- AP stats script code---------------------------------------------
-    ap_stats_obj = ap_stats.APSerialAccess(lfclient_host=args.mgr, lfclient_port=args.mgr_port, serial_port="/dev/ttyUSB1")
-    # ap_stats_obj
-    count = args.count
-    current_datetime = datetime.now()
-    date_time = current_datetime.strftime('%Y-%m-%d_%H-%M-%S')
-    def functions():
-        if args.channel_utilization:
-            ap_stats_obj.send_generic_commands(
-                command=["iw dev ap_tt0 station dump", "iw dev ap_tt1 station dump", "iw dev ap_tt2 station dump"],
-                date_time=date_time)
+    def Run_traffc(y):
+        global ap_log_flag
+        throughput_qos.pre_cleanup()
+        throughput_qos.os_type()
+        throughput_qos.phantom_check()
+        throughput_qos.build()
+        throughput_qos.start(False, False)
+        time.sleep(5)
+        print("starting moniitor the client and enabling AP logging flag")
+        with ap_log_flag.get_lock():
+            ap_log_flag.value = True
+        data_achieved = throughput_qos.monitor()
+        data_achieved_as_list = list(data_achieved)
+        stop_time_only = throughput_qos.stop()
+        print("stop time is:", stop_time_only, "Disabling AP log flag!")
+        with ap_log_flag.get_lock():
+            ap_log_flag.value = False
+        tem = []
+        tem.append(data_achieved_as_list)
+        tem.append(stop_time_only)
+        throughput_qos.cleanup()
+        print('Traffic session ended')
+        y.put(tem)
 
-        if args.memory_utilization:
-            ap_stats_obj.send_generic_commands(command=["free -h"], date_time=date_time)
+    # ---------------------- AP stats script code---------------------------------------------
+    ap_stats_obj = ap_stats.APSerialAccess(lfclient_host=args.mgr, lfclient_port=args.mgr_port,
+                                           serial_port="/dev/ttyUSB0")
 
-        if args.cpu_utilization:
-            ap_stats_obj.send_generic_commands(command=["mpstat -P ALL"], date_time=date_time)
+    ### AP Phy rate and signal retriving method
+    def get_sta_dump(sta_band):
+        if (sta_band == '2.4G'):
+            command = 'iw dev ap_tt' + '0' + ' station dump'
+        if (sta_band == '5G'):
+            command = 'iw dev ap_tt' + '2' + ' station dump'
+        if (sta_band == '6G'):
+            command = 'iw dev ap_tt' + '1' + ' station dump'
+        log = ap_stats_obj.get_log(command=command)
+        with open('current_log.txt', 'w') as txtfile:
+            txtfile.write(f"{'current_log'} {log}\n")
+        with open("current_log.txt", "r") as f:
+            complete_logs = f.readlines()
 
-        if args.temp:
-            ap_stats_obj.send_generic_commands(command=["sensors"], date_time=date_time)
+        for i in complete_logs:
+            if i.find('signal') != -1:
+                signal = i.split('signal:')[1]
 
-        if args.channel_utilization or args.memory_utilization or args.cpu_utilization or args.temp:
-            txt_file_path = f'tt2_channel_utilization_{date_time}.txt'  # Change this to the appropriate file
-            csv_file_path = f'bitrate_summary_{date_time}.csv'  # Change this to the desired Excel file name
-            ap_stats_obj.create_csv_with_bitrate_summary(txt_file_path, csv_file_path)
+            elif i.find('tx bitrate:') != -1:
+                tx_rate = i.split('tx bitrate:')[1]
 
+            elif i.find('rx bitrate:') != -1:
+                rx_rate = i.split('rx bitrate:')[1]
+
+                break
+        print('returning data')
+        return tx_rate, rx_rate, signal
+
+    def ap_log(x):
+        temTX_rate = []
+        temRX_rate = []
+        temsignal = []
+        data = []
+        count = int(args.test_duration)
+        count = math.floor(count / 2)
+        time.sleep(5)
+        print("attempting to log ", count, " times from AP with 2sec time interval")
+        while ap_log_flag.value == False:
+            print('waiting for traffic to start!')
+            time.sleep(2)
+        while ap_log_flag.value:
+            tx, rx, rssi = get_sta_dump('5G')
+            temTX_rate.append(tx)
+            temRX_rate.append(rx)
+            temsignal.append(rssi)
+            time.sleep(2)
+        if ap_log_flag.value == False:
+            print("Stopped logging from AP")
+        tx = mode(temTX_rate)
+        rx = mode(temRX_rate)
+        rssi = mode(temsignal)
+        data.append(tx)
+        data.append(rx)
+        data.append(rssi)
+        x.put(data)
+        # return data
+
+    AP_tx = []
+    AP_rx = []
+    AP_rssi = []
+    Client_rssi = []
+    Upload = []
+    Download = []
+    Current_distance = []
 
     while distances:
-
         posted_successfully = canbee_controller.post_data_to_canbee(data_to_send)
         while posted_successfully != True:
             print("Reattempting to instruct the robot to move ahead after 3 sec")
             time.sleep(3)
             posted_successfully = canbee_controller.post_data_to_canbee(data_to_send)
-            time.sleep(1)
+        time.sleep(1)
         robot_message = canbee_controller.get_data_from_canbee()
+        print("Robot status is ", robot_message)
         while robot_message != "Stopped":
             print("reading robot message after 3 sec")
             robot_message = canbee_controller.get_data_from_canbee()
@@ -748,86 +707,34 @@ def main():
             time.sleep(3)
             distance_from_ap = canbee_controller.get_distance_from_canbee()
         print(distances, distance_from_ap)
-        # i = input("are you ready with log")
-        def ap_log():
-            use_duration = False
-            use_count = False
-            end_time = 0
-            if args.duration is not None:
-                use_duration = True
-                duration = ap_stats_obj.parse_time(args.duration)
-                end_time = time.time() + duration
-
-            else:
-                use_count = True
-            interval = ap_stats_obj.parse_time(args.interval)
-
-            count = args.count
-            while (use_duration or use_count): # Ap stats code
-                if time.time() < end_time:
-                    functions()
-                    if (end_time - time.time() < interval):
-                        break
-                    print(f"Time left: {end_time - time.time()} Sec")
-
-                elif count >= 1:
-                    functions()
-                    count -= 1
-                    print(f"Count left: {count}")
-                    if count < 1:
-                        break
-
-                print(f"Sleeping for {interval} Seconds")
-                time.sleep(interval) # ap stats code
-        process2 = multiprocessing.Process(target=ap_log())
-
-        # ap_statistics = ap_stats.APSerialAccess()
-        def client_log():
-            for i in distances:  # Iterate through the list
-                if i == distance_from_ap:  # Check if i matches the coordinate
-                    distances.remove(i)
-                    throughput_qos.pre_cleanup()
-                    throughput_qos.os_type()
-                    throughput_qos.phantom_check()
-                    throughput_qos.build()
-                    throughput_qos.start(False, False)
-                    time.sleep(10)
-                    # data_acheived= throughput_qos.monitor()
-                    # print("final data is:>>><<<<<",data_acheived)
-                    # stop_time_only = throughput_qos.stop()
-                    # print("stop time is:", stop_time_only)
-                    # all_data_achieved.append((data_achieved, stop_time_only))
-
-                    data_achieved = throughput_qos.monitor()
-                    process2.start()
-                    data_achieved_as_list = list(data_achieved)
-                    print("final data is:>>><<<<<", data_achieved_as_list)
-                    stop_time_only = throughput_qos.stop()
-                    print("stop time is:", stop_time_only)
-                    all_data_achieved.append([distance_from_ap, data_achieved_as_list, stop_time_only])
-
-                    throughput_qos.cleanup()
-
-                    # throughput_qos.convert_into_df(all_data_achieved)
-                    time.sleep(5)
-                    # test_results['test_results'].append(throughput_qos.evaluate_qos(connections_download,connections_upload))
-                    # data.update(test_results)
-                    print("test ended")
-                    print("DATA1:", all_data_achieved)
-
-        process1 = multiprocessing.Process(target=client_log())
-
-        # Start both processes
-        process1.start()
-
-
-        # Wait for the specified duration
-        time.sleep(args.test_duration)
-
-        # Terminate both processes after the specified duration
-        process1.terminate()
-        process2.terminate()
-    throughput_qos.convert_into_df(all_data_achieved)
+        for i in distances:  # Iterate through the list
+            if i == distance_from_ap:  # Check if i matches the coordinate
+                Current_distance.append(i)
+                distances.remove(i)
+                x = multiprocessing.Queue()
+                y = multiprocessing.Queue()
+                p1 = multiprocessing.Process(target=ap_log, args=(x,))
+                p2 = multiprocessing.Process(target=Run_traffc, args=(y,))
+                p1.start()
+                p2.start()
+                # wait until process 1 is finished
+                p1.join()
+                # wait until process 2 is finished
+                p2.join()
+                tem = x.get()
+                print(tem, type(tem))
+                AP_tx.append(tem[0])
+                AP_rx.append(tem[1])
+                print(AP_rx)
+                AP_rssi.append(tem[2])
+                tem = y.get()[0]
+                print(tem, type(tem))
+                Client_rssi.append(tem[2])
+                Download.append(tem[6][0])
+                Upload.append(tem[7][0])
+                throughput_qos.update_sheet(distance=Current_distance, AP_tx=AP_tx, AP_rx=AP_rx, AP_rssi=AP_rssi,
+                                            client_rssi=Client_rssi, Upload=Upload, Download=Download)
+        # throughput_qos.convert_into_df(all_data_achieved=y.get(), AP_data=x.get())
 
 
 if __name__ == "__main__":
