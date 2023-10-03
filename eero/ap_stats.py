@@ -79,6 +79,18 @@ class APSerialAccess():
             for data in data_list:
                 txtfile.write(f"{str(datetime.datetime.now())} {data}\n")
 
+    #Provides a string return while calling this method with command argument
+    def get_log(self, command):
+        self.output = ''
+        self.open_serial_connectio()
+        self.serial_access.write((command + '\r\n').encode())
+        self.output += self.serial_access.readall().decode()
+        # print(self.output)
+        while (self.serial_access.in_waiting > 0):
+            self.output += self.serial_access.readall().decode()
+        self.close_connection()
+        return self.output
+
     def close_connection(self):
         self.serial_access.close()
 
