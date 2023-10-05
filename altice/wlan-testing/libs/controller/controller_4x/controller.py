@@ -654,7 +654,7 @@ class AController:
         channel_from_ap.split("wifi-channel:")
         print("Current Channel type ",type(channel_from_ap))
         print("Current Channel ", channel_from_ap)
-        if channel != channel_from_ap:
+        if str(channel) != str(channel_from_ap):
             print("Expected channel from AP and Current Channel of AP mismatched"+"\nDesired Channel"+str(channel)+" not equals to Current Channel:"+str(channel_from_ap))
             print("Going to set desired channel in AP")
             self.set_channel_band(radio=str(radio), band=str(band), channel=str(channel))
