@@ -36,7 +36,7 @@ proc process_arguments {args} {
 proc spawn_ssh {} {
     global ssh_password sudo_password target_user target_ip send_commands
 
-    spawn ssh -t lanforge@192.168.200.126 "sudo -S /home/lanforge/vrf_exec.bash eth1 ssh $target_user@$target_ip" && exit
+    spawn ssh -t lanforge@192.168.200.130 "sudo -S /home/lanforge/vrf_exec.bash eth1 ssh $target_user@$target_ip" && exit
     expect {
         "*$target_user*" {
             send "$ssh_password\r"
@@ -58,12 +58,12 @@ proc spawn_ssh {} {
                   send "quit\r"
                   expect -timeout -1 "*GEN*"
                   send "exit\r"
-                  expect -timeout -1 "126 closed*"
+                  expect -timeout -1 "130 closed*"
               } else {
                   send "quit\r"
                   expect -timeout -1 "*GEN*"
                   send "exit\r"
-                  expect -timeout -1 "*126 closed*"
+                  expect -timeout -1 "*130 closed*"
               }
 
         }  
