@@ -314,6 +314,11 @@ class DfsTest(Realm):
         station_list = LFUtils.portNameSeries(prefix_=sta_prefix, start_id_=start_id,
                                               end_id_=num_sta - 1, padding_number_=10000,
                                               radio=self.radio)
+
+        # Setting up static mac
+        # https://candelatech.atlassian.net/browse/DFS-161
+        station_profile.add_sta_data["mac"] = "a4:6b:b6:40:2f:54"
+
         station_profile.use_security(self.security, self.ssid, self.passwd)
         station_profile.set_number_template("00")
 
