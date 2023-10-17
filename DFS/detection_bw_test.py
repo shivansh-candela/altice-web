@@ -513,14 +513,14 @@ class DfsTest(Realm):
                         logging.info("csa frame  time is " + str(scapy_frame_time))
                         scapy_time = str(scapy_frame_time)
 
-                        for i in scapy_time:
-                            if i == "I":
-                                print("yes")
-                                logging.info("yes")
-                                ind = scapy_time.index("I")
-                                scapy_frame_time_ = scapy_time[:int(ind) - 1]
-                        print("scapy time", scapy_frame_time_)
-                        logging.info("scapy time" + str(scapy_frame_time_))
+                        # for i in scapy_time:
+                        #     if i == "I":
+                        #         print("yes")
+                        #         logging.info("yes")
+                        #         ind = scapy_time.index("I")
+                        #         scapy_frame_time_ = scapy_time[:int(ind) - 1]
+                        # print("scapy time", scapy_frame_time_)
+                        # logging.info("scapy time" + str(scapy_frame_time_))
 
                     csa_frame = self.pcap_obj.check_frame_present(
                         pcap_file=str(file_name),
@@ -540,14 +540,15 @@ class DfsTest(Realm):
                         logging.info("csa frame  time is " + str(csa_frame_time))
                         csa_time = str(csa_frame_time)
                         csa_frame_time_ = None
-                        for i in csa_time:
-                            if i == "I":
-                                print("yes")
-                                logging.info("yes")
-                                ind = csa_time.index("I")
-                                csa_frame_time_ = csa_time[:int(ind) - 1]
-                        print("csa time", csa_frame_time_)
-                        logging.info("csa time" + str(csa_frame_time_))
+                        # commenting this loop for to run on all timezones
+                        # for i in csa_time:
+                        #     if i == "I":
+                        #         print("yes")
+                        #         logging.info("yes")
+                        #         ind = csa_time.index("I")
+                        #         csa_frame_time_ = csa_time[:int(ind) - 1]
+                        # print("csa time", csa_frame_time_)
+                        # logging.info("csa time" + str(csa_frame_time_))
 
                         print("csa fra")
                         print(scapy_frame_time_)
@@ -556,8 +557,8 @@ class DfsTest(Realm):
                         print(type(csa_frame_time_))
                         print("calculate detection time")
                         logging.info("calculate detection time")
-                        csa_datetime = parser.parse(csa_frame_time_)
-                        scapy_datetime = parser.parse(scapy_frame_time_)
+                        csa_datetime = parser.parse(csa_frame_time)
+                        scapy_datetime = parser.parse(scapy_frame_time)
 
                         # Calculate the time difference
                         time_difference = round((csa_datetime - scapy_datetime).total_seconds(), 1)
