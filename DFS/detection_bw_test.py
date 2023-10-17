@@ -329,7 +329,7 @@ class DfsTest(Realm):
         print(stdout.read().decode())
         time.sleep(1)
 
-        command = f"python3 lf_hackrf_dfs.py --rf_type FCC0,1,1428,18,20 --lf_hackrf {self.lf_hackrf} --freq {freq} --one_burst --log_level debug"
+        command = f"nice -19 python3 lf_hackrf_dfs.py --rf_type FCC0,1,1428,18,20 --lf_hackrf {self.lf_hackrf} --freq {freq} --one_burst --log_level debug"
 
         # execute second command
         stdin, stdout, stderr = p.exec_command(str(command), get_pty=True)
