@@ -142,7 +142,7 @@ class DfsTest(Realm):
                  trials=None,
                  ssh_password=None,
                  ssh_username=None,
-                 traffic_type="lf_udp",
+                 traffic_type=None,
                  bandwidth=None,
                  ap_name=None,
                  lf_hackrf=None,
@@ -155,7 +155,8 @@ class DfsTest(Realm):
                  side_a_min_pdu=None,
                  side_b_min_pdu=None
                  ):
-        super().__init__(host, port)
+        super().__init__(lfclient_host=host,
+                         lfclient_port=port)
         self.host = host
         self.port = port
         self.ssid = ssid
@@ -188,14 +189,16 @@ class DfsTest(Realm):
         self.staConnect = sta_connect.StaConnect2(self.host, self.port, outfile="staconnect2.csv")
         self.local_realm = realm.Realm(lfclient_host=self.host, lfclient_port=self.port)
         self.pcap_obj = lf_pcap.LfPcap()
-        self.cx_profile = self.local_realm.new_l3_cx_profile()
+        self.cx_profile = self.new_l3_cx_profile() #create CX profile object
+        self.cx_profile.host = self.host
+        self.cx_profile.port = self.port
         self.create_client = create_client
-        self.side_a_min_rate = side_a_min_rate
-        self.side_a_max_rate = side_a_max_rate
-        self.side_b_min_rate = side_b_min_rate
-        self.side_b_max_rate = side_b_max_rate
-        self.side_a_min_pdu = side_a_min_pdu
-        self.side_b_min_pdu = side_b_min_pdu
+        self.cx_profile.side_a_min_bps = side_a_min_rate
+        self.cx_profile.side_a_max_bps = side_a_max_rate
+        self.cx_profile.side_b_min_bps = side_b_min_rate
+        self.cx_profile.side_b_max_bps = side_b_max_rate
+        self.cx_profile.side_a_min_pdu = side_a_min_pdu
+        self.cx_profile.side_b_min_pdu = side_b_min_pdu
         logging.basicConfig(filename='dpt.log', filemode='w', level=logging.INFO, force=True)
         if self.desired_detection < 60:
             print("please specify desired detection percentage value equal to or greater than the required percentage detection")
@@ -260,32 +263,35 @@ class DfsTest(Realm):
         y = response["interface"][query]
         return y
 
+    def pre_cleanup(self):
+        self.cx_profile.cleanup()
+        self.cx_profile.cleanup_prefix()
+
     # precleans everything before test start
-    def precleanup(self):
-        obj = lf_clean.lf_clean(host=self.host,
-                                port=self.port,
-                                clean_cxs=True,
-                                clean_endp=True)
-        obj.resource = "all"
-        obj.cxs_clean()
-        obj.port_mgr_clean()
+    # def precleanup(self):
+    #     obj = lf_clean.lf_clean(host=self.host,
+    #                             port=self.port,
+    #                             clean_cxs=True,
+    #                             clean_endp=True)
+    #     obj.resource = "all"
+    #     print("clearing all Layer-3 endpoints")
+    #     obj.cxs_clean()
+    #     obj.port_mgr_clean()
 
     # create a layer3 connection
     def create_layer3(self, traffic_type, sta_list):
         # checked
-        print(sta_list)
         logging.info("station list : " + str(sta_list))
-        print(self.upstream)
         # cx_profile = self.local_realm.new_l3_cx_profile()
-        self.cx_profile.host = self.host
-        self.cx_profile.port = self.port
+        # self.cx_profile.host = self.host
+        # self.cx_profile.port = self.port
         # layer3_cols = ['name', 'tx bytes', 'rx bytes', 'tx rate', 'rx rate']
-        self.cx_profile.side_a_min_bps = self.side_a_min_rate
-        self.cx_profile.side_a_max_bps = self.side_a_max_rate
-        self.cx_profile.side_b_min_bps = self.side_b_min_rate
-        self.cx_profile.side_b_max_bps = self.side_b_max_rate
-        self.cx_profile.side_a_min_pdu = self.side_a_min_pdu
-        self.cx_profile.side_b_min_pdu = self.side_b_min_pdu
+        # self.cx_profile.side_a_min_bps = self.side_a_min_rate
+        # self.cx_profile.side_a_max_bps = self.side_a_max_rate
+        # self.cx_profile.side_b_min_bps = self.side_b_min_rate
+        # self.cx_profile.side_b_max_bps = self.side_b_max_rate
+        # self.cx_profile.side_a_min_pdu = self.side_a_min_pduprecleanup
+        # self.cx_profile.side_b_min_pdu = self.side_b_min_pdu
 
         # create
         print("Creating endpoints")
@@ -293,6 +299,9 @@ class DfsTest(Realm):
         self.cx_profile.create(endp_type=traffic_type, side_a=self.upstream,
                                side_b=sta_list, sleep_time=0)
         self.cx_profile.start_cx()
+
+    def stop_l3(self):
+        self.cx_profile.stop_cx()
 
     # create client
     def create_client_(self, start_id=0, sta_prefix="wlan", num_sta=1):
@@ -1161,10 +1170,14 @@ class DfsTest(Realm):
                     # print("scapy time", scapy_frame_time_)
                     # logging.info("scapy time" + str(scapy_frame_time_))
 
-                csa_frame = self.pcap_obj.check_frame_present(
-                    pcap_file=str(file_name),
-                    filter="(wlan.csa.channel_switch.count && wlan.ssid == %s &&  wlan.bssid == %s)" % (
-                    str(self.ssid), str(bssid)))
+                try:
+                    csa_frame = self.pcap_obj.check_frame_present(
+                        pcap_file=str(file_name),
+                        filter="(wlan.csa.channel_switch.count && wlan.ssid == %s &&  wlan.bssid == %s)" % (
+                        str(self.ssid), str(bssid)))
+                except Exception as Except:
+                    print(f"FAILED with exception: {Except}")
+
                 print("csa frame", csa_frame)
                 logging.info("csa frame" + str(csa_frame))
                 if len(csa_frame) != 0 and csa_frame != "empty":
@@ -1177,6 +1190,7 @@ class DfsTest(Realm):
                         pcap_file=str(file_name),
                         filter="(wlan.csa.channel_switch.count && wlan.ssid == %s &&  wlan.bssid == %s)" % (
                         str(self.ssid), str(bssid)))
+
                     print("csa frame  time is ", csa_frame_time)
                     logging.info("csa frame  time is " + str(csa_frame_time))
                     csa_time = str(csa_frame_time)
@@ -1265,7 +1279,7 @@ class DfsTest(Realm):
         if self.create_client == "True":
             print("clean all stations before the test")
             logging.info("clean all stations before the test")
-            self.precleanup()
+            self.pre_cleanup()
 
             print("create client")
             logging.info("create client")
@@ -1308,6 +1322,7 @@ class DfsTest(Realm):
         test_duration = datetime.strptime(s2, FMT) - datetime.strptime(s1, FMT)
         logging.info("test duration" + str(test_duration))
         self.generate_report(test_duration=test_duration, main_dict=main)
+        self.stop_l3()
 
     # graphing function
     def generate_graph(self, data):
@@ -1919,6 +1934,7 @@ def main():
     parser.add_argument("--side_b_max_rate", type=int, help='for layer3 provide side b max tx rate', default=0)
     parser.add_argument("--side_a_min_pdu", type=int, help='for layer3 provide side a min pdu size', default=1250)
     parser.add_argument("--side_b_min_pdu", type=int, help='for layer3 provide side b min pdu size', default=1250)
+    parser.add_argument("--postcleanup", action='store_true')
 
     args = parser.parse_args()
     obj = DfsTest(host=args.host,
@@ -1956,7 +1972,11 @@ def main():
                   side_a_min_pdu=args.side_a_min_pdu,
                   side_b_min_pdu=args.side_b_min_pdu
                   )
+
     obj.run()
+
+    if args.postcleanup:
+        obj.pre_cleanup()
 
 if __name__ == '__main__':
     main()
