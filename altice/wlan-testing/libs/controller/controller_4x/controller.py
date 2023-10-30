@@ -175,7 +175,8 @@ class AController:
         else:
             try:
                 if self.use_ssh:
-                    cmd = f"../libs/apnos/altice_helper.sh -send_commands {cmd} "
+                    cmd = f"../libs/apnos/altice_helper.sh -send_commands {cmd} -ssh_ip {self.ip}"
+                    print("COMANDDDDDDDDDDDDDDDDDDDDDDDDDDD",cmd)
                     output = os.popen(cmd).read()
                 status = output.splitlines()
                 print("status: ", status)
@@ -226,7 +227,7 @@ class AController:
 
     
     # To get all the ssid names
-    def get_ap_ssid_name(self, radio="2G"):
+    def get_ap_ssid_name(self, radio=None):
         if radio == "2G":
             wifi_index = 0
         else:
@@ -255,7 +256,7 @@ class AController:
         return None
 
     # To get security
-    def get_ap_security(self, radio="2G"):
+    def get_ap_security(self, radio=None):
         if radio == "2G":
             wifi_index = 0
         else:
@@ -275,17 +276,19 @@ class AController:
                 return available_sec[-1]
         return None
 
-    def set_ap_security(self, radio="2G", security=None, password="something"):
-
+    def set_ap_security(self, radio=None, security=None, password="something"):
+        print(radio+"RADDDDIIIOOO"+type(radio))
         if radio == "2G":
             wifi_index = 0
         else:
             wifi_index = 1
+        print(wifi_index+"INNNNDDEXXXX"+type(wifi_index))
         if security == "open" or security is None:
-            print("============Setting Up OPEN Security============")
+
+            print("=============Setting Up "+security+" Security============")
             cmd = f"/wireless/security/config --wifi-index={wifi_index} --wifi-sec-choose-interface=0 --wifi-wl-auth-mode=None"
         elif security == "wpa2_personal":
-            print("=============Setting Up WPA2 Security============")
+            print("=============Setting Up "+security+" Security============")
             cmd = f"/wireless/security/config --wifi-index={wifi_index} --wifi-sec-choose-interface=0 --wifi-wl-auth-mode=WPA2-Personal --wifi-wl-wpa-passphrase={password}"
 
         command = self.run_generic_cli_command(cmd)
@@ -479,19 +482,19 @@ class AController:
                 return available_channel_5g[-1]
         return None
 
-    def set_ssid(self, radio="2G", ssid="altice"):
+    def set_ssid(self, radio=None, ssid="altice"):
         print("Set SSID")
         if radio == "2G":
-            wifi_index = 0;
+            wifi_index = 0
         else:
-            wifi_index = 1;
+            wifi_index = 1
         command = f"/wireless/basic/config --wifi-index={wifi_index} --wifi-ssid={ssid}"
         print(f"setting ssid : cmd: {command}")
         cmd = self.run_generic_cli_command(command)
         print(f"Result : {cmd}")
         return cmd
 
-    def get_channel_band(self, radio="2G"):
+    def get_channel_band(self, radio=None):
         print("Get Channel")
         if radio == "2G":
             wifi_index = 0
@@ -513,7 +516,7 @@ class AController:
                 return available_channel[-1]
         return None
 
-    def set_channel_band(self, radio="2G", band="20", channel="AUTO"):
+    def set_channel_band(self, radio=None, band="20", channel="AUTO"):
         print("Set Channel")
         if radio == "2G":
             wifi_index = 0
@@ -644,11 +647,13 @@ class AController:
                     cmd = None
                     return cmd
 
-
-    def check_and_set_ap_channel(self, radio="2G", band="20", channel="AUTO"):
+    def check_and_set_ap_channel(self, radio=None, band="20", channel="AUTO"):
         # print("PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP",self.get_channel_band(radio=radio))
+        print("Check and set AP channel.")
         print("Desired Channel type",type(channel))
         print("Desired Channel", channel)
+        # print("Desired RadiOOOOOOOOOOOOOOOOOO Type"+type(radio))
+        # print("Desired Radiooooo",radio)
         # p=type(self.get_channel_band(radio=radio))
         channel_from_ap = self.get_channel_band(radio=radio)
         channel_from_ap.split("wifi-channel:")
@@ -662,11 +667,14 @@ class AController:
                 self.setup_cli_connection(cmd="cli")
                 self.get_channel_band(radio=radio)
             else:
+                print("Channel Radio")
+                print("CHANEL RADIOOO%",radio)
                 self.get_channel_band(radio=radio)
         # self.get_channel_band(radio=radio)
 
-    def check_and_set_ssid_sec(self, radio="2G", ssid="client_altice", security="open", password="something"):
+    def check_and_set_ssid_sec(self, radio=None, ssid="client_altice", security=None, password="something"):
         self.get_all_ssid_detail(radio=radio)
+        print("SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSs",self.get_all_ssid_detail(radio=radio))
         print(f"ssid: 481: {ssid}, self.ap_ssid: {self.ap_ssid_5G}")
 
         if radio == "2G":
@@ -705,7 +713,7 @@ class AController:
     def check_bssid_5g(self):
         return self.bssid_detail_5g
 
-    def get_all_ssid_detail(self, radio="2G"):
+    def get_all_ssid_detail(self, radio=None):
         if radio == "2G":
             wifi_index = 0
         else:
