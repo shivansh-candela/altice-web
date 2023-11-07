@@ -267,31 +267,10 @@ class DfsTest(Realm):
         self.cx_profile.cleanup()
         self.cx_profile.cleanup_prefix()
 
-    # precleans everything before test start
-    # def precleanup(self):
-    #     obj = lf_clean.lf_clean(host=self.host,
-    #                             port=self.port,
-    #                             clean_cxs=True,
-    #                             clean_endp=True)
-    #     obj.resource = "all"
-    #     print("clearing all Layer-3 endpoints")
-    #     obj.cxs_clean()
-    #     obj.port_mgr_clean()
-
     # create a layer3 connection
     def create_layer3(self, traffic_type, sta_list):
         # checked
         logging.info("station list : " + str(sta_list))
-        # cx_profile = self.local_realm.new_l3_cx_profile()
-        # self.cx_profile.host = self.host
-        # self.cx_profile.port = self.port
-        # layer3_cols = ['name', 'tx bytes', 'rx bytes', 'tx rate', 'rx rate']
-        # self.cx_profile.side_a_min_bps = self.side_a_min_rate
-        # self.cx_profile.side_a_max_bps = self.side_a_max_rate
-        # self.cx_profile.side_b_min_bps = self.side_b_min_rate
-        # self.cx_profile.side_b_max_bps = self.side_b_max_rate
-        # self.cx_profile.side_a_min_pdu = self.side_a_min_pduprecleanup
-        # self.cx_profile.side_b_min_pdu = self.side_b_min_pdu
 
         # create
         print("Creating endpoints")
@@ -564,7 +543,7 @@ class DfsTest(Realm):
                     new_list = ["Burst", "Frequency(KHz)", "Pulse Width", "Blank Time(us)", "Long Pulse Width(us)",
                                 "Chirp Width(MHz)", "Pri(Hz)", "No of Continuous Pairs of Pulses", "Detection Time(sec)"]
                 if fcc == "Japan-w53-1" or fcc == "Japan-w53-2":
-                    new_list = ["Pulses", "Width", "PRF(Hz)", "Detected", "Frequency(KHz)",
+                    new_list = ["Pulses", "Width", "PRI(Hz)", "Detected", "Frequency(KHz)",
                                 "Detection Time(sec)"]
                 else:
                     new_list = ["Burst", "Pulses", "Width", "PRI(US)", "Detected", "Frequency(KHz)", "Detection Time(sec)"]
@@ -1160,16 +1139,6 @@ class DfsTest(Realm):
                     logging.info("csa frame  time is " + str(scapy_frame_time))
                     scapy_time = str(scapy_frame_time)
 
-                    #Commenting this so that code can run on all timezones
-                    # for i in scapy_time:
-                    #     if i == "I":
-                    #         print("yes")
-                    #         logging.info("yes")
-                    #         ind = scapy_time.index("I")
-                    #         scapy_frame_time_ = scapy_time[:int(ind) -1]
-                    # print("scapy time", scapy_frame_time_)
-                    # logging.info("scapy time" + str(scapy_frame_time_))
-
                 try:
                     csa_frame = self.pcap_obj.check_frame_present(
                         pcap_file=str(file_name),
@@ -1195,16 +1164,6 @@ class DfsTest(Realm):
                     logging.info("csa frame  time is " + str(csa_frame_time))
                     csa_time = str(csa_frame_time)
                     csa_frame_time_ = None
-
-                    # Commenting this so that code can run on all timezones
-                    # for i in csa_time:
-                    #     if i == "I":
-                    #         print("yes")
-                    #         logging.info("yes")
-                    #         ind = csa_time.index("I")
-                    #         csa_frame_time_ = csa_time[:int(ind) - 1]
-                    # print("csa time", csa_frame_time_)
-                    # logging.info("csa time" + str(csa_frame_time_))
 
                     print("csa fra")
                     print(scapy_frame_time_)
@@ -1795,12 +1754,12 @@ def main():
 
     Summary :
     ----------
-    Detection Probability Test  is compilance to the Dynamic Frequency Selection(DFS) Regulation, it creates regulatory
+    Detection Probability Test  is compilance to the Dynamic Frequency Selection(DFS_Object) Regulation, it creates regulatory
     specified radar pulses to the DUT repeatedly to measure the probability of detection.
 
     execution: This script is executed in following way
     1. create a client on 5GHZ band
-    2. check if the client is on expected DFS channel or not
+    2. check if the client is on expected DFS_Object channel or not
     3. if not terminate the script
     4. if yes then it will start sniffer on client channel
     5. once the client is associated respective regulation radar is generated from hackrf
@@ -1937,7 +1896,7 @@ def main():
     parser.add_argument("--postcleanup", action='store_true')
 
     args = parser.parse_args()
-    obj = DfsTest(host=args.host,
+    DFS_Object = DfsTest(host=args.host,
                   port=args.port,
                   ssid=args.ssid,
                   passwd=args.passwd,
@@ -1973,10 +1932,10 @@ def main():
                   side_b_min_pdu=args.side_b_min_pdu
                   )
 
-    obj.run()
+    DFS_Object.run()
 
     if args.postcleanup:
-        obj.pre_cleanup()
+        DFS_Object.pre_cleanup()
 
 if __name__ == '__main__':
     main()
