@@ -391,14 +391,14 @@ class DfsTest(Realm):
                 var = "ETSI3"
             if type == "etsi4":
                 var = "ETSI4"
-            command = f"sudo python3 lf_hackrf_dfs.py --freq {freq} --rf_type {var},{width},{pri},8 --pulse_count {count} --log_level debug --lf_hackrf {self.lf_hackrf}"
+            command = f"sudo python3 lf_hackrf_dfs.py --freq {freq} --rf_type {var},{width},{pri},20 --pulse_count {count} --log_level debug --lf_hackrf {self.lf_hackrf}"
             print(command)
         if type == "etsi5" or type == "etsi6":
             if type == "etsi5":
                 var = "ETSI5"
             if type == "etsi6":
                 var = "ETSI6"
-            command = f"sudo python3 lf_hackrf_dfs.py --freq {freq} --radar_type {var},{width},{prf_1},{prf_2},{prf_3},8 --log_level debug --lf_hackrf {self.lf_hackrf}"
+            command = f"sudo python3 lf_hackrf_dfs.py --freq {freq} --radar_type {var},{width},{prf_1},{prf_2},{prf_3},20 --log_level debug --lf_hackrf {self.lf_hackrf}"
             print(command)
         if type == "legacy":
             command = f"sudo python3 lf_hackrf_dfs.py --pulse_width {width} --pulse_interval {pri} --pulse_count {count} --sweep_time 1000 --one_burst --freq {freq} --lf_hackrf {self.lf_hackrf}"
