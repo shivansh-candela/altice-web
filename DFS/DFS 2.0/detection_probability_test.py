@@ -944,7 +944,7 @@ class DfsTest(Realm):
                 if fcc == "Japan-w53-1" or fcc == "Japan-w53-2":
                     main_dict[fcc][var_1]["Width"] = width_
                     main_dict[fcc][var_1]["Pulses"] = count_
-                    main_dict[fcc][var_1]["PRF(Hz)"] = prf
+                    main_dict[fcc][var_1]["PRI(Hz)"] = prf
 
                 if self.more_option == "centre":
                     if self.bandwidth == "20":
@@ -1627,7 +1627,7 @@ class DfsTest(Realm):
                     Trials.append(i)
                     pulse.append(main_dict[fcc][i]['Pulses'])
                     width.append(main_dict[fcc][i]['Width'])
-                    prf.append(main_dict[fcc][i]['PRF(Hz)'])
+                    prf.append(main_dict[fcc][i]['PRI(Hz)'])
                     detect.append(main_dict[fcc][i]['Detected'])
                     frequency.append(main_dict[fcc][i]['Frequency(KHz)'])
                     det_time.append(main_dict[fcc][i]['Detection Time(sec)'])
@@ -1662,9 +1662,9 @@ class DfsTest(Realm):
                     "Num Bursts": burst,
                     "Num Pulses": pulse,
                     "Pulse Width (us)": width,
-                    "PRF_1(Hz)": prf_1,
-                    "PRF_2(Hz)": prf_2,
-                    "PRF_3(Hz)":prf_3 ,
+                    "PRI_1(Hz)": prf_1,
+                    "PRI_2(Hz)": prf_2,
+                    "PRI_3(Hz)":prf_3 ,
                     "Detected": detect,
                     "Frequency (KHz)": frequency,
                     "Detection Time(secs)": det_time
@@ -1677,7 +1677,7 @@ class DfsTest(Realm):
                     "Blank Time(us)" : blank_t,
                     "Long Pulse Width(us)": long_pulse_wdth,
                     "Chirp Width(MHz)": chirp_width,
-                    "PRF(Hz)": pri,
+                    "PRI(Hz)": pri,
                     "No of Continuous Pairs of Pulses": no_c_pulse,
                     "Detected": detect,
                     "Frequency (KHz)": frequency,
@@ -1688,7 +1688,7 @@ class DfsTest(Realm):
                     "Trials": Trials,
                     "Num Pulses": pulse,
                     "Pulse Width (us)": width,
-                    "PRF(Hz)": prf,
+                    "PRI(Hz)": prf,
                     "Detected": detect,
                     "Frequency (KHz)": frequency,
                     "Detection Time(secs)": det_time
@@ -1700,7 +1700,7 @@ class DfsTest(Realm):
                     "Num Bursts": burst,
                     "Num Pulses": pulse,
                     "Pulse Width (us)": width,
-                    "PRF(Hz)": pri,
+                    "PRI(Hz)": pri,
                     "Detected": detect,
                     "Frequency (KHz)": frequency,
                     "Detection Time(secs)": det_time
