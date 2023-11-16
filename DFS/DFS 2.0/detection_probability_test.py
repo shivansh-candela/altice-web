@@ -955,7 +955,8 @@ class DfsTest(Realm):
                                      "124": "5620000",
                                      "128": "5640000", "132": "5660000", "136": "5680000", "140": "5700000",
                                      "144": "5720000"}
-                    if self.bandwidth == "40":
+
+                    elif self.bandwidth == "40":
                         frequency = {"52": "5270000", "54": "5270000", "56": "5270000", "60": "5310000",
                                      "62": "5310000", "64": "5310000",
                                      "100": "5510000", "102": "5510000",
@@ -965,7 +966,8 @@ class DfsTest(Realm):
                                      "128": "5630000", "132": "5670000", "134": "5670000",
                                      "136": "5670000", "140": "5710000", "142": "5710000",
                                      "144": "5710000"}
-                    if self.bandwidth == "80":
+
+                    elif self.bandwidth == "80":
                         frequency = {"52": "5290000", "54": "5290000", "56": "5290000", "58": "5290000",
                                      "60": "5290000", "62": "5290000", "64": "5290000",
                                      "100": "5530000", "102": "5530000", "104": "5530000", "106": "5530000",
@@ -975,8 +977,17 @@ class DfsTest(Realm):
                                      "128": "5610000", "132": "5690000", "134": "5690000",
                                      "136": "5690000", "138": "5690000", "140": "5690000", "142": "5690000",
                                      "144": "5690000"}
+
+                    elif self.bandwidth == "160":
+                        frequency = {"36": "5250000", "40": "5250000", "44": "5250000", "48": "5250000",
+                                     "52": "5250000", "56": "5250000", "60": "5250000",
+                                     "64": "5250000", "100": "5570000", "104": "5570000", "108": "5570000",
+                                     "112": "5570000", "116": "5570000", "120": "5570000", "124": "5570000",
+                                     "128": "5570000"}
+
                 if self.more_option == "random":
                     if self.bandwidth == "20":
+
                         frequency = {"52": str(random.randint(5250, 5270)), "54": str(random.randint(5250, 5290)),
                                      "56": str(random.randint(5270, 5290)), "58": str(random.randint(5250, 5330)),
                                      "60": str(random.randint(5290, 5310)), "62": str(random.randint(5290, 5330)),
@@ -991,7 +1002,8 @@ class DfsTest(Realm):
                                      "134": str(random.randint(5650, 5690)),
                                      "136": str(random.randint(5670, 5690)), "138": str(random.randint(5650, 5730)),
                                      "140": str(random.randint(5690, 5710)), "144": str(random.randint(5710, 5730))}
-                    if self.bandwidth == "40":
+
+                    elif self.bandwidth == "40":
                         frequency = {"52": str(random.randint(5250, 5290)), "54": str(random.randint(5250, 5290)),
                                      "56": str(random.randint(5250, 5290)), "58": str(random.randint(5250, 5330)),
                                      "60": str(random.randint(5290, 5330)), "62": str(random.randint(5290, 5330)),
@@ -1006,7 +1018,8 @@ class DfsTest(Realm):
                                      "134": str(random.randint(5650, 5690)),
                                      "136": str(random.randint(5650, 5690)),
                                      "140": str(random.randint(5690, 5730)), "144": str(random.randint(5690, 5730))}
-                    if self.bandwidth == "80":
+
+                    elif self.bandwidth == "80":
                         frequency = {"52": str(random.randint(5250, 5330)), "54": str(random.randint(5250, 5330)),
                                      "56": str(random.randint(5250, 5330)), "58": str(random.randint(5250, 5330)),
                                      "60": str(random.randint(5250, 5330)), "62": str(random.randint(5250, 5330)),
@@ -1021,6 +1034,17 @@ class DfsTest(Realm):
                                      "134": str(random.randint(5650, 5730)),
                                      "136": str(random.randint(5650, 5730)), "138": str(random.randint(5650, 5730)),
                                      "140": str(random.randint(5650, 5730)), "144": str(random.randint(5650, 5730))}
+
+                    elif self.bandwidth == "160":
+                        frequency = {"36": str(random.randint(5250, 5350)), "40": str(random.randint(5250, 5350)),
+                                     "44": str(random.randint(5250, 5350)), "48": str(random.randint(5250, 5350)),
+                                     "52": str(random.randint(5250, 5350)), "56": str(random.randint(5250, 5350)),
+                                     "60": str(random.randint(5250, 5350)), "64": str(random.randint(5250, 5350)),
+                                     "100": str(random.randint(5490, 5650)), "104": str(random.randint(5490, 5650)),
+                                     "108": str(random.randint(5490, 5650)), "112": str(random.randint(5490, 5650)),
+                                     "116": str(random.randint(5490, 5650)), "120": str(random.randint(5490, 5650)),
+                                     "124": str(random.randint(5490, 5650)), "128": str(random.randint(5490, 5650))}
+
                 print(str(int(frequency[str(self.channel)]) * 1000))
                 if self.more_option == "centre":
                     main_dict[fcc][var_1]["Frequency(KHz)"] = str(frequency[str(self.channel)])
