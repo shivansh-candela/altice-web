@@ -1525,8 +1525,8 @@ class DfsTest(Realm):
         table_1 = {
             "WaveForm Name": wave,
             "Pd %": pd_per,
-            "Desired Percentage %" :desired_per,
-            "Pd Required Percentage %": pd_req,
+            # "Desired Percentage %" :desired_per,
+            "Required Detection Percentage %": pd_req,
             "Num Trials": tring,
             "Average Detect Time (secs)": avg_detect,
             "Result": result,
