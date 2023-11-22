@@ -833,12 +833,12 @@ class DfsTest(Realm):
                         count_ = 70
                 elif fcc == "Japan-w56-1":
                     if self.legacy == "True":
-                        width_ = 1
-                        interval_ = 2778
+                        width_ = 0.5
+                        interval_ = 1389 #This is PRI, i.e. PRI = 1389
                         count_ = 18
                     else:
                         width_ = 0.5
-                        interval_ = 720
+                        interval_ = 720 #This is PRF, i.e. PRF = 720
                         count_ = 18
                 elif fcc == "Japan-w56-2":
                     if self.legacy == "True":
