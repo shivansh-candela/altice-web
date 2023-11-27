@@ -375,7 +375,7 @@ class DfsTest(Realm):
         stdin.flush()
         # Print the output of the first command
         print(stdout.read().decode())
-        time.sleep(1)
+        # time.sleep(1)
         command = None
         if type == "fcc6":
             command = f"nice -19 sudo python3 lf_hackrf_dfs.py --tx_sample_rate 20 --radar_type FCC6,100 --one_burst --log_level debug --lf_hackrf {self.lf_hackrf}"
