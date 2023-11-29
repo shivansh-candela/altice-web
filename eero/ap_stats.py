@@ -1,4 +1,16 @@
 """
+This script collects the logs and stats of AP with the help of serial connection and commands for respective needs
+
+Capabilities:
+    opening and closing the serial connection
+    sending generic commands and getting the output of it
+    append the data collected to csv or txt file and store it in LANforge
+    creating bit rate summary of configured AP
+
+Pre-requisites:
+    AP has to be connected through serial cable
+    For using append functions LANforge info has to be provided
+    Has to be executed in LANforge scripts
 >python ap_stats.py  --channel_utilization --memory_utilization --cpu_utilization --temp --interval 1m  --duration 1h
 >python ap_stats.py  --channel_utilization --memory_utilization --cpu_utilization --temp --interval 1m  --count 5
 
@@ -36,6 +48,7 @@ class APSerialAccess():
         time.sleep(0.5)
         self.output = ""
 
+    # Use this function to send a list of commands with date_time
     def send_generic_commands(self, command=[], date_time=""):
         self.open_serial_connectio()
         for comm in command:
@@ -48,6 +61,7 @@ class APSerialAccess():
                 self.output += self.serial_access.readall().decode()
                 data_list.append(self.output)
 
+            # These commands are used based on the requirements
             if comm == "iw dev ap_tt0 station dump":
                 self.append_to_txt(f"tt0_channel_utilization_{date_time}.txt", data_list=data_list)
             if comm == "iw dev ap_tt1 station dump":
@@ -79,7 +93,7 @@ class APSerialAccess():
             for data in data_list:
                 txtfile.write(f"{str(datetime.datetime.now())} {data}\n")
 
-    #Provides a string return while calling this method with command argument
+    # Using this function we can get the output of the given command
     def get_log(self, command):
         self.output = ''
         self.open_serial_connectio()
@@ -110,6 +124,7 @@ class APSerialAccess():
         else:
             return int(time_str)
 
+    # Creates a csv file of bit rate summary of most common values of tx and rx bitrates
     def create_csv_with_bitrate_summary(self, txt_file_path, csv_file_path):
         # Read data from the text file
         with open(txt_file_path, 'r') as txtfile:
