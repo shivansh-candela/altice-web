@@ -1,5 +1,28 @@
 #!/usr/bin/env python3
+"""
+This script generates the .pcap files and one .csv file based user specified increment order.
 
+Capabilities:
+    * The script will support for 2g, 5g, 6g bands.
+    * It has the capability for station side sniffing.
+    * It will support for multiple resources units.
+    * It will generate the pcap's based on the user specified increment order.
+    * It will generate the .csv file which will contain the station mac address information base on the user specifed increment order.
+
+Pre-requisites:
+    * The LARGE NETWORK TESTBED setup with (200 clients or more)
+    * Since the script is dependent on the lanforge-scripts, the script should be place "lanforge-scripts/py-scripts/" path to get the output.
+
+
+    CLI (Command Line Interface) to run the script:
+        python3 large_network_test.py --mgr 192.168.200.240 --scenario 200-clients-long-run
+        --twog_radio 1.1.wiphy2 1.1.wiphy3 1.1.wiphy4 1.1.wiphy5
+        --fiveg_radio 1.1.wiphy0 1.1.wiphy1 1.3.wiphy0 1.3.wiphy1 1.3.wiphy2 1.3.wiphy3 1.3.wiphy4
+        --sixg_radio 1.4.wiphy3 1.4.wiphy4 1.4.wiphy5 1.4.wiphy6 1.4.wiphy7 --twog_channel 1 --fiveg_channel 36 --sixg_channel 37
+        --twog_sniff_radio 1.4.wiphy0 --fiveg_sniff_radio 1.4.wiphy1 --sixg_sniff_radio 1.4.wiphy2 --increment 10
+        --csv_outfile sta_mac_list.csv --attenuators 1.1.1031 1.1.3104 --attenuator_module_values 0,0,0,0 0,0,0,0
+
+"""
 import csv
 import datetime
 import sys
@@ -317,9 +340,7 @@ def main():
             --sixg_radio 1.4.wiphy3 1.4.wiphy4 1.4.wiphy5 1.4.wiphy6 1.4.wiphy7 --twog_channel 1 --fiveg_channel 36 --sixg_channel 37 
             --twog_sniff_radio 1.4.wiphy0 --fiveg_sniff_radio 1.4.wiphy1 --sixg_sniff_radio 1.4.wiphy2 --increment 10 
             --csv_outfile sta_mac_list.csv --attenuators 1.1.1031 1.1.3104 --attenuator_module_values 0,0,0,0 0,0,0,0
-
-                                     '''
-                                     )
+''')
     required = parser.add_argument_group('Required arguments to run large_network_test.py')
     optional = parser.add_argument_group('Optional arguments to run large_network_test.py')
 
