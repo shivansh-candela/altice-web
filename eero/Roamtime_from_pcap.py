@@ -1,3 +1,22 @@
+'''
+
+The script is used to get the Authentication time ,Re-association time ,4-way handshake time,Roam time and QoS missed time from the provided pcap.
+
+Capabilities:
+    It calculates the respective times and gives an output in a CSV    
+
+
+Pre-requisites:
+    This script requires TShark to be installed..
+    Note: When you install Wireshark, the tshark typically comes bundled with it as part of the Wireshark package 
+    if not, you can consider manually installing tshark separately.
+    
+
+example CLI:
+        python3 Roamtime_from_pcap.py --pcap_file "testcase2.pcap" --bssid c4:a8:16:02:b4:4a c4:a8:16:02:b3:4a --client_mac 3a:dc:66:ee:50:35
+
+'''
+
 import subprocess
 import argparse
 from datetime import datetime
@@ -164,7 +183,7 @@ This script requires TShark to be installed and available in your system's PATH.
     if not, you can consider manually installing tshark separately.
 
 PURPOSE:
-    To get the Roam time and QoS missed time from the provided pcap.
+    To get the Authentication time ,Re-association time ,4-way handshake time,Roam time and QoS missed time from the provided pcap.
 
 EXAMPLE:
         python3 Roamtime_from_pcap.py --pcap_file "testcase2.pcap" --bssid c4:a8:16:02:b4:4a c4:a8:16:02:b3:4a --client_mac 3a:dc:66:ee:50:35
