@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import csv
 import datetime
 import sys
@@ -274,26 +276,26 @@ class Large_Network_Test(Realm):
 
 
 def main():
-    parser = argparse.ArgumentParser(prog='large_clients_test.py',
+    parser = argparse.ArgumentParser(prog='large_network_test.py',
                                      formatter_class=argparse.RawTextHelpFormatter,
                                      epilog='''
-                                     large_clients_test.py''',
+                                     large_network_test.py''',
                                      description=''' 
     CLI: 
          # To run the on only 2G
-            python3 large_clients_test.py --mgr 192.168.200.161 --scenario eero-script --twog_radio 1.1.phy0 --twog_channel 1 
+            python3 large_network_test.py --mgr 192.168.200.161 --scenario eero-script --twog_radio 1.1.phy0 --twog_channel 1 
             --twog_sniff_radio 1.1.phy1 --increment 2 --csv_outfile sta_mac_list.csv --attenuators 1.1.1031 1.1.3104 --attenuator_module_values 0,0,0,0 0,0,0,0
     
          # To run the on only 5G
-            python3 large_clients_test.py --mgr 192.168.200.161 --scenario eero-script --fiveg_radio 1.1.phy1 --fiveg_channel 36 
+            python3 large_network_test.py --mgr 192.168.200.161 --scenario eero-script --fiveg_radio 1.1.phy1 --fiveg_channel 36 
             --fiveg_sniff_radio 1.1.phy0 --increment 2 --csv_outfile sta_mac_list.csv --attenuators 1.1.1031 1.1.3104 --attenuator_module_values 0,0,0,0 0,0,0,0
     
         # To run the on only 5G
-            python3 large_clients_test.py --mgr 192.168.200.161 --scenario eero-script --sixg_radio 1.1.phy1 --sixg_channel 37 
+            python3 large_network_test.py --mgr 192.168.200.161 --scenario eero-script --sixg_radio 1.1.phy1 --sixg_channel 37 
             --sixg_sniff_radio 1.1.phy0 --increment 2 --csv_outfile sta_mac_list.csv --attenuators 1.1.1031 1.1.3104 --attenuator_module_values 0,0,0,0 0,0,0,0
     
         # To run on multiple bands (2g,5g,6g)
-            python3 large_clients_test.py --mgr 192.168.200.240 --scenario 200-clients-long-run 
+            python3 large_network_test.py --mgr 192.168.200.240 --scenario 200-clients-long-run 
                --twog_radio 1.1.wiphy2 1.1.wiphy3 1.1.wiphy4 1.1.wiphy5 
                --fiveg_radio 1.1.wiphy0 1.1.wiphy1 1.3.wiphy0 1.3.wiphy1 1.3.wiphy2 1.3.wiphy3 1.3.wiphy4 
                --sixg_radio 1.4.wiphy3 1.4.wiphy4 1.4.wiphy5 1.4.wiphy6 1.4.wiphy7 
@@ -310,7 +312,7 @@ def main():
     
                                             or
     
-            python3 large_clients_test.py --mgr 192.168.200.240 --scenario 200-clients-long-run --twog_radio 1.1.wiphy2 1.1.wiphy3 1.1.wiphy4 1.1.wiphy5 
+            python3 large_network_test.py --mgr 192.168.200.240 --scenario 200-clients-long-run --twog_radio 1.1.wiphy2 1.1.wiphy3 1.1.wiphy4 1.1.wiphy5 
             --fiveg_radio 1.1.wiphy0 1.1.wiphy1 1.3.wiphy0 1.3.wiphy1 1.3.wiphy2 1.3.wiphy3 1.3.wiphy4 
             --sixg_radio 1.4.wiphy3 1.4.wiphy4 1.4.wiphy5 1.4.wiphy6 1.4.wiphy7 --twog_channel 1 --fiveg_channel 36 --sixg_channel 37 
             --twog_sniff_radio 1.4.wiphy0 --fiveg_sniff_radio 1.4.wiphy1 --sixg_sniff_radio 1.4.wiphy2 --increment 10 
@@ -318,8 +320,8 @@ def main():
 
                                      '''
                                      )
-    required = parser.add_argument_group('Required arguments to run large_clients_test.py')
-    optional = parser.add_argument_group('Optional arguments to run large_clients_test.py')
+    required = parser.add_argument_group('Required arguments to run large_network_test.py')
+    optional = parser.add_argument_group('Optional arguments to run large_network_test.py')
 
     required.add_argument('--mgr', help='hostname for where LANforge GUI is running',
                           default='192.168.200.161')
