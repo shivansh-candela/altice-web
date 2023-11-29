@@ -118,11 +118,7 @@ class heatmap():
         ax.set_yticks([])
 
         
-        # y_coordinates = [img.shape[0] - y for y in y_coordinates]
-        y_coordinates = [img.shape[0] - 241, img.shape[0] - 322, img.shape[0] - 276, img.shape[0] - 282, img.shape[0] - 161,
-         img.shape[0] - 165, img.shape[0] - 48, img.shape[0] - 54, img.shape[0] - 166, img.shape[0] - 168,
-         img.shape[0] - 36, img.shape[0] - 48, img.shape[0] - 390, img.shape[0] - 393, img.shape[0] - 524,
-         img.shape[0] - 521, img.shape[0] - 524, img.shape[0] - 525, img.shape[0] - 386, img.shape[0] - 386]
+        y_coordinates = [img.shape[0] - y for y in y_coordinates]
         for i, (x_val, y_val) in enumerate(zip(x_coordinates, y_coordinates)):
 
             if not self.individual_shape_list:
