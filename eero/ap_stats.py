@@ -99,7 +99,6 @@ class APSerialAccess():
         self.open_serial_connectio()
         self.serial_access.write((command + '\r\n').encode())
         self.output += self.serial_access.readall().decode()
-        # print(self.output)
         while (self.serial_access.in_waiting > 0):
             self.output += self.serial_access.readall().decode()
         self.close_connection()

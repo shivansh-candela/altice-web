@@ -1,3 +1,14 @@
+"""
+This script is used on the client side of things for project heat
+
+Capabilities:
+    Runs L3 traffic on the clients on different locations based on the data given to Canbee
+
+Pre-requisites:
+    Needs a Canbee robot controller with LANforge connected to it and a rela client connected to LANforge
+    Has to be executed in LANforge scripts
+
+"""
 import sys
 import os
 import pandas as pd
@@ -110,6 +121,7 @@ class throughputheat(Realm):
         self.mac_id_list = mac_id_list
         self.mac_id1_list = mac_id1_list
 
+    # To get the OS info of the real clients
     def os_type(self):
         response = self.json_get("/resource/all")
         for key, value in response.items():
@@ -128,9 +140,8 @@ class throughputheat(Realm):
                 if hw_version != "":
                     self.android_list.append(hw_version)
         self.laptop_list = self.windows_list + self.linux_list + self.mac_list
-        # print("laptop_list :",self.laptop_list)
-        # print("android_list :",self.android_list)
 
+    # To check if the clients are in Phantom state or not
     def phantom_check(self):
         port_eid_list, same_eid_list, original_port_list = [], [], []
         response = self.json_get("/resource/all")
@@ -229,6 +240,7 @@ class throughputheat(Realm):
                     self.mac_id_list.append(i.strip(eid + ' '))
         print("MAC ID LIST", self.mac_id_list)
 
+    #TO start the L3 traffic
     def start(self, print_pass=False, print_fail=False):
         if len(self.cx_profile.created_cx) > 0:
             for cx in self.cx_profile.created_cx.keys():
@@ -242,6 +254,7 @@ class throughputheat(Realm):
 
         self.cx_profile.start_cx()
 
+    # TO stop the L3 traffic
     def stop(self):
         self.cx_profile.stop_cx()
         self.station_profile.admin_down()
@@ -286,7 +299,6 @@ class throughputheat(Realm):
                 for k in traffic_type_list:
                     cxs = "%s_%s_%s" % (i, k, j)
                     cx_names = cxs.replace(" ", "")
-                    # print(cx_names)
             cx_list.append(cx_names)
         print('cx_list', cx_list)
         count = 0
@@ -428,7 +440,7 @@ clientTxrate = 0
 clientRxraTE = 0
 clientSignal = 0
 
-
+# Code realted to Canbee robot controller
 class CanbeeRobotController:
     def __init__(self, base_url):
         self.base_url = base_url
@@ -677,7 +689,6 @@ def main():
         data.append(rx)
         data.append(rssi)
         x.put(data)
-        # return data
 
     AP_tx = []
     AP_rx = []
@@ -734,7 +745,7 @@ def main():
                 Upload.append(tem[7][0])
                 throughput_qos.update_sheet(distance=Current_distance, AP_tx=AP_tx, AP_rx=AP_rx, AP_rssi=AP_rssi,
                                             client_rssi=Client_rssi, Upload=Upload, Download=Download)
-        # throughput_qos.convert_into_df(all_data_achieved=y.get(), AP_data=x.get())
+
 
 
 if __name__ == "__main__":
