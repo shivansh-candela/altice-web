@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 '''
 
-The script generates heatmaps for rssi and throuput values by fetching the values from a csv and the co-ordinates from a JSon.
+The script generates heatmaps for rssi and throughput values by fetching the values from a csv and the co-ordinates from a JSon.
 
 Capabilities:
     It can generate heatmap for one node having 3 multiple bands 2.4G,5G and 6G 
@@ -22,7 +22,7 @@ How to run:
     step3: run the script using CLI from its location, and all the heatmaps will be saved in that particular folder.
 
 example CLI:
-         python3 generate_heatmap.py --folder_name check_heatmap_1 --rssi_scale="-90to-30" --throuput_scale="0to400" 
+         python3 generate_heatmap.py --folder_name check_heatmap_1 --rssi_scale="-90to-30" --throughput_scale="0to400" 
 
 sample CSV format:
         
@@ -68,12 +68,13 @@ class heatmap():
         base_directory = os.getcwd()
 
         self.folder_path = os.path.join(base_directory, self.folder_name)
+
         self.folder_contents = os.listdir(self.folder_path)
         files = [file for file in self.folder_contents if file.endswith('.json')]
 
         if len(files) == 1:
             json_file_path = os.path.join(self.folder_path, files[0])
-
+            print("fecthing co-ordinates")
             with open(json_file_path, 'r') as json_file:
                 data = jsn.load(json_file)
                 for cords in data["survey_points"]:
@@ -90,9 +91,10 @@ class heatmap():
             else:
                 print("More than one JSON file found. Please ensure there's only one JSON file in the folder.")
                 exit(0)
+
+
    
     def get_heatmap_png(self,x_coordinates,y_coordinates,image_name,values,image_png,scale): #generates heatmap and saves.
-
         img = imread(image_png)
         img1 = Image.open(image_png)
         img1 = img1.transpose(Image.FLIP_TOP_BOTTOM)
@@ -108,7 +110,7 @@ class heatmap():
         # sets the output image size same as input image and increase width and height by 200 to fit the color bar
         fig, ax = plt.subplots(figsize=((width + 200) / 100, (height + 200) / 100)) 
         # fig, ax = plt.subplots(figsize=(20, 10))
-
+        
         ax.imshow(img1, extent=[0, img.shape[1], img.shape[0], 0])
         ax.imshow(grid_rssi, extent=[0, img.shape[1], 0, img.shape[0]], zorder=1, alpha=0.5, cmap=cmap, vmin=scale.split("to")[0],
                   vmax=scale.split("to")[1])
@@ -145,17 +147,20 @@ class heatmap():
                       vmax=scale.split("to")[1]))
         if image_name.replace("TCP ","").replace("UDP ","") == "RSSI":
             cbar.set_label( "RSSI in (dBm)")
+            plt.title("Signal quality [dBm]", fontsize=10)
         else:
+            heading = f'{image_name.replace("TCP ","").replace("UDP ","").replace("udp ","").replace("tcp ","")} ({image_name.replace("DOWNLOAD","").replace("UPLOAD","").replace("Download","").replace("Upload","")}) [MBit/s]'
 
+            plt.title(heading, fontsize=10)
             cbar.set_label("Throughput " + "in (Mbps)")
+            # print(image_name)
         legend_handles = []
         ncol = 3
         legend_handles_node1 = []
         legend_handles_node2 = []
         legend_handles_node3 = []
-
         for key, color in self.color_map.items():
-            if key[0] == 'gateway':
+            if key[0] == 'gateway' :
                 legend_handles_node1.append(
                     plt.Line2D([0], [0], marker='o', color='w', markerfacecolor=color[0], label=f"{key[0]} - {key[1]}"))
             elif key[0] == 'leaf1':
@@ -167,13 +172,23 @@ class heatmap():
         if len(list(set(self.Access_points))) == 2:
             ncol = 2
         plt.legend(handles=legend_handles_node1 + legend_handles_node2 + legend_handles_node3, loc='upper center', bbox_to_anchor=(0.5, 0.0),
-                   title='Node-Band Combinations', ncol=ncol)
+                    ncol=ncol)
         # fig.savefig(buffer, bbox_inches='tight', pad_inches=0, format='png')
+
+        
         plt.savefig(f'./{image_name}.png', bbox_inches='tight', pad_inches=0, format='png')
 
     def generate_heatmap(self):
         files = [file for file in self.folder_contents if file.endswith('.csv')]
         image_png = [file for file in self.folder_contents if file.endswith('.png')]
+        floorplan_index = 0
+        if "First_floor_PNG.png" not in image_png:
+            floorplan_index = image_png.index("Groung_floor_PNG.png")
+        else:
+            floorplan_index = image_png.index("First_floor_PNG.png")
+
+
+
 
 
         if len(files) == 1:
@@ -216,7 +231,6 @@ class heatmap():
                     sorted_bands = sorted(set(bands), key=lambda x: order[x])
                     print("Nodes:",list(set(self.Access_points)))
                     print("Bands list :",sorted_bands)
-
                     # mapped the shapes and colors to maintain a particular standard.
                     for index , node in enumerate(list(set(self.Access_points))):
                         for band in sorted_bands:
@@ -264,8 +278,13 @@ class heatmap():
                             # print(values)
                             scale = self.throuput_scale if header != "RSSI" else self.rssi_scale
                             # print(scale,"scale")
-                            self.get_heatmap_png(self.x_cords, self.y_cords, header, values, image_png[0],scale)
 
+                            # Check if the file already exists
+                            if os.path.exists(f'./{header}.png'):
+                                os.remove(f'./{header}.png')
+                                # print(os.path.exists(f'./{header}.png'))
+                            self.get_heatmap_png(self.x_cords, self.y_cords, header, values, image_png[floorplan_index],scale)
+                    print(f"The heatmaps are saved in the folder:{self.folder_name}")
 
 
         else:
@@ -287,7 +306,7 @@ def main():
 
 Objective:
     
-The script generates heatmaps for rssi and throuput values by fetching the values from a csv and the co-ordinates from a JSon.
+The script generates heatmaps for rssi and throughput values by fetching the values from a csv and the co-ordinates from a JSon.
 
 Capabilities:
     It can generate heatmap for one node having 3 multiple bands 2.4G,5G and 6G 
@@ -308,7 +327,7 @@ How to run:
     step3: run the script from its location, and all the heatmaps will be saved in that particular folder.
 
 example CLI:
-         python3 generate_heatmap.py --folder_name check_heatmap_1 --rssi_scale="-90to-30" --throuput_scale="0to400" 
+         python3 generate_heatmap.py --folder_name check_heatmap_1 --rssi_scale="-90to-30" --throughput_scale="0to400" 
 
 sample CSV format:
         
@@ -321,8 +340,8 @@ sample CSV format:
 """)
     parser.add_argument("-folder_name", "--folder_name", type=str,
                         help="provide the folder name in which the json and csv are present", required=True)
-    parser.add_argument("-throuput_scale", "--throuput_scale", type=str,
-                        help="provide the scale for throuput values, eg: 0to300" ,default="0to300")
+    parser.add_argument("-throughput_scale", "--throughput_scale", type=str,
+                        help="provide the scale for throughput values, eg: 0to300" ,default="0to300")
     parser.add_argument("-rssi_scale", "--rssi_scale", type=str,
                         help="provide the scale for RSSI values, eg: '-90to-30'",default="-30to-90" )
 
@@ -330,7 +349,7 @@ sample CSV format:
 
     heatmap_obj = heatmap(
         folder_name=args.folder_name,
-        throuput_scale= args.throuput_scale,
+        throuput_scale= args.throughput_scale,
         rssi_scale=args.rssi_scale,
 
     )
