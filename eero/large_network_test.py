@@ -101,9 +101,9 @@ class Large_Network_Test(Realm):
         self.sixn_sniff_radio = sixg_sniff_radio
         self.cv_test = cv_test_manager.cv_test(lfclient_host=self.lf_host,
                                                lfclient_port=self.lf_port)
-        self.report = lf_report_pdf.lf_report(_path='', _results_dir_name="Large_Client_Test",
-                                              _output_html=f"large_client_test.html",
-                                              _output_pdf=f"lanrge_client_test.pdf")
+        self.report = lf_report_pdf.lf_report(_path='', _results_dir_name="Large_Network_Test",
+                                              _output_html=f"large_network_test.html",
+                                              _output_pdf=f"large_network_test.pdf")
         self.report_path = self.report.get_path_date_time()
 
     def load_apply_scenario(self, scenario):  # Loading the existing scenario
@@ -433,7 +433,7 @@ def main():
     obj.setting_attenuator(serial_num=attenuator_serial_list, attenuator_mod_values=module_values)
     if args.fiveg_radio and args.fiveg_channel:
         obj.setup(radio_list=args.fiveg_radio, channel_list=args.fiveg_channel, sniffer_radio=args.fiveg_sniff_radio,
-                  station_sniff=True, band="5g")
+                  station_sniff=False, band="5g")
     if args.twog_radio and args.twog_channel:
         obj.setup(radio_list=args.twog_radio, channel_list=args.twog_channel, sniffer_radio=args.twog_sniff_radio,
                   station_sniff=False, band="2g")
