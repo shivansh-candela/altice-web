@@ -88,6 +88,7 @@ def main():
                                      epilog='''
                                      large_network_test.py''',
                                      description=''' 
+    CLI: python3 large_client_test_sta_mac_fetching.py --mgr 192.168.200.240
                                      ''')
     required = parser.add_argument_group('Required arguments to run large_network_test.py')
     # optional = parser.add_argument_group('Optional arguments to run large_network_test.py')
