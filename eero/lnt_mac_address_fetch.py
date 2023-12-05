@@ -63,21 +63,23 @@ class LNT_MAC_FETCHING(Realm):
 
     # querying the port-mgr tab for mac address & writing them in a .csv file
     def station_mac_listing_to_csv(self):
-        resp = self.json_get(f"/port/?fields=mac")
+        resp = self.json_get(f"/port/?fields=mac,port")
         filtered_data = []
         for item in resp['interfaces']:
             for port, data in item.items():
                 if "sta" in port or "wlan" in port:
-                    filtered_data.append({'Port': port, 'MAC': data['mac']})
-        print(filtered_data)
+                    filtered_data.append({'Port-ID': data['port'], 'Port': port, 'MAC': data['mac']})
+        # print(filtered_data)
+        sorted_filtered_data = sorted(filtered_data, key=lambda x: x['Port-ID'])
+        # print(sorted_filtered_data)
 
         csv_file_path = f"./{self.directory}/sta_mac_list.csv"
 
         with open(csv_file_path, 'w', newline='') as csvfile:
-            fieldnames = ['Port', 'MAC']
+            fieldnames = ['Port-ID', 'Port', 'MAC']
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
             writer.writeheader()  # Writing Header
-            for row in filtered_data:
+            for row in sorted_filtered_data:
                 writer.writerow(row)
         print(f'Data has been written to {csv_file_path}')
 
@@ -86,9 +88,9 @@ def main():
     parser = argparse.ArgumentParser(prog='large_network_test.py',
                                      formatter_class=argparse.RawTextHelpFormatter,
                                      epilog='''
-                                     large_network_test.py''',
+                                     lnt_mac_address_fetch.py''',
                                      description=''' 
-    CLI: python3 large_client_test_sta_mac_fetching.py --mgr 192.168.200.240
+    CLI: python3 lnt_mac_address_fetch.py --mgr 192.168.200.240
                                      ''')
     required = parser.add_argument_group('Required arguments to run large_network_test.py')
     # optional = parser.add_argument_group('Optional arguments to run large_network_test.py')
