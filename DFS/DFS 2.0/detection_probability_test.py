@@ -543,7 +543,7 @@ class DfsTest(Realm):
                     new_list = ["Burst", "Frequency(KHz)", "Pulse Width", "Blank Time(us)", "Long Pulse Width(us)",
                                 "Chirp Width(MHz)", "Pri(Hz)", "No of Continuous Pairs of Pulses", "Detection Time(sec)"]
                 if fcc == "Japan-w53-1" or fcc == "Japan-w53-2":
-                    new_list = ["Pulses", "Width", "PRI(Hz)", "Detected", "Frequency(KHz)",
+                    new_list = ["Pulses", "Width", "PRF(Hz)", "Detected", "Frequency(KHz)",
                                 "Detection Time(sec)"]
                 else:
                     new_list = ["Burst", "Pulses", "Width", "PRI(US)", "Detected", "Frequency(KHz)", "Detection Time(sec)"]
@@ -944,7 +944,7 @@ class DfsTest(Realm):
                 if fcc == "Japan-w53-1" or fcc == "Japan-w53-2":
                     main_dict[fcc][var_1]["Width"] = width_
                     main_dict[fcc][var_1]["Pulses"] = count_
-                    main_dict[fcc][var_1]["PRI(Hz)"] = prf
+                    main_dict[fcc][var_1]["PRF(Hz)"] = prf
 
                 if self.more_option == "centre":
                     if self.bandwidth == "20":
@@ -1432,7 +1432,7 @@ class DfsTest(Realm):
         report.build_graph_without_border()
 
         # various atandards
-        required_percent = {"FCC0": "60%", "FCC1": "60%", "FCC2": "60%", "FCC3": "60%", "FCC4": "80%", "FCC5": "70%",
+        required_percent = {"FCC0": "60%", "FCC1": "60%", "FCC2": "60%", "FCC3": "60%", "FCC4": "60%", "FCC5": "70%",
                             "FCC6": "70%",
                             "ETSI0": "NA", "ETSI1": "60%", "ETSI2": "60%", "ETSI3": "60%", "ETSI4": "60%",
                             "ETSI5": "60%", "ETSI6": "60%",
@@ -1595,7 +1595,7 @@ class DfsTest(Realm):
         for fcc in self.fcctypes:
             report.set_obj_html("Detailed Result Table for " + str(fcc),
                                 "The below table provides detailed information for per trials run for " + str(
-                                    fcc) + "RADAR Type")
+                                    fcc) + " RADAR Type")
             report.build_objective()
             if fcc == "FCC5":
                 Trials, burst, trial_centre, trial_low, trial_high, uut_channel, freq_modulatin, tx_sample_rate, detect,frequency, det_time = [], [], [], [], [], [], [], [], [], [], []
@@ -1651,7 +1651,7 @@ class DfsTest(Realm):
                     Trials.append(i)
                     pulse.append(main_dict[fcc][i]['Pulses'])
                     width.append(main_dict[fcc][i]['Width'])
-                    prf.append(main_dict[fcc][i]['PRI(Hz)'])
+                    prf.append(main_dict[fcc][i]['PRF(Hz)'])
                     detect.append(main_dict[fcc][i]['Detected'])
                     frequency.append(main_dict[fcc][i]['Frequency(KHz)'])
                     det_time.append(main_dict[fcc][i]['Detection Time(sec)'])
@@ -1678,56 +1678,67 @@ class DfsTest(Realm):
                     "TX Sample Rate": tx_sample_rate,
                     "Detected": detect,
                     "Frequency (KHz)": frequency,
-                    "Detection Time(secs)": det_time
+                    "Detection Time (secs)": det_time
+                }
+            elif fcc == "FCC0" or fcc == "FCC1" or fcc == "FCC2" or fcc == "FCC3" or fcc == "FCC4":
+                table_2 = {
+                    "Trials": Trials,
+                    "Num Bursts": burst,
+                    "Num Pulses": pulse,
+                    "Pulse Width (μs)": width,
+                    "PRI (μs)": pri,
+                    "Detected": detect,
+                    "Frequency (KHz)": frequency,
+                    "Detection Time (secs)": det_time
                 }
             elif fcc == "ETSI5" or fcc == "ETSI6":
                 table_2 = {
                     "Trials": Trials,
                     "Num Bursts": burst,
                     "Num Pulses": pulse,
-                    "Pulse Width (us)": width,
-                    "PRI_1(Hz)": prf_1,
-                    "PRI_2(Hz)": prf_2,
-                    "PRI_3(Hz)":prf_3 ,
+                    "Pulse Width (μs)": width,
+                    "PRI_1 (Hz)": prf_1,
+                    "PRI_2 (Hz)": prf_2,
+                    "PRI_3 (Hz)": prf_3,
                     "Detected": detect,
                     "Frequency (KHz)": frequency,
-                    "Detection Time(secs)": det_time
+                    "Detection Time (secs)": det_time
                 }
             elif fcc == "Japan-w53-3" or fcc == "Japan-w53-4" or fcc == "Japan-w53-5" or fcc == "Japan-w53-6" or fcc ==  "Japan-w53-7" or fcc ==  "Japan-w53-8":
                 table_2 = {
                     "Trials": Trials,
                     "Num Bursts": burst,
-                    "Pulse Width (us)": width,
-                    "Blank Time(us)" : blank_t,
-                    "Long Pulse Width(us)": long_pulse_wdth,
+                    "Pulse Width (μs)": width,
+                    "Blank Time (μs)": blank_t,
+                    "Long Pulse Width (μs)": long_pulse_wdth,
                     "Chirp Width(MHz)": chirp_width,
-                    "PRI(Hz)": pri,
+                    "PRF (Hz)": pri,
                     "No of Continuous Pairs of Pulses": no_c_pulse,
                     "Detected": detect,
                     "Frequency (KHz)": frequency,
-                    "Detection Time(secs)": det_time
+                    "Detection Time (secs)": det_time
                 }
             elif fcc == "Japan-w53-1" or fcc == "Japan-w53-2":
                 table_2 = {
                     "Trials": Trials,
                     "Num Pulses": pulse,
-                    "Pulse Width (us)": width,
-                    "PRI(Hz)": prf,
+                    "Pulse Width (μs)": width,
+                    "PRF (Hz)": prf,
                     "Detected": detect,
                     "Frequency (KHz)": frequency,
-                    "Detection Time(secs)": det_time
+                    "Detection Time (secs)": det_time
                 }
             else:
-                # Japan-56-1,2,3,4,5,6 & Korea 1,2,3 & ETSI-0,1,2,3,4,
+                # Japan-56-1,2,3,4,5,6 & Korea 1,2,3 & ETSI-0,1,2,3,4
                 table_2 = {
                     "Trials": Trials,
                     "Num Bursts": burst,
                     "Num Pulses": pulse,
-                    "Pulse Width (us)": width,
-                    "PRI(Hz)": pri,
+                    "Pulse Width (μs)": width,
+                    "PRF (Hz)": pri,
                     "Detected": detect,
                     "Frequency (KHz)": frequency,
-                    "Detection Time(secs)": det_time
+                    "Detection Time (secs)": det_time
                 }
             test_setup_ = pd.DataFrame(table_2)
             report.set_table_dataframe(test_setup_)
