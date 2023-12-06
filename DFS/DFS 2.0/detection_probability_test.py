@@ -1767,7 +1767,7 @@ class DfsTest(Realm):
             "Time interval between Trials (secs)": self.time_int,
             "Run Traffic": self.enable_traffic,
             "Frequency step option": freq_option,
-            "Contact": "support@candelatech.com"
+            "Contact": "<a href='mailto:support@candelatech.com'>support@candelatech.com</a>"
         }
         report.set_table_title("Test basic Information")
         report.build_table_title()
