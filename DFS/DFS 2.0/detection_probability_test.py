@@ -116,6 +116,7 @@ lf_report = cv_test_reports.lanforge_reports
 lf_report_pdf = importlib.import_module("py-scripts.lf_report")
 lf_pcap = importlib.import_module("py-scripts.lf_pcap")
 lf_graph = importlib.import_module("py-scripts.lf_graph")
+lf_modify_radio = importlib.import_module("py-scripts.lf_modify_radio")
 
 
 class DfsTest(Realm):
@@ -1257,6 +1258,11 @@ class DfsTest(Realm):
     def run(self):
         print(self.enable_traffic)
         print(self.fcctypes)
+        # setting radio channel
+        print(f"Updating the radio channel : {self.radio}")
+        radio_eid = self.name_to_eid(eid=self.radio)
+        modify_radio = lf_modify_radio.lf_modify_radio(lf_mgr=self.host)
+        modify_radio.set_wifi_radio(_resource=radio_eid[1], _radio=radio_eid[2], _shelf=radio_eid[0], _channel=self.channel)
         if self.create_client == "True":
             print("clean all stations before the test")
             logging.info("clean all stations before the test")
