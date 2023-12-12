@@ -124,31 +124,44 @@ class heatmap():
         for i, (x_val, y_val) in enumerate(zip(x_coordinates, y_coordinates)):
 
             if not self.individual_shape_list:
-                circle = plt.Circle((x_val, y_val), radius=20, color=self.individual_colors[i], fill=True,alpha =1)
+                circle = plt.Circle((x_val, y_val), radius=16, color=self.individual_colors[i], fill=True,alpha =1,zorder=10)
                 ax.add_patch(circle)
             else:
                 if self.individual_shape_list[i] == "rectangle":
-                    rect = plt.Rectangle((x_val - 20, y_val - 20), 40, 30, color=self.individual_colors[i], fill=True,alpha =1)
+                    rect = plt.Rectangle((x_val - 20, y_val - 12), 30, 20, color=self.individual_colors[i], fill=True,alpha =1,zorder=10)
                     ax.add_patch(rect)
+                    # plt.text(x_val-20, y_val - 30, f"{str(values[i])}")
+                    # if image_name.replace("TCP ","").replace("UDP ","") != "RSSI":
+                    #     plt.text(x_val+10, y_val + 10, f"{str(self.rssi_values[i])}")
                 elif self.individual_shape_list[i] == "triangle":
-                    triangle = Polygon([(x_val - 20, y_val - 10), (x_val + 20, y_val - 10), (x_val, y_val + 20)], closed=True, color=self.individual_colors[i], fill=True,alpha =1)    
+                    triangle = Polygon([(x_val - 20, y_val - 10), (x_val + 20, y_val - 10), (x_val, y_val + 20)], closed=True, color=self.individual_colors[i], fill=True,alpha =1,zorder=10)    
                     ax.add_patch(triangle)
+                    # plt.text(x_val-20, y_val - 30, f"{str(values[i])}")
+                    # if image_name.replace("TCP ","").replace("UDP ","") != "RSSI":
+                    #     plt.text(x_val+10, y_val + 10, f"{str(self.rssi_values[i])}")
                 else:
-                    circle = plt.Circle((x_val, y_val), radius=20, color=self.individual_colors[i], fill=True,alpha =1)
+                    circle = plt.Circle((x_val, y_val), radius=16, color=self.individual_colors[i], fill=True,alpha =1,zorder=10)
                     ax.add_patch(circle)
+                    # plt.text(x_val-20, y_val - 30, f"{str(values[i])}")
+                    # if image_name.replace("TCP ","").replace("UDP ","") != "RSSI":
+                    #     plt.text(x_val+10, y_val + 10, f"{str(self.rssi_values[i])}")
 
 
 
-            
-            ax.text(x_val - 3, y_val - 3, str(i + 1), color='black', fontsize=10, ha='center', va='center')
-        [plt.text(i + 25, j + 10, str(values[index])) for index, (i, j) in enumerate(zip(x_coordinates, y_coordinates))]
+            ax.text(x_val - 3, y_val - 3, self.coord_number[i], color='black', fontsize=10, ha='center', va='center',zorder=10)
         cbar = plt.colorbar(
             ax.imshow(grid_rssi, extent=[0, img.shape[1], 0, img.shape[0]], zorder=1, alpha=0.5, cmap=cmap, vmin=scale.split("to")[0],
                       vmax=scale.split("to")[1]))
         if image_name.replace("TCP ","").replace("UDP ","") == "RSSI":
             cbar.set_label( "RSSI in (dBm)")
             plt.title("Signal quality [dBm]", fontsize=10)
+            [plt.text(i+13, j + 10, f"{str(values[index])}") for index, (i, j) in enumerate(zip(x_coordinates, y_coordinates))]
+
         else:
+            # [plt.text(i-20, j - 40, f"{str(values[index])}") for index, (i, j) in enumerate(zip(x_coordinates, y_coordinates))]
+
+            [plt.text(i-20, j -30, f"{str(values[index])}({str(self.rssi_values[index])})",fontsize=9) for index, (i, j) in enumerate(zip(x_coordinates, y_coordinates))]
+
             heading = f'{image_name.replace("TCP ","").replace("UDP ","").replace("udp ","").replace("tcp ","")} ({image_name.replace("DOWNLOAD","").replace("UPLOAD","").replace("Download","").replace("Upload","")}) [MBit/s]'
 
             plt.title(heading, fontsize=10)
@@ -183,7 +196,7 @@ class heatmap():
         image_png = [file for file in self.folder_contents if file.endswith('.png')]
         floorplan_index = 0
         if "First_floor_PNG.png" not in image_png:
-            floorplan_index = image_png.index("Groung_floor_PNG.png")
+            floorplan_index = image_png.index("Ground_floor_PNG.png")
         else:
             floorplan_index = image_png.index("First_floor_PNG.png")
 
@@ -197,7 +210,8 @@ class heatmap():
             # main_colors_rgb_values = [mcolors.to_rgb(color) for color in main_colors]
             
             # shapes and colors are hardcoded for now to maintain same colors and shapes every time 
-            main_colors_rgb_values = [(0/255,0/255,255/255),(255/255,0/255,0/255),(225/255,225/255,0/255)]
+
+            main_colors_rgb_values = [(128/255,128/255,128/255),(102/255,178/255,255/255),(127/255,0/255,255/255)]
             shapes_list = ["circle","rectangle","triangle"]
             
             self.individual_shape_list = []
@@ -269,11 +283,21 @@ class heatmap():
                             self.individual_shape_list.append(color_shape[1])
                     # print(self.individual_colors,"individual_colors")
                     # print(self.individual_shape_list,"individual_shape_list")
+                    csv_file.seek(0)
+                    self.rssi_values = [row[headers.index("RSSI")] for row in reader][1:]
+                    csv_file.seek(0)
+                    self.coord_number = [row[headers.index("SI.NO")] for row in reader][1:]
                     for header in headers:
+                        csv_file.seek(0)
+
                         # skipping the headers ["SI.NO","AP","Band","BSSID","Channel"] in the csv and generating heatmap for the rest of the headers like RSSI , TCP UPLOAD...
                         if header not in ["SI.NO","AP","Band","BSSID","Channel"]:  
-                            csv_file.seek(0)
+                            
                             column_values = [row[headers.index(header)] for row in reader]
+                            csv_file.seek(0)
+
+                            # print(self.coord_number,"-------------")
+                            # print(self.rssi_values,"-------------")
                             values = [int(value) for value in column_values[1:]]
                             # print(values)
                             scale = self.throuput_scale if header != "RSSI" else self.rssi_scale
