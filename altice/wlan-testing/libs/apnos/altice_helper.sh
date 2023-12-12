@@ -7,14 +7,23 @@ set ssh_password "DustBunnyRoundup9#"
 set sudo_password "lanforge"
 set target_user "admin"
 set target_ip "192.168.1.1"
-set ssh_ip "192.168.200.214"
 
 # Flag to track if user commands are provided
 set send_commands ""
+set ssh_ip ""
 set output ""
+if {$argc != 4} {
+    puts "Usage: $argv0 <username> <ssh_ip> <additional_arguments>"
+    exit 1
+}
+# Set variables from command-line arguments
+set username [lindex $argv 0]
+set ssh_ip [lindex $argv 1]
+set send_commands [lrange $argv 2 end]
+
 # Function to process command-line arguments
 proc process_arguments {args} {
-    global ssh_password sudo_password target_user target_ip send_commands ssh_ip
+    global  ssh_password sudo_password target_user target_ip send_commands ssh_ip
 
     set index 0
     foreach arg $args {
@@ -39,7 +48,7 @@ proc process_arguments {args} {
 proc spawn_ssh {} {
     global ssh_password sudo_password target_user target_ip send_commands ssh_ip
 
-    spawn ssh -t "$sudo_password@$ssh_ip" "sudo -S /home/lanforge/vrf_exec.bash eth1 ssh $target_user@$target_ip" && exit
+    spawn ssh -t lanforge@$ssh_ip "sudo -S /home/lanforge/vrf_exec.bash eth1 ssh $target_user@$target_ip" && exit
     expect {
         "*$target_user*" {
             send "$ssh_password\r"
@@ -61,12 +70,12 @@ proc spawn_ssh {} {
                   send "quit\r"
                   expect -timeout -1 "*GEN*"
                   send "exit\r"
-                  expect -timeout -1 "130 closed*"
+                  expect -timeout -1 "Traffic Generator closed*"
               } else {
                   send "quit\r"
                   expect -timeout -1 "*GEN*"
                   send "exit\r"
-                  expect -timeout -1 "*130 closed*"
+                  expect -timeout -1 "Traffic Generator closed*"
               }
 
         }  
