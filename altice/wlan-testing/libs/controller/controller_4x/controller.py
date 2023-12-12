@@ -175,11 +175,11 @@ class AController:
         else:
             try:
                 if self.use_ssh:
-                    cmd = f"../libs/apnos/altice_helper.sh -send_commands {cmd} -ssh_ip {self.ip}"
-                    print("COMANDDDDDDDDDDDDDDDDDDDDDDDDDDD",cmd)
+                    cmd = f"../libs/apnos/altice_helper.sh lanforge {str(self.ip)} {cmd}"
+                    print("SSH Command Sent:",cmd)
                     output = os.popen(cmd).read()
                 status = output.splitlines()
-                print("status: ", status)
+                print("Status of SSH Command Output: ", status)
                 status = re.sub("[^a-zA-Z_/0-9=> :\\^-]+", "", output)
                 status = status.split(" ")
                 print(status)
@@ -189,7 +189,7 @@ class AController:
             return status
 
     def run_generic_ap_prompt_command(self, cmd=""):
-        print("Command: ",cmd)
+        print("CLI Command: ",cmd)
         try:
             client = self.ssh_cli_connect()
             cmd = cmd
@@ -277,12 +277,12 @@ class AController:
         return None
 
     def set_ap_security(self, radio=None, security=None, password="something"):
-        print(radio+"RADDDDIIIOOO"+type(radio))
+        print(radio+"is the Radio and type is:"+type(radio))
         if radio == "2G":
             wifi_index = 0
         else:
             wifi_index = 1
-        print(wifi_index+"INNNNDDEXXXX"+type(wifi_index))
+        print(wifi_index+"Wifi Index"+type(wifi_index))
         if security == "open" or security is None:
 
             print("=============Setting Up "+security+" Security============")
@@ -674,8 +674,8 @@ class AController:
 
     def check_and_set_ssid_sec(self, radio=None, ssid="client_altice", security=None, password="something"):
         self.get_all_ssid_detail(radio=radio)
-        print("SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSs",self.get_all_ssid_detail(radio=radio))
-        print(f"ssid: 481: {ssid}, self.ap_ssid: {self.ap_ssid_5G}")
+        print("SSID Details from Radio",self.get_all_ssid_detail(radio=radio))
+        # print(f"ssid: 481: {ssid}, self.ap_ssid: {self.ap_ssid_5G}")
 
         if radio == "2G":
             if ssid != self.ap_ssid_2G:
@@ -690,7 +690,7 @@ class AController:
             else:
                 print("Same named SSID already Exists")
         if radio == "2G" or radio == "5G":
-            print("Setting SSID SECURITY")
+            print("Setting SSID SECURITY for :",radio)
             self.set_ap_security(radio=radio, security=security)
 
 
