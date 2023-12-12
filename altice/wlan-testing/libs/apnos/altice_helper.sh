@@ -7,13 +7,14 @@ set ssh_password "DustBunnyRoundup9#"
 set sudo_password "lanforge"
 set target_user "admin"
 set target_ip "192.168.1.1"
+set ssh_ip "192.168.200.214"
 
 # Flag to track if user commands are provided
 set send_commands ""
 set output ""
 # Function to process command-line arguments
 proc process_arguments {args} {
-    global ssh_password sudo_password target_user target_ip send_commands
+    global ssh_password sudo_password target_user target_ip send_commands ssh_ip
 
     set index 0
     foreach arg $args {
@@ -27,6 +28,8 @@ proc process_arguments {args} {
             set target_ip [string range $arg 11 end]
         } elseif {[string match "-send_command*" $arg]} {
             set send_commands [string range $arg 15 end]
+        } elseif {[string match "-ssh_ip*" $arg]} {
+            set ssh_ip [string range $arg 15 end]
         }
         incr index
     }
@@ -34,9 +37,9 @@ proc process_arguments {args} {
 
 # Function to spawn SSH command and enter interactive mode
 proc spawn_ssh {} {
-    global ssh_password sudo_password target_user target_ip send_commands
+    global ssh_password sudo_password target_user target_ip send_commands ssh_ip
 
-    spawn ssh -t lanforge@192.168.200.130 "sudo -S /home/lanforge/vrf_exec.bash eth1 ssh $target_user@$target_ip" && exit
+    spawn ssh -t "$sudo_password@$ssh_ip" "sudo -S /home/lanforge/vrf_exec.bash eth1 ssh $target_user@$target_ip" && exit
     expect {
         "*$target_user*" {
             send "$ssh_password\r"

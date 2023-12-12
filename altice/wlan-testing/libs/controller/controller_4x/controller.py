@@ -175,7 +175,7 @@ class AController:
         else:
             try:
                 if self.use_ssh:
-                    cmd = f"../libs/apnos/altice_helper.sh -send_commands {cmd} -ssh_ip {self.ip}"
+                    cmd = f"../libs/apnos/altice_helper.sh -send_commands {cmd} -ssh_ip {str(self.ip)}"
                     print("COMANDDDDDDDDDDDDDDDDDDDDDDDDDDD",cmd)
                     output = os.popen(cmd).read()
                 status = output.splitlines()
