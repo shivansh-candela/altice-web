@@ -63,12 +63,14 @@ class LNT_MAC_FETCHING(Realm):
 
     # querying the port-mgr tab for mac address & writing them in a .csv file
     def station_mac_listing_to_csv(self):
-        resp = self.json_get(f"/port/?fields=mac,port")
+        resp = self.json_get(f"/port/?fields=mac,port,mode,channel,signal,ssid")
         filtered_data = []
         for item in resp['interfaces']:
             for port, data in item.items():
                 if "sta" in port or "wlan" in port:
-                    filtered_data.append({'Port-ID': data['port'], 'Port': port, 'MAC': data['mac']})
+                    filtered_data.append({'Port-ID': data['port'], 'Port': port, 'MAC': data['mac'],
+                                          'Channel': data['channel'], 'Signal': data['signal'], 'Mode': data['mode'],
+                                          'SSID': data['ssid']})
         # print(filtered_data)
         sorted_filtered_data = sorted(filtered_data, key=lambda x: x['Port-ID'])
         # print(sorted_filtered_data)
@@ -76,7 +78,7 @@ class LNT_MAC_FETCHING(Realm):
         csv_file_path = f"./{self.directory}/sta_mac_list.csv"
 
         with open(csv_file_path, 'w', newline='') as csvfile:
-            fieldnames = ['Port-ID', 'Port', 'MAC']
+            fieldnames = ['Port-ID', 'Port', 'MAC', 'Channel', 'Signal', 'Mode', 'SSID']
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
             writer.writeheader()  # Writing Header
             for row in sorted_filtered_data:
