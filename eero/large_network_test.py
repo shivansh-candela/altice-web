@@ -45,7 +45,7 @@ cv_test_manager = importlib.import_module("py-json.cv_test_manager")
 cv_test_reports = importlib.import_module("py-json.cv_test_reports")
 lf_report = cv_test_reports.lanforge_reports
 lf_report_pdf = importlib.import_module("py-scripts.lf_report")
-
+lf_cleanup = importlib.import_module("py-scripts.lf_cleanup")
 attenuator = importlib.import_module("py-scripts.attenuator_serial")
 modify = importlib.import_module("py-scripts.lf_atten_mod_test")
 sniff_radio = importlib.import_module("py-scripts.lf_sniff_radio")
@@ -99,12 +99,60 @@ class Large_Network_Test(Realm):
         self.twon_sniff_radio = twog_sniff_radio
         self.fivn_sniff__radio = fiveg_sniff_radio
         self.sixn_sniff_radio = sixg_sniff_radio
+
+        self.station_profile = self.new_station_profile()
+        self.station_profile.lfclient_url = self.lfclient_url
         self.cv_test = cv_test_manager.cv_test(lfclient_host=self.lf_host,
                                                lfclient_port=self.lf_port)
         self.report = lf_report_pdf.lf_report(_path='', _results_dir_name="Large_Network_Test",
                                               _output_html=f"large_network_test.html",
                                               _output_pdf=f"large_network_test.pdf")
         self.report_path = self.report.get_path_date_time()
+
+    def pre_cleanup(self):
+        clean_profile = lf_cleanup.lf_clean(host=self.lf_host,
+                                            resource="all",
+                                            clean_sta=True,
+                                            clean_port_mgr=True)
+        logger.info(f"Cleaning pre-existing stations...")
+        clean_profile.sta_clean()
+        clean_profile.port_mgr_clean()
+        # self.wait_until_ports_disappear(sta_list=sta_list)
+
+    def gen_sta_name_list(self, radio, num_sta, start_id, sta_prefix="sta"):
+        eid = None
+        if radio is not None:
+            eid = self.name_to_eid(radio)
+        end_id = int(start_id) + int(num_sta) - 1
+
+        sta_list = []
+        for i in range((10000 + start_id), (10000 + end_id + 1)):
+            sta_name = "%s%s" % (sta_prefix, str(i)[1:])
+            if eid is None:
+                sta_list.append(sta_name)
+            else:
+                sta_list.append("%i.%i.%s" % (eid[0], eid[1], sta_name))
+        logger.info(f"Station List: {sta_list}")
+        return sta_list, end_id
+
+
+    def client_creation(self, radio=None, ssid=None, passwd=None, security=None, sta_list=None,
+                        number_template="00000"):
+        # Build stations
+        self.station_profile.use_security(security, ssid, passwd)
+        self.station_profile.set_number_template(number_template)
+
+        logger.info("Creating stations")
+        self.station_profile.set_command_flag("add_sta", "create_admin_down", 1)
+        self.station_profile.set_command_param("set_port", "report_timer", 1500)
+        self.station_profile.set_command_flag("set_port", "rpt_timer", 1)
+
+        if self.station_profile.create(radio=radio, sta_names_=sta_list):
+            logger.info(f"Stations created on {radio}.")
+        else:
+            logger.info("Stations not properly created.")
+
+        # self.wait_until_ports_appear(sta_list=sta_list)
 
     def load_apply_scenario(self, scenario):  # Loading the existing scenario
         self.cv_test.sync_cv()  # chamber-view sync
@@ -125,8 +173,13 @@ class Large_Network_Test(Realm):
         atten_obj = modify.CreateAttenuator(self.lf_host, self.lf_port, serno, idx, val)
         atten_obj.build()
 
-    def setting_attenuator(self, serial_num,
-                           attenuator_mod_values=None):  # Setting attenuation with specified module values
+    def fetching_resource_ip(self, resource_id):
+        # querying the host ip based on the clustered resources
+        resp = self.json_get(f'port/1/{resource_id}/eth0?fields=ip')
+        return resp['interface']['ip']
+
+    # Setting attenuation with specified module values
+    def setting_attenuator(self, serial_num, attenuator_mod_values=None):
         if attenuator_mod_values:
             if len(serial_num) == len(attenuator_mod_values):
                 for serial_number, module_val in zip(serial_num, attenuator_mod_values):
@@ -156,7 +209,7 @@ class Large_Network_Test(Realm):
         logger.info("Starting Sniffer")
         self.pcap_obj.monitor.start_sniff(capname=self.pcap_name, duration_sec=duration)
 
-    def stop_sniffer(self):  # stopping sniffing on radio
+    def stop_sniffer(self, radio="1.1.wiphy0"):  # stopping sniffing on radio
         logger.info("Stopping The Sniffer...")
         directory_name = os.path.join(self.report_path, "Pcap's")
         try:
@@ -166,8 +219,9 @@ class Large_Network_Test(Realm):
             logger.info(str(x))
         self.pcap_obj.monitor.admin_down()
         self.pcap_obj.cleanup()
-        lf_report.pull_reports(hostname=self.lf_host, port=22, username="lanforge",
-                               password="lanforge", report_location="/home/lanforge/" + self.pcap_name,
+        eth0_ip = self.fetching_resource_ip(resource_id=radio.split('.')[1])
+        lf_report.pull_reports(hostname=eth0_ip, port=22, username="lanforge", password="lanforge",
+                               report_location="/home/lanforge/" + self.pcap_name,
                                report_dir=f"{self.report_path}/Pcap's/")
         return self.pcap_name
 
@@ -184,7 +238,7 @@ class Large_Network_Test(Realm):
         logger.info("Starting Station Side Sniffer...")
         self.pcap_obj_.monitor.start_sniff(capname=self.pcap_name_, duration_sec=duration)
 
-    def stop_station_sniffer(self):  # stopping station side sniffing
+    def stop_station_sniffer(self, sta_name="1.1.sta0000"):  # stopping station side sniffing
         logger.info("Stopping The Station Side Sniffer...")
         directory_name = os.path.join(self.report_path, "Pcap's")
         try:
@@ -192,7 +246,8 @@ class Large_Network_Test(Realm):
                 os.makedirs(directory_name)
         except Exception as x:
             logger.info(str(x))
-        lf_report.pull_reports(hostname="192.168.200.175", port=22, username="lanforge", password="lanforge",
+        eth0_ip = self.fetching_resource_ip(resource_id=sta_name.split('.')[1])
+        lf_report.pull_reports(hostname=eth0_ip, port=22, username="lanforge", password="lanforge",
                                report_location="/home/lanforge/" + self.pcap_name_,
                                report_dir=f"{self.report_path}/Pcap's/")
         return self.pcap_name_
@@ -217,33 +272,48 @@ class Large_Network_Test(Realm):
         del response
         return sta_list
 
-    def get_sta_mac(self, sta_list):  # Fetching the Mac address on specified sta_list: ['1.1.sta00501', '1.1.sta00502']
-        sta_mac_dict = {}
-        for station in sta_list:
-            sta_split = station.split(".")
-            time.sleep(2)  # waiting for few seconds until loading the scenario
-            response = self.json_get(f"/port/{sta_split[0]}/{sta_split[1]}/{sta_split[2]}?fields=mac")
-            if (response is None) or ("interface" not in response):
-                logger.critical(f"station_mac_list: incomplete response: {response}")
-            else:
-                for item in response['interface'].values():
-                    sta_mac_dict[station] = item
-        logger.info(f"Station's Mac Address: {sta_mac_dict}")
-        return sta_mac_dict
-
     def modify_radio(self, radio):  # Setting the flags for specified radio (1.2.wiphy0)
         shelf, resource, radio_name, *nil = self.name_to_eid(eid=radio)
         modify_radio_ = lf_modify_radio.lf_modify_radio(lf_mgr=self.lf_host)
         modify_radio_.set_wifi_radio(_shelf=shelf, _resource=resource, _radio=radio_name,
                                      _flags_value=184614912)
 
-    def station_mac_listing_to_csv(self, sta_mac_dict):
+    def station_mac_listing_to_csv(self, sta_list):
+        data_list = []
+        for station in sta_list:
+            sta_split = station.split(".")
+            time.sleep(2)  # waiting for few seconds until loading the scenario
+            response = self.json_get(
+                f"/port/{sta_split[0]}/{sta_split[1]}/{sta_split[2]}?fields=mac,channel,signal,mode,ssid")
+            if self.pcap_name:
+                response['interface']['pcap_name'] = self.pcap_name
+            elif self.pcap_name_:
+
+                response['interface']['pcap_name'] = self.pcap_name_
+            response['interface']['sta_name'] = station
+            if (response is None) or ("interface" not in response):
+                logger.critical(f"station_mac_list: incomplete response: {response}")
+            else:
+                data_list.append({'Station Name': response['interface']['sta_name'],
+                                  'MAC Address': response['interface']['mac'],
+                                  'Channel': response['interface']['channel'],
+                                  'Signal': response['interface']['signal'],
+                                  'Mode': response['interface']['mode'],
+                                  'SSID': response['interface']['ssid'],
+                                  'PCAP-NAME': response['interface']['pcap_name']})
+        logger.info(f"Station's Data Rows: {data_list}")
         # Opening CSV file in append mode and write the dictionaries (station with mac address) with one row space
-        with open(f'./{self.report_path}/{self.csv_outfile}', 'a', newline='') as csvfile:
-            fieldnames = ['Station Names', 'MAC Address']  # Define the column names for the CSV file
+        csv_file_path = f'./{self.report_path}/{self.csv_outfile}'
+        with open(csv_file_path, 'a', newline='') as csvfile:
+            fieldnames = ['Station Name', 'MAC Address', 'Channel', 'Signal', 'Mode', 'SSID',
+                          'PCAP-NAME']  # Define the column names for the CSV file
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-            for key, value in sta_mac_dict.items():
-                writer.writerow({'Station Names': key, 'MAC Address': value})
+            # Check if the file is empty
+            is_empty = os.stat(csv_file_path).st_size == 0
+            if is_empty:
+                writer.writeheader()  # Writing Header
+            for row in data_list:
+                writer.writerow(row)
             writer.writerow({})  # Adding an empty row
 
     def setup(self, radio_list, channel_list, sniffer_radio=None, station_sniff=False, band="5g"):
@@ -262,11 +332,13 @@ class Large_Network_Test(Realm):
         self.modify_radio(radio=sniffer_radio)
 
         # main logic
+        start_range = 1
         for station_list in station_increment_separation:
             # start sniffer on radio
             logger.info(f"Creating Monitor Interface/Sniffer on Radio ({sniffer_radio}).")
-            self.start_sniffer(radio_channel=channel_list[0], radio=sniffer_radio.split(".")[2],
-                               test_name=f"test_{str(len(station_list))}_{band}_",
+            end_range = start_range + len(station_list) - 1
+            self.start_sniffer(radio_channel=channel_list[0], radio=sniffer_radio,
+                               test_name=f"test_{start_range}-{end_range}_{band}_",
                                monitor_name=f"monitor_{band}", duration=60)
             # station admin-up
             for sta in station_list:
@@ -276,26 +348,24 @@ class Large_Network_Test(Realm):
                     time.sleep(1)
                     self.start_station_side_sniffer(station_name=sta, duration=60)
                     self.wait_for_ip(station_list=[sta], timeout_sec=-1)
-                    sta_side_pcap_file_name = self.stop_station_sniffer()
+                    sta_side_pcap_file_name = self.stop_station_sniffer(sta_name=sta)
                     file_name = f"./{self.report_path}/Pcap's/" + str(sta_side_pcap_file_name)
                     logger.info(
                         f"Attaching the Station Side Pcap File({sta_side_pcap_file_name}) to Report Folder: {file_name}")
                 else:
                     self.admin_up(port_eid=sta)
+            start_range = end_range + 1
             # wait until station got ip
             if self.wait_for_ip(station_list=station_list, timeout_sec=-1):
                 logger.info(f"PASS-IP: All {station_list} stations got IPs.")
             else:
                 logger.info(f"FAILED-IP: May be some some stations {station_list} not got the IP...")
             logger.info("Stop Sniffer")
-            file_name_ = self.stop_sniffer()
+            file_name_ = self.stop_sniffer(radio=sniffer_radio)
             file_name = f"./{self.report_path}/Pcap's/" + str(file_name_)
             logger.info(f"Attaching the 'Pcap File'({file_name_}) to Report Folder: {file_name}")
-            # getting mac addresses for stations
-            sta_mac_dict = self.get_sta_mac(sta_list=station_list)
-            logger.info(f"Station Mac Address {sta_mac_dict}")
-            # appending the station's mac address in a csv file
-            self.station_mac_listing_to_csv(sta_mac_dict=sta_mac_dict)
+            # getting mac addresses for stations & appending the station's mac address in a csv file
+            self.station_mac_listing_to_csv(sta_list=station_list)
 
 
 def main():
@@ -308,15 +378,15 @@ def main():
          # To run the on only 2G
             python3 large_network_test.py --mgr 192.168.200.161 --scenario eero-script --twog_radio 1.1.phy0 --twog_channel 1 
             --twog_sniff_radio 1.1.phy1 --increment 2 --csv_outfile sta_mac_list.csv --attenuators 1.1.1031 1.1.3104 --attenuator_module_values 0,0,0,0 0,0,0,0
-    
+
          # To run the on only 5G
             python3 large_network_test.py --mgr 192.168.200.161 --scenario eero-script --fiveg_radio 1.1.phy1 --fiveg_channel 36 
             --fiveg_sniff_radio 1.1.phy0 --increment 2 --csv_outfile sta_mac_list.csv --attenuators 1.1.1031 1.1.3104 --attenuator_module_values 0,0,0,0 0,0,0,0
-    
+
         # To run the on only 5G
             python3 large_network_test.py --mgr 192.168.200.161 --scenario eero-script --sixg_radio 1.1.phy1 --sixg_channel 37 
             --sixg_sniff_radio 1.1.phy0 --increment 2 --csv_outfile sta_mac_list.csv --attenuators 1.1.1031 1.1.3104 --attenuator_module_values 0,0,0,0 0,0,0,0
-    
+
         # To run on multiple bands (2g,5g,6g)
             python3 large_network_test.py --mgr 192.168.200.240 --scenario 200-clients-long-run 
                --twog_radio 1.1.wiphy2 1.1.wiphy3 1.1.wiphy4 1.1.wiphy5 
@@ -332,14 +402,25 @@ def main():
                --csv_outfile sta_mac_list.csv 
                --attenuators 1.1.1031 1.1.3104 
                --attenuator_module_values 0,0,0,0 0,0,0,0
-    
+
                                             or
-    
+
             python3 large_network_test.py --mgr 192.168.200.240 --scenario 200-clients-long-run --twog_radio 1.1.wiphy2 1.1.wiphy3 1.1.wiphy4 1.1.wiphy5 
             --fiveg_radio 1.1.wiphy0 1.1.wiphy1 1.3.wiphy0 1.3.wiphy1 1.3.wiphy2 1.3.wiphy3 1.3.wiphy4 
             --sixg_radio 1.4.wiphy3 1.4.wiphy4 1.4.wiphy5 1.4.wiphy6 1.4.wiphy7 --twog_channel 1 --fiveg_channel 36 --sixg_channel 37 
             --twog_sniff_radio 1.4.wiphy0 --fiveg_sniff_radio 1.4.wiphy1 --sixg_sniff_radio 1.4.wiphy2 --increment 10 
             --csv_outfile sta_mac_list.csv --attenuators 1.1.1031 1.1.3104 --attenuator_module_values 0,0,0,0 0,0,0,0
+            
+        # To run the script with client creation 
+            python3 large_network_test.py --mgr 192.168.200.185 
+            --radio 'radio==1.1.phy0,ssid==eero_wifi_5-2G-1,ssid_pw==12345678,security==wpa2,num_sta==4' 
+            --radio 'radio==1.1.phy1,ssid==eero_wifi_5-2G-1,ssid_pw==12345678,security==wpa2,num_sta==4' 
+            --radio 'radio==1.2.wiphy0,ssid==eero_wifi_5-5G-36,ssid_pw==12345678,security==wpa2,num_sta==10'
+            --radio 'radio==1.2.wiphy1,ssid==eero_wifi_5-5G-36,ssid_pw==12345678,security==wpa2,num_sta==10' 
+            --twog_radio 1.1.phy0 1.1.phy1 --twog_channel 1 --twog_sniff_radio 1.2.wiphy0 
+            --fiveg_radio 1.2.wiphy1 --fiveg_channel 36 --fiveg_sniff_radio 1.2.wiphy0 --increment 2 
+            --csv_outfile sta_mac_list.csv
+            
 ''')
     required = parser.add_argument_group('Required arguments to run large_network_test.py')
     optional = parser.add_argument_group('Optional arguments to run large_network_test.py')
@@ -349,6 +430,13 @@ def main():
     required.add_argument('--mgr_port', help='port LANforge GUI HTTP service is running on',
                           default=8080)
     required.add_argument("--scenario", type=str, help="Name of the scenario that we want to load and apply")
+    optional.add_argument("--radio", '-r', action='append', nargs=1,
+                          help="--radio \n"
+                               "radio==<radio_name>"
+                               "ssid==<ssid>"
+                               "ssid_pw==<ssid password>"
+                               "security==<security>"
+                               "num_sta==<number_of_stations>")
     optional.add_argument('--csv_outfile', type=str, help='--outfile: give the filename with path',
                           default="sta_mac_list.csv")
 
@@ -389,21 +477,22 @@ def main():
         logger_config.load_lf_logger_config()
 
     module_values = []
-    if len(args.attenuators) == len(args.attenuator_module_values):
-        if args.attenuator_module_values:
-            try:
-                module_values = [list(map(int, atte_mod_values.split(','))) for atte_mod_values in
-                                 args.attenuator_module_values]
-                logger.info(f"Attenuation Module Value: {module_values}")
-                for item in module_values:
-                    if len(item) != 4:
-                        raise argparse.ArgumentTypeError(
-                            "'--attenuator_module_values' input must contain exactly 4 module values.")
-            except ValueError:
-                raise argparse.ArgumentTypeError("Invalid Input: Module values must be numeric.")
-    else:
-        raise argparse.ArgumentTypeError(
-            "Invalid Input: Please check the given '--attenuator_module_values' values match for given attenuators.")
+    if args.attenuators and args.attenuator_module_values:
+        if len(args.attenuators) == len(args.attenuator_module_values):
+            if args.attenuator_module_values:
+                try:
+                    module_values = [list(map(int, atte_mod_values.split(','))) for atte_mod_values in
+                                     args.attenuator_module_values]
+                    logger.info(f"Attenuation Module Value: {module_values}")
+                    for item in module_values:
+                        if len(item) != 4:
+                            raise argparse.ArgumentTypeError(
+                                "'--attenuator_module_values' input must contain exactly 4 module values.")
+                except ValueError:
+                    raise argparse.ArgumentTypeError("Invalid Input: Module values must be numeric.")
+        else:
+            raise argparse.ArgumentTypeError(
+                "Invalid Input: Please check the given '--attenuator_module_values' values match for given attenuators.")
 
     obj = Large_Network_Test(lf_host=args.mgr,
                              lf_port=args.mgr_port,
@@ -419,7 +508,46 @@ def main():
                              sixg_channel=args.sixg_channel,
                              increment=args.increment
                              )
-    obj.load_apply_scenario(scenario=args.scenario)
+    # Lists to help with station creation
+    radio_name_list = []
+    ssid_list = []
+    ssid_password_list = []
+    ssid_security_list = []
+    num_stations_list = []
+    if args.radio:
+        for radio_ in args.radio:
+            radio_keys = ['radio', 'ssid', 'ssid_pw', 'security', 'num_sta']
+            radio_info_dict = dict(map(lambda x: x.split('=='),
+                                       str(radio_).replace(
+                                           '"', '').replace(
+                                           '[', '').replace(
+                                           ']', '').replace(
+                                           "'", "").replace(
+                                           ",", " ").split()))
+            logger.info(f"Radio_Dict After Updating into dict {radio_info_dict}")
+            for key in radio_keys:
+                if key not in radio_info_dict:
+                    logger.critical(
+                        f"Missing config, for the {key}, all of the following need to be present {radio_keys}")
+                    exit(1)
+            radio_name_list.append(radio_info_dict['radio'])
+            ssid_list.append(radio_info_dict['ssid'])
+            ssid_password_list.append(radio_info_dict['ssid_pw'])
+            ssid_security_list.append(radio_info_dict['security'])
+            num_stations_list.append(radio_info_dict['num_sta'])
+        # existing station cleanup
+        obj.pre_cleanup()
+        # Todo: Need to check the radio supported station checking
+        sta_start_id = 0
+        for radio_name, ssid, password, security, num_sta in zip(radio_name_list, ssid_list, ssid_password_list,
+                                                                 ssid_security_list, num_stations_list):
+            sta_list, sta_end_id = obj.gen_sta_name_list(radio=radio_name, num_sta=num_sta, start_id=sta_start_id, sta_prefix="sta")
+            obj.client_creation(radio=radio_name, ssid=ssid, passwd=password, security=security, sta_list=sta_list)
+            sta_start_id = sta_end_id + 1
+    else:
+        obj.load_apply_scenario(scenario=args.scenario)
+
+    # obj.load_apply_scenario(scenario=args.scenario)
 
     attenuator_serial_list = []
     if not args.attenuators and not args.attenuator_module_values:
