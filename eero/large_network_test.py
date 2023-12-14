@@ -276,7 +276,7 @@ class Large_Network_Test(Realm):
         shelf, resource, radio_name, *nil = self.name_to_eid(eid=radio)
         modify_radio_ = lf_modify_radio.lf_modify_radio(lf_mgr=self.lf_host)
         modify_radio_.set_wifi_radio(_shelf=shelf, _resource=resource, _radio=radio_name,
-                                     _flags_value=184614912)
+                                     _flags=184614912)
 
     def station_mac_listing_to_csv(self, sta_list):
         data_list = []
