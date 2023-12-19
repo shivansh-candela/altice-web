@@ -155,12 +155,12 @@ class heatmap():
         if image_name.replace("TCP ","").replace("UDP ","") == "RSSI":
             cbar.set_label( "RSSI in (dBm)")
             plt.title("Signal quality [dBm]", fontsize=10)
-            [plt.text(i+13, j + 10, f"{str(values[index])}") for index, (i, j) in enumerate(zip(x_coordinates, y_coordinates))]
+            [plt.text(i-20, j -30, f"{str(values[index])}dBm",fontsize=9) for index, (i, j) in enumerate(zip(x_coordinates, y_coordinates))]
 
         else:
-            # [plt.text(i-20, j - 40, f"{str(values[index])}") for index, (i, j) in enumerate(zip(x_coordinates, y_coordinates))]
+            [plt.text(i+9, j + 12, f"{str(self.rssi_values[index])}dBm",fontsize=7) for index, (i, j) in enumerate(zip(x_coordinates, y_coordinates))]
 
-            [plt.text(i-20, j -30, f"{str(values[index])}({str(self.rssi_values[index])})",fontsize=9) for index, (i, j) in enumerate(zip(x_coordinates, y_coordinates))]
+            [plt.text(i-20, j -30, f"{str(values[index])}Mbps",fontsize=9) for index, (i, j) in enumerate(zip(x_coordinates, y_coordinates))]
 
             heading = f'{image_name.replace("TCP ","").replace("UDP ","").replace("udp ","").replace("tcp ","")} ({image_name.replace("DOWNLOAD","").replace("UPLOAD","").replace("Download","").replace("Upload","")}) [MBit/s]'
 
@@ -168,6 +168,7 @@ class heatmap():
             cbar.set_label("Throughput " + "in (Mbps)")
             # print(image_name)
         legend_handles = []
+        # ({str(self.rssi_values[index])})
         ncol = 3
         legend_handles_node1 = []
         legend_handles_node2 = []
