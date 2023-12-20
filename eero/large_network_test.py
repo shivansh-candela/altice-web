@@ -20,7 +20,7 @@ Pre-requisites:
         --fiveg_radio 1.1.wiphy0 1.1.wiphy1 1.3.wiphy0 1.3.wiphy1 1.3.wiphy2 1.3.wiphy3 1.3.wiphy4
         --sixg_radio 1.4.wiphy3 1.4.wiphy4 1.4.wiphy5 1.4.wiphy6 1.4.wiphy7 --twog_channel 1 --fiveg_channel 36 --sixg_channel 37
         --twog_sniff_radio 1.4.wiphy0 --fiveg_sniff_radio 1.4.wiphy1 --sixg_sniff_radio 1.4.wiphy2 --increment 10
-        --csv_outfile sta_mac_list.csv --attenuators 1.1.1031 1.1.3104 --attenuator_module_values 0,0,0,0 0,0,0,0
+        --csv_outfile output_results.csv --attenuators 1.1.1031 1.1.3104 --attenuator_module_values 0,0,0,0 0,0,0,0
 
 """
 import csv
@@ -31,6 +31,9 @@ import importlib
 import argparse
 import time
 import logging
+import pyshark
+import pandas as pd
+import subprocess
 
 logger = logging.getLogger(__name__)
 
@@ -68,7 +71,7 @@ class Large_Network_Test(Realm):
                  fiveg_channel=None,
                  sixg_channel=None,
                  increment=None,
-                 csv_outfile="station_mac's_csv.csv",
+                 csv_outfile="result.csv",
                  twog_sniff_radio=None,
                  fiveg_sniff_radio=None,
                  sixg_sniff_radio=None,
@@ -135,9 +138,7 @@ class Large_Network_Test(Realm):
         logger.info(f"Station List: {sta_list}")
         return sta_list, end_id
 
-
-    def client_creation(self, radio=None, ssid=None, passwd=None, security=None, sta_list=None,
-                        number_template="00000"):
+    def client_creation(self, radio=None, ssid=None, passwd=None, security=None, sta_list=None,number_template="00000"):
         # Build stations
         self.station_profile.use_security(security, ssid, passwd)
         self.station_profile.set_number_template(number_template)
@@ -151,7 +152,6 @@ class Large_Network_Test(Realm):
             logger.info(f"Stations created on {radio}.")
         else:
             logger.info("Stations not properly created.")
-
         # self.wait_until_ports_appear(sta_list=sta_list)
 
     def load_apply_scenario(self, scenario):  # Loading the existing scenario
@@ -275,38 +275,61 @@ class Large_Network_Test(Realm):
     def modify_radio(self, radio):  # Setting the flags for specified radio (1.2.wiphy0)
         shelf, resource, radio_name, *nil = self.name_to_eid(eid=radio)
         modify_radio_ = lf_modify_radio.lf_modify_radio(lf_mgr=self.lf_host)
-        modify_radio_.set_wifi_radio(_shelf=shelf, _resource=resource, _radio=radio_name,
-                                     _flags=184614912)
+        modify_radio_.set_wifi_radio(_shelf=shelf, _resource=resource, _radio=radio_name, _flags=184614912)
 
-    def station_mac_listing_to_csv(self, sta_list):
+    def station_mac_listing_to_csv(self, sta_list, band, pcap_file_name):
         data_list = []
         for station in sta_list:
             sta_split = station.split(".")
             time.sleep(2)  # waiting for few seconds until loading the scenario
             response = self.json_get(
-                f"/port/{sta_split[0]}/{sta_split[1]}/{sta_split[2]}?fields=mac,channel,signal,mode,ssid")
+                f"/port/{sta_split[0]}/{sta_split[1]}/{sta_split[2]}?fields=mac,channel,signal,mode,ssid,key/phrase")
             if self.pcap_name:
                 response['interface']['pcap_name'] = self.pcap_name
             elif self.pcap_name_:
-
                 response['interface']['pcap_name'] = self.pcap_name_
             response['interface']['sta_name'] = station
             if (response is None) or ("interface" not in response):
                 logger.critical(f"station_mac_list: incomplete response: {response}")
             else:
+                if band == "6g":
+                    decrypt_phrase = None
+                else:
+                    # decrypt_phrase = 12345678:candy2-2G-6
+                    decrypt_phrase = f"{response['interface']['key/phrase']}:{response['interface']['ssid']}"
+                print("Decrypt Pass phrase:", decrypt_phrase)
+                print("Pcap Name:", pcap_file_name)
+
+                # DHCP Time, 4-way handshake time calculation
+                probe_assoc_time_list,authrequest_assoc_time_list,authresponse_assoc_time_list,four_way_handshake_time_list,dhcp_time_list= self.dhcp_time_calculation(client_mac_list=[response['interface']['mac']],
+                                                                                                                                                                        pcap_file=pcap_file_name, decrypt_phrase=decrypt_phrase, band=band)
+                print(probe_assoc_time_list)
+                print(authrequest_assoc_time_list)
+                print(authresponse_assoc_time_list)
+                print(four_way_handshake_time_list)
+                print(dhcp_time_list)
+
+                print("MAC-ID after", response['interface']['mac'])
                 data_list.append({'Station Name': response['interface']['sta_name'],
                                   'MAC Address': response['interface']['mac'],
                                   'Channel': response['interface']['channel'],
                                   'Signal': response['interface']['signal'],
                                   'Mode': response['interface']['mode'],
                                   'SSID': response['interface']['ssid'],
-                                  'PCAP-NAME': response['interface']['pcap_name']})
+                                  'PCAP-NAME': response['interface']['pcap_name'],
+                                  'Probe Request to Assoc Response (sec)': probe_assoc_time_list[0],
+                                  'Authentication Request to Assoc Response (sec)': authrequest_assoc_time_list[0],
+                                  'Authentication Response to Assoc response (sec)': authresponse_assoc_time_list[0],
+                                  '4-Way Handshake Time (sec)': four_way_handshake_time_list[0],
+                                  'Dhcp time (sec)': dhcp_time_list[0]})
         logger.info(f"Station's Data Rows: {data_list}")
         # Opening CSV file in append mode and write the dictionaries (station with mac address) with one row space
         csv_file_path = f'./{self.report_path}/{self.csv_outfile}'
         with open(csv_file_path, 'a', newline='') as csvfile:
+            # Define the column names for the CSV file
             fieldnames = ['Station Name', 'MAC Address', 'Channel', 'Signal', 'Mode', 'SSID',
-                          'PCAP-NAME']  # Define the column names for the CSV file
+                          'PCAP-NAME', 'Probe Request to Assoc Response (sec)', 'Authentication Request to Assoc Response (sec)',
+                          'Authentication Response to Assoc response (sec)', '4-Way Handshake Time (sec)', 'Dhcp time (sec)']
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
             # Check if the file is empty
             is_empty = os.stat(csv_file_path).st_size == 0
@@ -315,6 +338,188 @@ class Large_Network_Test(Realm):
             for row in data_list:
                 writer.writerow(row)
             writer.writerow({})  # Adding an empty row
+
+    def dhcp_time_calculation(self, client_mac_list, pcap_file, decrypt_phrase, band):
+        transmitter_addresses_list = client_mac_list
+        pcap_file = pcap_file  # pcap_file = '30_2.pcap'
+        print("Transmitter Address:", transmitter_addresses_list)
+        probe_assoc_time_list = []
+        authrequest_assoc_time_list = []
+        authresponse_assoc_time_list = []
+        four_way_handshake_time_list = []
+        dhcp_time_list = []
+        mac_list = []
+        # Define the transmitter addresses as a list
+        # transmitter_addresses = ['00:0a:52:b6:a1:dd', '9c:57:bc:ca:95:a3', '00:0a:52:ce:62:dd' ]
+        all_data = pd.DataFrame()
+        for i, transmitter_address in enumerate(transmitter_addresses_list):
+            probetime = 0
+            Assoctime = 0
+            firstmessage = 0
+            fourthmessage = 0
+            authenticationresponse = 0
+            authenticationrequest = 0
+            first__dhcp_frame_timestamp = None
+            last_frame_timestamp = None
+            time_differences_list = []
+            mac_list.append(transmitter_address)
+
+            # Create the display filters using the variable
+            display_filter1 = f'(wlan.fc.type_subtype==5) && (wlan.da == {transmitter_address})'
+            display_filter2 = f'(wlan.fc.type_subtype==1) && (wlan.da == {transmitter_address})'
+            display_filter3 = f'(wlan_rsna_eapol.keydes.msgnr == 1 ) && (wlan.ra == {transmitter_address})'
+            display_filter4 = f'(wlan_rsna_eapol.keydes.msgnr == 4 ) && (wlan.ta == {transmitter_address})'
+            display_filter5 = f'(wlan.fc.type_subtype==11) && (wlan.ta == {transmitter_address})'
+            display_filter6 = f'(wlan.fc.type_subtype==11) && (wlan.da == {transmitter_address})'
+            display_filter7 = 'dhcp'
+
+            # Open the PCAP file and apply the display filters
+            capture1 = pyshark.FileCapture(pcap_file, display_filter=display_filter1)
+            capture2 = pyshark.FileCapture(pcap_file, display_filter=display_filter2)
+            capture3 = pyshark.FileCapture(pcap_file, display_filter=display_filter3)
+            capture4 = pyshark.FileCapture(pcap_file, display_filter=display_filter4)
+            capture5 = pyshark.FileCapture(pcap_file, display_filter=display_filter5)
+            capture6 = pyshark.FileCapture(pcap_file, display_filter=display_filter6)
+            capture7 = pyshark.FileCapture(pcap_file, display_filter=display_filter7)
+
+            # Iterate through the packets in each capture and print the timestamps
+            print(f"Transmitter Address: {transmitter_address}")
+            for packet in capture1:
+                probetime = packet.sniff_time
+                print("Probe Response Timestamp:", packet.sniff_time)
+
+            for packet in capture2:
+                Assoctime = packet.sniff_time
+                print("Assoc Response Timestamp:", packet.sniff_time)
+
+            for packet in capture3:
+                firstmessage = packet.sniff_time
+                print(packet.sniff_time)
+            for packet in capture4:
+                fourthmessage = packet.sniff_time
+                print(packet.sniff_time)
+            for packet in capture5:
+                authenticationrequest = packet.sniff_time
+                print(packet.sniff_time)
+
+            for packet in capture6:
+                authenticationresponse = packet.sniff_time
+                print(packet.sniff_time)
+
+            print("Dhcp Capture Obj-------------------:", capture7)
+
+            if band == "6g":
+                first_frame = True
+                for packet in capture7:
+                    print("-------------------")
+                    if first_frame:
+                        first__dhcp_frame_timestamp = str(packet.sniff_time).split(" ")[-1]
+                        first_frame = False
+
+                    last_frame_timestamp = str(packet.sniff_time).split(" ")[-1]
+            else:
+                if decrypt_phrase is None:
+                    print(f"Please provide the decryption phrase for {band} band.")
+                decryption = f'uat:80211_keys:"wpa-pwd"," {decrypt_phrase}"'
+                command = [
+                    'tshark',
+                    '-r', pcap_file,
+                    '-o', 'wlan.enable_decryption:TRUE',
+                    '-o', decryption,
+                    '-Y', f'dhcp.option.dhcp == 1 && wlan.addr == {transmitter_address}',
+                    '-T', 'fields',
+                    '-e', 'frame.time'
+                ]
+                result = ""
+                try:
+                    result = subprocess.run(command, capture_output=True, text=True, check=True)
+                except:
+                    print("Could not decrypt the pcap.")
+                output_lines = result.stdout.strip().splitlines()
+                if output_lines:
+                    for elem in output_lines[0].split(",")[1].split(" "):
+                        if ':' in elem:
+                            first__dhcp_frame_timestamp = elem[:-3]
+                            print(f"First Dhcp timestamp for {transmitter_address}:", first__dhcp_frame_timestamp)
+
+                command = [
+                    'tshark',
+                    '-r', pcap_file,
+                    '-o', 'wlan.enable_decryption:TRUE',
+                    '-o', decryption,
+                    '-Y', f'dhcp.option.dhcp == 5 && wlan.addr ==  {transmitter_address}',
+                    '-T', 'fields',
+                    '-e', 'frame.time'
+                ]
+                result1 = ""
+                try:
+                    result1 = subprocess.run(command, capture_output=True, text=True, check=True)
+                except:
+                    print("Could not decrypt the pcap.")
+
+                # print(result)
+                output_lines1 = result1.stdout.strip().splitlines()
+                if output_lines1:
+                    for elem in output_lines1[-1].split(",")[1].split(" "):
+                        if ':' in elem:
+                            last_frame_timestamp = elem[:-3]
+                            print(f"Last Dhcp timestamp for {last_frame_timestamp}:", first__dhcp_frame_timestamp)
+
+            if probetime and Assoctime:
+                time_difference = Assoctime - probetime
+                print(f"Time Difference between Assoc and Probe for {transmitter_address}: {time_difference}")
+                # time_differences_list.append(time_difference)
+                probe_assoc_time_list.append(str(time_difference).split(":")[-1])
+            else:
+                print("No matching Probe and Assoc responses found.")
+                probe_assoc_time_list.append("-")
+
+            if authenticationrequest and Assoctime:
+                time_difference = Assoctime - authenticationrequest
+                print(f"Time Difference between authreq and Probe for {transmitter_address}: {time_difference}")
+                authrequest_assoc_time_list.append(str(time_difference).split(":")[-1])
+
+
+            else:
+                print("No matching authreq and Assoc responses found.")
+                authrequest_assoc_time_list.append("-")
+
+            if authenticationresponse and Assoctime:
+                time_difference = Assoctime - authenticationresponse
+                print(f"Time Difference between authres and Probe for {transmitter_address}: {time_difference}")
+                authresponse_assoc_time_list.append(str(time_difference).split(":")[-1])
+
+            else:
+                print("No matching authres and authres responses found.")
+                authresponse_assoc_time_list.append("-")
+
+            if firstmessage and fourthmessage:
+                time_difference = fourthmessage - firstmessage
+                print(f"Time interval for 4 way handshake {transmitter_address}: {time_difference}")
+                four_way_handshake_time_list.append(str(time_difference).split(":")[-1])
+
+            else:
+                print("No eapol found")
+                four_way_handshake_time_list.append("-")
+
+            if first__dhcp_frame_timestamp and last_frame_timestamp:
+                time_difference = datetime.datetime.strptime(last_frame_timestamp, "%H:%M:%S.%f") - datetime.datetime.strptime(
+                    first__dhcp_frame_timestamp, "%H:%M:%S.%f")
+                # time_difference = last_frame_timestamp - first__dhcp_frame_timestamp
+                print(f"Time interval for DHCP {transmitter_address}: {time_difference}")
+                dhcp_time_list.append(str(time_difference).split(":")[-1])
+
+            else:
+                print("Could not fetch dhcp time")
+                dhcp_time_list.append("-")
+            capture1.close()
+            capture2.close()
+            capture3.close()
+            capture4.close()
+            capture5.close()
+            capture6.close()
+            capture7.close()
+        return probe_assoc_time_list, authrequest_assoc_time_list, authresponse_assoc_time_list, four_way_handshake_time_list, dhcp_time_list
 
     def setup(self, radio_list, channel_list, sniffer_radio=None, station_sniff=False, band="5g"):
         radio_based_stations = []
@@ -343,6 +548,7 @@ class Large_Network_Test(Realm):
             # station admin-up
             for sta in station_list:
                 if station_sniff:
+                    sta_split = sta.split(".")
                     self.admin_up(port_eid=sta)
                     logger.info(f"Starting Sniffer on Station ({sta}).")
                     time.sleep(1)
@@ -352,6 +558,7 @@ class Large_Network_Test(Realm):
                     file_name = f"./{self.report_path}/Pcap's/" + str(sta_side_pcap_file_name)
                     logger.info(
                         f"Attaching the Station Side Pcap File({sta_side_pcap_file_name}) to Report Folder: {file_name}")
+                    self.station_mac_listing_to_csv(sta_list=[sta], band=band, pcap_file_name=file_name)
                 else:
                     self.admin_up(port_eid=sta)
             start_range = end_range + 1
@@ -365,7 +572,7 @@ class Large_Network_Test(Realm):
             file_name = f"./{self.report_path}/Pcap's/" + str(file_name_)
             logger.info(f"Attaching the 'Pcap File'({file_name_}) to Report Folder: {file_name}")
             # getting mac addresses for stations & appending the station's mac address in a csv file
-            self.station_mac_listing_to_csv(sta_list=station_list)
+            self.station_mac_listing_to_csv(sta_list=station_list, band=band, pcap_file_name=file_name)
 
 
 def main():
@@ -377,15 +584,15 @@ def main():
     CLI: 
          # To run the on only 2G
             python3 large_network_test.py --mgr 192.168.200.161 --scenario eero-script --twog_radio 1.1.phy0 --twog_channel 1 
-            --twog_sniff_radio 1.1.phy1 --increment 2 --csv_outfile sta_mac_list.csv --attenuators 1.1.1031 1.1.3104 --attenuator_module_values 0,0,0,0 0,0,0,0
+            --twog_sniff_radio 1.1.phy1 --increment 2 --csv_outfile output_results.csv --attenuators 1.1.1031 1.1.3104 --attenuator_module_values 0,0,0,0 0,0,0,0
 
          # To run the on only 5G
             python3 large_network_test.py --mgr 192.168.200.161 --scenario eero-script --fiveg_radio 1.1.phy1 --fiveg_channel 36 
-            --fiveg_sniff_radio 1.1.phy0 --increment 2 --csv_outfile sta_mac_list.csv --attenuators 1.1.1031 1.1.3104 --attenuator_module_values 0,0,0,0 0,0,0,0
+            --fiveg_sniff_radio 1.1.phy0 --increment 2 --csv_outfile output_results.csv --attenuators 1.1.1031 1.1.3104 --attenuator_module_values 0,0,0,0 0,0,0,0
 
-        # To run the on only 5G
+        # To run the on only 6G
             python3 large_network_test.py --mgr 192.168.200.161 --scenario eero-script --sixg_radio 1.1.phy1 --sixg_channel 37 
-            --sixg_sniff_radio 1.1.phy0 --increment 2 --csv_outfile sta_mac_list.csv --attenuators 1.1.1031 1.1.3104 --attenuator_module_values 0,0,0,0 0,0,0,0
+            --sixg_sniff_radio 1.1.phy0 --increment 2 --csv_outfile output_results.csv --attenuators 1.1.1031 1.1.3104 --attenuator_module_values 0,0,0,0 0,0,0,0
 
         # To run on multiple bands (2g,5g,6g)
             python3 large_network_test.py --mgr 192.168.200.240 --scenario 200-clients-long-run 
@@ -399,7 +606,7 @@ def main():
                --fiveg_sniff_radio 1.4.wiphy1 
                --sixg_sniff_radio 1.4.wiphy2 
                --increment 10 
-               --csv_outfile sta_mac_list.csv 
+               --csv_outfile output_results.csv 
                --attenuators 1.1.1031 1.1.3104 
                --attenuator_module_values 0,0,0,0 0,0,0,0
 
@@ -409,8 +616,8 @@ def main():
             --fiveg_radio 1.1.wiphy0 1.1.wiphy1 1.3.wiphy0 1.3.wiphy1 1.3.wiphy2 1.3.wiphy3 1.3.wiphy4 
             --sixg_radio 1.4.wiphy3 1.4.wiphy4 1.4.wiphy5 1.4.wiphy6 1.4.wiphy7 --twog_channel 1 --fiveg_channel 36 --sixg_channel 37 
             --twog_sniff_radio 1.4.wiphy0 --fiveg_sniff_radio 1.4.wiphy1 --sixg_sniff_radio 1.4.wiphy2 --increment 10 
-            --csv_outfile sta_mac_list.csv --attenuators 1.1.1031 1.1.3104 --attenuator_module_values 0,0,0,0 0,0,0,0
-            
+            --csv_outfile output_results.csv --attenuators 1.1.1031 1.1.3104 --attenuator_module_values 0,0,0,0 0,0,0,0
+
         # To run the script with client creation 
             python3 large_network_test.py --mgr 192.168.200.185 
             --radio 'radio==1.1.phy0,ssid==eero_wifi_5-2G-1,ssid_pw==12345678,security==wpa2,num_sta==4' 
@@ -419,8 +626,8 @@ def main():
             --radio 'radio==1.2.wiphy1,ssid==eero_wifi_5-5G-36,ssid_pw==12345678,security==wpa2,num_sta==10' 
             --twog_radio 1.1.phy0 1.1.phy1 --twog_channel 1 --twog_sniff_radio 1.2.wiphy0 
             --fiveg_radio 1.2.wiphy1 --fiveg_channel 36 --fiveg_sniff_radio 1.2.wiphy0 --increment 2 
-            --csv_outfile sta_mac_list.csv
-            
+            --csv_outfile output_results.csv
+
 ''')
     required = parser.add_argument_group('Required arguments to run large_network_test.py')
     optional = parser.add_argument_group('Optional arguments to run large_network_test.py')
@@ -438,7 +645,7 @@ def main():
                                "security==<security>"
                                "num_sta==<number_of_stations>")
     optional.add_argument('--csv_outfile', type=str, help='--outfile: give the filename with path',
-                          default="sta_mac_list.csv")
+                          default="result.csv")
 
     optional.add_argument('--twog_radio', help='2g_radios: Radio to sniff', nargs="+")
     optional.add_argument('--fiveg_radio', help='5g_radios: Radio to sniff', nargs="+")
@@ -464,6 +671,11 @@ def main():
     optional.add_argument('--attenuator_module_values',
                           help='Specify Attenuator module values in (ddb) for each given attenuator using --attenuators (4 module values for each attenuator)'
                                'eg: --attenuator_module_values 100,200,300,0 450,450,550,550', nargs="+")
+    # packet decryption for dhcp time calculation args
+    parser.add_argument('--twog_decrypt_phrase', '-twog_decrypt_keys',
+                        help="Provide the twog Decryption phrase to decrypt the pcap in the format of <wpa_key>:<ssid>")
+    parser.add_argument('--fiveg_decrypt_phrase', '-fiveg_decrypt_keys',
+                        help="Provide the fiveg Decryption phrase to decrypt the pcap in the format of <wpa_key>:<ssid>")
     # logging configuration
     optional.add_argument("--lf_logger_config_json",
                           help="--lf_logger_config_json <json file> , json configuration of logger")
@@ -506,8 +718,7 @@ def main():
                              twog_channel=args.twog_channel,
                              fiveg_channel=args.fiveg_channel,
                              sixg_channel=args.sixg_channel,
-                             increment=args.increment
-                             )
+                             increment=args.increment,)
     # Lists to help with station creation
     radio_name_list = []
     ssid_list = []
@@ -541,7 +752,8 @@ def main():
         sta_start_id = 0
         for radio_name, ssid, password, security, num_sta in zip(radio_name_list, ssid_list, ssid_password_list,
                                                                  ssid_security_list, num_stations_list):
-            sta_list, sta_end_id = obj.gen_sta_name_list(radio=radio_name, num_sta=num_sta, start_id=sta_start_id, sta_prefix="sta")
+            sta_list, sta_end_id = obj.gen_sta_name_list(radio=radio_name, num_sta=num_sta, start_id=sta_start_id,
+                                                         sta_prefix="sta")
             obj.client_creation(radio=radio_name, ssid=ssid, passwd=password, security=security, sta_list=sta_list)
             sta_start_id = sta_end_id + 1
     else:
