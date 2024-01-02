@@ -1935,6 +1935,27 @@ def main():
     parser.add_argument("--postcleanup", action='store_true')
 
     args = parser.parse_args()
+
+    # restricting the --channel arg for Japan-W53 & W56
+    japan_w53_channel_list = ["52", "56", "60", "64"]
+    japan_w56_channel_list = ["100", "104", "108", "112", "116", "120", "124", "128", "132", "136", "140", "144"]
+    for fcc_type in args.fcctypes:
+        if args.channel not in japan_w53_channel_list and fcc_type.startswith("Japan-w53-"):
+            print(f"The selected {fcc_type} test signal must be tested within 5250MHz to 5350MHz frequency range. \n"
+                  f"Selected channel for current test is {args.channel}. \n"
+                  f"Please verify the channel configured on AP to test with {fcc_type} radar signals.")
+            logging.info(f"The selected {fcc_type} test signal must be tested within 5250MHz to 5350MHz frequency range. \n"
+                  f"Selected channel for current test is {args.channel}. \n"
+                  f"Please verify the channel configured on AP to test with {fcc_type} radar signals.")
+            exit(0)
+        if args.channel not in japan_w56_channel_list and fcc_type.startswith("Japan-w56-"):
+            print(f"The selected {fcc_type} test signal must be tested within 5470MHz to 5725MHz frequency range. \n"
+                  f"Selected channel for current test is {args.channel}. \n"
+                  f"Please verify the channel configured on AP to test wih {fcc_type} radar signals.")
+            logging.info(f"The selected {fcc_type} test signal must be tested within 5470MHz to 5725MHz frequency range. \n"
+                  f"Selected channel for current test is {args.channel}. \n"
+                  f"Please verify the channel configured on AP to test wih {fcc_type} radar signals.")
+            exit(0)
     DFS_Object = DfsTest(host=args.host,
                   port=args.port,
                   ssid=args.ssid,
