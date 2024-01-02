@@ -536,18 +536,20 @@ class DfsTest(Realm):
                     time.sleep(25)
                     new_list = ["Burst", "Trial Centre", "Trial Low", "Trial High","UUT Channel",  "Frequency Modulating", "Tx sample rate", "Detected", "Frequency(KHz)",
                                 "Detection Time(sec)"]
-                if fcc == "ETSI5" or fcc == "ETSI6":
+                elif fcc == "ETSI5" or fcc == "ETSI6":
                     new_list = ["Burst", "prf_1", "prf_2", "prf_3", "Width", "Pulses",   "Detected", "Frequency(KHz)",
                                 "Detection Time(sec)"]
-                if (fcc == "Japan-w53-3" or fcc == "Japan-w53-4" or fcc == "Japan-w53-5" or fcc == "Japan-w53-6"
+                elif (fcc == "Japan-w53-3" or fcc == "Japan-w53-4" or fcc == "Japan-w53-5" or fcc == "Japan-w53-6"
                         or fcc == "Japan-w53-7" or fcc ==  "Japan-w53-8"):
                     new_list = ["Burst", "Frequency(KHz)", "Pulse Width", "Blank Time(us)", "Long Pulse Width(us)",
                                 "Chirp Width(MHz)", "Pri(Hz)", "No of Continuous Pairs of Pulses", "Detection Time(sec)"]
-                if fcc == "Japan-w53-1" or fcc == "Japan-w53-2":
+                elif fcc == "Japan-w53-1" or fcc == "Japan-w53-2":
                     new_list = ["Pulses", "Width", "PRF(Hz)", "Detected", "Frequency(KHz)",
                                 "Detection Time(sec)"]
-                else:
+                elif fcc == "FCC0" or fcc == "FCC1" or fcc == "FCC2" or fcc == "FCC3" or fcc == "FCC4":
                     new_list = ["Burst", "Pulses", "Width", "PRI(US)", "Detected", "Frequency(KHz)", "Detection Time(sec)"]
+                else:   # KOREA_1,2,3,4 & Japan-w56-1,2,3,4
+                    new_list = ["Burst", "Pulses", "Width", "PRF(Hz)", "Detected", "Frequency(KHz)", "Detection Time(sec)"]
                 third_dict = dict.fromkeys(new_list)
                 main_dict[fcc][var_1] = third_dict.copy()
                 print("result data", main_dict)
