@@ -661,8 +661,8 @@ class DfsTest(Realm):
         # report.move_data(directory_name="pcap")
 
         test_setup_info = {
-            "DUT Name": "NXP_AP",
-            "SSID": None,
+            "DUT Name": self.ap_name,
+            # "SSID": None,
             "Test Duration": test_duration,
         }
         report.set_title("Detection Bandwidth  Test Report")
@@ -673,7 +673,7 @@ class DfsTest(Realm):
 
         report.test_setup_table(value="Device under test", test_setup_data=test_setup_info)
 
-        report.set_obj_html("Objective", "Detection Probability Test  is compilance to the Dynamic Frequency Selection"
+        report.set_obj_html("Objective", "Detection Bandwidth Test  is compliance to the Dynamic Frequency Selection"
                                          " (DFS) Regulation, The purpose of this test is to subject the DUT  to a Type 0 FCC radar pulse"
                                          "while moving the frequency of the radar signal through the channel to characterized range of frequencies over which"
                                          "the DUT can detect the radar pulse.")
@@ -1012,9 +1012,7 @@ INCLUDE_IN_README: False
     parser.add_argument("--ssh_password", help='provide password for doing ssh into LANforge', default="lanforge")
 
     parser.add_argument("--lf_hackrf", help='provide serial number og tx hackrf eg 30a28607', default="30a28607")
-
-    parser.add_argument("--ap_name", help='provied the dut name, which need to be test.', default="Relay2 RA620")
-
+    parser.add_argument("--ap_name", help='provied the dut name, which need to be test.', default="Test_AP")
     parser.add_argument("--sniff_radio", help="radio at which wireshark will be started", default="1.1.wiphy0")
 
     parser.add_argument('--fcctypes', help='types needed to be tested FCC0', nargs="+", default=["FCC0"])
