@@ -165,6 +165,8 @@ class DfsTest(Realm):
         self.staConnect = sta_connect.StaConnect2(self.host, self.port, outfile="staconnect2.csv")
         self.local_realm = realm.Realm(lfclient_host=self.host, lfclient_port=self.port)
         self.pcap_obj = lf_pcap.LfPcap()
+        logging.basicConfig(filename='detection_bw.log', filemode='w', format='%(asctime)s - %(message)s',
+                            level=logging.INFO, force=True)
 
     def get_station_list(self):
         sta = self.staConnect.station_list()
@@ -992,6 +994,7 @@ class DfsTest(Realm):
         report.build_footer()
         report.write_html()
         report.write_pdf_with_timestamp(_page_size='A4', _orientation='Portrait')
+        report.move_data(directory="log", _file_name="detection_bw.log")
 
 
 def main():
