@@ -345,7 +345,7 @@ class DfsTest(Realm):
     def stop_sniffer(self):
         print("in stop_sniffer")
         directory = None
-        directory_name = "pcap"
+        directory_name = "Pcap's"
         if directory_name:
             directory = os.path.join("", str(directory_name))
         try:
@@ -358,10 +358,8 @@ class DfsTest(Realm):
         self.pcap_obj_2.monitor.admin_down()
         # time.sleep(2)
         self.pcap_obj_2.cleanup()
-        lf_report.pull_reports(hostname=self.host, port=22, username="lanforge",
-                               password="lanforge",
-                               report_location="/home/lanforge/" + self.pcap_name,
-                               report_dir="pcap")
+        lf_report.pull_reports(hostname=self.host, port=22, username="lanforge", password="lanforge",
+                               report_location="/home/lanforge/" + self.pcap_name, report_dir="Pcap's")
         # time.sleep(10)
 
         return self.pcap_name
@@ -491,7 +489,7 @@ class DfsTest(Realm):
                     print("stop sniffer")
                     time.sleep(2)
                     file_name_ = self.stop_sniffer()
-                    file_name = "./pcap/" + str(file_name_)
+                    file_name = "./Pcap's/" + str(file_name_)
                     print("pcap file name", file_name)
 
                     # pcap read logic
@@ -689,7 +687,7 @@ class DfsTest(Realm):
         date = str(datetime.now()).split(",")[0].replace(" ", "-").split(".")[0]
         report_path = report.get_report_path()
         print(report_path)
-        # report.move_data(directory_name="pcap")
+        report.move_data(directory_name="Pcap's")
 
         test_setup_info = {
             "DUT Name": self.ap_name,
