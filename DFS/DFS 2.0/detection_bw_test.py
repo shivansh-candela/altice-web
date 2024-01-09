@@ -473,7 +473,7 @@ class DfsTest(Realm):
 
                     print("starting sniffer")
                     self.start_sniffer(radio_channel=self.channel, radio=self.sniff_radio,
-                                       test_name="dfs_csa_" + str(fcc) + "_" + str(var_1) + "_channel" + str(self.channel) + "_")
+                                       test_name="dfs_csa_ch_" + str(self.channel) + "_" + str(frq) + "MHz_")
 
 
                     # print(type(current_time))
