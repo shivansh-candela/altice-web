@@ -214,7 +214,7 @@ class Large_Network_Test(Realm):
         directory_name = os.path.join(self.report_path, "Pcap's")
         try:
             if not (os.path.exists(directory_name) and os.path.isdir(directory_name)):
-                os.makedirs(directory_name)
+                os.mkdir(directory_name)
         except Exception as x:
             logger.info(str(x))
         self.pcap_obj.monitor.admin_down()
