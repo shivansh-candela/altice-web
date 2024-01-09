@@ -82,6 +82,7 @@ import pandas as pd
 import paramiko
 from dateutil import parser
 import matplotlib.pyplot as plt
+import asyncio
 import random
 import numpy as np
 import matplotlib
@@ -228,13 +229,10 @@ class DfsTest(Realm):
         return y
 
     def precleanup(self):
-        obj = lf_clean.lf_clean(host=self.host,
-                                port=self.port,
-                                clean_cxs=True,
-                                clean_endp=True)
+        obj = lf_clean.lf_clean(host=self.host, port=self.port)
         obj.resource = "all"
         obj.cxs_clean()
-        # obj.sta_clean()
+        obj.sta_clean()
         obj.port_mgr_clean()
 
     def create_client(self, start_id=0, sta_prefix="wlan", num_sta=1):
@@ -983,11 +981,11 @@ class DfsTest(Realm):
             "Radar Types": self.fcctypes,
             "Radar Hardware": "ct712",
             "Freq Channel Number": self.channel,
+            "Band Width": self.bandwidth,
             "Desired Pass Percentage": str(self.desired_detection) + str("%"),
             "Time interval between Trials (secs)": "2",
             "Run Traffic": False,
-
-            "Contact": "support@candelatech.com"
+            "Contact": "<a href='mailto:support@candelatech.com'>support@candelatech.com</a>"
         }
         report.set_table_title("Test basic Information")
         report.build_table_title()
@@ -1011,7 +1009,7 @@ EXAMPLE:
         # To run the bandwidth test on bandwidth 20MHz.
 
              ./detection_bw_test.py --host 192.168.200.91 --sniff_radio 1.1.wiphy1 --fcctypes FCC0 --channel 64 
-             --trial 1 --desired_detection 90 --more_option centre --bw 20
+             --trial 1 --desired_detection 90 --lf_hackrf 25766ec3 --more_option centre --bw 20 
 
 SCRIPT_CLASSIFICATION: Report Generation
 
@@ -1117,6 +1115,7 @@ INCLUDE_IN_README: False
                   time_int=args.time_int,
                   bandwidth=args.bw)
     obj.run()
+
 
 if __name__ == '__main__':
     main()
