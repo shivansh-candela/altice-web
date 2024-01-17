@@ -1495,20 +1495,9 @@ class DfsTest(Realm):
         report.move_graph_image()
         report.build_graph_without_border()
 
-        # various atandards
-        required_percent = {"FCC0": "60%", "FCC1": "60%", "FCC2": "60%", "FCC3": "60%", "FCC4": "60%", "FCC5": "70%",
-                            "FCC6": "70%",
-                            "ETSI0": "NA", "ETSI1": "60%", "ETSI2": "60%", "ETSI3": "60%", "ETSI4": "60%",
-                            "ETSI5": "60%", "ETSI6": "60%",
-                            "korea_1": "60%", "korea_2": "60%", "korea_3": "60%",
-                            "Japan-w53-1": "60%", "Japan-w53-3": "60%",  "Japan-w53-4": "60%",  "Japan-w53-7": "60%",
-                            "Japan-w53-8": "60%",
-                            "Japan-w53-6": "60%", "Japan-w53-5": "60%",
-                            "Japan-w53-2": "60%", "Japan-w56-1": "60%",  "Japan-w56-2": "60%", "Japan-w56-3": "60%",
-                            "Japan-w56-4": "60%", "Japan-w56-5": "60%", "Japan-w56-6": "60%"}
-
         report.set_obj_html("Summary Table",
-                            "The below table provides detailed information regarding detection probability percentage for various RADAR Types.")
+                            "The below table provides detailed information regarding detection probability percentage for various RADAR Types. <br>"
+                            f"Note: As per standard, the required detection percent is 60%. In the current test, user passed {self.desired_detection} % value.")
         report.build_objective()
         wave, desired_per, pd_per, pd_req, tring, avg_detect, result = [], [], [], [], [], [], []
 
@@ -1548,7 +1537,6 @@ class DfsTest(Realm):
                 else:
                     result.append("FAILED")
 
-            pd_req.append(required_percent[fcc])
             length = []
             for i in main_dict[fcc]:
                 if main_dict[fcc][i] is None:
@@ -1588,9 +1576,8 @@ class DfsTest(Realm):
                     avg_detect.append(av)
         table_1 = {
             "WaveForm Name": wave,
-            "Pd %": pd_per,
-            # "Desired Percentage %" :desired_per,
-            "Required Detection Percentage %": pd_req,
+            "Pd (%)": pd_per,
+            "Required Detection Percentage (%)": desired_per,
             "Num Trials": tring,
             "Average Detect Time (secs)": avg_detect,
             "Result": result,
