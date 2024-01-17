@@ -1366,8 +1366,15 @@ class DfsTest(Realm):
 
     # graphing function
     def generate_graph(self, data):
+        if 8 <= len(self.fcctypes) <= 10:   # if the no of bars are between 8 & 10 roating the x-axis labels to 45
+            bar_text_rotation = 0
+            text_rotation = 45
+        else:
+            bar_text_rotation = 0
+            text_rotation = 0
         obj = lf_graph.lf_stacked_graph(_data_set=data, _xaxis_name="", _yaxis_name="", _enable_csv=False,
-                                        _remove_border=True)
+                                        _remove_border=True, _bar_text_rotation=bar_text_rotation,
+                                        _x_ticklabels_rotation=text_rotation)
         img = obj.build_stacked_graph()
         return img
 
