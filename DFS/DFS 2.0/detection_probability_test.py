@@ -1632,10 +1632,24 @@ class DfsTest(Realm):
             print(aggregate)
 
             report.set_obj_html("Aggregate of short pulse type 1-4",
-                                "The aggregate is the average of the percentage of successful detections of"
-                                " Short Pulse Radar Types 1-4.  For example, the following table indicates how "
-                                " the aggregate of percentage of successful detections is computed. For the current run aggregate is equal to " + str(round(aggregate, 2)) + " %")
+                                "The aggregate is the average of the percentage of successful detections of Short Pulse "
+                                "Radar Types 1-4.  For example, the following table indicates how the aggregate of "
+                                "percentage of successful detections is computed. For the current run aggregate is "
+                                "equal to " + str(round(aggregate, 2)) + " %")
             report.build_objective()
+            aggregate_percentage = round(aggregate, 2)
+            if aggregate_percentage >= 80:
+                status = "PASS"
+            else:
+                status = "FAIL"
+            aggregate_table = {
+                "Achieved Aggregate % (FCC1 to FCC4)": [str(aggregate_percentage)],
+                "Required Aggregate %": ["80"],
+                "Status": [status],
+            }
+            table_setup = pd.DataFrame(aggregate_table)
+            report.set_table_dataframe(table_setup)
+            report.build_table()
 
             table_2 = {
                 "Radar Type": main_list,
