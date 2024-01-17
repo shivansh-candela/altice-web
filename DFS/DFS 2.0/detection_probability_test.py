@@ -1563,16 +1563,14 @@ class DfsTest(Realm):
                 else:
                     sum = 0
                     for i in detection_list:
-                        val = None
                         if i == "NA":
                             val = 0
                         else:
                             val = i
-
-                        sum = sum + int(val)
-
-                    av = round((sum / len(detection_list)), 1)
-                    print(av)
+                        sum = sum + val
+                    without_na_values = [item for item in detection_list if item != 'NA'] # removing "NA" values from the detection_list
+                    av = round((sum / len(without_na_values)), 1)
+                    print("Average Detation:", av)
                     avg_detect.append(av)
         table_1 = {
             "WaveForm Name": wave,
