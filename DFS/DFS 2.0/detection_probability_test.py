@@ -99,6 +99,8 @@ import pandas as pd
 import paramiko
 import random
 from dateutil import parser
+import json
+import shutil
 
 if sys.version_info[0] != 3:
     logging.critical("This script requires Python 3")
@@ -121,6 +123,9 @@ lf_modify_radio = importlib.import_module("py-scripts.lf_modify_radio")
 
 class DfsTest(Realm):
     def __init__(self,
+                 testname=None,
+                 starttime=None,
+                 ui_report_dir=None,
                  host=None,
                  port=None,
                  ssid=None,
@@ -154,10 +159,14 @@ class DfsTest(Realm):
                  side_b_min_rate=None,
                  side_b_max_rate=None,
                  side_a_min_pdu=None,
-                 side_b_min_pdu=None
+                 side_b_min_pdu=None,
+                 if_gain=None
                  ):
         super().__init__(lfclient_host=host,
                          lfclient_port=port)
+        self.testname = testname
+        self.starttime = starttime
+        self.ui_report_dir = ui_report_dir
         self.host = host
         self.port = port
         self.ssid = ssid
@@ -200,10 +209,29 @@ class DfsTest(Realm):
         self.cx_profile.side_b_max_bps = side_b_max_rate
         self.cx_profile.side_a_min_pdu = side_a_min_pdu
         self.cx_profile.side_b_min_pdu = side_b_min_pdu
+        self.if_gain = if_gain
         logging.basicConfig(filename='dpt.log', filemode='w', level=logging.INFO, force=True)
         if self.desired_detection < 60:
             print("please specify desired detection percentage value equal to or greater than the required percentage detection")
             exit(1)
+
+    def create_webui_logs(self):
+        if (self.starttime is not None and self.testname is not None):
+            result = {
+                'starttime': self.starttime,
+                'status': 'Aborted'
+            }
+            try:
+                with open(self.ui_report_dir + 'dfs_result.json', 'r') as f:
+                    data = json.load(f)
+
+                data[self.testname] = result
+
+                with open(self.ui_report_dir + 'dfs_result.json', 'w') as f:
+                    json.dump(data, f, indent=4)
+            except:
+                with open(self.ui_report_dir + 'dfs_result.json', 'w') as f:
+                    json.dump(result, f, indent=4)
 
     # get station list
     def get_station_list(self):
@@ -233,6 +261,7 @@ class DfsTest(Realm):
                 self.pcap_obj_2.monitor.start_sniff(capname=self.pcap_name, duration_sec=duration)
             else:
                 print("some problem with monitor not being up")
+                self.create_webui_logs()
                 exit()
         elif self.more_option == "random":
             self.pcap_obj_2 = sniff_radio.SniffRadio(lfclient_host=self.host, lfclient_port=self.port,
@@ -249,6 +278,7 @@ class DfsTest(Realm):
                 self.pcap_obj_2.monitor.start_sniff(capname=self.pcap_name, duration_sec=duration)
             else:
                 print("some problem with monitor not being up")
+                self.create_webui_logs()
                 exit()
 
 
@@ -260,6 +290,7 @@ class DfsTest(Realm):
         if (response is None) or ("interface" not in response):
             print("station_list: incomplete response:")
             logging.info("station_list: incomplete response:")
+            self.create_webui_logs()
             exit(1)
         y = response["interface"][query]
         return y
@@ -315,6 +346,9 @@ class DfsTest(Realm):
         station_profile.set_command_flag("set_port", "rpt_timer", 1)
         print("Creating stations.")
         logging.info("Creating stations.")
+        if (self.if_gain != None):
+            print("LF GAIN: ", self.if_gain)
+            logging.info(str(self.if_gain))
         station_profile.create(radio=self.radio, sta_names_=station_list)
 
         print("Waiting for ports to appear")
@@ -356,6 +390,7 @@ class DfsTest(Realm):
         else:
             print("Stations failed to get IPs")
             logging.error("Stations failed to get IPs")
+            self.create_webui_logs()
             exit(1)
 
     # this function is used for running hackrf script with different regulation inputs
@@ -379,9 +414,9 @@ class DfsTest(Realm):
         # time.sleep(1)
         command = None
         if type == "fcc6":
-            command = f"nice -19 sudo python3 lf_hackrf_dfs.py --tx_sample_rate 20 --radar_type FCC6,100 --one_burst --log_level debug --lf_hackrf {self.lf_hackrf}"
+            command = f"nice -19 sudo python3 lf_hackrf_dfs.py --tx_sample_rate 20 --radar_type FCC6,100 --one_burst --log_level debug --lf_hackrf {self.lf_hackrf} --if_gain {self.if_gain}"
         if type == "fcc5":
-            command = f"nice -19 sudo python3 lf_hackrf_dfs.py --freq {freq} --rf_type --one_burst FCC5,{burst},{trial_centre},{trial_low},{trial_high},{uut_channel},{freq_modulatin},{tx_sample_rate} --log_level debug --lf_hackrf {self.lf_hackrf}"
+            command = f"nice -19 sudo python3 lf_hackrf_dfs.py --freq {freq} --rf_type --one_burst FCC5,{burst},{trial_centre},{trial_low},{trial_high},{uut_channel},{freq_modulatin},{tx_sample_rate} --log_level debug --lf_hackrf {self.lf_hackrf} --if_gain {self.if_gain}"
             print(command)
         if type == "etsi1" or type == "etsi2" or type == "etsi3" or type == "etsi4":
             if type == "etsi1":
@@ -392,29 +427,29 @@ class DfsTest(Realm):
                 var = "ETSI3"
             if type == "etsi4":
                 var = "ETSI4"
-            command = f"nice -19 sudo python3 lf_hackrf_dfs.py --freq {freq} --rf_type {var},{width},{pri},20 --pulse_count {count} --one_burst --log_level debug --lf_hackrf {self.lf_hackrf}"
+            command = f"nice -19 sudo python3 lf_hackrf_dfs.py --freq {freq} --rf_type {var},{width},{pri},20 --pulse_count {count} --one_burst --log_level debug --lf_hackrf {self.lf_hackrf} --if_gain {self.if_gain}"
             print(command)
         if type == "etsi5" or type == "etsi6":
             if type == "etsi5":
                 var = "ETSI5"
             if type == "etsi6":
                 var = "ETSI6"
-            command = f"nice -19 sudo python3 lf_hackrf_dfs.py --freq {freq} --radar_type {var},{width},{prf_1},{prf_2},{prf_3},20 --log_level debug --one_burst --lf_hackrf {self.lf_hackrf}"
+            command = f"nice -19 sudo python3 lf_hackrf_dfs.py --freq {freq} --radar_type {var},{width},{prf_1},{prf_2},{prf_3},20 --log_level debug --one_burst --lf_hackrf {self.lf_hackrf} --if_gain {self.if_gain} --if_gain {self.if_gain}"
             print(command)
         if type == "legacy":
-            command = f"nice -19 sudo python3 lf_hackrf_dfs.py --pulse_width {width} --pulse_interval {pri} --pulse_count {count} --sweep_time 1000 --one_burst --freq {freq} --lf_hackrf {self.lf_hackrf}"
+            command = f"nice -19 sudo python3 lf_hackrf_dfs.py --pulse_width {width} --pulse_interval {pri} --pulse_count {count} --sweep_time 1000 --one_burst --freq {freq} --lf_hackrf {self.lf_hackrf} --if_gain {self.if_gain}"
         if type == "legacy_w56-1":
-            command = f"nice -19 python3 lf_hackrf_dfs.py --pulse_width {width} --pulse_interval {pri} --pulse_count {count} --tx_sample_rate 2 --sweep_time 1000 --freq {freq} --one_burst --lf_hackrf {self.lf_hackrf}"
+            command = f"nice -19 python3 lf_hackrf_dfs.py --pulse_width {width} --pulse_interval {pri} --pulse_count {count} --tx_sample_rate 2 --sweep_time 1000 --freq {freq} --one_burst --lf_hackrf {self.lf_hackrf} --if_gain {self.if_gain}"
         if type == "FCC0" or type == "FCC1" or type == "FCC2" or type == "FCC3" or type == "FCC4" or type == "KOREA" or type == "W56PULSE" or type == "ETSI0":
             if type == "ETSI0":
-                command = f"nice -19 python3 lf_hackrf_dfs.py --rf_type {type},{width},{pri},20 --lf_hackrf {self.lf_hackrf} --freq {freq} --one_burst --log_level debug"
+                command = f"nice -19 python3 lf_hackrf_dfs.py --rf_type {type},{width},{pri},20 --lf_hackrf {self.lf_hackrf} --freq {freq} --one_burst --log_level debug --if_gain {self.if_gain}"
             else:
-                command = f"nice -19 python3 lf_hackrf_dfs.py --rf_type {type},{width},{pri},{count},20 --lf_hackrf {self.lf_hackrf} --freq {freq} --one_burst --log_level debug"
+                command = f"nice -19 python3 lf_hackrf_dfs.py --rf_type {type},{width},{pri},{count},20 --lf_hackrf {self.lf_hackrf} --freq {freq} --one_burst --log_level debug --if_gain {self.if_gain}"
         if type == "w53-3":
-            command = f"nice -19 sudo python3 lf_hackrf_dfs.py --radar_type W53CHIRP,{width},{blank_time},{long_pulse_width},{chirp_width},{prf},{num_con_pair},{freq},20 --one_burst --lf_hackrf {self.lf_hackrf} --log_level debug "
+            command = f"nice -19 sudo python3 lf_hackrf_dfs.py --radar_type W53CHIRP,{width},{blank_time},{long_pulse_width},{chirp_width},{prf},{num_con_pair},{freq},20 --one_burst --lf_hackrf {self.lf_hackrf} --log_level debug --if_gain {self.if_gain}"
             print(command)
         if type == "w53-1":
-            command = f"nice -19 sudo python3 lf_hackrf_dfs.py --rf_type W53PULSE,{width},{prf},{count},20 --freq {freq} --one_burst --lf_hackrf {self.lf_hackrf} --log_level debug"
+            command = f"nice -19 sudo python3 lf_hackrf_dfs.py --rf_type W53PULSE,{width},{prf},{count},20 --freq {freq} --one_burst --lf_hackrf {self.lf_hackrf} --log_level debug --if_gain {self.if_gain}"
         # execute second command
         stdin, stdout, stderr = p.exec_command(str(command), get_pty=True)
         stdin.write(str(self.ssh_password) + "\n")
@@ -1289,6 +1324,7 @@ class DfsTest(Realm):
         else:
             print("station is not at expected channel")
             logging.error("station is not at expected channel")
+            self.create_webui_logs()
             exit(1)
 
         test_time = datetime.now()
@@ -1311,6 +1347,19 @@ class DfsTest(Realm):
         test_duration = datetime.strptime(s2, FMT) - datetime.strptime(s1, FMT)
         logging.info("test duration" + str(test_duration))
         self.generate_report(test_duration=test_duration, main_dict=main)
+        if (self.starttime is not None and self.testname is not None):
+            main['starttime'] = self.starttime
+            try:
+                with open(self.ui_report_dir + 'dfs_result.json', 'r') as f:
+                    data = json.load(f)
+
+                data[self.testname] = main
+
+                with open(self.ui_report_dir + 'dfs_result.json', 'w') as f:
+                    json.dump(data, f, indent=4)
+            except:
+                with open(self.ui_report_dir + 'dfs_result.json', 'w') as f:
+                    json.dump({self.testname: main}, f, indent=4)
         self.stop_l3()
 
     # graphing function
@@ -1786,6 +1835,12 @@ class DfsTest(Realm):
         report.write_pdf_with_timestamp(_page_size='A4', _orientation='Portrait')
         report.move_data(directory="log", _file_name="dpt.log" )
         # report.move_data(_file_name="dpt.log")
+        if (self.testname != None and self.starttime != None):
+            pdf_path = report.get_pdf_path()
+            log_path = report_path + '/log/dpt.log'
+            ui_report_directory = self.ui_report_dir + '/' + self.testname + '_' + self.starttime
+            shutil.copy(pdf_path, ui_report_directory + '/dfs_test.pdf')
+            shutil.copy(log_path, ui_report_directory + '/dfs_log.txt')
 
 
 def main():
@@ -1935,6 +1990,10 @@ def main():
     parser.add_argument("--side_a_min_pdu", type=int, help='for layer3 provide side a min pdu size', default=1250)
     parser.add_argument("--side_b_min_pdu", type=int, help='for layer3 provide side b min pdu size', default=1250)
     parser.add_argument("--postcleanup", action='store_true')
+    parser.add_argument("--testname", help='specify a name for the test')
+    parser.add_argument("--starttime", type=str, help="--starttime YYYY-MM-DDThh:mm")
+    parser.add_argument("--ui_report_dir", help='add path for webUI results dir to copy the pdf and other files')
+    parser.add_argument("--if_gain", help='to specify user defined default gain value for hackrf', default=27)
 
     args = parser.parse_args()
 
@@ -1959,45 +2018,50 @@ def main():
                   f"Please verify the channel configured on AP to test wih {fcc_type} radar signals.")
             exit(0)
     DFS_Object = DfsTest(host=args.host,
-                  port=args.port,
-                  ssid=args.ssid,
-                  passwd=args.passwd,
-                  security=args.security,
-                  radio=args.radio,
-                  upstream=args.upstream,
-                  fcctypes=args.fcctypes,
-                  channel=args.channel,
-                  sniff_radio=args.sniff_radio,
-                  static=args.static,
-                  static_ip=args.static_ip,
-                  ip_mask=args.ip_mask,
-                  gateway_ip=args.gateway_ip,
-                  enable_traffic=args.enable_traffic,
-                  desired_detection=args.desired_detection,
-                  extra_trials=args.extra_trials,
-                  more_option=args.more_option,
-                  time_int=args.time_int,
-                  trials=args.trials,
-                  ssh_username=args.ssh_username,
-                  ssh_password=args.ssh_password,
-                  traffic_type=args.traffic_type,
-                  bandwidth=args.bw,
-                  ap_name=args.ap_name,
-                  lf_hackrf=args.lf_hackrf,
-                  legacy=args.legacy,
-                  create_client=args.create_client,
-                  side_a_min_rate=args.side_a_min_rate,
-                  side_a_max_rate=args.side_a_max_rate,
-                  side_b_min_rate=args.side_b_min_rate,
-                  side_b_max_rate=args.side_b_max_rate,
-                  side_a_min_pdu=args.side_a_min_pdu,
-                  side_b_min_pdu=args.side_b_min_pdu
-                  )
+                         port=args.port,
+                         testname=args.testname,
+                         starttime=args.starttime,
+                         ui_report_dir=args.ui_report_dir,
+                         ssid=args.ssid,
+                         passwd=args.passwd,
+                         security=args.security,
+                         radio=args.radio,
+                         upstream=args.upstream,
+                         fcctypes=args.fcctypes,
+                         channel=args.channel,
+                         sniff_radio=args.sniff_radio,
+                         static=args.static,
+                         static_ip=args.static_ip,
+                         ip_mask=args.ip_mask,
+                         gateway_ip=args.gateway_ip,
+                         enable_traffic=args.enable_traffic,
+                         desired_detection=args.desired_detection,
+                         extra_trials=args.extra_trials,
+                         more_option=args.more_option,
+                         time_int=args.time_int,
+                         trials=args.trials,
+                         ssh_username=args.ssh_username,
+                         ssh_password=args.ssh_password,
+                         traffic_type=args.traffic_type,
+                         bandwidth=args.bw,
+                         ap_name=args.ap_name,
+                         lf_hackrf=args.lf_hackrf,
+                         legacy=args.legacy,
+                         create_client=args.create_client,
+                         side_a_min_rate=args.side_a_min_rate,
+                         side_a_max_rate=args.side_a_max_rate,
+                         side_b_min_rate=args.side_b_min_rate,
+                         side_b_max_rate=args.side_b_max_rate,
+                         side_a_min_pdu=args.side_a_min_pdu,
+                         side_b_min_pdu=args.side_b_min_pdu,
+                         if_gain=args.if_gain
+                         )
 
     DFS_Object.run()
 
     if args.postcleanup:
         DFS_Object.pre_cleanup()
+
 
 if __name__ == '__main__':
     main()
