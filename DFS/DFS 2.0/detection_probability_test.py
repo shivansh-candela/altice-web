@@ -199,7 +199,7 @@ class DfsTest(Realm):
         self.staConnect = sta_connect.StaConnect2(self.host, self.port, outfile="staconnect2.csv")
         self.local_realm = realm.Realm(lfclient_host=self.host, lfclient_port=self.port)
         self.pcap_obj = lf_pcap.LfPcap()
-        self.cx_profile = self.new_l3_cx_profile() #create CX profile object
+        self.cx_profile = self.new_l3_cx_profile()  # create CX profile object
         self.cx_profile.host = self.host
         self.cx_profile.port = self.port
         self.create_client = create_client
@@ -254,7 +254,8 @@ class DfsTest(Realm):
             self.pcap_obj_2.setup(0, 0, 0)
             self.pcap_obj_2.monitor.admin_up()
             print("Waiting until ports appear...")
-            x = LFUtils.wait_until_ports_appear(base_url=f"http://{self.host}:{self.port}", port_list="monitor", debug=True, timeout=300)
+            x = LFUtils.wait_until_ports_appear(base_url=f"http://{self.host}:{self.port}", port_list="monitor",
+                                                debug=True, timeout=300)
             if x is True:
                 print("monitor is up ")
                 print("start sniffing")
@@ -280,7 +281,6 @@ class DfsTest(Realm):
                 print("some problem with monitor not being up")
                 self.create_webui_logs()
                 exit()
-
 
     # query station data like channel etc
     def station_data_query(self, station_name="wlan0", query="channel"):
@@ -394,10 +394,10 @@ class DfsTest(Realm):
             exit(1)
 
     # this function is used for running hackrf script with different regulation inputs
-    def run_hackrf(self, width=None, pri=None, count=None, freq=None, type=None, burst=None, trial_centre=None, trial_low=None,
-                   trial_high=None, uut_channel=None, freq_modulatin=None, tx_sample_rate=None, prf_1=None, prf_2=None,
-                   prf_3=None, blank_time=None,long_pulse_width=None, chirp_width=None,
-                   prf=None,num_con_pair=None ):
+    def run_hackrf(self, width=None, pri=None, count=None, freq=None, type=None, burst=None, trial_centre=None,
+                   trial_low=None, trial_high=None, uut_channel=None, freq_modulatin=None, tx_sample_rate=None,
+                   prf_1=None, prf_2=None, prf_3=None, blank_time=None, long_pulse_width=None, chirp_width=None,
+                   prf=None, num_con_pair=None):
 
         p = paramiko.SSHClient()
         p.set_missing_host_key_policy(paramiko.AutoAddPolicy())  # This script doesn't work for me unless this line is added!
@@ -531,7 +531,7 @@ class DfsTest(Realm):
             main_dict[i] = sec_dict.copy()
         print(main_dict)
         logging.info(str(main_dict))
-        width_, interval_, count_ , burst_, trial_centre, trial_low, trial_high, uut_channel, freq_modulatin, tx_sample_rate, prf_1_, prf_2_, prf_3_  = "", "", "", "", "", "", "","", "", "", "", "", ""
+        width_, interval_, count_, burst_, trial_centre, trial_low, trial_high, uut_channel, freq_modulatin, tx_sample_rate, prf_1_, prf_2_, prf_3_ = "", "", "", "", "", "", "", "", "", "", "", "", ""
         blank_time, long_pulse_width, chirp_width, prf, num_con_pair = "", "", "", "", ""
         fcc1_list = None
         if "FCC1" in self.fcctypes:
@@ -569,13 +569,13 @@ class DfsTest(Realm):
                 var_1 = "Trial_" + str(var + tria + 1)
                 if fcc == "FCC5":
                     time.sleep(25)
-                    new_list = ["Burst", "Trial Centre", "Trial Low", "Trial High","UUT Channel",  "Frequency Modulating", "Tx sample rate", "Detected", "Frequency(KHz)",
-                                "Detection Time(sec)"]
+                    new_list = ["Burst", "Trial Centre", "Trial Low", "Trial High", "UUT Channel", "Frequency Modulating",
+                                "Tx sample rate", "Detected", "Frequency(KHz)", "Detection Time(sec)"]
                 elif fcc == "ETSI5" or fcc == "ETSI6":
-                    new_list = ["Burst", "prf_1", "prf_2", "prf_3", "Width", "Pulses",   "Detected", "Frequency(KHz)",
+                    new_list = ["Burst", "prf_1", "prf_2", "prf_3", "Width", "Pulses", "Detected", "Frequency(KHz)",
                                 "Detection Time(sec)"]
                 elif (fcc == "Japan-w53-3" or fcc == "Japan-w53-4" or fcc == "Japan-w53-5" or fcc == "Japan-w53-6"
-                        or fcc == "Japan-w53-7" or fcc ==  "Japan-w53-8"):
+                      or fcc == "Japan-w53-7" or fcc == "Japan-w53-8"):
                     new_list = ["Burst", "Frequency(KHz)", "Pulse Width", "Blank Time(us)", "Long Pulse Width(us)",
                                 "Chirp Width(MHz)", "Pri(Hz)", "No of Continuous Pairs of Pulses", "Detection Time(sec)"]
                 elif fcc == "Japan-w53-1" or fcc == "Japan-w53-2":
@@ -612,7 +612,7 @@ class DfsTest(Realm):
                         if tria > 30:
                             interval_ = str(random.randint(518, 3066))
                             formula = ((1 * 19 * 1000000) / (360 * int(interval_)))
-                            count_ = str(int(formula)+1)
+                            count_ = str(int(formula) + 1)
                         else:
                             interval_1 = fcc1_list[tria]
                             interval_ = str(fcc1_list[tria])
@@ -634,12 +634,12 @@ class DfsTest(Realm):
                     interval_ = str(random.randint(200, 500))
                     count_ = str(random.randint(12, 16))
                 elif fcc == "FCC5":
-                    if tria in range(0,10):
+                    if tria in range(0, 10):
                         print(tria)
                         trial_centre = str(1)
                         trial_low = str(0)
                         trial_high = str(0)
-                    if tria in range(10,20):
+                    if tria in range(10, 20):
                         print(tria)
                         trial_centre = str(0)
                         trial_low = str(1)
@@ -872,11 +872,11 @@ class DfsTest(Realm):
                 elif fcc == "Japan-w56-1":
                     if self.legacy == "True":
                         width_ = 0.5
-                        interval_ = 1389 #This is PRI, i.e. PRI = 1389
+                        interval_ = 1389  # This is PRI, i.e. PRI = 1389
                         count_ = 18
                     else:
                         width_ = 0.5
-                        interval_ = 720 #This is PRF, i.e. PRF = 720
+                        interval_ = 720  # This is PRF, i.e. PRF = 720
                         count_ = 18
                 elif fcc == "Japan-w56-2":
                     if self.legacy == "True":
@@ -956,8 +956,8 @@ class DfsTest(Realm):
                     main_dict[fcc][var_1]["Width"] = width_
                     main_dict[fcc][var_1]["PRI(US)"] = interval_
                 if (fcc == "FCC0" or fcc == "FCC1" or fcc == "FCC2" or fcc == "FCC3" or fcc == "FCC4"
-                        or fcc == "ETSI0" or fcc == "ETSI1"or fcc == "ETSI2" or fcc == "ETSI3" or fcc == "ETSI4"
-                        or fcc == "Japan-w56-1" or fcc == "Japan-w56-2" or fcc == "Japan-w56-3"or fcc == "Japan-w56-4" or fcc == "Japan-w56-5" or fcc == "Japan-w56-6"
+                        or fcc == "ETSI0" or fcc == "ETSI1" or fcc == "ETSI2" or fcc == "ETSI3" or fcc == "ETSI4"
+                        or fcc == "Japan-w56-1" or fcc == "Japan-w56-2" or fcc == "Japan-w56-3" or fcc == "Japan-w56-4" or fcc == "Japan-w56-5" or fcc == "Japan-w56-6"
                         or fcc == "korea_1" or fcc == "korea_2" or fcc == "korea_3"
                 ):
                     main_dict[fcc][var_1]["Burst"] = "1"
@@ -1104,12 +1104,14 @@ class DfsTest(Realm):
                     # else:
                     #     self.run_hackrf(width=width_, pri=interval_, count=count_, freq=str(frequency[str(self.channel)]))
                     if fcc == "FCC5":
-                        self.run_hackrf(type="fcc5", freq=str(frequency[str(self.channel)]), burst=burst_, trial_centre=trial_centre, trial_low=trial_low,
-                                        trial_high=trial_high, uut_channel=uut_channel, freq_modulatin=freq_modulatin, tx_sample_rate=tx_sample_rate)
-                    if fcc == "FCC0" or fcc == "FCC1" or fcc == "FCC2" or fcc == "FCC3" or fcc == "FCC4" or fcc == "ETSI0" or fcc == "ETSI1" or fcc == "ETSI2" or fcc == "ETSI3" or fcc == "ETSI4"\
-                            or fcc == "korea_1" or fcc == "korea_2"  or fcc == "korea_3":
+                        self.run_hackrf(type="fcc5", freq=str(frequency[str(self.channel)]), burst=burst_,
+                                        trial_centre=trial_centre, trial_low=trial_low, trial_high=trial_high,
+                                        uut_channel=uut_channel, freq_modulatin=freq_modulatin, tx_sample_rate=tx_sample_rate)
+                    if fcc == "FCC0" or fcc == "FCC1" or fcc == "FCC2" or fcc == "FCC3" or fcc == "FCC4" or fcc == "ETSI0" or fcc == "ETSI1" or fcc == "ETSI2" or fcc == "ETSI3" or fcc == "ETSI4" \
+                            or fcc == "korea_1" or fcc == "korea_2" or fcc == "korea_3":
                         if self.legacy == "True":
-                            self.run_hackrf(type="legacy", width=width_, pri=interval_, count=count_, freq=str(frequency[str(self.channel)]))
+                            self.run_hackrf(type="legacy", width=width_, pri=interval_, count=count_,
+                                            freq=str(frequency[str(self.channel)]))
                         else:
                             if fcc == "FCC0":
                                 var = "FCC0"
@@ -1124,7 +1126,7 @@ class DfsTest(Realm):
                             if fcc == "korea_1" or fcc == "korea_2" or fcc == "korea_3":
                                 var = "KOREA"
                             if fcc == "ETSI0":
-                                var =  "ETSI0"
+                                var = "ETSI0"
                             if fcc == "ETSI1":
                                 var = "etsi1"
                             if fcc == "ETSI2":
@@ -1134,16 +1136,16 @@ class DfsTest(Realm):
                             if fcc == "ETSI4":
                                 var = "etsi4"
                             self.run_hackrf(type=var, width=width_, pri=interval_, count=count_,
-                                                freq=str(frequency[str(self.channel)]))
+                                            freq=str(frequency[str(self.channel)]))
 
                     if fcc == "ETSI5" or fcc == "ETSI6":
                         if fcc == "ETSI5":
-                            self.run_hackrf(type="etsi5", width=width_, prf_1=prf_1_, prf_2 = prf_2_, prf_3 = prf_3_,
-                                        freq=str(frequency[str(self.channel)]), count=count_)
+                            self.run_hackrf(type="etsi5", width=width_, prf_1=prf_1_, prf_2=prf_2_, prf_3=prf_3_,
+                                            freq=str(frequency[str(self.channel)]), count=count_)
                         if fcc == "ETSI6":
                             self.run_hackrf(type="etsi6", width=width_, prf_1=prf_1_, prf_2=prf_2_, prf_3=prf_3_,
                                             freq=str(frequency[str(self.channel)]), count=count_)
-                    if fcc == "Japan-w53-3" or fcc == "Japan-w53-4" or fcc == "Japan-w53-5" or fcc == "Japan-w53-6" or fcc ==  "Japan-w53-7" or fcc == "Japan-w53-8":
+                    if fcc == "Japan-w53-3" or fcc == "Japan-w53-4" or fcc == "Japan-w53-5" or fcc == "Japan-w53-6" or fcc == "Japan-w53-7" or fcc == "Japan-w53-8":
                         self.run_hackrf(type="w53-3", width=width_, blank_time=blank_time,
                                         long_pulse_width=long_pulse_width, chirp_width=chirp_width,
                                         prf=prf, num_con_pair=num_con_pair,
@@ -1154,9 +1156,11 @@ class DfsTest(Realm):
                     if fcc == "Japan-w56-1" or fcc == "Japan-w56-2" or fcc == "Japan-w56-3" or fcc == "Japan-w56-4" or fcc == "Japan-w56-5" or fcc == "Japan-w56-6":
                         if self.legacy == "True":
                             if fcc == "Japan-w56-1":
-                                self.run_hackrf(type="legacy_w56-1", width=width_, pri=interval_, count=count_, freq=str(frequency[str(self.channel)]))
+                                self.run_hackrf(type="legacy_w56-1", width=width_, pri=interval_, count=count_,
+                                                freq=str(frequency[str(self.channel)]))
                             else:
-                                self.run_hackrf(type="legacy", width=width_, pri=interval_, count=count_, freq=str(frequency[str(self.channel)]))
+                                self.run_hackrf(type="legacy", width=width_, pri=interval_, count=count_,
+                                                freq=str(frequency[str(self.channel)]))
                         else:
                             var = "W56PULSE"
                             self.run_hackrf(type=var, width=width_, pri=interval_, count=count_,
@@ -1185,7 +1189,8 @@ class DfsTest(Realm):
 
                 # check for scapy frame
 
-                scapy_frame = self.pcap_obj.check_frame_present(pcap_file=str(file_name), filter="(wlan.sa == 00:11:22:33:44:55)")
+                scapy_frame = self.pcap_obj.check_frame_present(pcap_file=str(file_name),
+                                                                filter="(wlan.sa == 00:11:22:33:44:55)")
                 print("scapy frame +", scapy_frame)
                 scapy_frame_time_ = None
                 if len(scapy_frame) != 0 and scapy_frame != "empty":
@@ -1200,10 +1205,8 @@ class DfsTest(Realm):
                     scapy_time = str(scapy_frame_time)
 
                 try:
-                    csa_frame = self.pcap_obj.check_frame_present(
-                        pcap_file=str(file_name),
-                        filter="(wlan.csa.channel_switch.count && wlan.ssid == %s &&  wlan.bssid == %s)" % (
-                        str(self.ssid), str(bssid)))
+                    csa_frame = self.pcap_obj.check_frame_present(pcap_file=str(file_name),
+                                                                  filter="(wlan.csa.channel_switch.count && wlan.ssid == %s &&  wlan.bssid == %s)" % (str(self.ssid), str(bssid)))
                 except Exception as Except:
                     print(f"FAILED with exception: {Except}")
 
@@ -1215,10 +1218,8 @@ class DfsTest(Realm):
                     print("radar detected")
                     logging.info("radar detected")
                     main_dict[fcc][var_1]["Detected"] = "YES"
-                    csa_frame_time = self.pcap_obj.read_arrival_time(
-                        pcap_file=str(file_name),
-                        filter="(wlan.csa.channel_switch.count && wlan.ssid == %s &&  wlan.bssid == %s)" % (
-                        str(self.ssid), str(bssid)))
+                    csa_frame_time = self.pcap_obj.read_arrival_time(pcap_file=str(file_name),
+                                                                     filter="(wlan.csa.channel_switch.count && wlan.ssid == %s &&  wlan.bssid == %s)" % (str(self.ssid), str(bssid)))
 
                     print("csa frame  time is ", csa_frame_time)
                     logging.info("csa frame  time is " + str(csa_frame_time))
@@ -1299,7 +1300,8 @@ class DfsTest(Realm):
         print(f"Updating the radio channel : {self.radio}")
         radio_eid = self.name_to_eid(eid=self.radio)
         modify_radio = lf_modify_radio.lf_modify_radio(lf_mgr=self.host)
-        modify_radio.set_wifi_radio(_resource=radio_eid[1], _radio=radio_eid[2], _shelf=radio_eid[0], _channel=self.channel)
+        modify_radio.set_wifi_radio(_resource=radio_eid[1], _radio=radio_eid[2], _shelf=radio_eid[0],
+                                    _channel=self.channel)
         if self.create_client == "True":
             print("clean all stations before the test")
             logging.info("clean all stations before the test")
@@ -1373,7 +1375,7 @@ class DfsTest(Realm):
     def generate_report(self, test_duration=None, main_dict=None):
 
         print("test duration", test_duration)
-        lst =[]
+        lst = []
         for i in self.fcctypes:
             print(i)
             if "FCC" in i:
@@ -1655,12 +1657,12 @@ class DfsTest(Realm):
                                     fcc) + " RADAR Type")
             report.build_objective()
             if fcc == "FCC5":
-                Trials, burst, trial_centre, trial_low, trial_high, uut_channel, freq_modulatin, tx_sample_rate, detect,frequency, det_time = [], [], [], [], [], [], [], [], [], [], []
+                Trials, burst, trial_centre, trial_low, trial_high, uut_channel, freq_modulatin, tx_sample_rate, detect, frequency, det_time = [], [], [], [], [], [], [], [], [], [], []
 
             if fcc == "ETSI5" or fcc == "ETSI6":
                 Trials, burst, pulse, width, prf_1, prf_2, prf_3, detect, frequency, det_time = [], [], [], [], [], [], [], [], [], []
-            if fcc == "Japan-w53-3" or fcc == "Japan-w53-4" or fcc == "Japan-w53-5" or fcc == "Japan-w53-6" or fcc ==  "Japan-w53-7" or fcc ==  "Japan-w53-8":
-                Trials, burst, width, blank_t, long_pulse_wdth, chirp_width, pri, no_c_pulse,  detect, frequency, det_time = [], [], [], [], [], [], [], [], [], [], []
+            if fcc == "Japan-w53-3" or fcc == "Japan-w53-4" or fcc == "Japan-w53-5" or fcc == "Japan-w53-6" or fcc == "Japan-w53-7" or fcc == "Japan-w53-8":
+                Trials, burst, width, blank_t, long_pulse_wdth, chirp_width, pri, no_c_pulse, detect, frequency, det_time = [], [], [], [], [], [], [], [], [], [], []
             if fcc == "Japan-w53-1" or fcc == "Japan-w53-2":
                 Trials, pulse, width, prf, detect, frequency, det_time = [], [], [], [], [], [], []
             else:
@@ -1692,14 +1694,14 @@ class DfsTest(Realm):
                     detect.append(main_dict[fcc][i]['Detected'])
                     frequency.append(main_dict[fcc][i]['Frequency(KHz)'])
                     det_time.append(main_dict[fcc][i]['Detection Time(sec)'])
-                elif fcc == "Japan-w53-3" or fcc == "Japan-w53-4" or fcc == "Japan-w53-5" or fcc == "Japan-w53-6" or fcc ==  "Japan-w53-7" or fcc ==  "Japan-w53-8":
+                elif fcc == "Japan-w53-3" or fcc == "Japan-w53-4" or fcc == "Japan-w53-5" or fcc == "Japan-w53-6" or fcc == "Japan-w53-7" or fcc == "Japan-w53-8":
                     Trials.append(i)
                     burst.append(main_dict[fcc][i]['Burst'])
                     width.append(main_dict[fcc][i]['Width'])
                     blank_t.append(main_dict[fcc][i]["Blank Time(us)"])
                     long_pulse_wdth.append(main_dict[fcc][i]["Long Pulse Width(us)"])
                     chirp_width.append(main_dict[fcc][i]["Chirp Width(MHz)"])
-                    pri.append(main_dict[fcc][i][ "Pri(Hz)"])
+                    pri.append(main_dict[fcc][i]["Pri(Hz)"])
                     no_c_pulse.append(main_dict[fcc][i]["No of Continuous Pairs of Pulses"])
                     detect.append(main_dict[fcc][i]['Detected'])
                     frequency.append(main_dict[fcc][i]['Frequency(KHz)'])
@@ -1761,7 +1763,7 @@ class DfsTest(Realm):
                     "Frequency (KHz)": frequency,
                     "Detection Time (secs)": det_time
                 }
-            elif fcc == "Japan-w53-3" or fcc == "Japan-w53-4" or fcc == "Japan-w53-5" or fcc == "Japan-w53-6" or fcc ==  "Japan-w53-7" or fcc ==  "Japan-w53-8":
+            elif fcc == "Japan-w53-3" or fcc == "Japan-w53-4" or fcc == "Japan-w53-5" or fcc == "Japan-w53-6" or fcc == "Japan-w53-7" or fcc == "Japan-w53-8":
                 table_2 = {
                     "Trials": Trials,
                     "Num Bursts": burst,
@@ -1807,8 +1809,8 @@ class DfsTest(Realm):
         elif self.more_option == "random":
             freq_option = "Stay at random frequency between the bandwidth for all trials"
 
-        tx_power = {"52": "-41.17", "56": "41.92", "60": "-41.91", "64": "-41.31", "100": "-38.61", "104":"-39.06",
-                    "108": "-39.77", "112":"-40.27", "116": "-40.22", "120": "-39.44", "124": "-38.75",
+        tx_power = {"52": "-41.17", "56": "41.92", "60": "-41.91", "64": "-41.31", "100": "-38.61", "104": "-39.06",
+                    "108": "-39.77", "112": "-40.27", "116": "-40.22", "120": "-39.44", "124": "-38.75",
                     "128": "-38.32", "132": "-38.87", "136": "-39.77", "140": "-39.97", "144": "-40.03"}
         test_input_infor = {
             "Parameters": "Values",
@@ -1833,7 +1835,7 @@ class DfsTest(Realm):
         report.build_footer()
         report.write_html()
         report.write_pdf_with_timestamp(_page_size='A4', _orientation='Portrait')
-        report.move_data(directory="log", _file_name="dpt.log" )
+        report.move_data(directory="log", _file_name="dpt.log")
         # report.move_data(_file_name="dpt.log")
         if (self.testname != None and self.starttime != None):
             pdf_path = report.get_pdf_path()
@@ -1984,8 +1986,8 @@ def main():
     parser.add_argument("--legacy", help='stores true for legacy mode by default', default=True)
     parser.add_argument("--create_client", help='stores True/False if client creation is needed', default=False)
     parser.add_argument("--side_a_min_rate", type=int, help='for layer3 provide side a min tx rate', default=1000000)
-    parser.add_argument("--side_a_max_rate", type=int,  help='for layer3 provide side a max tx rate', default=0)
-    parser.add_argument("--side_b_min_rate",type=int,  help='for layer3 provide side b min tx rate', default=1000000)
+    parser.add_argument("--side_a_max_rate", type=int, help='for layer3 provide side a max tx rate', default=0)
+    parser.add_argument("--side_b_min_rate", type=int, help='for layer3 provide side b min tx rate', default=1000000)
     parser.add_argument("--side_b_max_rate", type=int, help='for layer3 provide side b max tx rate', default=0)
     parser.add_argument("--side_a_min_pdu", type=int, help='for layer3 provide side a min pdu size', default=1250)
     parser.add_argument("--side_b_min_pdu", type=int, help='for layer3 provide side b min pdu size', default=1250)
