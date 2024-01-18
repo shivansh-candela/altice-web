@@ -1494,10 +1494,13 @@ class DfsTest(Realm):
         report.set_graph_image(graph2)
         report.move_graph_image()
         report.build_graph_without_border()
-
-        report.set_obj_html("Summary Table",
-                            "The below table provides detailed information regarding detection probability percentage for various RADAR Types. <br>"
-                            f"Note: As per standard, the required detection percent is 60%. In the current test, user passed {self.desired_detection} % value.")
+        if self.desired_detection > 60:
+            report.set_obj_html("Summary Table",
+                                "The below table provides detailed information regarding detection probability percentage for various RADAR Types. <br>"
+                                f"Note: As per standard, the required detection percent is 60%. In the current test, user passed {self.desired_detection} % value.")
+        else:
+            report.set_obj_html("Summary Table",
+                                "The below table provides detailed information regarding detection probability percentage for various RADAR Types.")
         report.build_objective()
         wave, desired_per, pd_per, pd_req, tring, avg_detect, result = [], [], [], [], [], [], []
 
@@ -1650,7 +1653,6 @@ class DfsTest(Realm):
             test_setup = pd.DataFrame(table_2)
             report.set_table_dataframe(test_setup)
             report.build_table()
-
 
         report.set_obj_html("Detailed Result Table",
                             "The below tables provides detailed information for per trials run for each RADAR Types")
