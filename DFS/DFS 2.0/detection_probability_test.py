@@ -1204,7 +1204,7 @@ class DfsTest(Realm):
 
                 try:
                     csa_frame = self.pcap_obj.check_frame_present(pcap_file=str(file_name),
-                                                                  filter="(wlan.csa.channel_switch.count && wlan.ssid == %s &&  wlan.bssid == %s)" % (str(self.ssid), str(bssid)))
+                                                                  filter="(wlan.csa.channel_switch.count && wlan.bssid == %s)" % (str(bssid)))
                 except Exception as Except:
                     print(f"FAILED with exception: {Except}")
 
@@ -1217,7 +1217,7 @@ class DfsTest(Realm):
                     logging.info("radar detected")
                     main_dict[fcc][var_1]["Detected"] = "YES"
                     csa_frame_time = self.pcap_obj.read_arrival_time(pcap_file=str(file_name),
-                                                                     filter="(wlan.csa.channel_switch.count && wlan.ssid == %s &&  wlan.bssid == %s)" % (str(self.ssid), str(bssid)))
+                                                                     filter="(wlan.csa.channel_switch.count && wlan.bssid == %s)" % (str(bssid)))
 
                     print("csa frame  time is ", csa_frame_time)
                     logging.info("csa frame  time is " + str(csa_frame_time))
