@@ -250,7 +250,11 @@ class DfsTest(Realm):
         if self.more_option == "centre":
             self.pcap_obj_2 = sniff_radio.SniffRadio(lfclient_host=self.host, lfclient_port=self.port,
                                                      radio=self.sniff_radio, channel=radio_channel,
-                                                     monitor_name="monitor", channel_bw="20")
+                                                     monitor_name="monitor", channel_bw=self.bandwidth)
+            print("RADIO:",self.radio)
+            print("CHANNEL:",self.channel)
+            print("BANDWIDTH:",self.bandwidth)
+
             self.pcap_obj_2.setup(0, 0, 0)
             self.pcap_obj_2.monitor.admin_up()
             print("Waiting until ports appear...")
@@ -267,7 +271,7 @@ class DfsTest(Realm):
         elif self.more_option == "random":
             self.pcap_obj_2 = sniff_radio.SniffRadio(lfclient_host=self.host, lfclient_port=self.port,
                                                      radio=self.sniff_radio, channel=radio_channel,
-                                                     monitor_name="monitor", channel_bw="20")
+                                                     monitor_name="monitor", channel_bw=self.bandwidth)
             self.pcap_obj_2.setup(1, 1, 1)
             self.pcap_obj_2.monitor.admin_up()
             print("Waiting until ports appear...")
@@ -296,9 +300,13 @@ class DfsTest(Realm):
         return y
 
     def pre_cleanup(self):
+        # self.cx_profile.cleanup()
+        # self.cx_profile.cleanup_prefix()
         self.cx_profile.cleanup()
         self.cx_profile.cleanup_prefix()
-
+        lf_clean_obj = lf_clean.lf_clean(host=self.host)
+        lf_clean_obj.resource = 'all'
+        lf_clean_obj.sta_clean()
     # create a layer3 connection
     def create_layer3(self, traffic_type, sta_list):
         # checked
