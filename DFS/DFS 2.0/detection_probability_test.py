@@ -250,10 +250,9 @@ class DfsTest(Realm):
         if self.more_option == "centre":
             self.pcap_obj_2 = sniff_radio.SniffRadio(lfclient_host=self.host, lfclient_port=self.port,
                                                      radio=self.sniff_radio, channel=radio_channel,
-                                                     monitor_name="monitor", channel_bw=self.bandwidth)
+                                                     monitor_name="monitor", channel_bw='20')
             print("RADIO:",self.radio)
             print("CHANNEL:",self.channel)
-            print("BANDWIDTH:",self.bandwidth)
 
             self.pcap_obj_2.setup(0, 0, 0)
             self.pcap_obj_2.monitor.admin_up()
@@ -271,7 +270,7 @@ class DfsTest(Realm):
         elif self.more_option == "random":
             self.pcap_obj_2 = sniff_radio.SniffRadio(lfclient_host=self.host, lfclient_port=self.port,
                                                      radio=self.sniff_radio, channel=radio_channel,
-                                                     monitor_name="monitor", channel_bw=self.bandwidth)
+                                                     monitor_name="monitor", channel_bw='20')
             self.pcap_obj_2.setup(1, 1, 1)
             self.pcap_obj_2.monitor.admin_up()
             print("Waiting until ports appear...")
@@ -588,6 +587,7 @@ class DfsTest(Realm):
                                 "Chirp Width(MHz)", "Pri(Hz)", "No of Continuous Pairs of Pulses", "Detection Time(sec)"]
                 elif fcc == "Japan-w53-1" or fcc == "Japan-w53-2":
                     new_list = ["Pulses", "Width", "PRF(Hz)", "Detected", "Frequency(KHz)",
+                    bandwinew_list = ["Pulses", "Width", "PRF(Hz)", "Detected", "Frequency(KHz)",
                                 "Detection Time(sec)"]
                 elif fcc == "FCC0" or fcc == "FCC1" or fcc == "FCC2" or fcc == "FCC3" or fcc == "FCC4":
                     new_list = ["Burst", "Pulses", "Width", "PRI(US)", "Detected", "Frequency(KHz)", "Detection Time(sec)"]
