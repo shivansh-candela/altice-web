@@ -587,7 +587,6 @@ class DfsTest(Realm):
                                 "Chirp Width(MHz)", "Pri(Hz)", "No of Continuous Pairs of Pulses", "Detection Time(sec)"]
                 elif fcc == "Japan-w53-1" or fcc == "Japan-w53-2":
                     new_list = ["Pulses", "Width", "PRF(Hz)", "Detected", "Frequency(KHz)",
-                    bandwinew_list = ["Pulses", "Width", "PRF(Hz)", "Detected", "Frequency(KHz)",
                                 "Detection Time(sec)"]
                 elif fcc == "FCC0" or fcc == "FCC1" or fcc == "FCC2" or fcc == "FCC3" or fcc == "FCC4":
                     new_list = ["Burst", "Pulses", "Width", "PRI(US)", "Detected", "Frequency(KHz)", "Detection Time(sec)"]
