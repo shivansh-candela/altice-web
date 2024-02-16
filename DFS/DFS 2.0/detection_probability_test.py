@@ -529,6 +529,7 @@ class DfsTest(Realm):
         print(main_dict)
         logging.info(str(main_dict))
         list_ = []
+        total_trials=self.trials + self.extra_trials
         for i in range(self.trials + self.extra_trials):
             var = 000
             var_1 = "Trial_" + str(var + i + 1)
@@ -555,21 +556,20 @@ class DfsTest(Realm):
                     print("ignore")
                 else:
                     pri2.append(randomly)
-                if len(pri2) >= 15:
+                if len(pri2) >= total_trials:
                     break
                 else:
                     continue
-            print(pri2)
-            print(len(pri2))
+            print(pri2,"Extra Trials list")
+            print(len(pri2),"Length of extra trials list")
             pri1.extend(pri2)
-            print(pri1)
-            print(len(pri1))
+            print(pri1,"extra list added to main unique pri1 list")
+            print(len(pri1),"length of total trials list")
             fcc1_list = pri1
         print("fcc1_list", fcc1_list)
 
         for fcc in self.fcctypes:
             for tria in range(self.trials + self.extra_trials):
-                print("tria", tria)
                 logging.info(str(tria))
                 time.sleep(int(self.time_int))
                 var = 000
@@ -596,7 +596,6 @@ class DfsTest(Realm):
                 main_dict[fcc][var_1] = third_dict.copy()
                 print("result data", main_dict)
                 logging.info("result data" + str(main_dict))
-                # standard = {"FCC0": {"width_": "1", "interval_": "1428", "count_": "18"}, "FCC1": {}}
 
                 if fcc == "FCC0":
                     width_ = "1"
@@ -614,7 +613,7 @@ class DfsTest(Realm):
                         print(count_)
                     else:
                         print("since given trials are greater than or equal to  30 both TestA and TestB is considered")
-                        logging.info("since given trials are greater than or equal to  30 both TEstA andTestB is considered")
+                        logging.info("since given trials are greater than or equal to  30 both TestA and TestB is considered")
                         width_ = "1"
                         if tria > 30:
                             interval_ = str(random.randint(518, 3066))
