@@ -230,9 +230,32 @@ class DfsTest(Realm):
                 with open(self.ui_report_dir + 'dfs_result.json', 'w') as f:
                     json.dump(data, f, indent=4)
             except:
+                new_data = {
+                    self.testname: result
+                }
                 with open(self.ui_report_dir + 'dfs_result.json', 'w') as f:
-                    json.dump(result, f, indent=4)
+                    json.dump(new_data, f, indent=4)
+    #webgui
+    def check_abort(self):
+        if (self.starttime is not None and self.testname is not None):
+            # try:
+            with open(self.ui_report_dir + 'dfs_result.json', 'r') as f:
+                data = json.load(f)
 
+            if (self.testname not in data.keys()):
+                return
+
+            if ('status' not in data[self.testname].keys()):
+                return
+
+            if (data[self.testname]['status'] == 'Aborting'):
+                data[self.testname]['status'] = 'Aborted'
+
+                with open(self.ui_report_dir + 'dfs_result.json', 'w') as f:
+                    json.dump(data, f, indent=4)
+
+                logging.info('Test Aborted')
+                exit(1)
     # get station list
     def get_station_list(self):
         sta = self.staConnect.station_list()
@@ -245,7 +268,7 @@ class DfsTest(Realm):
         return sta_list
 
     # set channel to parent radio and start sniffing
-    def start_sniffer(self, radio_channel=None, radio=None, test_name="dfs_csa_", duration=60):
+    def start_sniffer(self, radio_channel=None, radio=None, test_name="dfs_csa_", duration=12):
         self.pcap_name = test_name + str(datetime.now().strftime("%Y-%m-%d-%H-%M")).replace(':', '-') + ".pcap"
         if self.more_option == "centre":
             self.pcap_obj_2 = sniff_radio.SniffRadio(lfclient_host=self.host, lfclient_port=self.port,
@@ -348,8 +371,13 @@ class DfsTest(Realm):
 
         station_profile.use_security(self.security, self.ssid, self.passwd)
         station_profile.set_number_template("00")
+        print("Bandwidth",self.bandwidth)
+        if self.bandwidth=="160":
+            station_profile.set_command_flag("add_sta", "create_admin_down", 1)
+            station_profile.set_command_flag("add_sta", "ht160_enable", 1)
+        else:
+            station_profile.set_command_flag("add_sta", "create_admin_down", 1)
 
-        station_profile.set_command_flag("add_sta", "create_admin_down", 1)
         station_profile.set_command_flag("set_port", "rpt_timer", 1)
         print("Creating stations.")
         logging.info("Creating stations.")
@@ -405,7 +433,7 @@ class DfsTest(Realm):
                    trial_low=None, trial_high=None, uut_channel=None, freq_modulatin=None, tx_sample_rate=None,
                    prf_1=None, prf_2=None, prf_3=None, blank_time=None, long_pulse_width=None, chirp_width=None,
                    prf=None, num_con_pair=None):
-
+        print("Running Hackrf")
         p = paramiko.SSHClient()
         p.set_missing_host_key_policy(paramiko.AutoAddPolicy())  # This script doesn't work for me unless this line is added!
         p.connect(self.host, port=22, username=self.ssh_username, password=self.ssh_password)
@@ -413,6 +441,7 @@ class DfsTest(Realm):
 
         # send frames
         # Execute the first command for scapy logic
+        print("Execute the first command for scapy logic")
         stdin, stdout, stderr = p.exec_command("sudo python scapy_frame.py", get_pty=True)
         stdin.write(str(self.ssh_password) + "\n")
         stdin.flush()
@@ -424,7 +453,7 @@ class DfsTest(Realm):
             command = f"nice -19 sudo python3 lf_hackrf_dfs.py --tx_sample_rate 20 --radar_type FCC6,100 --one_burst --log_level debug --lf_hackrf {self.lf_hackrf} --if_gain {self.if_gain}"
         if type == "fcc5":
             command = f"nice -19 sudo python3 lf_hackrf_dfs.py --freq {freq} --rf_type --one_burst FCC5,{burst},{trial_centre},{trial_low},{trial_high},{uut_channel},{freq_modulatin},{tx_sample_rate} --log_level debug --lf_hackrf {self.lf_hackrf} --if_gain {self.if_gain}"
-            print(command)
+            print("Type FCC5",command)
         if type == "etsi1" or type == "etsi2" or type == "etsi3" or type == "etsi4":
             if type == "etsi1":
                 var = "ETSI1"
@@ -570,12 +599,14 @@ class DfsTest(Realm):
 
         for fcc in self.fcctypes:
             for tria in range(self.trials + self.extra_trials):
+                self.check_abort()
+                print("tria", tria)
                 logging.info(str(tria))
                 time.sleep(int(self.time_int))
                 var = 000
                 var_1 = "Trial_" + str(var + tria + 1)
                 if fcc == "FCC5":
-                    time.sleep(25)
+                    # time.sleep(25)
                     new_list = ["Burst", "Trial Centre", "Trial Low", "Trial High", "UUT Channel", "Frequency Modulating",
                                 "Tx sample rate", "Detected", "Frequency(KHz)", "Detection Time(sec)"]
                 elif fcc == "ETSI5" or fcc == "ETSI6":
@@ -1030,58 +1061,42 @@ class DfsTest(Realm):
                 if self.more_option == "random":
                     if self.bandwidth == "20":
 
-                        frequency = {"52": str(random.randint(5250, 5270)), "54": str(random.randint(5250, 5290)),
-                                     "56": str(random.randint(5270, 5290)), "58": str(random.randint(5250, 5330)),
-                                     "60": str(random.randint(5290, 5310)), "62": str(random.randint(5290, 5330)),
-                                     "64": str(random.randint(5310, 5330)), "100": str(random.randint(5490, 5510)),
-                                     "102": str(random.randint(5490, 5530)), "104": str(random.randint(5510, 5530)),
-                                     "108": str(random.randint(5530, 5550)), "110": str(random.randint(5530, 5570)),
-                                     "112": str(random.randint(5550, 5570)), "116": str(random.randint(5570, 5590)),
-                                     "118": str(random.randint(5570, 5610)), "122": str(random.randint(5570, 5650)),
-                                     "120": str(random.randint(5590, 5610)),
-                                     "124": str(random.randint(5610, 5630)), "126": str(random.randint(5610, 5650)),
-                                     "128": str(random.randint(5630, 5650)), "132": str(random.randint(5650, 5670)),
-                                     "134": str(random.randint(5650, 5690)),
-                                     "136": str(random.randint(5670, 5690)), "138": str(random.randint(5650, 5730)),
-                                     "140": str(random.randint(5690, 5710)), "144": str(random.randint(5710, 5730))}
+                        frequency = {
+                                     "52": str(random.randint(5250, 5270)), "56": str(random.randint(5250, 5290)),
+                                     "60": str(random.randint(5290, 5310)),"64": str(random.randint(5310, 5330)),
+                                     "100": str(random.randint(5490, 5510)),"104": str(random.randint(5510, 5530)),
+                                     "108": str(random.randint(5530, 5550)),"112": str(random.randint(5550, 5570)),
+                                     "116": str(random.randint(5570, 5590)),"120": str(random.randint(5590, 5610)),
+                                     "124": str(random.randint(5610, 5630)),"128": str(random.randint(5630, 5650)),
+                                     "132": str(random.randint(5650, 5670)),"136": str(random.randint(5670, 5690)),
+                                     "140": str(random.randint(5690, 5710)),"144": str(random.randint(5710, 5730))
+                                     }
 
                     elif self.bandwidth == "40":
-                        frequency = {"52": str(random.randint(5250, 5290)), "54": str(random.randint(5250, 5290)),
-                                     "56": str(random.randint(5250, 5290)), "58": str(random.randint(5250, 5330)),
-                                     "60": str(random.randint(5290, 5330)), "62": str(random.randint(5290, 5330)),
-                                     "64": str(random.randint(5290, 5330)), "100": str(random.randint(5490, 5530)),
-                                     "102": str(random.randint(5490, 5530)), "104": str(random.randint(5490, 5530)),
-                                     "108": str(random.randint(5530, 5570)), "110": str(random.randint(5530, 5570)),
-                                     "112": str(random.randint(5530, 5570)), "116": str(random.randint(5570, 5610)),
-                                     "118": str(random.randint(5570, 5610)), "122": str(random.randint(5570, 5650)),
-                                     "120": str(random.randint(5570, 5610)),
-                                     "124": str(random.randint(5610, 5650)), "126": str(random.randint(5610, 5650)),
-                                     "128": str(random.randint(5610, 5650)), "132": str(random.randint(5650, 5690)),
-                                     "134": str(random.randint(5650, 5690)),
-                                     "136": str(random.randint(5650, 5690)),
+                        frequency = {"52": str(random.randint(5250, 5290)), "56": str(random.randint(5250, 5290)),
+                                     "60": str(random.randint(5290, 5330)), "64": str(random.randint(5290, 5330)),
+                                     "100": str(random.randint(5490, 5530)), "104": str(random.randint(5490, 5530)),
+                                     "108": str(random.randint(5530, 5570)), "112": str(random.randint(5530, 5570)),
+                                     "116": str(random.randint(5570, 5610)), "120": str(random.randint(5570, 5610)),
+                                     "124": str(random.randint(5610, 5650)), "128": str(random.randint(5610, 5650)),
+                                     "132": str(random.randint(5650, 5690)), "136": str(random.randint(5650, 5690)),
                                      "140": str(random.randint(5690, 5730)), "144": str(random.randint(5690, 5730))}
 
                     elif self.bandwidth == "80":
-                        frequency = {"52": str(random.randint(5250, 5330)), "54": str(random.randint(5250, 5330)),
-                                     "56": str(random.randint(5250, 5330)), "58": str(random.randint(5250, 5330)),
-                                     "60": str(random.randint(5250, 5330)), "62": str(random.randint(5250, 5330)),
-                                     "64": str(random.randint(5250, 5330)), "100": str(random.randint(5490, 5570)),
-                                     "102": str(random.randint(5490, 5570)), "104": str(random.randint(5490, 5570)),
-                                     "108": str(random.randint(5490, 5570)), "110": str(random.randint(5490, 5570)),
-                                     "112": str(random.randint(5490, 5570)), "116": str(random.randint(5570, 5650)),
-                                     "118": str(random.randint(5570, 5650)), "122": str(random.randint(5570, 5650)),
-                                     "120": str(random.randint(5570, 5650)),
-                                     "124": str(random.randint(5570, 5650)), "126": str(random.randint(5570, 5650)),
-                                     "128": str(random.randint(5570, 5650)), "132": str(random.randint(5650, 5730)),
-                                     "134": str(random.randint(5650, 5730)),
-                                     "136": str(random.randint(5650, 5730)), "138": str(random.randint(5650, 5730)),
+                        frequency = {"52": str(random.randint(5250, 5330)), "56": str(random.randint(5250, 5330)),
+                                     "60": str(random.randint(5250, 5330)), "64": str(random.randint(5250, 5330)),
+                                     "100": str(random.randint(5490, 5570)), "104": str(random.randint(5490, 5570)),
+                                     "108": str(random.randint(5490, 5570)), "112": str(random.randint(5490, 5570)),
+                                     "116": str(random.randint(5570, 5650)), "120": str(random.randint(5570, 5650)),
+                                     "124": str(random.randint(5570, 5650)), "128": str(random.randint(5570, 5650)),
+                                     "132": str(random.randint(5650, 5730)), "136": str(random.randint(5650, 5730)),
                                      "140": str(random.randint(5650, 5730)), "144": str(random.randint(5650, 5730))}
 
                     elif self.bandwidth == "160":
-                        frequency = {"36": str(random.randint(5250, 5350)), "40": str(random.randint(5250, 5350)),
-                                     "44": str(random.randint(5250, 5350)), "48": str(random.randint(5250, 5350)),
-                                     "52": str(random.randint(5250, 5350)), "56": str(random.randint(5250, 5350)),
-                                     "60": str(random.randint(5250, 5350)), "64": str(random.randint(5250, 5350)),
+                        frequency = {"36": str(random.randint(5250, 5330)), "40": str(random.randint(5250, 5330)),
+                                     "44": str(random.randint(5250, 5330)), "48": str(random.randint(5250, 5330)),
+                                     "52": str(random.randint(5250, 5330)), "56": str(random.randint(5250, 5330)),
+                                     "60": str(random.randint(5250, 5330)), "64": str(random.randint(5250, 5330)),
                                      "100": str(random.randint(5490, 5650)), "104": str(random.randint(5490, 5650)),
                                      "108": str(random.randint(5490, 5650)), "112": str(random.randint(5490, 5650)),
                                      "116": str(random.randint(5490, 5650)), "120": str(random.randint(5490, 5650)),
@@ -1095,6 +1110,13 @@ class DfsTest(Realm):
 
                 print("starting sniffer")
                 logging.info("starting sniffer")
+                if(fcc == 'FCC5'):
+                    duration = 22
+                    self.start_sniffer(radio_channel=self.channel, radio=self.sniff_radio,
+                                    test_name="dfs_csa_" + str(fcc) + "_" + str(var_1) + "_channel" + str(
+                                        self.channel) + "_", duration=duration)
+                else:
+                    duration = 12
                 self.start_sniffer(radio_channel=self.channel, radio=self.sniff_radio,
                                    test_name="dfs_csa_" + str(fcc) + "_" + str(var_1) + "_channel" + str(
                                        self.channel) + "_")
@@ -1171,19 +1193,76 @@ class DfsTest(Realm):
                                             freq=str(frequency[str(self.channel)]))
 
                 elif self.more_option == "random":
-                    if fcc == "FCC5":
-                        self.run_hackrf(type="fcc5", freq=str(int(frequency[str(self.channel)]) * 1000))
-                    else:
-                        self.run_hackrf(width=width_, pri=interval_, count=count_,
-                                        freq=str(frequency[str(self.channel)]))
+                    print("Random Option")
                     if fcc == "FCC6":
                         self.run_hackrf(type="fcc6", freq=str(int(frequency[str(self.channel)]) * 1000))
-                    else:
-                        self.run_hackrf(width=width_, pri=interval_, count=count_,
-                                        freq=str(int(frequency[str(self.channel)]) * 1000))
+                    # else:
+                    #     self.run_hackrf(width=width_, pri=interval_, count=count_, freq=str(frequency[str(self.channel)]))
+                    if fcc == "FCC5":
+                        self.run_hackrf(type="fcc5", freq=str(int(frequency[str(self.channel)]) * 1000), burst=burst_,
+                                        trial_centre=trial_centre, trial_low=trial_low, trial_high=trial_high,
+                                        uut_channel=uut_channel, freq_modulatin=freq_modulatin, tx_sample_rate=tx_sample_rate)
+                    if fcc == "FCC0" or fcc == "FCC1" or fcc == "FCC2" or fcc == "FCC3" or fcc == "FCC4" or fcc == "ETSI0" or fcc == "ETSI1" or fcc == "ETSI2" or fcc == "ETSI3" or fcc == "ETSI4" \
+                            or fcc == "korea_1" or fcc == "korea_2" or fcc == "korea_3":
+                        if self.legacy == "True":
+                            print("In Legacy Mode")
+                            self.run_hackrf(type="legacy", width=width_, pri=interval_, count=count_,
+                                            freq=str(int(frequency[str(self.channel)]) * 1000))
+                        else:
+                            if fcc == "FCC0":
+                                var = "FCC0"
+                            if fcc == "FCC1":
+                                var = "FCC1"
+                            if fcc == "FCC2":
+                                var = "FCC2"
+                            if fcc == "FCC3":
+                                var = "FCC3"
+                            if fcc == "FCC4":
+                                var = "FCC4"
+                            if fcc == "korea_1" or fcc == "korea_2" or fcc == "korea_3":
+                                var = "KOREA"
+                            if fcc == "ETSI0":
+                                var = "ETSI0"
+                            if fcc == "ETSI1":
+                                var = "etsi1"
+                            if fcc == "ETSI2":
+                                var = "etsi2"
+                            if fcc == "ETSI3":
+                                var = "etsi3"
+                            if fcc == "ETSI4":
+                                var = "etsi4"
+                            self.run_hackrf(type=var, width=width_, pri=interval_, count=count_,
+                                            freq=str(int(frequency[str(self.channel)]) * 1000))
 
+                    if fcc == "ETSI5" or fcc == "ETSI6":
+                        if fcc == "ETSI5":
+                            self.run_hackrf(type="etsi5", width=width_, prf_1=prf_1_, prf_2=prf_2_, prf_3=prf_3_,
+                                            freq=str(int(frequency[str(self.channel)]) * 1000), count=count_)
+                        if fcc == "ETSI6":
+                            self.run_hackrf(type="etsi6", width=width_, prf_1=prf_1_, prf_2=prf_2_, prf_3=prf_3_,
+                                            freq=str(int(frequency[str(self.channel)]) * 1000), count=count_)
+                    if fcc == "Japan-w53-3" or fcc == "Japan-w53-4" or fcc == "Japan-w53-5" or fcc == "Japan-w53-6" or fcc == "Japan-w53-7" or fcc == "Japan-w53-8":
+                        self.run_hackrf(type="w53-3", width=width_, blank_time=blank_time,
+                                        long_pulse_width=long_pulse_width, chirp_width=chirp_width,
+                                        prf=prf, num_con_pair=num_con_pair,
+                                        freq=str(int(frequency[str(self.channel)]) * 1000)[:4])
+                    if fcc == "Japan-w53-1" or fcc == "Japan-w53-2":
+                        self.run_hackrf(type="w53-1", width=width_, prf=prf, count=count_,
+                                        freq=str(int(frequency[str(self.channel)]) * 1000))
+                    if fcc == "Japan-w56-1" or fcc == "Japan-w56-2" or fcc == "Japan-w56-3" or fcc == "Japan-w56-4" or fcc == "Japan-w56-5" or fcc == "Japan-w56-6":
+                        if self.legacy == "True":
+                            if fcc == "Japan-w56-1":
+                                self.run_hackrf(type="legacy_w56-1", width=width_, pri=interval_, count=count_,
+                                                freq=str(int(frequency[str(self.channel)]) * 1000))
+                            else:
+                                self.run_hackrf(type="legacy", width=width_, pri=interval_, count=count_,
+                                                freq=str(int(frequency[str(self.channel)]) * 1000))
+                        else:
+                            var = "W56PULSE"
+                            self.run_hackrf(type=var, width=width_, pri=interval_, count=count_,
+                                            freq=str(int(frequency[str(self.channel)]) * 1000))
                 print("stop sniffer")
-                time.sleep(5)
+                time.sleep(duration)
                 file_name_ = self.stop_sniffer()
                 file_name = "./pcap/" + str(file_name_)
                 print("pcap file name", file_name)
@@ -1291,7 +1370,8 @@ class DfsTest(Realm):
                             continue
                         else:
                             break
-
+            self.check_abort()
+        self.check_abort()
         print("final dict", main_dict)
         logging.info("final dict" + str(main_dict))
         return main_dict
