@@ -1,0 +1,5 @@
+2023-10-30 11:50:44 [32mINFO[0m Adding Stations:5G band, Number of Stations: 1 DUT: AlticeAP SSID: client_connectivity_al idx: 0
+2023-10-30 11:50:44 [32mINFO[0m Total 2G Radios Available in Testbed: 1
+2023-10-30 11:50:46 [32mINFO[0m Total stations per radio: 1
+2023-10-30 11:50:49 [32mINFO[0m Adding 1 Stations on 1.1.wiphy1
+2023-10-30 11:50:49 [35mDEBUG[0m Raw Line : ["profile_link 1.1 STA-AUTO 1 'DUT: AlticeAP Radio-2' NA wiphy1"]

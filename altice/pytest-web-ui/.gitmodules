@@ -1,0 +1,3 @@
+[submodule "pytest-web-ui"]
+	path = pytest-web-ui
+	url = https://github.com/greearb/pytest-web-ui.git

@@ -1,0 +1,125 @@
+{% extends 'resources/dashboard/generic_base.html' %}
+{% load static %}
+
+{% block content %}
+
+<section class="content home">
+    
+        <div class="content-center" style="width: 100%;"> 
+        <div class="card">
+                <!-- <form action="/external/" method="post">
+        {% csrf_token %}
+        <input type="submit" value="Execute a Python Script"> -->
+        <!-- <label for="textar">Servers</label>
+        <textarea  id="textar" name="param" rows="4" cols="50"> -->
+
+        <!-- </textarea>
+    </form> -->
+    <div class="row-clearfix">
+    <div class="col-lg-20 col-md-20 col-sm-20"></div>
+    <div class="body">
+        <div class="header">
+            <h2><strong style="color: #00cfd1;">Run</strong> Testplan
+            <ul class="header-dropdown">                            
+                
+            </ul>
+        </div>
+        <!-- <div class="text-center">
+            <h2>Pytest</h2>
+            <ul class="header-dropdown">                            
+            </ul>
+        </div> -->
+    <form action="/runtime_only/" class="form" method="POST">
+        {% csrf_token %}
+       
+        
+        <div class="content-center">
+            <div class="row clearfix" >
+                <div class="col-sm-0">
+                    <div class="form-group">
+                        <input type="hidden" class="form-control" name="pytest" placeholder="model" value="pytest -m">
+                    </div>
+                </div>
+                <div class="col-sm-3">
+                    <div class="form-group">
+                        <input type="text" class="form-control" name="marker" placeholder="Testplan">
+                    </div>
+                </div>
+                <div class="col-sm-0">
+                    <div class="form-group">
+                        <input type="hidden" class="form-control" name="testbed_m" placeholder="testbed" value="--testbed=">
+                    </div>
+                </div>
+                <!-- <div class="col-sm-3">
+                    <div class="">
+                        <select class="form-group" name='testbed_n'>
+                            <option value="">Select</option>
+                            {% for i in tesbed_s %}
+                                <option value="{{i.testbedname}}">{{i.testbedname}}</option>
+                            {% endfor %}
+                            
+                        </select>
+                    </div>
+                </div> -->
+                <div class="col-sm-3">
+                    <div class="form-group">
+                        <input type="text" class="form-control" name="testbed_n" placeholder="testbed">
+                    </div>
+                </div>
+                <!-- <div class="col-sm-0">
+                    <div class="form-group">
+                        <input type="hidden" class="form-control" name="allure" placeholder="allure" value="--alluredir=../allure_runtime_report">
+                    </div>
+                </div> -->
+                <!-- <div class="col-sm-2">
+                    <div class="form-group">
+                        <input type="text" class="form-control" name="allure_name" placeholder="allure_name">
+                    </div>
+                </div> -->
+                <div class="col-sm-1">
+                    
+                    <input type="submit" style="margin-top: 0px; background-color: #00cfd1;" class="btn btn-primary btn-round" value="Execute a Pytest">
+                    
+                </div>
+            </div>
+        </div>
+    </form>
+    <hr><br>
+    <div class="header">
+        <h2><strong style="color: #00cfd1;">INPUT STRING</strong>
+        <ul class="header-dropdown">                            
+            
+        </ul>
+    </div>
+    {{data_string}}
+    <br><hr>
+
+    <div class="container-fluid">
+        <div class="file-manager">
+    <div class="header">
+        <h2><strong style="color: #00cfd1;">OUTPUT</strong>
+    </div>
+    <div class="row clearfix">
+        <div class="col-lg-3 col-md-4 col-sm-12">
+            <div class="card">
+                <div class="file">
+                    <a href="{% url 'logfile_runtest' %}">
+                        <div class="file-name">
+                            <p class=""><h3>LOGS</h3></p>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>    
+    </div>
+</div>
+</div>
+    <br><hr>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+</section>
+{% endblock %}        

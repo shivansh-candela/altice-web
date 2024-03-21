@@ -1,0 +1,876 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="iL8hUXsdXy71MbOZjq4fWUv4KGPZnJ7k17P7RClL">
+    <!-- Favicon-->
+    <title>CT:Statistics</title>
+    <meta name="description" content="Oero Laravel">
+    <meta name="author" content="Oero Laravel">
+    <link rel="stylesheet" href="{% static 'resources\assets\plugins\bootstrap\css\bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'resources\assets\plugins\jvectormap\jquery-jvectormap-2.0.3.min.css' %}">
+    <link rel="stylesheet" href="{% static 'resources\assets\plugins\morrisjs\morris.min.css' %}">
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet"
+        href="{% static 'resources\assets\plugins\bootstrap\css\bootstrap-select\css\bootstrap-select.css' %}">
+
+    <!-- Latest compiled and minified JavaScript -->
+    <link rel="stylesheet" href="{% static 'resources\assets\plugins\bootstrap\css\bootstrap.min.css' %}">
+    <!-- Custom Css -->
+    <link rel="stylesheet" href="{% static 'resources\assets\css\mysty1.css' %}">
+    <link rel="stylesheet" href="{% static 'resources\assets\css\color_skins.css' %}">
+    <!-- <link href='https://fonts.gstatic.com/s/opensans/v13/DXI1ORHCpsQm3Vp6mXoaTRa1RVmPjeKy21_GQJaLlJI.woff'
+        rel='stylesheet'> -->
+    <!-- Font Awesome -->
+    <!-- <script src="https://kit.fontawesome.com/ebfda35ca7.js" crossorigin="anonymous"></script> -->
+    <script>
+        if (window.history.replaceState) {
+            window.history.replaceState(null, null, window.location.href);
+        }
+    </script>
+    <script src="{% static 'resources\assets\js\pages\quer1.min.js' %}"></script>
+
+    <link rel="stylesheet" href="{% static 'resources\assets\css\tabulator.css' %}">
+    <script src="{% static 'resources\assets\js\pages\tabulator.js' %}"></script>
+    <style>
+        td:hover {
+            background-color: #f5f5f5;
+        }
+
+        #download:hover {
+            background-color: transparent;
+        }
+
+        #trash {
+            box-shadow: none;
+        }
+
+        #trash:active {
+            transform: scale(0.95);
+        }
+
+        body::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* Hide scrollbar for IE, Edge and Firefox */
+
+        body {
+            -ms-overflow-style: none;
+            /* IE and Edge */
+            scrollbar-width: none;
+            /* Firefox */
+        }
+
+        #shadow:focus,
+        #shadow:hover,
+        #file:hover {
+            box-shadow: none;
+            cursor: pointer;
+        }
+
+
+
+        /* button,
+        #file,
+        #shadow {
+            box-shadow: 5px 5px 10px black;
+            border-left: white;
+        } */
+
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #F2F2F2;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #BDBDBD;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #6E6E6E;
+        }
+
+        *::-moz-placeholder {
+            font-weight: bold;
+            color: black;
+            font-family: "Open Sans Light";
+        }
+
+        *::-webkit-input-placeholder {
+            font-weight: bold;
+            color: black;
+            font-family: "Open Sans Light";
+        }
+
+        *:-ms-input-placeholder {
+            font-weight: bold;
+            color: black;
+            font-family: "Open Sans Light";
+        }
+
+        *:-o-input-placeholder {
+            font-weight: bold;
+            color: black;
+            font-family: "Open Sans Light";
+        }
+    </style>
+    <style media="only screen">
+        html,
+        body {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            position: absolute;
+            top: 0;
+            left: 0;
+            padding: 0;
+            overflow: auto;
+        }
+
+        body {
+            padding: 1rem;
+            overflow: auto;
+        }
+
+        .tabulator-col {
+            background-color: #303c54 !important;
+            color: white;
+        }
+
+        #filter-clear {
+            width: 150px;
+            border-radius: .7rem;
+            /* box-shadow: 5px 5px 5px; */
+            border-color: #303c54;
+        }
+
+        .wifi-symbol {
+            display: none;
+        }
+
+        .wifi-symbol [foo],
+        .wifi-symbol {
+            display: block;
+            position: relative;
+            margin: 0 auto 0;
+            top: -30px;
+            width: 150px;
+            height: 150px;
+
+            -ms-transform: rotate(-45deg);
+            -moz-transform: rotate(-45deg);
+            -o-transform: rotate(-45deg);
+            -webkit-transform: rotate(-45deg);
+            transform: rotate(-45deg);
+        }
+
+        .wifi-symbol .wifi-circle {
+            box-sizing: border-box;
+            -moz-box-sizing: border-box;
+            display: block;
+            width: 100%;
+            height: 100%;
+            font-size: 21.4285714286px;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            border-color: #FFFFCC;
+            border-style: solid;
+            border-width: 1em 1em 0 0;
+            -webkit-border-radius: 0 100% 0 0;
+            border-radius: 0 100% 0 0;
+            opacity: 0;
+            -o-animation: wifianimation 1s infinite;
+            -moz-animation: wifianimation 1s infinite;
+            -webkit-animation: wifianimation 1s infinite;
+            animation: wifianimation 1s infinite;
+        }
+
+        .wifi-symbol .wifi-circle.first {
+            -o-animation-delay: 600ms;
+            -moz-animation-delay: 600ms;
+            -webkit-animation-delay: 600ms;
+            animation-delay: 600ms;
+        }
+
+        .wifi-symbol .wifi-circle.second {
+            width: 5em;
+            height: 5em;
+            -o-animation-delay: 400ms;
+            -moz-animation-delay: 400ms;
+            -webkit-animation-delay: 400ms;
+            animation-delay: 400ms;
+        }
+
+        .wifi-symbol .wifi-circle.third {
+            width: 3em;
+            height: 3em;
+        }
+
+        .wifi-symbol .wifi-circle.fourth {
+            width: 1em;
+            height: 1em;
+            opacity: 1;
+            background-color: #FFFFCC;
+            -o-animation: none;
+            -moz-animation: none;
+            -webkit-animation: none;
+            animation: none;
+        }
+
+        @keyframes wifianimation {
+            0% {
+                opacity: 0.4;
+            }
+
+            5% {
+                opactiy: 1;
+            }
+
+            6% {
+                opactiy: 0.1;
+            }
+
+            100% {
+                opactiy: 0.1;
+            }
+        }
+        
+    </style>
+
+
+</head>
+
+<body style="font-family: 'Open Sans Light'; background-color: white; overflow-y: auto;">
+    <!-- Page Loader -->
+    <div style="background-color:#303c54;" class="page-loader-wrapper">
+        <div style="background-color:#303c54;" class="loader">
+            <div style="background-color:#303c54;" class="m-t-30">
+                <div class="wifi-symbol">
+                    <div class="wifi-circle first"></div>
+                    <div class="wifi-circle second"></div>
+                    <div class="wifi-circle third"></div>
+                    <div class="wifi-circle fourth">
+                    </div>
+                </div>
+            </div>
+            <p style="background-color:#303c54;">Please wait...</p>
+        </div>
+    </div>
+    <!-- Overlay For Sidebars -->
+    <div class="overlay"></div>
+    <div id="wrapper">
+        <nav class="navbar p-l-5 p-r-5" style="background-color: #303c54; max-height: 60px;">
+            <ul class="nav navbar-nav navbar-left" style="background-color: #303c54; max-height: 60px;">
+                <li>
+                    <div class="navbar-header">
+                        <!-- <a href="javascript:void(0);" class="bars"></a> -->
+                        <!-- <a class="navbar-brand"><img src="{% static 'resources\assets\images\candela.png' %}" width="30" alt="Oreo"><span class="m-l-10">Candela Technologies</span></a> -->
+                    </div>
+                </li>
+                <!-- <li><a href="javascript:void(0);" class="ls-toggle-btn" data-close="true"><i class="zmdi zmdi-settings"
+                            title="Back"></i></a></li>
+ -->
+
+                <li class="d-none d-md-inline-block">
+                <li>
+                    <a href="#" class="ls-toggle-btn"><i class="zmdi zmdi-menu"></i></a>
+                </li>
+                <li class="active open">
+                    <a href="{% url 'home' %}"></i><b><span style="font-weight:bolder">Dashboard</span></b></a>
+                </li>
+                <li class="active open">
+                    <a href="{% url 'statistics' %}"></i><b><span style="font-weight:bolder;  display: block;
+                        width: 100%;
+                        padding-left: 20px;
+                        padding-right: 20px;
+                        background: #5985de;
+                        color: #FFF;
+                        text-align: center;">Statistics</span></b></a>
+                </li>
+                </li>
+                <li class="float-right">
+                    <p style="color: white;"><b>Active User : </b>{{tester_email_id.name}}</p>
+
+                    <a href="{% url 'logout' %}" class="mega-menu" data-close="true"><i class="zmdi zmdi-long-arrow-tab"
+                            title="Logout"></i></a>
+                    <!-- <a href="javascript:void(0);" class="js-right-sidebar" data-close="true"><i
+                            class="zmdi zmdi-settings" title="Settings"></i></a> -->
+                </li>
+            </ul>
+        </nav>
+    </div>
+    <!-- Left Sidebar -->power
+    <aside id="leftsidebar" class="sidebar">
+        <ul style="background-color:white" class="nav nav-tabs">
+            <li class="nav-item" style="text-align: center;margin:0 auto 0;width:100%;">
+                <a style="color: white;cursor: default;" class="nav-link active" data-toggle="tab" href="#dashboard">
+
+                    <link rel="icon" href="{% static 'resources\assets\images\gold1.svg' %}" type="icon"><img src="{% static 'resources\assets\images\alti.jpeg' %}" style="height: 24px;" /></i>&nbsp;<strong style="font-size: small; color: black;">Altice Labs</strong>
+
+                </a>
+            </li>
+        </ul>
+        <div class="tab-content">
+            <div class="tab-pane stretchRight active" id="dashboard">
+                <div class="menu">
+                    <ul style="background-color:rgb(60,75,100);margin: 0 0px;" class="list">
+                        <li class="">
+                            <a href="{% url 'view_all' %}" class="clickfornodata"
+                                style="padding-bottom: 10px; height:50.5px;">
+                                <i style="color: white;" class="zmdi zmdi-account-add"></i>
+                                <b><span style="color: white;">Resources</span></b>
+                            </a>
+                        </li>
+                        <li class="">
+                            <a href="{% url 'new_testplan' %}" style="padding-bottom: 20px; padding-top: 12px;">
+                                <i style="color: white;" class="zmdi zmdi-account-add"></i>
+                                <b><span style="color: white;">Add New Testplans</span></b>
+                            </a>
+                        </li>
+                        <li class="">
+                            <a href="{% url 'test_scheduler' %}" style="padding-bottom: 20px; padding-top: 12px;">
+                                <i style="color: white;" class="zmdi zmdi-account-add"></i>
+                                <b><span style="color: white;">Test Scheduler</span></b>
+                            </a>
+                        </li>
+                        <!-- <li class="">
+                            <a style="padding-bottom: 20px; padding-top: 12px;">
+                                <i style="color: white;" class="zmdi zmdi-account-add"></i>
+                                <b><span style="color: white;">Results</span></b>
+                            </a>
+                        </li> -->
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+    </aside>
+
+
+    <div>
+        <section class="content home">
+
+
+
+            <button id="filter-clear">Clear Filters</button>
+            <div
+                style="overflow-y:auto;max-height:82vh;height:auto;border: 3px solid rgb(60,75,100);box-shadow: 0 3px 10px rgb(0 0 0 / 0.5);">
+                <div id="tablechart"> </div>
+            </div>
+        </section>
+
+
+        <script src="{% static 'resources\assets\bundles\libscripts.bundle.js' %} "></script>
+        <script src="{% static 'resources\assets\bundles\vendorscripts.bundle.js' %} "></script>
+        <script src="{% static 'resources\assets\bundles\mainscripts.bundle.js' %} "></script>
+        <script src="{% static 'resources\assets\bundles\morrisscripts.bundle.js' %} "></script>
+        <script src="{% static 'resources\assets\bundles\jvectormap.bundle.js' %} "></script>
+        <script src="{% static 'resources\assets\bundles\knob.bundle.js' %} "></script>
+        <script src="{% static 'resources\assets\js\pages\index.js' %} "></script>
+
+        <script>
+            var __basePath = './';
+        </script>
+
+
+
+        <script>
+
+
+
+
+            let columns = [];
+            let rows = [];
+            //getting the data for the table
+            $.ajax({
+                url: "/json",
+                dataType: "json",
+                type: "GET",
+                contentType: "application/json; charset=utf-8",
+                success: function (alldata) {
+
+                    alldata.forEach(item=>{
+                        if(item["security"]=="wpa"){
+                            item["security"]="wpa_personal"
+                        }
+                        if(item["result"]=="xfailed"){
+                            item["result"]="failed"
+                        }
+                    })
+
+                    let data= alldata.filter(function(currentValue, index, arr){
+                        if(currentValue["result"]!=undefined && (currentValue["result"]=="passed" || currentValue["result"]=="failed" || currentValue["result"]=="error" ) ){
+                        return currentValue
+                    }
+                   })
+                   if (!$.trim(data)) {
+                        alert("No Data For Statistics");
+                        document.getElementsByClassName("clickfornodata")[0].click()
+                    }
+
+                    $.each(data, function (index, value) {
+
+                        if (columns.length == 0) {
+                            for (key in value) {
+                                columns.push(key);
+                            }
+                        }
+                        var temp = [];
+                        for (key in value) {
+                            temp.push(value[key]);
+                        }
+                        rows.push(temp);
+
+                    })
+
+                    furtherprocess(data)//callback for tabulator
+                }
+            })
+
+            
+            function furtherprocess(data) {
+
+                //creating select option for header filters
+                function selectwithdrop(cell, onRendered, success, cancel, editorParams) {
+                    var cellValue = cell.getValue().toUpperCase(),
+                        input = document.createElement("select");
+                        // input.setAttribute("multiple",true)
+
+
+                    Object.keys(editorParams.values).forEach((key) => {
+                        let option = document.createElement("option");
+                        option.text = editorParams.values[key];
+                        option.value = editorParams.values[key];
+                        input.appendChild(option);
+                    });
+
+
+                    input.style.width = "100%";
+                    input.style.border = "1px solid #4b4b4b";
+                    input.style.borderRadius = "5px";
+                    input.style.outline = "none";
+
+                    input.value = cellValue;
+
+
+
+                    function onChange(e) {
+                        success(input.value);
+                    }
+
+                    input.addEventListener("change", onChange);
+
+                    return input;
+                }
+
+
+
+                //defining the tabulator for table
+                var table = new Tabulator("#tablechart", {
+                    movableRows: true,
+                    data: data,
+                    movableColumns: true,
+                    maxHeight: "80vh",
+                    
+
+                    columns: [
+                        // {
+                        //     rowHandle: true, formatter: "handle", headerSort: false, frozen: true,
+                        //     minWidth: 30, maxWidth: 30
+                        // },
+                        {
+                            title: "ID", field: "id", headerFilter: true, headerFilterParams: { values: getFilteringOptions("id") }, editor: selectwithdrop, editorParams: { value: getFilteringOptions("id") }, headerFilterFunc: "=",
+                        },
+                        {
+                            title: "TESTER ID", field: "tester_id", headerFilter: true, headerFilterParams: { values: getFilteringOptions("tester_id"), }, editor: selectwithdrop, editorParams: { value: getFilteringOptions("tester_id") }, headerFilterFunc: "=",
+                        },
+                        {
+                            title: "TESTER NAME", field: "tester_name", headerFilter: true, headerFilterParams: { values: getFilteringOptions("tester_name"), }, editor: selectwithdrop, editorParams: { value: getFilteringOptions("tester_name") }, headerFilterFunc: "=",
+                        },
+                        
+                        {
+                            title: "TESTPLAN", field: "testplan", headerFilter: true, headerFilterParams: { values: getFilteringOptions("testplan"), }, editor: selectwithdrop, editorParams: { value: getFilteringOptions("testplan") }, headerFilterFunc: "=",
+                        },
+                        {
+                            title: "ACCESSPOINT", field: "accesspoint", headerFilter: true, headerFilterParams: { values: getFilteringOptions("accesspoint"), }, editor: selectwithdrop, editorParams: { value: getFilteringOptions("accesspoint") }, headerFilterFunc: "=",
+                        },
+                        {
+                            title: "ACCESSPOINT MODE", field: "accesspoint_mode", headerFilter: true, headerFilterParams: { values: getFilteringOptions("accesspoint_mode"), }, editor: selectwithdrop, editorParams: { value: getFilteringOptions("accesspoint_mode") }, headerFilterFunc: "=",
+                        },
+                        {
+                            title: "ACCESSPOINT SERIAL", field: "accesspoint_serial", headerFilter: true, headerFilterParams: { values: getFilteringOptions("accesspoint_serial"), }, editor: selectwithdrop, editorParams: { value: getFilteringOptions("accesspoint_serial") }, headerFilterFunc: "=",
+                        },
+                        {
+                            title: "TRAFFICGENERATOR", field: "trafficgenerator", headerFilter: true, headerFilterParams: { values: getFilteringOptions("trafficgenerator"), }, editor: selectwithdrop, editorParams: { value: getFilteringOptions("trafficgenerator") }, headerFilterFunc: "=",
+                        },
+                        {
+                            title: "TESTBED", field: "testbed", headerFilter: true, headerFilterParams: { values: getFilteringOptions("testbed"), }, editor: selectwithdrop, editorParams: { value: getFilteringOptions("testbed") }, headerFilterFunc: "=",
+                        },
+                        {
+                            title: "STARTTIME", field: "starttime", headerFilter: true, headerFilterParams: { values: getFilteringOptions("starttime"), }, editor: selectwithdrop, editorParams: { value: getFilteringOptions("starttime") }, headerFilterFunc: "=",
+                        },
+                        // {
+                        //     title: "FIRMWARE NAME", field: "firmware_name", headerFilter: true, headerFilterParams: { values: getFilteringOptions("firmware_name"), }, editor: selectwithdrop, editorParams: { value: getFilteringOptions("firmware_name") }, headerFilterFunc: "=",
+                        // },
+                        {
+                            title: "RELEASE CYCLE", field: "release_cycle", headerFilter: true, headerFilterParams: { values: getFilteringOptions("release_cycle"), }, editor: selectwithdrop, editorParams: { value: getFilteringOptions("created_at") }, headerFilterFunc: "=",
+                        },
+                        {
+                            title: "TEST CASE", field: "test_case", headerFilter: true, headerFilterParams: { values: getFilteringOptions("test_case"), }, editor: selectwithdrop, editorParams: { value: getFilteringOptions("test_case") }, headerFilterFunc: "=",
+                        },
+                        {
+                            title: "FEATURE", field: "feature", headerFilter: true, headerFilterParams: { values: getFilteringOptions("feature"), }, editor: selectwithdrop, editorParams: { value: getFilteringOptions("feature") }, headerFilterFunc: "=",
+                        },
+                        {
+                            title: "CHANNEL", field: "channel", headerFilter: true, headerFilterParams: { values: getFilteringOptions("channel"), }, editor: selectwithdrop, editorParams: { value: getFilteringOptions("channel") }, headerFilterFunc: "=",
+                        },
+                        {
+                            title: "SECURITY", field: "security", headerFilter: true, headerFilterParams: { values: getFilteringOptions("security"), }, editor: selectwithdrop, editorParams: { value: getFilteringOptions("security") }, headerFilterFunc: "=",
+                        },
+                        {
+                            title: "BAND", field: "band", headerFilter: true, headerFilterParams: { values: getFilteringOptions("band"), }, editor: selectwithdrop, editorParams: { value: getFilteringOptions("band") }, headerFilterFunc: "=",
+                        },
+                        {
+                            title: "BANDWIDTH", field: "bandwidth", headerFilter: true, headerFilterParams: { values: getFilteringOptions("bandwidth"), }, editor: selectwithdrop, editorParams: { value: getFilteringOptions("bandwidth") }, headerFilterFunc: "=",
+                        },
+                        {
+                            title: "PROTOCOL", field: "protocol", headerFilter: true, headerFilterParams: { values: getFilteringOptions("protocol"), }, editor: selectwithdrop, editorParams: { value: getFilteringOptions("protocol") }, headerFilterFunc: "=",
+                        },
+                       
+                        { title: "DURATION", field: "duration", },
+                        { title: "PASSED", field: "passed", formatter: "tickCross", frozen: true },
+                        { title: "FAILED", field: "failed", formatter: "tickCross", frozen: true },
+                        { title: "ERROR", field: "error", formatter: "tickCross", frozen: true },
+                        { title: "RESULT", field: "result", frozen: true },
+
+                    ], layout: "fitDataFill",
+                    resizableColumnFit: false,
+
+                });
+
+                // getting the default filtering option for header filter
+                function getFilteringOptions(field) {
+                    let columndata = []
+                    let idx;
+                    for (key in columns) {
+                        if (columns[key] == field) {
+                            idx = key;
+                            break;
+                        }
+                    }
+
+                    if (idx) {
+                        for (key in rows) {
+                            columndata.push(rows[key][idx])
+                        }
+                    }
+                    let uniquedata = [...new Set(columndata)]
+                    return uniquedata.sort();
+                }
+                //udating the filteroption on each filteration
+                table.on("dataProcessed", () => {
+                    table.on("dataFiltered", function (filters, rows) {
+
+                        let appliedfilters = filters.map(item => {
+                            return item.field
+                        })
+                        let indexOfFilters = []
+
+
+                        let modified_id = []
+                        let modified_tester_id = []
+                        let modified_tester_name = []
+                        let modified_testplan = []
+                        let modified_accesspoint = []
+                        let modified_accesspoint_mode = []
+                        let modified_accesspoint_serial = []
+                        let modified_trafficgenerator = []
+                        let modified_testbed = []
+                        let modified_time = []
+                        // let modified_firmwarename = []
+                        let modified_release_cycle = []
+                        let modified_testcase = []
+                        let modified_feature = []
+                        let modified_channel = []
+                        let modified_security = []
+                        let modified_band = []
+                        let modified_bandwidth = []
+                        let modified_protocol = []
+
+
+                        for (x in rows) {
+
+                            if (modified_id.indexOf(rows[x]._row.data.id) == -1) {
+                                if (appliedfilters.indexOf("id") != -1) {
+                                    indexOfFilters.push(0)
+                                    modified_id.push("")
+                                }
+                                modified_id.push(rows[x]._row.data.id)
+                            }
+
+                            if (rows[x]._row.data.tester_id != undefined && modified_tester_id.indexOf(rows[x]._row.data.tester_id) == -1) {
+                                if (appliedfilters.indexOf("tester_id") != -1) {
+                                    indexOfFilters.push(1)
+                                    modified_tester_id.push("")
+                                }
+                                modified_tester_id.push(rows[x]._row.data.tester_id)
+                            }
+
+                            if (rows[x]._row.data.tester_name != undefined && modified_tester_name.indexOf(rows[x]._row.data.tester_name) == -1) {
+                                if (appliedfilters.indexOf("tester_name") != -1) {
+                                    indexOfFilters.push(2)
+                                    modified_tester_name.push("")
+
+                                }
+                                modified_tester_name.push(rows[x]._row.data.tester_name)
+                            }
+
+                          
+
+                            if (rows[x]._row.data.testplan != undefined && modified_testplan.indexOf(rows[x]._row.data.testplan) == -1) {
+                                if (appliedfilters.indexOf("testplan") != -1) {
+                                    indexOfFilters.push(3)
+                                    modified_testplan.push("")
+
+                                }
+                                modified_testplan.push(rows[x]._row.data.testplan)
+                            }
+
+                            if (rows[x]._row.data.accesspoint != undefined && modified_accesspoint.indexOf(rows[x]._row.data.accesspoint) == -1) {
+
+                                if (appliedfilters.indexOf("accesspoint") != -1) {
+                                    indexOfFilters.push(4)
+                                    modified_accesspoint.push("")
+
+                                }
+                                modified_accesspoint.push(rows[x]._row.data.accesspoint)
+                            }
+
+                            if (rows[x]._row.data.accesspoint_mode != undefined && modified_accesspoint_mode.indexOf(rows[x]._row.data.accesspoint_mode) == -1) {
+
+                                if (appliedfilters.indexOf("accesspoint_mode") != -1) {
+                                    indexOfFilters.push(5)
+                                    modified_accesspoint_mode.push("")
+
+                                }
+                                modified_accesspoint_mode.push(rows[x]._row.data.accesspoint_mode)
+                            }
+
+                            if (rows[x]._row.data.accesspoint_serial != undefined && modified_accesspoint_serial.indexOf(rows[x]._row.data.accesspoint_serial) == -1) {
+                                if (appliedfilters.indexOf("accesspoint_serial") != -1) {
+                                    indexOfFilters.push(6)
+                                    modified_accesspoint_serial.push("")
+
+                                }
+                                modified_accesspoint_serial.push(rows[x]._row.data.accesspoint_serial)
+                            }
+
+                            if (rows[x]._row.data.trafficgenerator != undefined && modified_trafficgenerator.indexOf(rows[x]._row.data.trafficgenerator) == -1) {
+                                if (appliedfilters.indexOf("trafficgenerator") != -1) {
+                                    indexOfFilters.push(7)
+                                    modified_trafficgenerator.push("")
+
+                                }
+                                modified_trafficgenerator.push(rows[x]._row.data.trafficgenerator)
+                            }
+
+                            if (rows[x]._row.data.testbed != undefined && modified_testbed.indexOf(rows[x]._row.data.testbed) == -1) {
+                                if (appliedfilters.indexOf("testbed") != -1) {
+                                    indexOfFilters.push(8)
+                                    modified_testbed.push("")
+
+                                }
+                                modified_testbed.push(rows[x]._row.data.testbed)
+                            }
+
+                            if (rows[x]._row.data.starttime != undefined && modified_time.indexOf(rows[x]._row.data.starttime) == -1) {
+                                if (appliedfilters.indexOf("starttime") != -1) {
+                                    indexOfFilters.push(9)
+                                    modified_time.push("")
+
+                                }
+
+                                modified_time.push(rows[x]._row.data.starttime)
+                            }
+
+                            // if (rows[x]._row.data.firmware_name != undefined && modified_firmwarename.indexOf(rows[x]._row.data.firmware_name) == -1) {
+                            //     if (appliedfilters.indexOf("firmware_name") != -1) {
+                            //         indexOfFilters.push(10)
+                            //         modified_firmwarename.push("")
+
+                            //     }
+
+                            //     modified_firmwarename.push(rows[x]._row.data.firmware_name)
+                            // }
+
+                            if (rows[x]._row.data.release_cycle != undefined && modified_release_cycle.indexOf(rows[x]._row.data.release_cycle) == -1) {
+                                if (appliedfilters.indexOf("release_cycle") != -1) {
+                                    indexOfFilters.push(10)
+                                    modified_release_cycle.push("")
+
+                                }
+
+                                modified_release_cycle.push(rows[x]._row.data.release_cycle)
+                            }
+
+                            if (rows[x]._row.data.test_case != undefined && modified_testcase.indexOf(rows[x]._row.data.test_case) == -1) {
+                                if (appliedfilters.indexOf("test_case") != -1) {
+                                    indexOfFilters.push(11)
+                                    modified_testcase.push("")
+
+                                }
+                                modified_testcase.push(rows[x]._row.data.test_case)
+                            }
+
+
+                            if (rows[x]._row.data.feature != undefined && modified_feature.indexOf(rows[x]._row.data.feature) == -1) {
+                                if (appliedfilters.indexOf("feature") != -1) {
+                                    indexOfFilters.push(12)
+                                    modified_feature.push("")
+
+                                }
+                                modified_feature.push(rows[x]._row.data.feature)
+                            }
+
+                            if (rows[x]._row.data.channel != undefined && modified_channel.indexOf(rows[x]._row.data.channel) == -1) {
+                                if (appliedfilters.indexOf("channel") != -1) {
+                                    indexOfFilters.push(13)
+                                    modified_channel.push("")
+
+                                }
+
+                                modified_channel.push(rows[x]._row.data.channel)
+                            }
+
+                            if (rows[x]._row.data.security != undefined && modified_security.indexOf(rows[x]._row.data.security) == -1) {
+                                if (appliedfilters.indexOf("security") != -1) {
+                                    indexOfFilters.push(14)
+                                    modified_security.push("")
+
+                                }
+                                modified_security.push(rows[x]._row.data.security)
+                            }
+
+                            if (rows[x]._row.data.band != undefined && modified_band.indexOf(rows[x]._row.data.band) == -1) {
+                                if (appliedfilters.indexOf("band") != -1) {
+                                    indexOfFilters.push(15)
+                                    modified_band.push("")
+
+                                }
+                                modified_band.push(rows[x]._row.data.band)
+                            }
+
+                            if (rows[x]._row.data.bandwidth != undefined && modified_bandwidth.indexOf(rows[x]._row.data.bandwidth) == -1) {
+                                if (appliedfilters.indexOf("bandwidth") != -1) {
+                                    indexOfFilters.push(16)
+                                    modified_bandwidth.push("")
+
+                                }
+                                modified_bandwidth.push(rows[x]._row.data.bandwidth)
+                            }
+
+                            if (rows[x]._row.data.protocol != undefined && modified_protocol.indexOf(rows[x]._row.data.protocol) == -1) {
+                                if (appliedfilters.indexOf("protocol") != -1) {
+                                    indexOfFilters.push(17)
+                                    modified_protocol.push("")
+
+                                }
+                                modified_protocol.push(rows[x]._row.data.protocol)
+                            }                           
+                        }
+
+                        let newParams = [modified_id, modified_tester_id, modified_tester_name,
+                            modified_testplan, modified_accesspoint, modified_accesspoint_mode, modified_accesspoint_serial,
+                            modified_trafficgenerator, modified_testbed, modified_time, modified_release_cycle,
+                            modified_testcase, modified_feature, modified_channel, modified_security, modified_band, modified_bandwidth, modified_protocol
+                            ]
+                            for(arr of newParams){
+                                arr.sort()
+                            }
+
+                        var newColumns = [];
+                        var aColumns = table.getColumns();
+                                    console.log("e")
+                        for (let i = 0; i < aColumns.length - 5; i++) {
+                            console.log(aColumns[i]._column.definition.headerFilterParams)
+                            aColumns[i]._column.definition.headerFilterParams = { values: newParams[i] };
+                            aColumns[i]._column.definition.editorParams = { value: newParams[i] };
+                            
+
+                            newColumns.push(aColumns[i]._column.definition);
+                        }
+                        for (let i = aColumns.length-5; i < aColumns.length; i++) {
+                            newColumns.push(aColumns[i]._column.definition)
+                        }
+
+                        
+                        const updating = async () => {
+                            await table.setColumns(newColumns)
+                            table.redraw(true)
+                            let headerSelects = document.querySelectorAll("select")
+                            for (let i = 0; i < headerSelects.length; i++) {
+                                if (indexOfFilters.indexOf(i) != -1) {
+                                    headerSelects[i].selectedIndex = 1
+                                }
+
+
+                            }
+                        }
+
+                        updating()
+
+
+                    })
+
+
+                })
+
+                //funtion for clear all filter
+                document.getElementById("filter-clear").addEventListener("click", function () {
+                    table.clearHeaderFilter();
+                    table.redraw()
+                })
+
+            }
+
+
+
+
+
+        </script>
+
+        <script type="text/javascript ">
+    var Tawk_API = Tawk_API || {},
+        Tawk_LoadStart = new Date();
+    (function() {
+        var s1 = document.createElement("script "),
+            s0 = document.getElementsByTagName("script ")[0];
+        s1.async = true;
+        s1.src = '{% static 'resources\assets\js\pages\tawk.js' %}';
+        s1.charset = 'UTF-8';
+        s1.setAttribute('crossorigin', '*');
+        s0.parentNode.insertBefore(s1, s0);
+    })();
+</script>
+        <script type="text/javascript">
+            window.history.forward();
+
+            function noBack() {
+                window.history.forward();
+            }
+        </script>
+</body>
+
+</html>

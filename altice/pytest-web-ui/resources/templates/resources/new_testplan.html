@@ -1,0 +1,815 @@
+{% load static %}
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <!-- <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name=" csrf-token " content="iL8hUXsdXy71MbOZjq4fWUv4KGPZnJ7k17P7RClL "> -->
+    <title>CT:Add New Testplan</title>
+    <!-- <meta name="description " content="Oero Laravel ">
+    <meta name="author " content="Oero Laravel "> -->
+
+
+    <link rel="stylesheet " href="{% static 'resources\assets\plugins\bootstrap\css\bootstrap.min.css' %} ">
+    <link rel="stylesheet " href="{% static 'resources\assets\plugins\jvectormap\jquery-jvectormap-2.0.3.min.css' %} ">
+    <link rel="stylesheet " href="{% static 'resources\assets\plugins\morrisjs\morris.min.css' %} ">
+    <!-- Custom Css -->
+    <link rel="stylesheet " href="{% static 'resources\assets\css\mysty1.css' %} ">
+    <link rel="stylesheet " href="{% static 'resources\assets\css\color_skins.css' %} ">
+
+    <script type="text/javascript">
+        var Tawk_API = Tawk_API || {},
+            Tawk_LoadStart = new Date();
+        (function() {
+            var s1 = document.createElement("script"),
+                s0 = document.getElementsByTagName("script")[0];
+            s1.async = true;
+            s1.src = "{% static 'resources\assets\js\pages\tawk.js' %}";
+            s1.charset = 'UTF-8';
+            s1.setAttribute('crossorigin', '*');
+            s0.parentNode.insertBefore(s1, s0);
+        })();
+    </script>
+    <style>
+        body {
+            min-width: 150px;
+            zoom: normal;
+        }
+        
+        #wrapper {
+            margin-left: auto;
+            margin-right: auto;
+            width: 961px;
+        }
+        
+        .smart-tree[show-root-lines] {
+            font-weight: bolder;
+        }
+        
+        .wifi-symbol {
+            display: none;
+        }
+        
+        .wifi-symbol [foo],
+        .wifi-symbol {
+            display: block;
+            position: relative;
+            margin: 0 auto 0;
+            top: -30px;
+            width: 150px;
+            height: 150px;
+            -ms-transform: rotate(-45deg);
+            -moz-transform: rotate(-45deg);
+            -o-transform: rotate(-45deg);
+            -webkit-transform: rotate(-45deg);
+            transform: rotate(-45deg);
+        }
+        
+        .wifi-symbol .wifi-circle {
+            box-sizing: border-box;
+            -moz-box-sizing: border-box;
+            display: block;
+            width: 100%;
+            height: 100%;
+            font-size: 21.4285714286px;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            border-color: #FFFFCC;
+            border-style: solid;
+            border-width: 1em 1em 0 0;
+            -webkit-border-radius: 0 100% 0 0;
+            border-radius: 0 100% 0 0;
+            opacity: 0;
+            -o-animation: wifianimation 1s infinite;
+            -moz-animation: wifianimation 1s infinite;
+            -webkit-animation: wifianimation 1s infinite;
+            animation: wifianimation 1s infinite;
+        }
+        
+        .wifi-symbol .wifi-circle.first {
+            -o-animation-delay: 600ms;
+            -moz-animation-delay: 600ms;
+            -webkit-animation-delay: 600ms;
+            animation-delay: 600ms;
+        }
+        
+        .wifi-symbol .wifi-circle.second {
+            width: 5em;
+            height: 5em;
+            -o-animation-delay: 400ms;
+            -moz-animation-delay: 400ms;
+            -webkit-animation-delay: 400ms;
+            animation-delay: 400ms;
+        }
+        
+        .wifi-symbol .wifi-circle.third {
+            width: 3em;
+            height: 3em;
+        }
+        
+        .wifi-symbol .wifi-circle.fourth {
+            width: 1em;
+            height: 1em;
+            opacity: 1;
+            background-color: #FFFFCC;
+            -o-animation: none;
+            -moz-animation: none;
+            -webkit-animation: none;
+            animation: none;
+        }
+        
+        @keyframes wifianimation {
+            0% {
+                opacity: 0.4;
+            }
+            5% {
+                opactiy: 1;
+            }
+            6% {
+                opactiy: 0.1;
+            }
+            100% {
+                opactiy: 0.1;
+            }
+        }
+    </style>
+</head>
+
+<body style="border-color: gray; background-color: white;" style="font-family: 'Open Sans Light'; overflow-y: auto;">
+    <!-- Page Loader -->
+    <div style="background-color:#303c54;" class="page-loader-wrapper">
+        <div style="background-color:#303c54;" class="loader">
+            <div style="background-color:#303c54;" class="m-t-30">
+                <div class="wifi-symbol">
+                    <div class="wifi-circle first"></div>
+                    <div class="wifi-circle second"></div>
+                    <div class="wifi-circle third"></div>
+                    <div class="wifi-circle fourth">
+                    </div>
+                </div>
+            </div>
+            <p style="background-color:#303c54;">Please wait...</p>
+        </div>
+    </div>
+    <!-- Overlay For Sidebars -->
+    <div class="overlay"></div>
+    <div id="wrapper">
+        <nav class="navbar p-l-5 p-r-5" style="background-color: #303c54; max-height: 60px;">
+            <ul class="nav navbar-nav navbar-left" style="background-color: #303c54; max-height: 60px;">
+                <li>
+                    <div class="navbar-header">
+                        <!-- <a href="javascript:void(0);" class="bars"></a> -->
+                        <!-- <a class="navbar-brand"><img src="{% static 'resources\assets\images\candela.png' %}" width="30" alt="Oreo"><span class="m-l-10">Candela Technologies</span></a> -->
+                    </div>
+                </li>
+                <!-- <li><a href="javascript:void(0);" class="ls-toggle-btn" data-close="true"><i class="zmdi zmdi-settings"
+                            title="Back"></i></a></li>
+ -->
+
+                <li class="d-none d-md-inline-block">
+                    <li>
+                        <a href="#" class="ls-toggle-btn"><i class="zmdi zmdi-menu"></i></a>
+                    </li>
+                    <li class="active open">
+                        <a href="{% url 'home' %}"></i><b><span style="font-weight:bolder">Dashboard</span></b></a>
+                    </li>
+                    <li class="active open">
+                        <a href="{% url 'statistics' %}"></i><b><span style="font-weight:bolder">Statistics</span></b></a>
+                    </li>
+                </li>
+                <li class="float-right">
+                    <p style="color: white;"><b>Active User : </b>{{tester_email_id.name}}</p>
+
+                    <a href="{% url 'logout' %}" class="mega-menu" data-close="true"><i
+                            class="zmdi zmdi-long-arrow-tab" title="Logout"></i></a>
+                    <!-- <a href="javascript:void(0);" class="js-right-sidebar" data-close="true"><i class="zmdi zmdi-settings"
+                            title="Settings"></i></a> -->
+                </li>
+            </ul>
+        </nav>
+    </div>
+    <!-- Left Sidebar -->power
+    <aside id="leftsidebar" class="sidebar">
+        <ul style="background-color:white" class="nav nav-tabs">
+            <li class="nav-item" style="text-align: center;margin:0 auto 0;width:100%;">
+                <a style="color: white;cursor: default;" class="nav-link active" data-toggle="tab" href="#dashboard">
+
+                    <link rel="icon" href="{% static 'resources\assets\images\gold1.svg' %}" type="icon"><img src="{% static 'resources\assets\images\alti.jpeg' %}" style="height: 24px;" /></i>&nbsp;<strong style="font-size: small; color: black;">Altice Labs</strong>
+
+                </a>
+            </li>
+        </ul>
+        <div class="tab-content">
+            <div class="tab-pane stretchRight active" id="dashboard">
+                <div class="menu">
+                    <ul style="background-color:rgb(60,75,100);margin: 0 0px;" class="list">
+                        <li class="">
+                            <a href="{% url 'view_all' %}" style="padding-bottom: 10px; height:50.5px;">
+                                <i style="color: white;" class="zmdi zmdi-account-add"></i>
+                                <b><span style="color: white;">Resources</span></b>
+                            </a>
+                        </li>
+                        <li class="">
+                            <a href="{% url 'new_testplan' %}" style="padding-bottom: 20px; padding-top: 12px;width: 100%; background-color: #5985de;">
+                                <i style="color: white;" class="zmdi zmdi-account-add"></i>
+                                <b><span style="color: white;">Add New Testplans</span></b>
+                            </a>
+                        </li>
+                        <li class="">
+                            <a href="{% url 'test_scheduler' %}" style="padding-bottom: 20px; padding-top: 12px;">
+                                <i style="color: white;" class="zmdi zmdi-account-add"></i>
+                                <b><span style="color: white;">Test Scheduler</span></b>
+                            </a>
+                        </li>
+                        <!-- <li class="">
+                            <a style="padding-bottom: 20px; padding-top: 12px;">
+                                <i style="color: white;" class="zmdi zmdi-account-add"></i>
+                                <b><span style="color: white;">Results</span></b>
+                            </a>
+                        </li> -->
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+    </aside>
+    <!-- Chat-launcher -->
+    <!-- Smart Tree -->
+    <link rel="stylesheet" type="text/css" href="{% static 'resources\assets\css\smart.default.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'resources\assets\css\demos.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'resources\assets\css\styles.css' %}">
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="{% static 'resources\assets\css\cdnmin.css' %}">
+    <script>
+        if (window.history.replaceState) {
+            window.history.replaceState(null, null, window.location.href);
+        }
+    </script>
+    <style>
+        td:hover {
+            background-color: #f5f5f5;
+        }
+        
+        #download:hover {
+            background-color: transparent;
+        }
+        
+        #trash {
+            box-shadow: none;
+        }
+        
+        #trash:active {
+            transform: scale(0.95);
+        }
+        
+        /* body::-webkit-scrollbar {
+            display: none;
+        } */
+        /* Hide scrollbar for IE, Edge and Firefox */
+        
+        /* body { */
+            /* -ms-overflow-style: none; */
+            /* IE and Edge */
+            /* scrollbar-width: none; */
+            /* Firefox */
+        /* } */
+        
+        #shadow:focus,
+        #shadow:hover,
+        #file:hover {
+            box-shadow: none;
+            cursor: pointer;
+        }
+        
+        button,
+        #file,
+        #shadow {
+            box-shadow: 5px 5px 10px black;
+            border-left: white;
+        }
+        
+        .btn-group {
+            display: inline-block;
+        }
+        
+        .smart-tree .smart-tree-main-container {
+            overflow-y: scroll;
+        }
+        
+        .smart-tree:not([toggle-element-position="far"]) smart-tree-items-group .smart-tree-items-group-arrow {
+            opacity: 0;
+        }
+        
+        .smart-tree[selection-mode=checkBox] smart-tree-item[selected]>.smart-tree-item-label-container:after,
+        .smart-tree[selection-mode=checkBox] smart-tree-items-group[selected]>.smart-tree-item-label-container:after {
+            content: "";
+        }
+        
+        .smart-tree {
+            border-bottom-width: 0px;
+            height: 60vh;
+        }
+    </style>
+    <aside>
+        <li>
+            <div class="user-info">
+
+                <div style="color: white;" class="detail">
+                    <h4>{{tester_email_id.name}}</h4>
+                    <!-- <h4>{{uid.email}}</h4> -->
+                </div>
+            </div>
+        </li>
+    </aside>
+
+    {{ mydata|json_script:"mydata" }}
+    <script>
+        const mydata = JSON.parse(document.getElementById('mydata').textContent);
+        var data = JSON.parse(mydata);
+        var string = new Set();
+        var temp_final_string = [];
+        var final_string = [];
+
+        function clear_tree() {
+            var delete_tree = document.querySelector('smart-tree');
+            console.log(delete_tree);
+            delete_tree.clearSelection();
+            //check_and_apply();
+            $('#for_more').click(check_and_apply('#for_more'));
+            // document.getElementById('selected_cases').innerHTML = '';
+            // document.getElementById('')
+        }
+    </script>
+    <section class="content home" style="padding-bottom: 0px;width: auto;">
+        {% if messages %}
+        <ul class="messages" style="margin-bottom: 100px;">
+            {% for message in messages %}
+            <li style="margin-top: -70px;" {% if message.tags %} class="{{ message.tags }}" {% endif %}>{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+        <div class="content-center" style="width: 100%; height: max-content; padding-bottom: 20px;">
+            <div class="card" style='margin: 0%; width: auto;background-color: white; width: 100%; box-shadow: 5px 5px 10px black; margin-top:-70px'>
+                <h2 style="display: block; color: white; font-family: sans-serif; background-color: rgb(60,75,100); height: 40px; padding-top: 10px; font-size: 15px; margin-bottom: 0%;">
+                    &nbsp; <b>Add Custom Test Plan</b>
+                </h2><br>
+                <form action="{% url 'custom_plan' %}" method="post" autocomplete="off">
+                    {% csrf_token %}
+                    <div class="col" style=" max-width: max-content;">
+                        <input type="text" name="new_testplan" id="new_testplan" placeholder="Testplan Name" required>
+                        <a href="#" onclick="add(this);" class="btn btn-primary btn-round" style="background-color: rgb(60, 75, 100);"><i class="zmdi zmdi-plus"></i></a>
+                        <label for="total-selected" id="selected-testcases" style=" max-width: max-content;"><b>Total Testcases Selected: 0,&nbsp;Total Estimated Time: 0 minutes</b></label><br>
+                        <a class='btn btn-sm btn-round' style='color: white; font-weight: bold; background-color: #3c4b64; box-shadow: none;' onclick='clear_tree();'>Clear</a>
+                        <!-- <a class='btn btn-sm btn-round' style='color: white; font-weight: bold; background-color: #3c4b64; box-shadow: none;' onclick='check_and_apply();'>Load </a> -->
+                    </div>
+
+                    <div style="padding: 5px;">
+                        <div id="smart-card" style="float: left; height: 60vh; box-shadow: 5px 5px 10px black;">
+                            <script>
+                                function check_and_apply(loc) {
+                                    console.log(data);
+                                    total = 0;
+                                    final_string = [];
+                                    new_final_string = [];
+                                    document.getElementById('selected_cases').innerHTML = "<label>Selected Testplans</label><br>";
+                                    temp_final_string = document.querySelector('smart-tree').getSelectedValues();
+                                    //console.log(temp_final_string);
+                                    let string_to_display = "";
+                                    for (i in temp_final_string) {
+                                        if (temp_final_string[i] != " ") {
+                                            final_string.push(temp_final_string[i]);
+                                            //new_final_string.push(temp_final_string[i]);
+                                            title_string = temp_final_string[i];
+                                            title_string = title_string.replace('(', '');
+                                            title_string = title_string.replace(')', '');
+                                            title_string = title_string.split(/\sand\s/);
+                                            total = total + data['Testplan']['Features'][title_string[0]]['band'][title_string[1]]['security'][title_string[2]]['channels'][title_string[3]]['bandwidth'][title_string[4]]['protocol'][title_string[5]]['sub_features'][title_string[6]]['estimated time'];
+                                            title_string = data['Testplan']['Features'][title_string[0]]['band'][title_string[1]]['security'][title_string[2]]['channels'][title_string[3]]['bandwidth'][title_string[4]]['protocol'][title_string[5]]['sub_features'][title_string[6]]['testcase name'];
+                                            temp_final_string[i] = temp_final_string[i].replace('(', '');
+                                            temp_final_string[i] = temp_final_string[i].replace(')', '');
+                                            temp_final_string[i] = temp_final_string[i].replace('_', ' ');
+                                            string_to_display += ("<label title=" + title_string + ">"+temp_final_string[i]+ "</label>");
+                                            //document.getElementById('selected_cases').innerHTML += "<label title=" + title_string + ">" + temp_final_string[i] + "</label><br>";
+                                        }
+                                    } 
+                                    //console.log(string_to_display);
+                                    document.getElementById('selected_cases').innerHTML += string_to_display + "<br>";
+                                    document.getElementById('selected-testcases').innerHTML = "<b>Total Testcases Selected: " + final_string.length + ",&nbsp;Total Estimated Time: " + total +" minutes</b>";
+                                    final_string = final_string.join(' or ');
+                                    final_string = final_string.replace(/2G/g, "twog");
+                                    final_string = final_string.replace(/5G/g, "fiveg");
+                                    //new_final_string = new_final_string.join(' or ');
+                                    //new_final_string = new_final_string.replace(/2G/g, "twog");
+                                    //new_final_string = new_final_string.replace(/5G/g, "fiveg");
+                                    new_final_string = final_string;
+                                    document.getElementById('testplan_new').value = final_string;
+                                    document.getElementById('testplan_new1').value = new_final_string;
+                                    // alert(final_string);
+                                    //console.log(final_string);
+                                }
+                                var opt = "<smart-tree has-three-states toggle-mode='arrow' style='width: max-content;' onchange='check_and_apply()' selection-mode='checkBox' show-root-lines show-lines >";
+                                for (i in data['Testplan']['Features']) {
+                                    if (i == "name" || i == "estimated time" || i == "Total") {
+                                        continue;
+                                    }
+                                    opt += "<smart-tree-items-group id='for_more' value=' ' >" + data['Testplan']['Features'][i]['name'] + "<span style='font-weight: lighter;'> (" + data['Testplan']['Features'][i]['Total'] + " testcases) (" + data['Testplan']['Features'][i]['estimated time'] + " minutes)</span>";
+                                    if('band' in data['Testplan']['Features'][i]) {
+                                        for(j in data['Testplan']['Features'][i]['band']) {
+                                            if (j == "name" || j == "estimated time" || j == "Total") {
+                                                continue;
+                                            }
+                                            opt += "<smart-tree-items-group id='for_more' class='child' value=' '>" + data['Testplan']['Features'][i]['band'][j]['name'] + "<span style='font-weight: lighter;'> (" + data['Testplan']['Features'][i]['band'][j]['Total'] + " testcases) (" + data['Testplan']['Features'][i]['band'][j]['estimated time'] + " minutes)</span>";
+                                            if('security' in data['Testplan']['Features'][i]['band'][j]) {
+                                                for(k in data['Testplan']['Features'][i]['band'][j]['security']) {
+                                                    if (k == "name" || k == "estimated time" || k == "Total") {
+                                                        continue;
+                                                    }
+                                                    opt += "<smart-tree-items-group id='for_more' class='child' value=' '>" + data['Testplan']['Features'][i]['band'][j]['security'][k]['name'] + "<span style='font-weight: lighter;'> (" + data['Testplan']['Features'][i]['band'][j]['security'][k]['Total'] + " testcases) (" + data['Testplan']['Features'][i]['band'][j]['security'][k]['estimated time'] + " minutes)</span>";                                                    
+                                                    if('channels' in data['Testplan']['Features'][i]['band'][j]['security'][k]) {;
+                                                        for(l in data['Testplan']['Features'][i]['band'][j]['security'][k]['channels']) {
+                                                            if (l == "name" || l == "estimated time" || l == "Total") {
+                                                                continue;
+                                                            }
+                                                            opt += "<smart-tree-items-group id='for_more' class='child' value=' '>" + data['Testplan']['Features'][i]['band'][j]['security'][k]['channels'][l]['name'] + "<span style='font-weight: lighter;'> (" + data['Testplan']['Features'][i]['band'][j]['security'][k]['channels'][l]['Total'] + " testcases) (" + data['Testplan']['Features'][i]['band'][j]['security'][k]['channels'][l]['estimated time'] + " minutes)</span>";
+                                                            if('bandwidth' in data['Testplan']['Features'][i]['band'][j]['security'][k]['channels'][l]) {
+                                                                for(m in data['Testplan']['Features'][i]['band'][j]['security'][k]['channels'][l]['bandwidth']) {
+                                                                    if (m == "name" || m == "estimated time" || m == "Total") {
+                                                                        continue;
+                                                                    }
+                                                                    opt += "<smart-tree-items-group id='for_more' class='child' value=' '>" + data['Testplan']['Features'][i]['band'][j]['security'][k]['channels'][l]['bandwidth'][m]['name'] + "<span style='font-weight: lighter;'> (" + data['Testplan']['Features'][i]['band'][j]['security'][k]['channels'][l]['bandwidth'][m]['Total'] + " testcases) (" + data['Testplan']['Features'][i]['band'][j]['security'][k]['channels'][l]['bandwidth'][m]['estimated time'] + " minutes)</span>";
+                                                                    if('protocol' in data['Testplan']['Features'][i]['band'][j]['security'][k]['channels'][l]['bandwidth'][m]) {
+                                                                        for(n in data['Testplan']['Features'][i]['band'][j]['security'][k]['channels'][l]['bandwidth'][m]['protocol']) {
+                                                                            if (n == "name" || n == "estimated time" || n == "Total") {
+                                                                                continue;
+                                                                            }
+                                                                            opt += "<smart-tree-items-group id='for_more' class='child' value=' '>" + data['Testplan']['Features'][i]['band'][j]['security'][k]['channels'][l]['bandwidth'][m]['protocol'][n]['name'] + "<span style='font-weight: lighter;'> (" + data['Testplan']['Features'][i]['band'][j]['security'][k]['channels'][l]['bandwidth'][m]['protocol'][n]['Total'] + " testcases) (" + data['Testplan']['Features'][i]['band'][j]['security'][k]['channels'][l]['bandwidth'][m]['protocol'][n]['estimated time'] + " minutes)</span>";                                            
+                                                                            if('sub_features' in data['Testplan']['Features'][i]['band'][j]['security'][k]['channels'][l]['bandwidth'][m]['protocol'][n]) {
+                                                                                for(o in data['Testplan']['Features'][i]['band'][j]['security'][k]['channels'][l]['bandwidth'][m]['protocol'][n]['sub_features']) {
+                                                                                    if (o == "name" || o == "estimated time" || o == "Total") {
+                                                                                        continue;
+                                                                                    }
+                                                                                    opt += "<smart-tree-item id='for' class='child' value='(" + i + "&nbsp;and&nbsp;" + j + "&nbsp;and&nbsp;" + k + "&nbsp;and&nbsp;" + l + "&nbsp;and&nbsp;" + m + "&nbsp;and&nbsp;" + n + "&nbsp;and&nbsp;" + o + ")'>" + data['Testplan']['Features'][i]['band'][j]['security'][k]['channels'][l]['bandwidth'][m]['protocol'][n]['sub_features'][o]['marker'] + "<span style='font-weight: lighter;'> (1 testcase) (" + data['Testplan']['Features'][i]['band'][j]['security'][k]['channels'][l]['bandwidth'][m]['protocol'][n]['sub_features'][o]['estimated time'] + " minutes)</span></smart-tree-item>";
+                                                                                }
+                                                                            }
+                                                                            opt += "</smart-tree-items-group>";
+                                                                        }
+                                                                    }
+                                                                    opt += "</smart-tree-items-group>";
+                                                                }
+                                                            }
+                                                            opt += "</smart-tree-items-group>";
+                                                        }
+                                                    }
+                                                    opt += "</smart-tree-items-group>";   
+                                                }
+                                            }
+                                            opt += "</smart-tree-items-group>";
+                                        }
+                                    }
+                                    opt += "</smart-tree-items-group>";
+                                }
+                                opt += "</smart-tree>";
+
+                                document.getElementById('smart-card').innerHTML = opt;
+                                $('#for_more').click(check_and_apply('#for_more'));
+                            </script>
+                        </div>
+                        <div id="selected_cases" style="padding-left: 15px; overflow: scroll; height: 60vh; max-height: 70vh; box-shadow: 5px 5px 10px black;">
+                        
+                        </div>
+
+                        <!-- <div  class="col" style=" max-width: max-content;">
+                    <input type="text" name="testplan_new" id="testplan_new" style="display: visible;" required>
+
+                </div> -->
+                    
+                    </div>
+                    <div>
+                        <input type="text" name="testplan_new1" id="testplan_new1" style="display: none;" required> 
+                        <input type="text" name="testplan_new" id="testplan_new" style="display: visible; width: 97%; margin-top: 20px; margin-left: 20px;" required>
+
+                    </div>
+
+                </form>
+
+            </div>
+        </div>
+        <div class="card " style="margin: 0%; box-shadow: 5px 5px 10px black; font-family: sans-serif; ">
+            <div class="header " style="background-color: white; padding: 0%; ">
+                <h2 id="heading " style="font-family: sans-serif; background-color: rgb(60,75,100); height: 40px; padding-top: 10px; ">
+                    <strong style="color: white; ">&nbsp; Custom Testplans</strong>
+                </h2>
+                <div class="body " style="padding-left: 0%; padding-top: 0%; padding-bottom: 0%; background-color: white ">
+                    <div id="collected " class="table-responsive " style="white-space: pre; padding-left: 10px; ">
+                        <table style="width: 100%; justify-content: center; " class="table table-bordered js-basic-example dataTable ">
+                            <thead>
+                                <tr>
+                                    <!-- <th style="border: none;"></th> -->
+                                    <th>S.No</th>
+                                    <th>Tester</th>
+                                    <th>Testplan</th>
+                                    <th>Testcases</th>
+                                    <th>Estimated Time(minutes)</th>
+                                    <th>Features</th>
+                                    <th>Band</th>
+                                    <th>Security</th>
+                                    <th>Channels</th>
+                                    <th>Bandwidth</th>
+                                    <th>Protocols</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbody " style="white-space: pre; ">
+                                {% for i in testplan_data %} {% if i.features != None %}
+                                <tr onclick="change('{{ i.testplan_name }}')">
+                                    <!-- <td style="border: none; background: none; padding-right: 0%;">
+                                    <a href="#" id="trash" style="margin-top: 0px; border: none; padding: 0%; cursor: pointer; box-shadow: none;" onclick="delete_plan('{{i.testplan_name}}','{{i.tester_id}}');"><i
+                                                class="fa-solid fa-trash" style="color: red;"></i> </a>
+                                </td> -->
+                                    <td style="width: auto; ">{{ forloop.counter }}</td>
+                                    <td style="width: auto; ">{{i.tester_id}}</td>
+                                    <td style="width: auto; ">{{i.testplan_name}}</td>
+                                    <td style="width: auto; ">{{i.Total_Testcases}}</td>
+                                    <td style="width: auto; ">{{i.Estimated_Time}}</td>
+                                    <td style="width: auto; ">{{i.unique_features}}</td>
+                                    <td style="width: auto; ">{{i.unique_band }}</td>
+                                    <td style="width: auto; ">{{i.unique_security }}</td>
+                                    <td style="width: auto; ">{{i.unique_channels }}</td>
+                                    <td style="width: auto; ">{{i.unique_bandwidth }}</td>
+                                    <td style="width: auto; ">{{i.unique_protocol }}</td>
+                                </tr>
+                                <!-- {{ i.data|json_script:"new_data " }} -->
+                                <tr id="{{ i.testplan_name }}" style="display: none;">
+                                    <td colspan="11">
+                                        <table style="width: 100%; justify-content: center; " class="table table-bordered js-basic-example dataTable ">
+                                            <thead>
+                                                <tr style="background-color: #60779f; color: white;">
+                                                    <th>Testcase</th>
+                                                    <th>Estimated Time(minutes)</th>
+                                                    <th>Features</th>
+                                                    <th>Band</th>
+                                                    <th>Security</th>
+                                                    <th>Channel</th>
+                                                    <th>Bandwidth</th>
+                                                    <th>Protocol</th>
+                                                    <th>Sub Feature</th>
+                                                    <th>Description</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <td style="width: auto;">{{ i.testcases | linebreaks }}</td>
+                                                <td style="width: auto;">{{ i.time | linebreaks}}</td>
+                                                <td style="width: auto; ">{{i.features | linebreaks}}</td>
+                                                <td style="width: auto; ">{{i.band | linebreaks}}</td>
+                                                <td style="width: auto; ">{{i.security | linebreaks}}</td>
+                                                <td style="width: auto; ">{{i.channels | linebreaks}}</td>
+                                                <td style="width: auto; ">{{i.bandwidth | linebreaks}}</td>
+                                                <td style="width: auto; ">{{i.protocol | linebreaks}}</td>
+                                                <td style="width: auto; ">{{i.sub_feature | linebreaks}}</td>
+                                                <td id="description" style="width: auto; white-space: pre;">{{ i.description | linebreaks }}</td>
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                </tr>
+                                {% endif %} {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </section>
+    <!-- Smart Scripts -->
+    <script type="module" src="{% static 'resources\assets\js\pages\smart.tree.js' %}"></script>
+    <script type="module" src="{% static 'resources\assets\js\pages\index.js' %}"></script>
+
+
+    <script type="text/javascript">
+        var all_modes_keys;
+        var all_security_keys;
+        var all_band_keys;
+        var all_feature_keys;
+        var features_keys_parent = Object.keys(data['Testplan']['Features']);
+        for (var i = 0; i < features_keys_parent.length; i++) {
+            $('#features').append('<option value="' + features_keys_parent[i] + '">' + features_keys_parent[i] + '</option>');
+            $('#features').selectpicker('refresh');
+        }
+        // var opt = "<smart-tree data-source='['" + data + "]'></smart-tree>";
+        // alert(opt);
+        $('#features').change(function() {
+            $('#modes').empty();
+            window.features_keys = $('#features').val();
+            //alert(window.features_keys);
+            //alert(features_keys);
+            var all_modes_keys = Object.keys(data['Testplan']['Features'][window.features_keys]['Mode']);
+            globalThis.all_modes_keys = all_modes_keys;
+            //alert(globalThis.all_modes_keys);
+            $('#modes').append('<option value="" selected disabled>Mode</option>');
+            for (i = 0; i < globalThis.all_modes_keys.length; i++) {
+                //console.log(globalThis.all_modes_keys[i]);
+                $('#modes').append('<option value=' + globalThis.all_modes_keys[i].toLowerCase() + '>' + globalThis.all_modes_keys[i] + '</option>');
+                $('#modes').selectpicker('refresh');
+
+            }
+        });
+        $('#modes').change(function() {
+            $('#security').empty();
+            window.modes_keys = $('#modes').val();
+            //alert(modes_keys);
+            var all_security_keys = Object.keys(data['Testplan']['Features'][window.features_keys]['Mode'][window.modes_keys]['security']);
+            globalThis.all_security_keys = all_security_keys;
+            //alert(globalThis.all_security_keys);
+            $('#security').append('<option value="" selected disabled>Security</option>');
+            for (i = 0; i < globalThis.all_security_keys.length; i++) {
+                //console.log(globalThis.all_security_keys[i]);
+                $('#security').append('<option value=' + globalThis.all_security_keys[i].toLowerCase() + '>' + globalThis.all_security_keys[i] + '</option>');
+                $('#security').selectpicker('refresh');
+            }
+        });
+        $('#security').change(function() {
+            $('#band').empty();
+            window.security_keys = $('#security').val();
+            //alert(window.security_keys);
+            //alert(security_keys);
+            var all_band_keys = Object.keys(data['Testplan']['Features'][window.features_keys]['Mode'][window.modes_keys]['security'][window.security_keys]['band']);
+            globalThis.all_band_keys = all_band_keys;
+            //alert(globalThis.all_band_keys);
+            $('#band').append('<option value="" selected disabled>Band</option>');
+            for (i = 0; i < globalThis.all_band_keys.length; i++) {
+                //console.log(globalThis.all_band_keys[i]);
+                $('#band').append('<option value=' + globalThis.all_band_keys[i].toLocaleLowerCase() + '>' + globalThis.all_band_keys[i] + '</option>');
+                $('#band').selectpicker('refresh');
+            }
+        });
+        $('#find').click(
+            function() {
+                var super_string = [];
+                var all_features = $('#features').val();
+                var all_mode = $('#modes').val();
+                var all_security = $('#security').val();
+                var all_band = $('#band').val();
+                if (all_features.length > 1) {
+                    var features = [];
+                    for (var i = 0; i < all_features.length; i++) {
+                        if (all_features[i].value != "") {
+                            features.push(all_features[i].value);
+                        }
+                    }
+                    features = '(' + features.join(" or ") + ')';
+                    super_string.push(features);
+                }
+                if (all_mode.length > 1) {
+                    var mode = [];
+                    for (var i = 0; i < all_mode.length; i++) {
+                        if (all_mode[i].value != "") {
+                            mode.push(all_mode[i].value);
+                        }
+                    }
+                    mode = '(' + mode.join(" or ") + ')';
+                    super_string.push(mode);
+                }
+                if (all_security.length > 1) {
+                    var security = [];
+                    for (var i = 0; i < all_security.length; i++) {
+                        if (all_security[i].value != "") {
+                            security.push(all_security[i].value);
+                        }
+                    }
+                    security = '(' + security.join(" or ") + ')';
+                    super_string.push(security);
+                }
+                if (all_band.length > 1) {
+                    var band = [];
+                    for (var i = 0; i < all_band.length; i++) {
+                        if (all_band[i].value != "") {
+                            band.push(all_band[i].value);
+                        }
+                    }
+                    band = '(' + band.join(" or ") + ')';
+                    super_string.push(band);
+                }
+                var string = super_string.join(" and ");
+                if (string.length == 0) {
+                    alert("cannot create empty testplan");
+                } else if (all_features.length == 1) {
+                    alert("cannot create testplan without any features");
+                } else if (all_features.length == 2) {
+                    if (all_mode.length >= 2) {
+                        document.getElementById("testplan_new").value = string;
+                        //loc.parentNode.parentNode.submit();
+                    } else if (all_security.length >= 2) {
+                        document.getElementById("testplan_new").value = string;
+                        //loc.parentNode.parentNode.submit();
+                    } else if (all_band.length >= 2) {
+                        document.getElementById("testplan_new").value = string;
+                        //loc.parentNode.parentNode.submit();
+                    } else {
+                        alert("cannot create a single feature testplan without any mode, security or band");
+                    }
+                } else {
+                    document.getElementById("testplan_new").value = string;
+                }
+                let csr = $("input[name=csrfmiddlewaretoken]").val();
+                userData = {
+                    'testplan_new': string,
+                    csrfmiddlewaretoken: csr,
+                };
+                temp_data = {};
+                $.ajax({
+                    type: "POST",
+                    url: "{% url 'collect_only' %}",
+                    data: userData,
+                    success: function(response) {
+                        temp_data = response.context.stt;
+                        document.getElementById('heading').value = "Collected Testcases";
+                        //console.log(temp_data);
+                        $("#collected").html(temp_data);
+                    }
+                });
+            }
+        );
+        var super_string = [];
+        var output = "";
+
+        function add_more() {
+            //alert('added');
+            var feature = $('#features').val();
+            var mode = $('#modes').val();
+            var security = $('#security').val();
+            var band = $('#band').val();
+            single_testplan = [feature, mode, security, band];
+            output += "<tr>"
+            for (var i = 0; i < single_testplan.length; i++) {
+                output += "<td>" + single_testplan[i] + "</td>";
+            }
+            output += "</tr>";
+            $('#tbody').empty();
+            $('#tbody').append(output);
+            single_testplan = '(' + single_testplan.join(" and ") + ')';
+            super_string.push(single_testplan);
+            $('#security').empty();
+            $('#band').empty();
+            $('#modes').empty();
+            $("#band").selectpicker("refresh");
+            $("#modes").selectpicker("refresh");
+            $("#security").selectpicker("refresh");
+        }
+
+        //let testplan_data = {};
+        function add(loc) {
+            if (document.getElementById('new_testplan').value == "") {
+                alert("cannot create a testplan without any name");
+            } else {
+                if (final_string.length == 0) {
+                    alert("cannot create empty testplan");
+                } else {
+                    //console.log(loc.parentNode.parentNode);
+                    loc.parentNode.parentNode.submit();
+                    /*let new_testplan_data = document.querySelector("#testplan_new1").value;
+                    let test_name = document.querySelector("#new_testplan").value;
+                    let postData = JSON.stringify({
+                        test_name: test_name
+                        testplan_new1: new_testplan_data,
+                    })
+                    $.ajax({
+                        url:"/custom_plan/",
+                        method: "POST",
+                        data: postData,
+                        contentType: 'application/json',
+                        success: function(response) {
+                            testplan_data = response['tesplan_data']
+                        }
+                    })*/
+                }
+            }
+
+        }
+
+        function change(loc) {
+            if (document.getElementById(loc).style.display == "none") {
+                document.getElementById(loc).style.display = "";
+            } else {
+                document.getElementById(loc).style.display = "none";
+            }
+        }
+    </script>
+    <!-- Scripts -->
+    <script src="{% static 'resources\assets\bundles\libscripts.bundle.js' %}"></script>
+    <script src="{% static 'resources\assets\bundles\vendorscripts.bundle.js' %}"></script>
+    <script src="{% static 'resources\assets\bundles\mainscripts.bundle.js' %}"></script>
+    <script src="{% static 'resources\assets\bundles\morrisscripts.bundle.js' %}"></script>
+    <script src="{% static 'resources\assets\bundles\jvectormap.bundle.js' %}"></script>
+    <script src="{% static 'resources\assets\bundles\knob.bundle.js' %}"></script>
+    <script src="{% static 'resources\assets\js\pages\index.js' %}"></script>
+    <script type="text/javascript">
+        window.history.forward();
+
+        function noBack() {
+            window.history.forward();
+        }
+    </script>
+    <!--End of Tawk.to Script-->
+</body>
+
+</html>

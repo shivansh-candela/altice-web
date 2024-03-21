@@ -1,0 +1,97 @@
+{% extends 'resources/dashboard/index.html' %}
+{% load static %}
+
+{% block content %}
+
+<section class="content home">
+    <div class="block-header">
+        <div class="row">
+        </div>
+    </div>
+    <div class="col-sm-6 container">                
+                
+<div class="row clearfix">
+<div class="content-center"> 
+<div class="card">
+    
+    <form action="" class="form" method="POST">
+        {% csrf_token %}
+        <div class="text-center">
+            <h4>{{testbed_id.testbedname}}</h4>
+            <h4>{{testbed_id.accesspoint}}</h4>
+            <h4>{{testbed_id.lanforge}}</h4>
+            <h4>{{testbed_id.accesspoint.mode}}</h4>
+            <h4>{{testbed_id.lanforge.name}}</h4>
+            <ul class="header-dropdown">                            
+            </ul>
+            
+        </div>
+        
+    </form>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section class="content home">
+    <div class="block-header">
+        <div class="row">
+        </div>
+    </div>
+    <div class="col-sm-6 container">                
+                
+<div class="row clearfix">
+<div class="content-center"> 
+<div class="card">
+    
+    <form action="" class="form" method="POST">
+        {% csrf_token %}
+        <div class="text-center">
+            <h2>Add Pytest</h2>
+            <ul class="header-dropdown">                            
+            </ul>
+        </div>
+        <div class="content-center">
+            <div class="row clearfix">
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <input type="hidden" class="form-control" name="pytest" placeholder="model" value="pytest -m">
+                    </div>
+                </div>
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <input type="text" class="form-control" name="marker" placeholder="marker">
+                    </div>
+                </div>
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <input type="hidden" class="form-control" name="testbed_m" placeholder="testbed" value="--testbed=">
+                    </div>
+                </div>
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <input type="text" class="form-control" name="testbed_n" placeholder="testbed" value="{{testbed.testbedname}}">
+                    </div>
+                </div>
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <input type="hidden" class="form-control" name="collect" placeholder="collect" value="--collect-only">
+                    </div>
+                </div>
+                
+                <div class="col-sm-12">
+                    <input type="submit" class="btn btn-primary btn-round" value="Add pytest">
+                    <button type="submit" class="btn btn-default btn-round btn-simple">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+{% endblock %}

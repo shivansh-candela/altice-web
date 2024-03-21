@@ -1,0 +1,7 @@
+django
+celery
+flower
+django-celery-beat
+django-enum-choices
+django-celery-results
+bs4

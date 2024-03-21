@@ -1,0 +1,1 @@
+{"uuid": "00b8f520-0ed0-4e07-920a-c8254a909b10", "children": ["ed752465-6cf5-4256-b34b-0c1d32b527bf"], "befores": [{"name": "get_attenuators", "status": "passed", "start": 1702295755637, "stop": 1702295755637}], "afters": [{"name": "get_attenuators::0", "status": "passed", "start": 1702295936898, "stop": 1702295936898}], "start": 1702295755637, "stop": 1702295936898}

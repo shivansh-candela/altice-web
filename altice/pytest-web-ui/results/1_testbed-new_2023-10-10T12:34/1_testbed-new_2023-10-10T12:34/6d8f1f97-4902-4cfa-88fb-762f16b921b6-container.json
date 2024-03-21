@@ -1,0 +1,1 @@
+{"uuid": "b2906e1e-c647-4b11-8002-c1d0654fddbd", "children": ["c30a0625-028b-4230-bd26-c9cdc7142c8d"], "befores": [{"name": "create_lanforge_chamberview_dut", "status": "passed", "start": 1702380857347, "stop": 1702380862159}], "start": 1702380857347, "stop": 1702380896029}

@@ -1,0 +1,43 @@
+{% extends 'resources/dashboard/index.html' %}
+
+
+{% block content %}
+
+<section class="content home">
+    <div class="block-header">
+        <div class="row">
+        </div>
+    </div>
+    <div class="col-sm-6 container">                
+                
+<div class="row clearfix">
+<div class="content-center"> 
+<div class="card">
+    
+    <form action="{% url 'add_accesspoint' %}" class="form" method="POST">
+        {% csrf_token %}
+        <div class="text-center">
+            <h4>{{accesspoint_id.model}}</h4>
+            <h4>{{accesspoint_id.mode}}</h4>
+            <h4>{{accesspoint_id.serial}}</h4>
+            <h4>{{accesspoint_id.jumphost}}</h4>
+            <h4>{{accesspoint_id.ip}}</h4>
+            <h4>{{accesspoint_id.username}}</h4>
+            <h4>{{accesspoint_id.password}}</h4>
+            <h4>{{accesspoint_id.port}}</h4>
+            <h4>{{accesspoint_id.jumphost_tty}}</h4>
+            <h4>{{accesspoint_id.version}}</h4>
+            <ul class="header-dropdown">                            
+            </ul>
+            
+        </div>
+        
+    </form>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+{% endblock %}

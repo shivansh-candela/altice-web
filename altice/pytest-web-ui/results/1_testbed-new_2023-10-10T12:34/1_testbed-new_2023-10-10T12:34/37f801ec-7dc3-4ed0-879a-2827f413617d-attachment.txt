@@ -1,0 +1,2 @@
+2023-10-10 15:07:32 [32mINFO[0m Adding Stations:2G band, Number of Stations: 1 DUT: AlticeAP SSID: client_connectivity_al idx: 0
+2023-10-10 15:07:32 [32mINFO[0m Total 2G Radios Available in Testbed: 1

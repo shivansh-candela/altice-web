@@ -1,0 +1,46 @@
+{% extends 'resources/dashboard/index.html' %}
+
+
+{% block content %}
+
+<section class="content home">
+    <div class="block-header">
+        <div class="row">
+        </div>
+    </div>
+    <div class="col-sm-6 container">                
+                
+<div class="row clearfix">
+<div class="content-center"> 
+<div class="card">
+    
+    <form action="" class="form" method="POST">
+        {% csrf_token %}
+        <div class="text-center">
+            <h4>{{lanforge_id.name}}</h4>
+            <h4>{{lanforge_id.ip}}</h4>
+            <h4>{{lanforge_id.port}}</h4>
+            <h4>{{lanforge_id.ssh_port}}</h4>
+            <h4>{{lanforge_id.twog_radio}}</h4>
+            <h4>{{lanforge_id.fiveg_radio}}</h4>
+            <h4>{{lanforge_id.ax_radio}}</h4>
+            <h4>{{lanforge_id.upstream}}</h4>
+            <h4>{{lanforge_id.upstream_subnet}}</h4>
+            <h4>{{lanforge_id.uplink}}</h4>
+            <h4>{{lanforge_id.twog_station_name}}</h4>
+            <h4>{{lanforge_id.fiveg_station_name}}</h4>
+            <h4>{{lanforge_id.ax_station_name}}</h4>
+            <ul class="header-dropdown">                            
+            </ul>
+            
+        </div>
+        
+    </form>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+{% endblock %}

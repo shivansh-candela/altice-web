@@ -1,0 +1,5 @@
+2023-12-12 17:20:29 [32mINFO[0m Adding Stations:2G band, Number of Stations: 1 DUT: AP SSID: client_connectivity_al idx: 0
+2023-12-12 17:20:29 [32mINFO[0m Total 2G Radios Available in Testbed: 1
+2023-12-12 17:20:30 [32mINFO[0m Total stations per radio: 1
+2023-12-12 17:20:30 [32mINFO[0m Adding 1 Stations on 1.1.wiphy1
+2023-12-12 17:20:30 [35mDEBUG[0m Raw Line : ["profile_link 1.1 STA-AUTO 1 'DUT: AP Radio-1' NA wiphy1"]

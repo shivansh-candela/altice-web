@@ -1,0 +1,98 @@
+{
+    "basic-01": {
+        "controller": {
+            "url": "https://sec-qa01.cicd.lab.wlan.tip.build:16001",
+            "username": "tip@ucentral.com",
+            "password": "OpenWifi%123"
+        },
+        "access_point": [
+            {
+                "id": 3,
+                "model": "edgecore_ecw5410",
+                "mode": "wifi5",
+                "serial": "3c2c99f44e77",
+                "jumphost": "true",
+                "ip": "10.28.3.100",
+                "username": "lanforge",
+                "password": "pumpkin77",
+                "port": "22",
+                "jumphost_tty": "/dev/ttyAP1",
+                "version": "release-latest"
+            }
+        ],
+        "traffic_generator": {
+            "name": "lanforge",
+            "details": {
+                "ip": "10.28.3.6",
+                "port": "8080",
+                "ssh_port": "22",
+                "twog_radio": [
+                    "1.1.wiphy4"
+                ],
+                "fiveg_radio": [
+                    "1.1.wiphy5"
+                ],
+                "ax_radio": [
+                    "1.1.wiphy0",
+                    "1.1.wiphy1",
+                    "1.1.wiphy2",
+                    "1.1.wiphy3"
+                ],
+                "upstream": "1.1.eth2",
+                "upstream_subnet": "10.28.2.1/24",
+                "uplink": "1.1.eth3",
+                "twog_station_name": "wlan0",
+                "fiveg_station_name": "wlan1",
+                "ax_station_name": "ax"
+            }
+        }
+    },
+    "PWU-30": {
+        "controller": {
+            "url": "https://sec-qa01.cicd.lab.wlan.tip.build:16001",
+            "username": "tip@ucentral.com",
+            "password": "OpenWifi%123"
+        },
+        "access_point": [
+            {
+                "id": 3,
+                "model": "edgecore_ecw5410",
+                "mode": "wifi5",
+                "serial": "3c2c99f44e77",
+                "jumphost": "true",
+                "ip": "10.28.3.100",
+                "username": "lanforge",
+                "password": "pumpkin77",
+                "port": "22",
+                "jumphost_tty": "/dev/ttyAP1",
+                "version": "release-latest"
+            }
+        ],
+        "traffic_generator": {
+            "name": "lanforge",
+            "details": {
+                "ip": "10.28.3.6",
+                "port": "8080",
+                "ssh_port": "22",
+                "twog_radio": [
+                    "1.1.wiphy4"
+                ],
+                "fiveg_radio": [
+                    "1.1.wiphy5"
+                ],
+                "ax_radio": [
+                    "1.1.wiphy0",
+                    "1.1.wiphy1",
+                    "1.1.wiphy2",
+                    "1.1.wiphy3"
+                ],
+                "upstream": "1.1.eth2",
+                "upstream_subnet": "10.28.2.1/24",
+                "uplink": "1.1.eth3",
+                "twog_station_name": "wlan0",
+                "fiveg_station_name": "wlan1",
+                "ax_station_name": "ax"
+            }
+        }
+    }
+}

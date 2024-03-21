@@ -1,0 +1,373 @@
+﻿{% load static %}
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <!-- <meta http-equiv="X-UA-Compatible" content="IE=Edge"> -->
+    <!-- <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"> -->
+    <!-- <meta name="csrf-token" content="iL8hUXsdXy71MbOZjq4fWUv4KGPZnJ7k17P7RClL"> -->
+    <title>Login - Candela Technologies India PVT.LTD</title>
+
+    <link rel="stylesheet" href="{% static 'resources\assets\plugins\bootstrap\css\bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'resources\assets\plugins\jvectormap\jquery-jvectormap-2.0.3.min.css' %}">
+    <link rel="stylesheet" href="{% static 'resources\assets\plugins\morrisjs\morris.min.css' %}">
+    <!-- Custom Css -->
+    <!-- <link rel="stylesheet" href="{% static 'resources\assets\css\mystyles.css' %}"> -->
+    <link rel="stylesheet" href="{% static 'resources\assets\css\mysty.css' %}">
+    <link rel="stylesheet" href="{% static 'resources\assets\css\color_skins.css' %}">
+
+    <link rel="stylesheet" href="{% static 'resources\assets\css\mysty1.css' %}">
+    <link rel="stylesheet" href="{% static 'resources\assets\css\authentication.css' %}">
+    <link rel="stylesheet" href="{% static 'resources\assets\css\color_skins.css' %}">
+    <style>
+        body {
+            font-family: "Lato", sans-serif;
+            background-image: url("{%  static 'resources\assets\images\mthood3.jpg' %}");
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            background-size: cover;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            overflow-y: scroll;
+        }
+
+        .sidenav {
+            height: 100%;
+            width: 0;
+            position: fixed;
+            z-index: 1;
+            top: 0;
+            right: 0;
+            background-color: #111;
+            overflow-x: hidden;
+            transition: 0s;
+            padding-top: 60px;
+        }
+
+        .nav-link {
+            position: absolute;
+            right: 50;
+            top: 15;
+        }
+
+        .nav-link1 {
+            position: absolute;
+            right: 15;
+            top: 25;
+        }
+
+        .sidenav a {
+            padding: 8px 8px 8px 32px;
+            text-decoration: none;
+            font-size: 25px;
+            color: #818181;
+            display: block;
+            transition: 0s;
+        }
+
+        .sidenav a:hover {
+            color: #f1f1f1;
+        }
+
+        .sidenav .closebtn {
+            position: absolute;
+            top: 0;
+            right: 25px;
+            font-size: 36px;
+            margin-left: 50px;
+        }
+
+        @media screen and (max-height: 450px) {
+            .sidenav {
+                padding-top: 15px;
+            }
+
+            .sidenav a {
+                font-size: 18px;
+            }
+        }
+    </style>
+
+</head>
+
+
+<body id="body" class="theme-cyan authentication sidebar-collapse">
+    <div>
+        <div id="main" style="width: 100vw;">
+            <div class="container" style="display: block">
+                <nav class="navbar navbar-expand-lg fixed-top navbar-transparent">
+                    <div class="container">
+                        <ul class="navbar-nav" style="display:block;">
+                            <li class="nav-item" style="float:right; padding-right: 10px; ">
+                                &nbsp;
+                                <a class="nav-link" href="/admin" style=" border-radius: 15px; border: none; background-color: #00cfd1; color: white; font-weight: bold; float: left;">Admin</a>
+                                <span class="nav-link1" style="cursor:pointer; float: right;"
+                                    title="customize theme" onclick="toggleNav()">
+                                    <i class="zmdi zmdi-menu"></i>
+                                </span>
+                            </li>
+                        </ul>
+                    </div>
+                </nav>
+                <div class="content-center" style="margin-top: 10%; margin-left: auto; margin-right: auto;">
+                    <div class="card-plain">
+                        
+                        <form action="{% url 'login' %}" class="form" method="POST">
+                            {% csrf_token %}
+                            <div class="header">
+                                <!-- <a class="navbar-brand" href="https://www.candelatech.com/" title=""
+                                    target="_blank"> -->
+
+                                    <img src="{% static 'resources\assets\images\altice_home_hr.png'%} "
+                                        style="width: 600px;height: 200px;border-color: #f1f1f1; position: relative;top: 50px;"
+                                        alt=" ALTICE LABS ">
+                                <!-- </a> -->
+
+                            </div>
+                            <div class="content">
+                                <div class="input-group input-lg">
+                                    <input type="email" class="form-control" name="email" oninput="check()" placeholder="E-mail" style="text-transform: lowercase;">
+                                    <span class="input-group-addon">
+                                        <i class="zmdi zmdi-account-circle"></i>
+                                    </span>
+                                </div>
+                                <label id="wrong_uid" style="display: none; color: red;">Invalid Email</label>
+                                <div class="input-group input-lg">
+                                    <input type="password" class="form-control" name="password"
+                                        placeholder="password">
+                                    <span class="input-group-addon">
+                                        <i class="zmdi zmdi-lock"></i>
+                                    </span>
+                                </div>
+                            </div>
+                            <div id="form_status" style="text-align: center;">
+                                {% if msg %}
+                                <b style="color: red;">{{msg}}</b> {% endif %}
+                            </div>
+                            <div class="footer text-center">
+                                <h3><input type="submit" class="btn btn-primary btn-round btn-lg btn-block "
+                                        value="Signin"></h3>
+
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <footer class="footer"
+                style="display: inline-block; overflow: hidden; justify-content: stretch; align-items: center; color: white; position: fixed; min-width: 390px; bottom: 0; width: 100%; padding: 25px 0px; margin-top: auto; flex: 0 0 50px; max-height: 20vh;">
+                <ul style="float: left; width: 400px;display: flex;flex-direction: row;justify-content: space-between;align-items: baseline; ">
+                    <!-- <li><a href="https://www.candelatech.com/contact.php" target="_blank">Contact Us</a></li>
+                    <li><a href="https://www.candelatech.com/" target="_blank">About Us</a></li>
+                    <li class="nav-item">
+                        <a class="nav-link2" title="Follow us on linkedin"
+                            href="https://www.linkedin.com/company/candela-technologies-inc." target="_blank">
+                            <i class="zmdi zmdi-linkedin zmdi-hc-2x"></i>
+                            <p class="d-lg-none d-xl-none">linkedin</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link2" title="Follow us on Twitter" href="https://twitter.com/candelatech"
+                            target="_blank">
+                            <i class="zmdi zmdi-twitter zmdi-hc-2x"></i>
+                            <p class="d-lg-none d-xl-none">Twitter</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link2" title="Like us on Facebook"
+                            href="https://m.facebook.com/145915792107364/" target="_blank">
+                            <i class="zmdi zmdi-facebook zmdi-hc-2x"></i>
+                            <p class="d-lg-none d-xl-none">Facebook</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link2" title="subscribe us on youtube"
+                            href="https://www.youtube.com/channel/UCg-71KmChUhBLCF_lIp4-Ng" target="_blank">
+                            <i class="zmdi zmdi-youtube zmdi-hc-3x"></i>
+                            <p class="d-lg-none d-xl-none">Youtube</p>
+                        </a>
+                    </li> -->
+
+                    <li class="nav-item">Contact Us</li>
+                    <li class="nav-item">About Us</li>
+                    <li class="nav-item">
+                      
+                            <i class="zmdi zmdi-linkedin zmdi-hc-2x"></i>
+                            <p class="d-lg-none d-xl-none">linkedin</p>
+                        
+                    </li>
+                    <li class="nav-item">
+                       
+                            <i class="zmdi zmdi-twitter zmdi-hc-2x"></i>
+                            <p class="d-lg-none d-xl-none">Twitter</p>
+                    
+                    </li>
+                    <li class="nav-item">
+                        
+                            <i class="zmdi zmdi-facebook zmdi-hc-2x"></i>
+                            <p class="d-lg-none d-xl-none">Facebook</p>
+                     
+                    </li>
+                    <li class="nav-item">
+                       
+                            <i class="zmdi zmdi-youtube zmdi-hc-3x"></i>
+                            <p class="d-lg-none d-xl-none">Youtube</p>
+                        
+                    </li>
+                </ul>
+                <div class="copyright" style="float: right; padding-right: 10px; padding-top: 20px;">
+                    &copy;
+                    <script>
+                        document.write(new Date().getFullYear())
+                    </script>,
+                    <span>Designed by Candela Technologies</span>
+                </div>
+            </footer>
+        </div>
+        <div id="mySidenav" class="sidenav">
+            <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+            <a href="#">
+
+
+                <button type="button" onclick="myFunction(this)">
+                    <div>
+                        <img src="{% static 'resources\assets\images\login.jpg'%} " width="150px" height="75px" id="bg">
+                    </div>
+
+                </button>
+                <button type="button" onclick="myFunction(this)">
+                    <div>
+                        <img src="{% static 'resources\assets\images\bg1.jpg'%} " width="150px" height="75px" id="bg">
+                    </div>
+
+                </button>
+                <button type="button" onclick="myFunction(this)">
+                    <div>
+                        <img src="{% static 'resources\assets\images\bg2.jpg'%} " width="150px" height="75px" id="bg">
+                    </div>
+
+                </button>
+                <button type="button" onclick="myFunction(this)">
+                    <div>
+                        <img src="{% static 'resources\assets\images\bg3.jpg'%} " width="150px" height="75px" id="bg">
+                    </div>
+
+                </button>
+                <button type="button" onclick="myFunction(this)">
+                    <div>
+                        <img src="{% static 'resources\assets\images\bg4.jpg'%} " width="150px" height="75px" id="bg">
+                    </div>
+
+                </button>
+                <button type="button" onclick="myFunction(this)">
+                    <div>
+                        <img src="{% static 'resources\assets\images\bg5.jpg'%} " width="150px" height="75px" id="bg">
+                    </div>
+
+                </button>
+                <button type="button" onclick="myFunction(this)">
+                    <div>
+                        <img src="{% static 'resources\assets\images\mthood1.jpg'%} " width="150px" height="75px"
+                            id="bg">
+                    </div>
+
+                </button>
+                <button type="button" onclick="myFunction(this)">
+                    <div>
+                        <img src="{% static 'resources\assets\images\mthood2.jpg'%} " width="150px" height="75px"
+                            id="bg">
+                    </div>
+
+                </button>
+                <button type="button" onclick="myFunction(this)">
+                    <div>
+                        <img src="{% static 'resources\assets\images\mthood3.jpg'%} " width="150px" height="75px"
+                            id="bg">
+                    </div>
+
+                </button>
+            </a>
+
+        </div>
+    </span>
+    <script>
+        function check() {
+            if(!document.querySelector("input[type='email'").checkValidity()) {
+                document.getElementById("wrong_uid").style.display = "block";
+            }
+            else {
+                document.getElementById("wrong_uid").style.display = "none";
+            }
+        }
+        function toggleNav() {
+            var element = document.getElementById("mySidenav");
+            if (element.style.width == "0px") {
+                document.getElementById("mySidenav").style.width = "20vw";
+                document.getElementById("main").style.marginRight = "20vw";
+                document.getElementById("mySidenav").style.zIndex = 9999;
+                document.body.backgroundSize = "100vh 80vw";
+            } else {
+                document.getElementById("mySidenav").style.width = "0";
+                document.getElementById("main").style.width = "100vw";
+                document.body.backgroundSize = "100vh 100vw";
+            }
+        }
+
+        // function openNav() {
+
+        //     document.getElementById("mySidenav").style.width = "20vw";
+        //     document.getElementById("body").style.width = "80vw";
+        //     document.body.backgroundSize = "100vh 80vw";
+
+        // }
+
+        function closeNav() {
+            document.getElementById("mySidenav").style.width = "0";
+            document.getElementById("main").style.width = "100vw";
+            document.body.backgroundSize = "100vh 100vw";
+        }
+
+        function myFunction(loc) {
+            var bg_url = loc.firstElementChild.firstElementChild.src;
+            document.body.style.backgroundImage = "url('" + bg_url + "')";
+            document.body.style.backgroundSize = "100vw 100vh";
+            document.body.style.backgroundRepeat = "no-repeat";
+            localStorage.setItem("background-image",bg_url);
+        }
+
+        window.onload = function() {
+            bg_url = localStorage.getItem('background-image');
+            if(bg_url != null) {
+                document.body.style.backgroundImage = "url('" + bg_url + "')";
+            }
+        }
+    </script>
+
+    <!-- Scripts -->
+    <script src="{% static 'resources\assets\bundles\libscripts.bundle.js' %}"></script>
+    <script src="{% static 'resources\assets\bundles\vendorscripts.bundle.js' %}"></script>
+
+
+    <script src="{% static 'resources\assets\bundles\mainscripts.bundle.js' %}"></script>
+    <script src="{% static 'resources\assets\bundles\morrisscripts.bundle.js' %}"></script>
+    <script src="{% static 'resources\assets\bundles\jvectormap.bundle.js' %}"></script>
+    <script src="{% static 'resources\assets\bundles\knob.bundle.js' %}"></script>
+    <script src="{% static 'resources\assets\js\pages\index.js' %}"></script>
+    <!--Start of Tawk.to Script-->
+    <script type="text/javascript">
+        var Tawk_API = Tawk_API || {},
+            Tawk_LoadStart = new Date();
+        (function () {
+            var s1 = document.createElement("script"),
+                s0 = document.getElementsByTagName("script")[0];
+            s1.async = true;
+            s1.src = "{% static 'resources\\assets\\css\\js\\pages\\tawk.js' %}";
+            s1.charset = 'UTF-8';
+            s1.setAttribute('crossorigin', '*');
+            s0.parentNode.insertBefore(s1, s0);
+        })();
+    </script>
+
+</body>
+
+</html>

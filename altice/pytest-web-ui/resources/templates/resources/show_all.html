@@ -1,0 +1,291 @@
+{% load static %}
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="iL8hUXsdXy71MbOZjq4fWUv4KGPZnJ7k17P7RClL ">
+    <!-- Favicon-->
+    <title>Schedules</title>
+    <meta name="description " content="Oero Laravel ">
+    <meta name="author " content="Oero Laravel ">
+
+
+    <link rel="stylesheet " href="{% static 'resources\assets\plugins\bootstrap\css\bootstrap.min.css' %} ">
+    <link rel="stylesheet " href="{% static 'resources\assets\plugins\jvectormap\jquery-jvectormap-2.0.3.min.css' %} ">
+    <link rel="stylesheet " href="{% static 'resources\assets\plugins\morrisjs\morris.min.css' %} ">
+    <!-- Custom Css -->
+    <link rel="stylesheet " href="{% static 'resources\assets\css\mysty1.css' %} ">
+    <link rel="stylesheet " href="{% static 'resources\assets\css\color_skins.css' %} ">
+    <script type="text/javascript">
+        window.history.forward();
+
+        function noBack() {
+            window.history.forward();
+        }
+    </script>
+
+    <script type="text/javascript">
+        var Tawk_API = Tawk_API || {},
+            Tawk_LoadStart = new Date();
+        (function() {
+            var s1 = document.createElement("script"),
+                s0 = document.getElementsByTagName("script")[0];
+            s1.async = true;
+            s1.src = "{% static 'resources\assets\css\js\pages\tawk.js' %}";
+            s1.charset = 'UTF-8';
+            s1.setAttribute('crossorigin', '*');
+            s0.parentNode.insertBefore(s1, s0);
+        })();
+    </script>
+    <style>
+        body {
+            min-width: 150px;
+        }
+    </style>
+</head>
+
+<body style="font-family: 'Open Sans Light'; background-color: white; overflow-y: auto; overflow-x: hidden;">
+    <!-- Page Loader -->
+    <div style="background-color:#303c54;" class="page-loader-wrapper">
+        <div style="background-color:#303c54;" class="loader">
+            <!-- <div style="background-color:#303c54;" class="m-t-30"><img class="zmdi-hc-spin" src="{% static 'resources\assets\images\candela.png' %}" width="48" height="48" alt="Oreo"></div> -->
+            <p style="background-color:#303c54;">Please wait...</p>
+        </div>
+    </div>
+    <!-- Overlay For Sidebars -->
+    <div class="overlay" style="max-height: 60px;"></div>
+    <nav class="navbar p-l-5 p-r-5" style="background-color: #303c54;">
+        <ul class="nav navbar-nav navbar-left" style="background-color: #303c54;">
+            <li>
+                <div class="navbar-header">
+                    <!-- <a href="javascript:void(0);" class="bars"></a> -->
+                    <!-- <a class="navbar-brand"><img src="{% static 'resources\assets\images\candela.png' %}" width="30" alt="Oreo"><span class="m-l-10">Candela Technologies</span></a> -->
+                </div>
+            </li>
+            <!-- <li><a href="javascript:void(0);" class="ls-toggle-btn" data-close="true"><i class="zmdi zmdi-settings"
+                        title="Back"></i></a></li>
+-->
+
+            <li class="d-none d-md-inline-block">
+                <li>
+                    <a href="#" class="ls-toggle-btn"><i class="zmdi zmdi-menu"></i></a>
+                </li>
+                <li class="active open">
+
+                    <a href="{% url 'home' %}"></i><span style="font-weight: bold;">Dashboard</span></a>
+                </li>
+                <li class="active open">
+                    <a href="{% url 'statistics' %}"></i><span style="font-weight: bold;">Statistics</span></a>
+
+                </li>
+
+            </li>
+            <li class="float-right">
+                <p style="color: white;"><b>Active User : </b>{{tester_email_id.name}}</p>
+
+                <a href="{% url 'logout' %}" class="mega-menu" data-close="true"><i
+                        class="zmdi zmdi-long-arrow-tab" title="Logout"></i></a>
+                <!-- <a href="javascript:void(0);" class="js-right-sidebar" data-close="true"><i class="zmdi zmdi-settings"
+                        title="Settings"></i></a> -->
+            </li>
+        </ul>
+    </nav>
+    <!-- Left Sidebar -->power
+    <aside id="leftsidebar" class="sidebar">
+        <ul style="background-color:white" class="nav nav-tabs">
+            <li class="nav-item" style="text-align: center;margin:0 auto 0;width:100%;">
+                <a style="color: white;cursor: default;" class="nav-link active" data-toggle="tab" href="#dashboard">
+
+                    <link rel="icon" href="{% static 'resources\assets\images\gold1.svg' %}" type="icon"><img src="{% static 'resources\assets\images\alti.jpeg' %}" style="height: 24px;" /></i>&nbsp;<strong style="font-size: small; color: black;">Altice Labs</strong>
+
+                </a>
+            </li>
+        </ul>
+        <div class="tab-content">
+            <div class="tab-pane stretchRight active" id="dashboard">
+                <div class="menu">
+                    <ul style="background-color:rgb(60,75,100);margin: 0 0px;" class="list">
+
+                        <li class="">
+                            <a href="{% url 'view_all' %}" style="padding-bottom: 10px; height:50.5px;">
+                                <i style="color: white;" class="zmdi zmdi-account-add"></i>
+                                <b><span style="color: white;">Resources</span></b>
+                            </a>
+                        </li>
+                        <li class="">
+                            <a href="{% url 'new_testplan' %}" style="padding-bottom: 20px; padding-top: 12px;">
+                                <i style="color: white;" class="zmdi zmdi-account-add"></i>
+                                <b><span style="color: white;">Add New Testplans</span></b>
+                            </a>
+                        </li>
+                        <li class="" style="padding-top: 13px;">
+                            <a href="{% url 'test_scheduler' %}" style="display: inline;">
+                                <i style="color: white;" class="zmdi zmdi-account-add"></i>
+                                <b><span style="color: white;">Test Scheduler</span></b>
+                            </a>
+                            <a class="menu-toggle" style="color: white; display: inline; float: right; padding: 20px; padding-top: 0%;" href="#"></a>
+                            <ul class="ml-menu">
+                                {% for cycle in release_cycles %}
+                                <li class="">
+                                    <a href="{% url 'release_cycles' %}?cycle={{ cycle.release_cycle_name }}" style="display: table-footer-group;" onclick="document.getElementById('myInput1').value='{{ cycle.release_cycle_name }}';$('#myInput1').keyup();">
+                                        <i style="color: white;" class="fa-solid fa-rocket"></i>
+                                        <b><span style="color: white;">{{ cycle.release_cycle_name }}&ensp;<br>({{cycle.start_date.date}}&ensp;To&ensp;{{cycle.end_date.date}})</span></b>
+                                    </a>
+                                </li>
+                                {% endfor %}
+
+
+                            </ul>
+
+                        </li>
+                        <!-- <li class="" style="padding-top: 14px;">
+                            <a style="color: white;" href="javascript:void(0);" class="menu-toggle">
+                                <i style="color: white;" class="zmdi zmdi-account-o"></i>
+                                <b><span style="color: white;">Results</span></b>
+                            </a>
+                        </li> -->
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+    </aside>
+    <section class="content home" style="padding-bottom: 0px;width: auto;">
+        <div class="content-center" style="width: 100%; height: max-content; padding-bottom: 20px;">
+            <div class="card " style="margin: 0%; box-shadow: 5px 5px 10px black; font-family: sans-serif;">
+                <div class="header" style="background-color: white; padding: 0%; overflow-x: auto;">
+                    <h2 style="font-family: sans-serif; background-color: rgb(60,75,100); height: 40px; padding-top: 10px;">
+                        <strong style="color: white;">&nbsp;{{ releasecycle }}</strong>
+                    </h2>
+                    <div class="body" style="background-color: white">
+                        <input type="text" style="display: none;" id="myInput1" onkeyup="functionn()" placeholder="Search .." title="Type in a name">
+
+                        <div class="table-responsive">
+
+                            <table id="myTable" style="width: 100%; justify-content: center;" class="table table-bordered js-basic-example dataTable ">
+                                <thead>
+                                    <tr>
+                                        <th>Status</th>
+                                        <th style="border: box 20px; padding-right: 8.2rem;">Results</th>
+                                        <th>Selected-Testcases</th>
+                                        <th>Passed</th>
+                                        <th>Failed</th>
+                                        <th>Error</th>
+                                        <th>Total Duration(min)</th>
+                                        <th>Testplan</th>
+                                        <th>Testbed</th>
+                                        <th>Time</th>
+                                        <!-- <th>Firmware Image</th> -->
+                                        <th>Release Cycle</th>
+                                        <th>Access Point</th>
+                                        <th>Traffic Generator</th>
+                                        <th>Access Point Serial</th>
+                                        <th>Access Point Mode</th>
+                                        <th>Tester name</th>
+                                        <th>Tester ID</th>
+                                        <th>Notes</th>
+                                        <th>Noted By</th>
+
+                                    </tr>
+                                </thead>
+                                <tbody id="tbody">
+                                    {% for i in testscheduler_all reversed%}
+
+                                    <tr>
+                                        <td style="width: auto; ">{{i.status}}</td>
+                                        <td style='padding-left: 0px; min-width: max-content; overflow: auto; white-space: no-wrap;'><a id='file' class='btn btn-primary btn-round' style='background-color: transparent; color: blue;' href='{{request.build_absolute_uri | slice:":-15" }}:2000/results/{{i.tester_id}}_{{i.testbed}}_{{i.starttime}}/{{i.tester_id}}_{{i.testbed}}_{{i.starttime}}_logs.txt'
+                                                onclick='new_window(this); return false;'><i><img src='/static/resources/assets/images/log-file.png' alt='LOG file' width='25px' height='25px'></i></a>
+                                            <a id='file' class='btn btn-primary btn-round' style='background-color: transparent; color: blue;' href='{{request.build_absolute_uri | slice:":-15" }}:2000/results/{{i.tester_id}}_{{i.testbed}}_{{i.starttime}}/{{i.tester_id}}_{{i.testbed}}_{{i.starttime}}_RTlogs.txt'
+                                                onclick='new_window(this); return false;'><i class='zmdi zmdi-file' style='font-size:25px'></i></a>
+                                            <a id='file' class='btn btn-primary btn-round' style='background-color: transparent;' href='{{request.build_absolute_uri | slice:":-15" }}:2000/results/{{i.tester_id}}_{{i.testbed}}_{{i.starttime}}/allure-report/' onclick='new_window(this); return false;'><img src='/static/resources/assets/images/allure.png' alt='ALLURE' width='25px' height='25px'></i>
+                                            </a>
+                                            <a id='file' class='btn btn-primary btn-round' style='background-color: transparent; padding-left: 20px; padding-right: 20px;' href='{{request.build_absolute_uri | slice:":-15" }}:2000/results/{{i.tester_id}}_{{i.testbed}}_{{i.starttime}}/{{i.tester_id}}_{{i.testbed}}_{{i.starttime}}.html'
+                                                onclick='new_window(this); return false;'><img src='/static/resources/assets/images/files.png' width='30px' height='25px' style='margin: 0%; padding: 0%;'></i>
+                                            </a>
+                                        </td>
+
+                                        <td title="Selected Testcases" style="width: auto; ">{{i.total_testcases}}</td>
+                                        <td title="Passed" style="width: auto; ">{{i.total_passed}}</td>
+                                        <td title="Failed" style="width: auto; ">{{i.total_failed}}</td>
+                                        <td title="Error" style="width: auto; ">{{i.total_error}}</td>
+                                        <td title="Duration(min)" style="width: auto; ">{% widthratio i.total_duration 60 1 %}</td>
+                                        <td title="Testplan" style="width: auto; ">{{i.testplan}}</td>
+                                        <td title="Testbed" style="width: auto; ">{{i.testbed}}</td>
+                                        <td title="Time" style="width: auto; ">{{i.starttime}}</td>
+                                        <!-- <td title="Firmware Image" style="width: auto; ">{{i.firmware_name}}</td> -->
+                                        <td title="Release Cycle" style="width: auto; ">{{i.created_at}}</td>
+                                        <td title="Access Point" style="width: auto;">{{i.accesspoint}}</td>
+                                        <td title="Traffic Generator" style="width: auto;">{{i.trafficgenerator}}</td>
+                                        <td title="Access Point Serial" style="width: auto;">{{i.accesspoint_serial}}</td>
+                                        <td title="Access Point Mode" style="width: auto;">{{i.accesspoint_mode}}</td>
+                                        <td title="Tester Name" style="width: auto;">{{i.tester_name}}</td>
+                                        <td title="Tester-ID" style="width: auto; ">{{i.tester_id}}</td>
+                                        <td title="Notes">
+                                            <input onfocus='clearInterval(interval);' onfocusout='var interval = setInterval(function() {refresh()}, 1000); window.interval = interval;' type='text' id='{{i.starttime}}' value='{{i.remarks}}'>
+                                        </td>
+                                        <td title="Noted By">{{i.evaluator}}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Chat-launcher -->
+    <script src="{% static 'resources\assets\bundles\libscripts.bundle.js' %} "></script>
+    <script src="{% static 'resources\assets\bundles\vendorscripts.bundle.js' %} "></script>
+    <script src="{% static 'resources\assets\bundles\mainscripts.bundle.js' %} "></script>
+    <script src="{% static 'resources\assets\bundles\morrisscripts.bundle.js' %} "></script>
+    <script src="{% static 'resources\assets\bundles\jvectormap.bundle.js' %} "></script>
+    <script src="{% static 'resources\assets\bundles\knob.bundle.js' %} "></script>
+    <script src="{% static 'resources\assets\js\pages\index.js' %} "></script>
+    <script>
+        if (window.history.replaceState) {
+            window.history.replaceState(null, null, window.location.href);
+        }
+    </script>
+
+    <script>
+        $('tbody').on('click', '.btn-del', function() {
+            output = "";
+            let sid = $(this).attr('data-sid');
+            userData = {
+                sid: sid,
+                csrfmiddlewaretoken: '{{csrf_token}}',
+            };
+            var r = confirm("Are you sure you want to delete this testplan?");
+            if (r == true) {
+                $.ajax({
+                    url: "{% url 'delete_task' %}",
+                    method: "POST",
+                    data: userData,
+                    success: function(response) {
+                        x = response.context.alldata; //get all the data from response
+
+                        for (i = x.length - 1; i >= 0; i--) {
+                            output += "<tr><td style='border: none; background: none; padding-right: 0%;'><a href='#' class='btn-del' id='delete' style='margin-top: 0px; border: none; padding: 0%; cursor: pointer; box-shadow: none;' data-sid=" + x[i].starttime + "><i class='zmdi zmdi-delete' style='color: red; font-size: 25px;'></i></a></td><td scope='row'>" + x[i].status + "</td><td style='padding-left:3px;'>&nbsp;<a id='file' class='btn btn-primary btn-round' style='background-color: #3c4b64; box-shadow:none;' href='http://192.168.200.78/results/" + x[i].tester_id + "_" + x[i].testbed + "_" + x[i].starttime + "/" + x[i].tester_id + "_" + x[i].testbed + "_" + x[i].starttime + ".txt'><i class='zmdi zmdi-file' style='font-size:12px'></i></a>&nbsp;<a id='file' class='btn btn-primary btn-round' style='background-color: #3c4b64; box-shadow:none;' href='http://192.168.200.78/results/" + x[i].tester_id + "_" + x[i].testbed + "_" + x[i].starttime + "/" + "allure-report/" + "'><img src='/static/resources/assets/images/allure.png' alt='ALLURE' width='12px' height='12px'></i></a>&nbsp;<a id='file' class='btn btn-primary btn-round' style='background-color: #3c4b64; box-shadow:none;' href='http://192.168.200.78/results/" + x[i].tester_id + "_" + x[i].testbed + "_" + x[i].starttime + "/" + x[i].tester_id + "_" + x[i].testbed + "_" + x[i].starttime + ".html'><img src='/static/resources/assets/images/files.png' width='12px' height='12px' style='margin: 0%;  box-shadow:none;padding: 0%;'></i></a></td><td>" + x[i].total_testcases + "</td><td>" + x[i].total_passed + "</td><td>" + x[i].total_failed + "</td><td>" + x[i].total_error + "</td><td>" + x[i].total_duration + "</td><td>" + x[i].testplan + "</td><td>" + x[i].testbed + "</td><td>" + x[i].starttime  + "</td><td>" + x[i].created_at + "</td><td>" + x[i].accesspoint + "</td><td>" + x[i].trafficgenerator + "</td><td>" + x[i].accesspoint_serial + "</td><td>" + x[i].accesspoint_mode + "</td><td>" + x[i].tester_name + "</td><td>" + x[i].tester_id + "</td></tr>"
+
+                        }
+                        $("#tbody").html(output);
+                        //window.onload(refresh());
+                        window.location.reload();
+
+                        // $('#forme').trigger('reset');
+                        // $("#idmsg").html("DATA SAVEf");
+                    }
+
+                });
+            }
+        });
+    </script>
+
+</body>
+
+
+
+</html>

@@ -1,0 +1,27 @@
+{
+    "alldata": [
+        {
+            "id": 1,
+            "tester_id": 1,
+            "tester_name": "Saurabh",
+            "name": "1_webui1_2022-05-23T21:49",
+            "task": "resources.tasks.run_schedule_task",
+            "testplan": "trial1",
+            "accesspoint": "sasdhjbh",
+            "accesspoint_mode": "bghgdsafuyhgq",
+            "accesspoint_serial": "903cb36c46da11",
+            "trafficgenerator": "Saurabh",
+            "testbed": "webui1",
+            "starttime": "2022-05-23T21:49",
+            "status": "Pending",
+            "firmware_name": "release-latest",
+            "created_at": "RC-00",
+            "celery_task_id": "0",
+            "total_passed": 0,
+            "total_failed": 0,
+            "total_error": 0,
+            "total_duration": 0,
+            "total_testcases": "0"
+        }
+    ]
+}

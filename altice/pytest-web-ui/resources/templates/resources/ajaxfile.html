@@ -1,0 +1,425 @@
+<script>
+    var log_interval = "";
+    $("#btnsave").click(
+        function() {
+            output = "";
+            let testplan = document.getElementById('testplan_n').selectedOptions[0].value;
+            let testbed = document.getElementById('testbed_n').selectedOptions[0].value;
+            let starttime = $("#shadow").val();
+            let firmware_m = document.getElementById('firmware_n').selectedOptions[0].value;
+            let status = document.getElementById('firmware_n').selectedOptions[0].value;
+            let accesspoint = $("#accesspoint").val()
+            let csr = $("input[name=csrfmiddlewaretoken]").val();
+            estimated_start = starttime;
+            estimated_start = new Date(estimated_start);
+            estimated_end = estimated_start.setMinutes(estimated_start.getMinutes() + parseInt(estimated_times[testplan]));
+            estimated_end = new Date(estimated_end);
+            console.log("btn save button clicked ", testbed);
+            console.log("btn save button clicked ", testplan);
+            console.log("btn save button clicked ", starttime);
+            console.log("btn save button clicked ", firmware_m);
+            console.log("btn save button clicked ", accesspoint);
+            console.log("btn save button clicked ", csr);
+            if (testplan == '') {
+                alert("Please select a testplan");
+            } else if (testbed == '') {
+                alert("Please select a testbed");
+            } else if (starttime == '') {
+                alert("Please schedule a time");
+            } else if(new Date(starttime) < new  Date()) {
+                alert("Please schedule a time now or in the future");
+                $("#shadow").val('');
+            } else if (all_starttimes.includes(starttime)) {
+                alert("A test is already scheduled at that time. Please schedule your test at another time.");
+                $("#shadow").val('');
+            } else if (times[testbed].length > 0) {
+                find: {
+                    if(testbed_starttimes[testbed].includes(starttime)) {
+                        alert('A test is already scheduled on the testbed: ' + testbed + '. Please specify a different time.');
+                        break find;
+                    }
+                    for (i in times[testbed]) {
+                        //new_starttime = new Date(starttime + ':00.000Z');
+                        //estimated_end = new Date(estimated_end);
+                        needed = times[testbed][i];
+                        if ((new Date(starttime).getTime() < needed.getTime() && needed.getTime() < estimated_end.getTime())) {
+                            alert(testbed + ' is in use.\nEstimated Endtime: ' + needed);
+                            break find;
+                        }
+                    }
+                    userData = {
+                        testplan: testplan,
+                        testbed: testbed,
+                        starttime: starttime,
+                        firmware_m: firmware_m,
+                        accesspoint: accesspoint,
+                        csrfmiddlewaretoken: csr,
+                    };
+                    temp_data = {}
+                    $.ajax({
+                        url: "{% url 'test_scheduler' %}",
+                        method: "POST",
+                        data: userData,
+                        success: function(response) {
+                            $('#forme')[0].reset();
+                            window.location.reload();
+                        }
+
+                    });
+                }
+            }
+            else {
+                userData = {
+                    testplan: testplan,
+                    testbed: testbed,
+                    starttime: starttime,
+                    firmware_m: firmware_m,
+                    accesspoint: accesspoint,
+                    csrfmiddlewaretoken: csr,
+                };
+                temp_data = {}
+                $.ajax({
+                    url: "{% url 'test_scheduler' %}",
+                    method: "POST",
+                    data: userData,
+                    success: function(response) {
+                        $('#forme')[0].reset();
+                        window.location.reload();
+                    }
+
+                });
+            }
+        });
+
+    function new_window(loc) {
+        let t = location.host
+        if (t.includes(':')) {
+            t = t.slice(0, t.indexOf(':'))
+            loc.href = loc.href.replace(location.host, t);
+        }
+        window.open(loc.href, loc.href, 'width=500,height=500,popup=1');
+    }
+
+    $('tbody').on('click', '.btn-del', function() {
+        output = "";
+        let csr = $("input[name=csrfmiddlewaretoken]").val();
+        let sid = $(this).attr('data-sid');
+        console.log("------------------------------------------sid", sid);
+        userData = {
+            sid: sid,
+            csrfmiddlewaretoken: csr,
+        };
+        var r = confirm("Are you sure you want to delete this testplan?");
+        if (r == true) {
+            $.ajax({
+                url: "{% url 'delete_task' %}",
+                method: "POST",
+                data: userData,
+                success: function(response) {
+                    // x = response.context.alldata; //get all the data from response
+
+                    // for (i = x.length - 1; i >= 0; i--) {
+                    //     output += "<tr><td style='border: none; background: none; padding-right: 0%;'><a href='#' class='btn-del' id='delete' style='margin-top: 0px; border: none; padding: 0%; cursor: pointer; box-shadow: none;' data-sid=" + x[i].starttime + "><i class='zmdi zmdi-delete' style='color: red; font-size: 25px;'></i></a></td><td scope='row'>" + x[i].status + "</td><td style='padding-left:3px;'>&nbsp;<a id='file' class='btn btn-primary btn-round' style='background-color: #3c4b64; box-shadow:none;' href='http://192.168.200.78/results/" + x[i].tester_id + "_" + x[i].testbed + "_" + x[i].starttime + "/" + x[i].tester_id + "_" + x[i].testbed + "_" + x[i].starttime + ".txt'><i class='zmdi zmdi-file' style='font-size:12px'></i></a>&nbsp;<a id='file' class='btn btn-primary btn-round' style='background-color: #3c4b64; box-shadow:none;' href='http://192.168.200.78/results/" + x[i].tester_id + "_" + x[i].testbed + "_" + x[i].starttime + "/" + "allure-report/" + "'><img src='/static/resources/assets/images/allure.png' alt='ALLURE' width='12px' height='12px'></i></a>&nbsp;<a id='file' class='btn btn-primary btn-round' style='background-color: #3c4b64; box-shadow:none;' href='http://192.168.200.78/results/" + x[i].tester_id + "_" + x[i].testbed + "_" + x[i].starttime + "/" + x[i].tester_id + "_" + x[i].testbed + "_" + x[i].starttime + ".html'><img src='/static/resources/assets/images/files.png' width='12px' height='12px' style='margin: 0%;  box-shadow:none;padding: 0%;'></i></a></td><td>" + x[i].total_testcases + "</td><td>" + x[i].total_passed + "</td><td>" + x[i].total_failed + "</td><td>" + x[i].total_error + "</td><td>" + x[i].total_duration + "</td><td>" + x[i].testplan + "</td><td>" + x[i].testbed + "</td><td>" + x[i].starttime + "</td><td>" + x[i].firmware_name + "</td><td>" + x[i].created_at + "</td><td>" + x[i].accesspoint + "</td><td>" + x[i].trafficgenerator + "</td><td>" + x[i].accesspoint_serial + "</td><td>" + x[i].accesspoint_mode + "</td><td>" + x[i].tester_name + "</td><td>" + x[i].tester_id + "</td></tr>"
+
+                    // }
+                    // $("#tbody").html(output);
+                    // refresh();
+                    // window.location.reload();
+
+                    // $('#forme').trigger('reset');
+                    // $("#idmsg").html("DATA SAVEf");
+                }
+
+            });
+            $(this)[0].parentElement.parentElement.remove()
+        }
+    });
+
+    $('tbody').on('click', '.btn-cncl', function() {
+        output = "";
+        let csr = $("input[name=csrfmiddlewaretoken]").val();
+        let sid = $(this).attr('data-sid');
+        console.log("------------------------------------------sid", sid);
+        userData = {
+            sid: sid,
+            csrfmiddlewaretoken: csr,
+        };
+        var r = confirm("Are you sure you want to cancel this testplan?");
+        if (r == true) {
+            $.ajax({
+                url: "{% url 'cancel_task' %}",
+                method: "POST",
+                data: userData,
+                success: function(response) {
+                    refresh();
+                }
+            });
+        }
+    });
+
+    $('tbody').on('click', '.add_remarks', function() {
+        let csr = $("input[name=csrfmiddlewaretoken]").val();
+        let sid = $(this).attr('data-sid');
+        data = sid.split(" ");
+        let starttime = data[0];
+        let name = data[1];
+        let remarks = document.getElementById(starttime).value;
+        sid = starttime + "|" + name + "|" + remarks;
+        userData = {
+            starttime: starttime,
+            name: name,
+            remarks: remarks,
+            csrfmiddlewaretoken: csr,
+        };
+        $.ajax({
+            url: "{% url 'add_remarks' %}",
+            method: "POST",
+            data: userData,
+            success: function(response) {
+                window.location.reload();
+            }
+        });
+    });
+
+    function sync() {
+        var sync_var = parseInt(document.getElementById('sync_var').value);
+        $.ajax({
+            url: "{% url 'sync_data' %}",
+            method: "GET",
+            success: function(response) {
+                x = response.context.sync_var;
+                document.getElementById('sync_var').value = x;
+                if (x == sync_var) {
+                    console.log("sync");
+                } else {
+                    console.log("syncing...");
+                    refresh();
+                }
+            }
+        })
+    }
+    // window.scroll_lock = false;
+    function get_log(loc) {
+        starttime = 'starttime=' + $(loc).attr('data-sid');
+        if (window.log_interval) {
+            console.log('inside if');
+            clearInterval(window.log_interval);
+        }
+        console.log('inside else');
+        window.log_interval = setInterval(function() {
+            $.ajax({
+                url: "{% url 'get_log' %}",
+                method: "GET",
+                data: starttime,
+                success: function(response) {
+                    logs = response.logs;
+                    document.getElementById('logs').innerText = logs;
+                    // if(!window.scroll_lock) {
+                    //     document.getElementById('logs').scrollTo(0, document.getElementById('logs').scrollHeight);
+                    //     window.scroll_lock = true;
+                    // }
+                }
+            })
+        }, 2000);
+    }
+
+    function refresh() {
+        $('.myTable')[0].style.cursor = 'progress';
+        output = "";
+        $.ajax({
+            url: "{% url 'refresh_data' %}",
+            method: "GET",
+            success: function(response) {
+                count =1
+                x = response.context.alldata; //get all data from response
+                y = response.final_data.alldata; // get data_with_testcases.json data from response
+                //console.log(typeof(y));
+                $('thead').remove();
+                output += '\
+                    <tr style="display: table-row-group">\
+                        <th style="border: none; "></th>\
+                        <th style="border: none; "></th>\
+                        <th>Status</th>\
+                        <th style="border: box 20px; padding-right: 8.2rem;">Results</th>\
+                        <th>Selected-Testcases</th>\
+                        <th>Passed</th>\
+                        <th>Failed</th>\
+                        <th>Error</th>\
+                        <th>Duration(sec)</th>\
+                        <th>Testplan</th>\
+                        <th>Testbed</th>\
+                        <th>Time</th>\
+                        <th>Release Cycle</th>\
+                        <th>Access Point</th>\
+                        <th>Traffic Generator</th>\
+                        <th>Access Point Serial</th>\
+                        <th>Access Point Mode</th>\
+                        <th>Tester Name</th>\
+                        <th>Tester-ID</th>\
+                        <th>Notes</th>\
+                        <th>Noted By</th>\
+                    </tr>\
+                    ';
+                for (z in times) {
+                    times[z] = [];
+                }
+                all_starttimes = [];
+                total_count = 1;
+                // console.log("---->saurabh",x);alert(
+                for (i = x.length - 1; i >= 0; i--) {
+                    if(total_count >25) {
+                        break;
+                    }
+                    total_count += 1;
+                    if(x[i].status=="Cancelled" || x[i].status=="Completed" || x[i].status=="Pending" || x[i].status == "Aborted") {
+                        if(x[i].tester_name=="{{tester_email_id.name}}") {
+                            output += "<tr style='display: table-row-group;' onclick='change(1" + x[i].id + ");'><td title='Delete' onclick='change(1" + x[i].id + ");' style='border: none; background: none; padding-right: 0%;'><a href='#' class='btn-del' id='delete' style='margin-top: 0px; border: none; padding: 0%; cursor: pointer;' data-sid=" + x[i].starttime + "><i class='zmdi zmdi-delete' style='color: red; font-size: 25px;'></i></a></td><td title='Cancel' onclick='change(1" + x[i].id + ");' style='border: none; background: none; padding-right: 5px;'><a href='#' class='btn-cncl' id='cancel' style='margin-top: 0px; border: none; padding: 0%; pointer-events: none;' data-sid=" + x[i].starttime + "><i class='zmdi zmdi-close' style='color: #cccccc; font-size: 25px;'></i></a></td><td title='Status' scope='row'>" + x[i].status + "</td><td title='Results' onclick='change(1" + x[i].id + ");' style='padding-left: 0px; min-width: max-content; overflow: auto; white-space: no-wrap;'>";
+                        }
+                        else {
+                            output += "<tr style='display: table-row-group;' onclick='change(1" + x[i].id + ");'><td title='Delete' onclick='change(1" + x[i].id + ");' style='border: none; background: none; padding-right: 0%;'><a href='#' class='btn-del' id='delete' style='margin-top: 0px; border: none; padding: 0%; pointer-events: none;' data-sid=" + x[i].starttime + "><i class='zmdi zmdi-delete' style='color: #cccccc; font-size: 25px;'></i></a></td><td title='Cancel' onclick='change(1" + x[i].id + ");' style='border: none; background: none; padding-right: 5px;'><a href='#' class='btn-cncl' id='cancel' style='margin-top: 0px; border: none; padding: 0%; pointer-events: none;' data-sid=" + x[i].starttime + "><i class='zmdi zmdi-close' style='color: #cccccc; font-size: 25px;'></i></a></td><td title='Status' scope='row'>" + x[i].status + "</td><td title='Results' onclick='change(1" + x[i].id + ");' style='padding-left: 0px; min-width: max-content; overflow: auto; white-space: no-wrap;'>";
+                        }
+                    }
+                    else {
+                        if(x[i].tester_name=="{{tester_email_id.name}}") {
+                            output += "<tr style='display: table-row-group;' onclick='change(1" + x[i].id + ");'><td title='Delete' onclick='change(1" + x[i].id + ");' style='border: none; background: none; padding-right: 0%;'><a href='#' class='btn-del' id='delete' style='margin-top: 0px; border: none; padding: 0%; cursor: pointer;' data-sid=" + x[i].starttime + "><i class='zmdi zmdi-delete' style='color: red; font-size: 25px;'></i></a></td><td title='Cancel' onclick='change(1" + x[i].id + ");' style='border: none; background: none; padding-right: 5px;'><a href='#' class='btn-cncl' id='cancel' style='margin-top: 0px; border: none; padding: 0%; cursor: pointer;' data-sid=" + x[i].starttime + "><i class='zmdi zmdi-close' style='color: red; font-size: 25px;'></i></a></td><td title='Status' scope='row'>" + x[i].status + "</td><td title='Results' onclick='change(1" + x[i].id + ");' style='padding-left: 0px; min-width: max-content; overflow: auto; white-space: no-wrap;'>";
+                        }
+                        else {
+                            output += "<tr style='display: table-row-group;' onclick='change(1" + x[i].id + ");'><td title='Delete' onclick='change(1" + x[i].id + ");' style='border: none; background: none; padding-right: 0%;'><a href='#' class='btn-del' id='delete' style='margin-top: 0px; border: none; padding: 0%; pointer-events: none;' data-sid=" + x[i].starttime + "><i class='zmdi zmdi-delete' style='color: #cccccc; font-size: 25px;'></i></a></td><td title='Cancel' onclick='change(1" + x[i].id + ");' style='border: none; background: none; padding-right: 5px;'><a href='#' class='btn-cncl' id='cancel' style='margin-top: 0px; border: none; padding: 0%; pointer-events: none;' data-sid=" + x[i].starttime + "><i class='zmdi zmdi-close' style='color: #cccccc; font-size: 25px;'></i></a></td><td title='Status' scope='row'>" + x[i].status + "</td><td title='Results' onclick='change(1" + x[i].id + ");' style='padding-left: 0px; min-width: max-content; overflow: auto; white-space: no-wrap;'>";
+                        }
+                    }
+                    if (x[i].status != "Running") {
+                        output += "<a id='file' class='btn btn-primary btn-round' style='background-color: transparent; pointer-events: none;' href='#' data-sid='" + x[i].starttime + "' onclick='get_log(this);' disabled><i><img src='/static/resources/assets/images/terminal.png' alt='LOG file' width='25px' height='25px'></i></a>"
+                    } else {
+                        output += "<a title='Runtime Logs' id='file' class='btn btn-primary btn-round logs' style='background-color: transparent;' href='#logs' data-sid='" + x[i].starttime + "' onclick='get_log(this);'><i><img src='/static/resources/assets/images/terminal.png' alt='LOG file' width='25px' height='25px'></i></a>"
+                    }
+                    output += "<a title='Logs' id='file' class='btn btn-primary btn-round' style='background-color: transparent; color: blue;' href='http://" + location.host + ":2000/results/" + x[i].tester_id + "_" + x[i].testbed + "_" + x[i].starttime + "/" + x[i].tester_id + "_" + x[i].testbed + "_" + x[i].starttime + "_logs.txt' onclick='new_window(this); return false;' ><i><img src='/static/resources/assets/images/log-file.png' alt='LOG file' width='25px' height='25px'></i></a><a title='Pytest Logs' id='file' class='btn btn-primary btn-round' style='background-color: transparent; color: blue;' href='http://" + location.host + ":2000/results/" + x[i].tester_id + "_" + x[i].testbed + "_" + x[i].starttime + "/" + x[i].tester_id + "_" + x[i].testbed + "_" + x[i].starttime + "_RTlogs.txt' onclick='new_window(this); return false;'><i class='zmdi zmdi-file' style='font-size:25px'></i></a><a title='Allure report' id='file' class='btn btn-primary btn-round' style='background-color: transparent;' href='http://" + location.host + ":2000/results/" + x[i].tester_id + "_" + x[i].testbed + "_" + x[i].starttime + "/" + "allure-report/" + "' onclick='new_window(this); return false;'><img src='/static/resources/assets/images/allure.png' alt='ALLURE' width='25px' height='25px'></i></a><a title='Html report' id='file' class='btn btn-primary btn-round' style='background-color: transparent; padding-left: 20px; padding-right: 20px;' href='http://" + location.host + ":2000/results/" + x[i].tester_id + "_" + x[i].testbed + "_" + x[i].starttime + "/" + x[i].tester_id + "_" + x[i].testbed + "_" + x[i].starttime + ".html' onclick='new_window(this); return false;'><img src='/static/resources/assets/images/files.png' width='30px' height='25px' style='margin: 0%; padding: 0%;'></i></a></td><td title='Selected-Testcases'>" + x[i].total_testcases + "</td><td title='Passed'>" + x[i].total_passed + "</td><td title='Failed'>" + x[i].total_failed + "</td><td title='Error'>" + x[i].total_error + "</td><td title='Duration(sec)'>" + x[i].total_duration + "</td><td title='Testplan'>" + x[i].testplan + "</td><td title='Testbed'>" + x[i].testbed + "</td><td title='Time'>" + x[i].starttime  + "</td><td title='Release Cycle'>" + x[i].created_at + "</td><td title='Accesspoint'>" + x[i].accesspoint + "</td><td title='Traffic Generator'>" + x[i].trafficgenerator + "</td><td title='Access Point Serial'>" + x[i].accesspoint_serial + "</td><td title='Access Point Mode'>" + x[i].accesspoint_mode + "</td><td title='Tester Name'>" + x[i].tester_name + "</td><td title='Tester-ID'>" + x[i].tester_id + "</td><td title='Notes'><input onfocus='clearInterval(interval);' onfocusout= 'var interval = setInterval(function() {sync()}, 1000); window.interval = interval;' type='text' id='" + x[i].starttime + "' value='" + x[i].remarks + "'><a href='#' class='add_remarks btn btn-primary btn-round' data-sid='" + x[i].starttime + " " + '{{tester_email_id.name}}' + "' style='color: white; background-color: #3c4b64;' > Add</a></td><td title='Noted By'>" + x[i].evaluator + "</td></tr>";
+                    if (x[i].completed == false) {
+                        e_start = x[i].starttime + ':00.000Z';
+                        e_start = new Date(x[i].starttime);
+                        e_start.setMinutes(e_start.getMinutes() + parseInt(x[i].estimated_time));
+                        times[x[i].testbed].push(e_start);
+                        times[x[i].testbed].sort();
+                        testbed_starttimes[x[i].testbed].push(x[i].starttime);
+                        all_starttimes.push(x[i].starttime);
+                    }
+                    output += '\
+                        <tr style="height: auto; display: none;" id="1' + x[i].id + '">\
+                            <td style="border: none;">\
+                            </td>\
+                            <td style="border: none;">\
+                            </td>\
+                            <td colspan="20">\
+                                <table style="width: 100%; justify-content: center; " class="table table-bordered js-basic-example dataTable ">\
+                                    <thead>\
+                                        <tr style="background-color: #60779f; color: white;" >\
+                                            <th>\
+                                                S.No\
+                                            </th>\
+                                            <th>\
+                                                Testcase Name\
+                                            </th>\
+                                            <th>\
+                                                Status\
+                                            </th>\
+                                            <th>\
+                                                Result\
+                                            </th>\
+                                            <th>\
+                                                Running Time\
+                                            </th>\
+                                            <th>\
+                                                Feature\
+                                            </th>\
+                                            <th>\
+                                                Band\
+                                            </th>\
+                                            <th>\
+                                                Security\
+                                            </th>\
+                                            <th>\
+                                                Channel\
+                                            </th>\
+                                            <th>\
+                                                Bandwidth\
+                                            </th>\
+                                            <th>\
+                                                Protocol\
+                                            </th>\
+                                        </tr>\
+                                    </thead>\
+                                    <tbody>';
+                                        
+                        console.log(x[i].name)
+                    for (j in y) {
+                        // console.log(y[j].name)
+                        // console.log(x[i].name)
+                        
+                        // console.log(y[j].name)
+
+                        if (y[j].name == x[i].name) {
+                            
+                            output += '<tr>\
+                            <td title="S.No">' + `${count}` + '</td>\
+                            <td title="Testcase Name">' + y[j].test_case + '</td>\
+                            <td title="Status">' + x[i].status + '</td>\
+                            <td title="Result">' + y[j].result + '</td>\
+                            <td title="Running Time">' + y[j].duration + '</td>\
+                            <td title="Feature">' + y[j].feature + '</td>\
+                            <td title="Mode">' + y[j].band + '</td>\
+                            <td title="Security">' + y[j].security + '</td>\
+                            <td title="Channel">' + y[j].channel + '</td>\
+                            <td title="Bandwidth">' + y[j].bandwidth + '</td>\
+                            <td title="Protocol">' + y[j].protocol + '</td>\
+                            </tr>';
+                            count++
+                        }
+                        
+                        
+                    }
+                    count =1
+                    
+                    
+                    console.log("------------------------------")
+                    // for (j in data[x[i].testplan]) {
+                    //     output += '<tr>\
+                    //         <td>' + data[x[i].testplan][j]['name'] + '</td>\
+                    //         <td>' + data[x[i].testplan][j]['feature'] + '</td>\
+                    //         <td>' + data[x[i].testplan][j]['mode'] + '</td>\
+                    //         <td>' + data[x[i].testplan][j]['security'] + '</td>\
+                    //         <td>' + data[x[i].testplan][j]['band'] + '</td>\
+                    //         <td>' + data[x[i].testplan][j]['running time'] + '</td>\
+                    //         <td>' + x[i].status + '</td></tr>';
+                    // }
+                    output += '</tbody>\
+                    </table>\
+                            </td>\
+                        </tr>\
+                    ';
+                }
+
+                $("#tbody").html(output);
+                $('.myTable')[0].style.cursor = 'auto';
+            }
+
+        });
+    }
+    var interval = setInterval(function() {
+        sync();
+    }, 1000);
+    refresh();
+
+    function change(loc) {
+        var x = document.getElementById(loc);
+        if (x.style.display === "none") {
+            clearInterval(window.interval);
+            x.style.display = "table-row-group";
+            x.style.width = "100%";
+        } else {
+            x.style.display = "none";
+            var interval = setInterval(function() {
+                sync();
+            }, 1000);
+            window.interval = interval;
+        }
+    }
+</script>

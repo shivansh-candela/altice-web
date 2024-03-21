@@ -1,0 +1,521 @@
+{% load static %}
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <!-- <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name=" csrf-token " content="iL8hUXsdXy71MbOZjq4fWUv4KGPZnJ7k17P7RClL "> -->
+    <title>CT:Resources</title>
+    <!-- <meta name="description " content="Oero Laravel ">
+    <meta name="author " content="Oero Laravel "> -->
+
+
+    <link rel="stylesheet " href="{% static 'resources\assets\plugins\bootstrap\css\bootstrap.min.css' %} ">
+    <link rel="stylesheet " href="{% static 'resources\assets\plugins\jvectormap\jquery-jvectormap-2.0.3.min.css' %} ">
+    <link rel="stylesheet " href="{% static 'resources\assets\plugins\morrisjs\morris.min.css' %} ">
+    <!-- Custom Css -->
+    <link rel="stylesheet " href="{% static 'resources\assets\css\mysty1.css' %} ">
+    <link rel="stylesheet " href="{% static 'resources\assets\css\color_skins.css' %} ">
+
+    <script type="text/javascript">
+        var Tawk_API = Tawk_API || {},
+            Tawk_LoadStart = new Date();
+        (function() {
+            var s1 = document.createElement("script"),
+                s0 = document.getElementsByTagName("script")[0];
+            s1.async = true;
+            s1.src = "{% static 'resources\assets\js\pages\tawk.js' %}";
+            s1.charset = 'UTF-8';
+            s1.setAttribute('crossorigin', '*');
+            s0.parentNode.insertBefore(s1, s0);
+        })();
+    </script>
+    <style>
+        body {
+            min-width: 150px;
+            zoom: normal;
+        }
+        
+        #wrapper {
+            margin-left: auto;
+            margin-right: auto;
+            width: 961px;
+        }
+        
+        .wifi-symbol {
+            display: none;
+        }
+        
+        .wifi-symbol [foo],
+        .wifi-symbol {
+            display: block;
+            position: relative;
+            margin: 0 auto 0;
+            top: -30px;
+            width: 150px;
+            height: 150px;
+            -ms-transform: rotate(-45deg);
+            -moz-transform: rotate(-45deg);
+            -o-transform: rotate(-45deg);
+            -webkit-transform: rotate(-45deg);
+            transform: rotate(-45deg);
+        }
+        
+        .wifi-symbol .wifi-circle {
+            box-sizing: border-box;
+            -moz-box-sizing: border-box;
+            display: block;
+            width: 100%;
+            height: 100%;
+            font-size: 21.4285714286px;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            border-color: #FFFFCC;
+            border-style: solid;
+            border-width: 1em 1em 0 0;
+            -webkit-border-radius: 0 100% 0 0;
+            border-radius: 0 100% 0 0;
+            opacity: 0;
+            -o-animation: wifianimation 1s infinite;
+            -moz-animation: wifianimation 1s infinite;
+            -webkit-animation: wifianimation 1s infinite;
+            animation: wifianimation 1s infinite;
+        }
+        
+        .wifi-symbol .wifi-circle.first {
+            -o-animation-delay: 600ms;
+            -moz-animation-delay: 600ms;
+            -webkit-animation-delay: 600ms;
+            animation-delay: 600ms;
+        }
+        
+        .wifi-symbol .wifi-circle.second {
+            width: 5em;
+            height: 5em;
+            -o-animation-delay: 400ms;
+            -moz-animation-delay: 400ms;
+            -webkit-animation-delay: 400ms;
+            animation-delay: 400ms;
+        }
+        
+        .wifi-symbol .wifi-circle.third {
+            width: 3em;
+            height: 3em;
+        }
+        
+        .wifi-symbol .wifi-circle.fourth {
+            width: 1em;
+            height: 1em;
+            opacity: 1;
+            background-color: #FFFFCC;
+            -o-animation: none;
+            -moz-animation: none;
+            -webkit-animation: none;
+            animation: none;
+        }
+        
+        @keyframes wifianimation {
+            0% {
+                opacity: 0.4;
+            }
+            5% {
+                opactiy: 1;
+            }
+            6% {
+                opactiy: 0.1;
+            }
+            100% {
+                opactiy: 0.1;
+            }
+        }
+    </style>
+</head>
+
+<body style="border-color: gray; background-color: white;" style="font-family: 'Open Sans Light'; overflow-y: auto;">
+    <!-- Page Loader -->
+    <div style="background-color:#303c54;" class="page-loader-wrapper">
+        <div style="background-color:#303c54;" class="loader">
+            <div style="background-color:#303c54;" class="m-t-30">
+                <div class="wifi-symbol">
+                    <div class="wifi-circle first"></div>
+                    <div class="wifi-circle second"></div>
+                    <div class="wifi-circle third"></div>
+                    <div class="wifi-circle fourth">
+                    </div>
+                </div>
+            </div>
+            <p style="background-color:#303c54;">Please wait...</p>
+        </div>
+    </div>
+    <!-- Overlay For Sidebars -->
+    <div class="overlay"></div>
+    <div id="wrapper">
+        <nav class="navbar p-l-5 p-r-5" style="background-color: #303c54; max-height: 60px;">
+            <ul class="nav navbar-nav navbar-left" style="background-color: #303c54; max-height: 60px;">
+                <li>
+                    <div class="navbar-header">
+                        <!-- <a href="javascript:void(0);" class="bars"></a> -->
+                        <!-- <a class="navbar-brand"><img src="{% static 'resources\assets\images\candela.png' %}" width="30" alt="Oreo"><span class="m-l-10">Candela Technologies</span></a> -->
+                    </div>
+                </li>
+                <!-- <li><a href="javascript:void(0);" class="ls-toggle-btn" data-close="true"><i class="zmdi zmdi-settings"
+                            title="Back"></i></a></li>
+ -->
+
+                <li class="d-none d-md-inline-block">
+                    <li>
+                        <a href="#" class="ls-toggle-btn"><i class="zmdi zmdi-menu"></i></a>
+                    </li>
+                    <li class="active open">
+                        <a href="{% url 'home' %}"></i><b><span style="font-weight:bolder">Dashboard</span></b></a>
+                    </li>
+                    <li class="active open">
+                        <a href="{% url 'statistics' %}"></i><b><span style="font-weight:bolder">Statistics</span></b></a>
+                    </li>
+                </li>
+                <li class="float-right">
+                    <p style="color: white;"><b>Active User : </b>{{tester_email_id.name}}</p>
+
+                    <a href="{% url 'logout' %}" class="mega-menu" data-close="true"><i
+                            class="zmdi zmdi-long-arrow-tab" title="Logout"></i></a>
+                    <!-- <a href="javascript:void(0);" class="js-right-sidebar" data-close="true"><i class="zmdi zmdi-settings"
+                            title="Settings"></i></a> -->
+                </li>
+            </ul>
+        </nav>
+    </div>
+    <!-- Left Sidebar -->power
+    <aside id="leftsidebar" class="sidebar">
+        <ul style="background-color:white" class="nav nav-tabs">
+            <li class="nav-item" style="text-align: center;margin:0 auto 0;width:100%;">
+                <a style="color: white; cursor: default;" class="nav-link active" data-toggle="tab" href="#dashboard">
+
+                    <link rel="icon" href="{% static 'resources\assets\images\gold1.svg' %}" type="icon"><img src="{% static 'resources\assets\images\alti.jpeg' %}" style="height: 24px;" /></i>&nbsp;<strong style="font-size: small; color: black;">Altice Labs</strong>
+
+                </a>
+            </li>
+        </ul>
+        <div class="tab-content">
+            <div class="tab-pane stretchRight active" id="dashboard">
+                <div class="menu">
+                    <ul style="background-color:rgb(60,75,100);margin: 0 0px;" class="list">
+                        <li class="">
+                            <a href="{% url 'view_all' %}" style="padding-bottom: 10px; height:50.5px; width: 100%; background-color: #5985de;">
+                                <i style="color: white;" class="zmdi zmdi-account-add"></i>
+                                <b><span style="color: white;">Resources</span></b>
+                            </a>
+                        </li>
+                        <li class="">
+                            <a href="{% url 'new_testplan' %}" style="padding-bottom: 20px; padding-top: 12px;">
+                                <i style="color: white;" class="zmdi zmdi-account-add"></i>
+                                <b><span style="color: white;">Add New Testplans</span></b>
+                            </a>
+                        </li>
+                        <li class="">
+                            <a href="{% url 'test_scheduler' %}" style="padding-bottom: 20px; padding-top: 12px;">
+                                <i style="color: white;" class="zmdi zmdi-account-add"></i>
+                                <b><span style="color: white;">Test Scheduler</span></b>
+                            </a>
+                        </li>
+                        <!-- <li class="">
+                            <a style="padding-bottom: 20px; padding-top: 12px;">
+                                <i style="color: white;" class="zmdi zmdi-account-add"></i>
+                                <b><span style="color: white;">Results</span></b>
+                            </a>
+                        </li> -->
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+    </aside>
+    <!-- Chat-launcher -->
+    <style>
+        /*
+    .zoom:hover {
+        transform: scale(1.2);
+        /* (150% zoom - Note: if the zoom is too large, it will go outside of the viewport)} */
+        
+        #example1 {
+            border: 1px solid;
+            box-shadow: 5px 5px 10px #3d3d3d;
+        }
+        /* .card {
+        box-shadow: 5px -5px 10px #3d3d3d;
+    }
+
+    .card:hover {
+        box-shadow: none;
+    }*/
+        
+        h6 {
+            padding: 10px;
+        }
+        
+        #head {
+            background-color: #3c4b64;
+            width: auto;
+            margin: auto;
+            padding: auto;
+            overflow: auto;
+        }
+        
+        div[title] {
+            font-weight: bold;
+            color: rgb(231, 214, 139);
+        }
+    </style>
+    <section class="content home ">
+        <!-- <div class="page-header-image " style="background-image:url( '{%  static 'myapp/assets/images/login.jpg ' %}') "> -->
+        <div class="container-fluid ">
+            <div class="file_manager ">
+
+                <div class="outer " id="example1">
+                    <div class="header" id="head">
+                        <h6 style="color: white;text-transform: capitalize; font-weight: bolder;"><b>Access Points</b></h6>
+
+                    </div><br>
+                    <!-- <div class="col-lg-2 col-md-2 col-sm-2 " style="display:inline-block ">
+        
+        {{lf_id.name}}&#010;{{lf_id.ip}}&#010;{{lf_id.port}}&#010;{{lf_id.ssh_port}}&#010;{{lf_id.twog_radio}}&#010;{{lf_id.fiveg_radio}}&#010;{{lf_id.ax_radio}}&#010;{{lf_id.upstream}}&#010;{{lf_id.upstream_subnet}}&#010;{{lf_id.uplink}}&#010;{{lf_id.twog_station_name}}&#010;{{lf_id.fiveg_station_name}}&#010;{{lf_id.ax_station_name}}&#010;
+    </div>   -->
+
+                    <div style="overflow-x:scroll;white-space:nowrap;">
+                        {% for i in accesspoint_all %}
+                        <div class="col-lg-2 col-md-2 col-sm-2 " style="display:inline-block; ">
+
+
+                            <div class="card ;" title="DUT Model&nbsp;:&nbsp;&nbsp;{{i.model}}&#010;WI-FI Standards&nbsp;:&nbsp;&nbsp;{{i.mode}}&#010;DUT Serial Number&nbsp;:&nbsp;&nbsp;{{i.serial}}&#010;Jumphost&nbsp;:&nbsp;&nbsp;{{i.jumphost}}&#010;Lanforge IP&nbsp;:&nbsp;&nbsp;{{i.ip}}&#010;Lanforge Username:&nbsp;&nbsp;{{i.username}}&#010;Lanforge Password&nbsp;:&nbsp;&nbsp;{{i.password}}&#010;Lanforge SSH Port No.&nbsp;:&nbsp;&nbsp;{{i.port}}&#010;Serial connection tty&nbsp;:&nbsp;&nbsp;{{i.jumphost_tty}}&#010;Firmare Version&nbsp;:&nbsp;&nbsp;{{i.version}}&#010;AP Username&nbsp;:&nbsp;&nbsp;{{i.ap_username}}&#010;AP Password&nbsp;:&nbsp;&nbsp;{{i.ap_password}}&#010;AP Prompt&nbsp;:&nbsp;&nbsp;{{i.ap_prompt}}">
+                                <div class="file ">
+                                    <!-- <h5>AP</h5> -->
+                                    <!-- <div class="Left ">
+                        <button type="button " class="btn btn-icon btn-icon-mini btn-round btn-danger ">
+                            <i class="zmdi zmdi-delete "></i>
+                        </button>
+                    </div> -->
+
+
+
+                                    <!-- <div class="icon ">
+                            <i class="zmdi zmdi-file-text "></i>
+                            
+                        </div> -->
+
+                                    <div class="file-name " style="border-top:none;text-align: center;">
+                                        {% if i.image %}
+                                        <img src="{{i.image.url}} " style="height: 150px; max-width: 200px;" alt=" ">
+                                        {% else  %}
+                                        <img src="{% static '/resources/assets/images/altice_ap1.png' %} " style="height: 150px; max-width: 200px;" alt=" ">
+                                        {% endif %}
+                                    
+                                        
+                                        <div class="file-name " style="border-top-width: 0px; align-content: center;">
+                                            <h8>
+                                                <p class="m-b-5 text-muted " style="text-align:center;">{{i.model}}</p>
+                                            </h8>
+                                            <!-- <p class="m-b-5 text-muted ">{{j.ip}}</p> -->
+                                            <h8>
+                                                <p class="m-b-5 text-muted " style="text-align:center;">{{i.ip}}</p>
+                                            </h8>
+                                        </div>
+
+
+                                        <!-- <p class="m-b-5 text-muted ">ap_id={{i.id}}</p> -->
+                                    </div>
+
+
+                                </div>
+                            </div>
+
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <!-- </div> -->
+
+                </div>
+
+                <hr style="height:1px;border:none;color:#333; " />
+
+                <div class="outer " id="example1">
+                    <div class="header " id="head">
+                        <h6 style="color: white;text-transform: capitalize;"><b>Traffic Generator</b></h6>
+
+                    </div><br>
+                    <!-- <div class="col-lg-2 col-md-2 col-sm-2 " style="display:inline-block; ">
+        <div class="card " style="background-color:cyan; ">
+            <div class="file ">
+                
+                    <div class="file-name ">
+                        <h8><p class="m-b-5 text-muted text-center ">Add LANforge</p></h8>
+                        <h8><p class="m-b-5 text-muted text-center ">+</p></h8>
+                        
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div> -->
+                    <div style="overflow-x:scroll;white-space:nowrap ;">
+                        {% for j in lanforge_all %}
+                        <div class="col-lg-2 col-md-2 col-sm-2 " style="display:inline-block; padding-top: 0.5%; ">
+                            <div class="card " title="Traffic Generator Name&nbsp;:&nbsp;&nbsp;{{j.name}}&#010;Traffic Generator IP&nbsp;:&nbsp;&nbsp;{{j.ip}}&#010;HTTP Port&nbsp;:&nbsp;&nbsp;{{j.port}}&#010;SSH Port&nbsp;:&nbsp;&nbsp;{{j.ssh_port}}&#010;2.4Ghz radio&nbsp;:&nbsp;&nbsp;{{j.twog_radio}}&#010;5 Ghz radio&nbsp;:&nbsp;&nbsp;{{j.fiveg_radio}}&#010;Ax radio&nbsp;:&nbsp;&nbsp;{{j.ax_radio}}&#010;Upstream Port&nbsp;:&nbsp;&nbsp;{{j.upstream}}&#010;LAN Upstream Port&nbsp;:&nbsp;&nbsp;{{j.lan_upstream}}&#010;2.4Ghz Station Name&nbsp;:&nbsp;&nbsp;{{j.twog_station_name}}&#010;5Ghz Station Name&nbsp;:&nbsp;&nbsp;{{j.fiveg_station_name}}&#010;Ax Station Name&nbsp;:&nbsp;&nbsp;{{j.ax_station_name}}&#010;Attenuation connected serial&nbsp;:&nbsp;&nbsp;{{j.attenuation_connected_serial}}&#010;Attenuation selected serial&nbsp;:&nbsp;&nbsp;{{j.attenuation_selected_serial}}">
+                                <div class="file text-center ">
+                                    <!-- <h5>LF</h5> -->
+                                    <!-- <a href="{% url 'lanforge_details' pk=j.id %} "> -->
+                                    <!-- <div class="hover ">
+                            <button type="button " class="btn btn-icon btn-icon-mini btn-round btn-danger ">
+                                <i class="zmdi zmdi-delete "></i>
+                            </button>
+                        </div> -->
+
+                                    <!-- <div class="icon ">
+                            <i class="zmdi zmdsai-file-text "></i>
+                                {{testbed.testbedname}}</h4>
+        
+                        </div> -->
+                        {% if j.image %}
+                        <img src="{{j.image.url}} " style="height: 150px; max-width: 200px;"alt=" ">
+                        {% else  %}
+                        <img src="{% static '/resources/assets/images/ct523.jpg' %} " style="height: 150px; max-width: 200px;"alt=" ">
+                        {% endif %}
+                                    <div class="file-name " style="border-top-width: 0px;">
+                                        <h8>
+                                            <p class="m-b-5 text-muted ">{{j.name}}</p>
+                                        </h8>
+                                        <!-- <p class="m-b-5 text-muted ">{{j.ip}}</p> -->
+                                        <h8>
+                                            <p class="m-b-5 text-muted ">{{j.ip}}</p>
+                                        </h8>
+                                    </div>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        {% endfor %}
+                    </div>
+                </div>
+                <hr style="height:1px;border:none;color:#333; " />
+
+                <div class="outer " id="example1">
+                    <div class="header " id="head">
+                        <h6 style="color: white;text-transform: capitalize;"><b>Test Bed</b></h6>
+
+                    </div><br>
+                    <div style="overflow-x:scroll;white-space:nowrap ;">
+                        {% for k in testbed_all %}{% if k.availability %} {% if k.status %}
+                        <div class="col-lg-2 col-md-2 col-sm-2 " style="display:inline-block; padding-top: 2%;">
+                            <div class="zoom">
+                                <div class="card" title="Testbedname&nbsp;:&nbsp;&nbsp;{{k.testbedname}}&#010;Accesspoint&nbsp;:&nbsp;&nbsp;{{k.accesspoint}}&#010;Trafficgenerator&nbsp;:&nbsp;&nbsp;{{k.trafficgenerator}}&#010;Accesspoint mode&nbsp;:&nbsp;&nbsp;{{k.accesspoint.mode}}&#010;">
+                                    <div class="file text-center ">
+                                        <span style="height: 10px; width: 10px; border-radius: 50%; background-color: green; display: block; margin-left: 5px; margin-top: 5px;"></span>
+                                        <!-- <a href="{% url 'testbed_details' pk=k.id %}"> -->
+                                        <img src="{% static '/resources/assets/images/rf.png' %}" alt="TESTBED">
+                                        <div class="file-name" style="border-top: 0px;">
+                                            <h8 style="border-top: 0px;">
+                                                <p class="m-b-5 text-muted ">{{k.testbedname}}</p>
+                                            </h8>
+                                            <p class="m-b-5 text-muted "></p>
+                                        </div>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %} {% endif %} {% endfor %} {% for k in testbed_all %} {% if not k.status %}
+                        <div class="col-lg-2 col-md-2 col-sm-2 " style="display:inline-block; padding-top: 2%;">
+                            <div class="zoom">
+                                <div class="card" title="Testbedname&nbsp;:&nbsp;&nbsp;{{k.testbedname}}&#010;Accesspoint&nbsp;:&nbsp;&nbsp;{{k.accesspoint}}&#010;Trafficgenerator&nbsp;:&nbsp;&nbsp;{{k.trafficgenerator}}&#010;Accesspoint mode&nbsp;:&nbsp;&nbsp;{{k.accesspoint.mode}}&#010;">
+                                    <div class="file text-center ">
+                                        <span style="height: 10px; width: 10px; border-radius: 50%; background-color: red; display: block; margin-left: 5px; margin-top: 5px;"></span>
+                                        <!-- <a href="{% url 'testbed_details' pk=k.id %}"> -->
+                                        <img src="{% static '/resources/assets/images/rf.png' %}" alt="TESTBED">
+                                        <div class="file-name" style="border-top: 0px;">
+                                            <h8 style="border-top: 0px;">
+                                                <p class="m-b-5 text-muted ">{{k.testbedname}}</p>
+                                            </h8>
+                                            <p class="m-b-5 text-muted "></p>
+                                        </div>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %} {% endfor %}
+                    </div>
+                </div>
+                <hr style="height:1px;border:none;color:#333; " />
+                <div class="outer " id="example1">
+                    <div class="header " id="head">
+                        <h6 style="color: white;text-transform: capitalize;"><b>Test Plan</b></h6>
+                    </div><br>
+                    <div style="overflow-x:scroll;white-space:nowrap ;">
+                        {% for tp in testplan_all %}
+                        <div class="col-lg-2 col-md-2 col-sm-2 " style="display:inline-block; padding-top: 15px; padding-bottom: 15px; ">
+                            <div class="card" title="Testplan &nbsp; :{{tp.testplan_name}}">
+                                <div class="file text-center ">
+                                    <div class="file-name" style="border-top: 0px;">
+                                        <h8 style="border-top: 0px;">
+                                            <p class="m-b-5 text-muted ">{{tp.testplan_name}}</p>
+                                        </h8>
+                                        <p class="m-b-5 text-muted "></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <!-- <div class="col-lg-2 col-md-2 col-sm-2 " style="display:inline-block; ">
+        <div class="card " style="background-color:cyan; ">
+            <div class="file ">
+                #    
+                    <div class="file-name ">
+                        <h8><p class="m-b-5 text-muted ">Add Testplan</p></h8>
+                        
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div> -->
+
+
+            </div>
+
+        </div>
+        </div>
+        <!-- </div> -->
+    </section>
+    <!--Start of Tawk.to Script-->
+    <!-- <script type="text/javascript">
+    var Tawk_API = Tawk_API || {},
+        Tawk_LoadStart = new Date();
+    (function() {
+        var s1 = document.createElement("script"),
+            s0 = document.getElementsByTagName("script")[0];
+        s1.async = true;
+        s1.src = 'https://embed.tawk.to/59f5afbbbb0c3f433d4c5c4c/default';
+        s1.charset = 'UTF-8';
+        s1.setAttribute('crossorigin', '*');
+        s0.parentNode.insertBefore(s1, s0);
+    })();
+</script> -->
+    <!-- Scripts -->
+    <script src="{% static 'resources\assets\bundles\libscripts.bundle.js' %}"></script>
+    <script src="{% static 'resources\assets\bundles\vendorscripts.bundle.js' %}"></script>
+    <script src="{% static 'resources\assets\bundles\mainscripts.bundle.js' %}"></script>
+    <script src="{% static 'resources\assets\bundles\morrisscripts.bundle.js' %}"></script>
+    <script src="{% static 'resources\assets\bundles\jvectormap.bundle.js' %}"></script>
+    <script src="{% static 'resources\assets\bundles\knob.bundle.js' %}"></script>
+    <script src="{% static 'resources\assets\js\pages\index.js' %}"></script>
+    <script type="text/javascript">
+        window.history.forward();
+
+        function noBack() {
+            window.history.forward();
+        }
+    </script>
+    <!--End of Tawk.to Script-->
+</body>
+
+</html>

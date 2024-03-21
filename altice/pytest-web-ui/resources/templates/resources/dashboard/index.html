@@ -1,0 +1,3181 @@
+﻿﻿{% load static %}
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="iL8hUXsdXy71MbOZjq4fWUv4KGPZnJ7k17P7RClL">
+    <!-- Favicon-->
+    <title>CT:Dashboard</title>
+    <meta name="description" content="Oero Laravel">
+    <meta name="author" content="Oero Laravel">
+    <link rel="stylesheet" href="{% static 'resources\assets\plugins\bootstrap\css\bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'resources\assets\plugins\jvectormap\jquery-jvectormap-2.0.3.min.css' %}">
+    <link rel="stylesheet" href="{% static 'resources\assets\plugins\morrisjs\morris.min.css' %}">
+    <!-- Latest compiled and minified CSS -->
+
+    <!-- Latest compiled and minified JavaScript -->
+    <link rel="stylesheet" href="{% static 'resources\assets\css\cdnmin.css' %}">
+    <!-- Custom Css -->
+    <!-- <link rel="stylesheet" href="{% static 'resources\assets\css\mystyles.css' %}"> -->
+    <link rel="stylesheet" href="{% static 'resources\assets\css\mysty1.css' %}">
+    <link rel="stylesheet" href="{% static 'resources\assets\css\color_skins.css' %}">
+    <!-- Font Awesome -->
+    <script>
+        if (window.history.replaceState) {
+            window.history.replaceState(null, null, window.location.href);
+        }
+    </script>
+    <script src="{% static 'resources\assets\js\pages\quer1.min.js' %}"></script>
+
+    <!--script for chart.js-->
+    <script src="{% static 'resources\assets\bundles\chart.min.js' %}"></script>
+    <style>
+        td:hover {
+            background-color: #f5f5f5;
+        }
+
+        #download:hover {
+            background-color: transparent;
+        }
+
+        #trash {
+            box-shadow: none;
+        }
+
+        #trash:active {
+            transform: scale(0.95);
+        }
+
+        body::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* Hide scrollbar for IE, Edge and Firefox */
+
+        body {
+            -ms-overflow-style: none;
+            /* IE and Edge */
+            scrollbar-width: none;
+            /* Firefox */
+        }
+
+        /* select::-webkit-scrollbar {
+            display: none;
+        }
+        select{
+            -ms-overflow-style:none;
+            scrollbar-width:none;
+        } */
+
+
+        .dropdown-menu.inner {
+            -ms-overflow-style: none;
+            /* Internet Explorer 10+ */
+            scrollbar-width: none;
+            /* Firefox */
+        }
+
+        .dropdown-menu .inner::-webkit-scrollbar {
+            display: none;
+            /* Safari and Chrome */
+        }
+
+        #shadow:focus,
+        #shadow:hover,
+        #file:hover {
+            box-shadow: none;
+            cursor: pointer;
+        }
+
+        button,
+        #file,
+        #shadow {
+
+            box-shadow: 0 3px 10px rgb(0 0 0);
+
+        }
+
+
+
+
+        *::-moz-placeholder {
+            font-weight: bold;
+            color: black;
+            font-family: "Open Sans Light";
+        }
+
+        *::-webkit-input-placeholder {
+            font-weight: bold;
+            color: black;
+            font-family: "Open Sans Light";
+        }
+
+        *:-ms-input-placeholder {
+            font-weight: bold;
+            color: black;
+            font-family: "Open Sans Light";
+        }
+
+        *:-o-input-placeholder {
+            font-weight: bold;
+            color: black;
+            font-family: "Open Sans Light";
+        }
+
+        .btn-group {
+            display: inline-block;
+        }
+    </style>
+    <!-- Smart Tree -->
+    <link rel="stylesheet" type="text/css" href="{% static 'resources\assets\css\smart.default.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'resources\assets\css\demos.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'resources\assets\css\styles.css' %}">
+    <style media="only screen">
+        html,
+        body {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            position: absolute;
+            top: 0;
+            left: 0;
+            padding: 0;
+            overflow: auto;
+        }
+
+        body {
+            padding: 1rem;
+            overflow: auto;
+        }
+
+        #chart1,
+        #chart2,
+        #chart3,
+        #chart4 {
+            box-shadow: 0 3px 10px rgb(0 0 0 / 0.5);
+            width: 100%;
+            border: 4px solid rgb(40, 96, 134);
+            box-sizing: border-box;
+            padding: 1%;
+        }
+
+        .pivottable {
+            box-shadow: 0 3px 10px rgb(0 0 0 / 0.5);
+            padding: 20 0 0 20px;
+            border: 2px solid rgb(60, 75, 100);
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        .pivottable::-webkit-scrollbar {
+            display: none;
+            width: none;
+        }
+
+        canvas {
+            box-sizing: initial;
+        }
+
+        hr {
+            margin: 0.1em auto;
+        }
+    </style>
+    <style>
+        /* styling for loader wifi icon */
+        .wifi-symbol {
+            display: none;
+        }
+
+        .wifi-symbol [foo],
+        .wifi-symbol {
+            display: block;
+            position: relative;
+            margin: 0 auto 0;
+            top: -30px;
+            width: 150px;
+            height: 150px;
+
+            -ms-transform: rotate(-45deg);
+            -moz-transform: rotate(-45deg);
+            -o-transform: rotate(-45deg);
+            -webkit-transform: rotate(-45deg);
+            transform: rotate(-45deg);
+        }
+
+        .wifi-symbol .wifi-circle {
+            box-sizing: border-box;
+            -moz-box-sizing: border-box;
+            display: block;
+            width: 100%;
+            height: 100%;
+            font-size: 21.4285714286px;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            border-color: #FFFFCC;
+            border-style: solid;
+            border-width: 1em 1em 0 0;
+            -webkit-border-radius: 0 100% 0 0;
+            border-radius: 0 100% 0 0;
+            opacity: 0;
+            -o-animation: wifianimation 1s infinite;
+            -moz-animation: wifianimation 1s infinite;
+            -webkit-animation: wifianimation 1s infinite;
+            animation: wifianimation 1s infinite;
+        }
+
+        .wifi-symbol .wifi-circle.first {
+            -o-animation-delay: 600ms;
+            -moz-animation-delay: 600ms;
+            -webkit-animation-delay: 600ms;
+            animation-delay: 600ms;
+        }
+
+        .wifi-symbol .wifi-circle.second {
+            width: 5em;
+            height: 5em;
+            -o-animation-delay: 400ms;
+            -moz-animation-delay: 400ms;
+            -webkit-animation-delay: 400ms;
+            animation-delay: 400ms;
+        }
+
+        .wifi-symbol .wifi-circle.third {
+            width: 3em;
+            height: 3em;
+        }
+
+        .wifi-symbol .wifi-circle.fourth {
+            width: 1em;
+            height: 1em;
+            opacity: 1;
+            background-color: #FFFFCC;
+            -o-animation: none;
+            -moz-animation: none;
+            -webkit-animation: none;
+            animation: none;
+        }
+
+        @keyframes wifianimation {
+            0% {
+                opacity: 0.4;
+            }
+
+            5% {
+                opactiy: 1;
+            }
+
+            6% {
+                opactiy: 0.1;
+            }
+
+            100% {
+                opactiy: 0.1;
+            }
+        }
+
+        /* media quesries for side pannel */
+        @media screen and (min-width:801px) {
+            #section {
+                margin-right: 270px;
+            }
+
+            #pivot-1 {
+                width: 280px;
+            }
+
+            #addition-btn {
+                right: 265
+            }
+
+            #delete-btn {
+                right: 235;
+            }
+
+            #smart-card {
+                width: 240px;
+            }
+        }
+
+        @media screen and (max-width:800px) {
+            #section {
+                margin-right: 150px;
+            }
+
+            #pivot-1 {
+                width: 150px;
+            }
+
+            #addition-btn {
+                right: 135
+            }
+
+            #delete-btn {
+                right: 105;
+            }
+
+            #pivot-1>div.btn-group.bootstrap-select.show-tick {
+                width: 125px !important;
+            }
+
+            #smart-card {
+                width: 120px;
+            }
+        }
+
+        /* styling for smart tree for diffrent selected cases */
+        .smart-tree .smart-tree-main-container {
+            overflow-y: auto;
+            overflow-x: auto;
+        }
+
+        .smart-tree:not([toggle-element-position="far"]) smart-tree-items-group .smart-tree-items-group-arrow {
+            opacity: 0;
+        }
+
+        .smart-tree[selection-mode=checkBox] smart-tree-item[selected]>.smart-tree-item-label-container:after,
+        .smart-tree[selection-mode=checkBox] smart-tree-items-group[selected]>.smart-tree-item-label-container:after {
+            content: "";
+
+        }
+
+        .smart-tree[selection-mode=checkBox] smart-tree-items-group[selected]>.smart-tree-item-label-container {
+            content: "";
+            background-color: rgb(152, 213, 241);
+        }
+
+        .smart-tree[selection-mode=checkBox] smart-tree-items-group[indeterminate]>.smart-tree-item-label-container {
+            content: "";
+            background-color: #c4bdff;
+        }
+
+        .smart-tree {
+            border: none;
+            height: 95%;
+
+        }
+    </style>
+
+
+</head>
+
+<body style="border-color: gray; background-color: white;" style="font-family: 'Open Sans Light'; overflow-y: auto;">
+    <!-- Page Loader -->
+
+    <div style="background-color:#303c54;" class="page-loader-wrapper">
+        <div style="background-color:#303c54;" class="loader">
+            <div style="background-color:#303c54;" class="m-t-30">
+                <div class="wifi-symbol">
+                    <div class="wifi-circle first"></div>
+                    <div class="wifi-circle second"></div>
+                    <div class="wifi-circle third"></div>
+                    <div class="wifi-circle fourth">
+                    </div>
+                </div>
+            </div>
+            <p style="background-color:#303c54;">Please wait...</p>
+        </div>
+    </div>
+    <!-- Overlay For Sidebars -->
+    <div class="overlay"></div>
+    <div id="wrapper">
+        <nav class="navbar p-l-5 p-r-5" style="background-color: #303c54; max-height: 60px;">
+            <ul class="nav navbar-nav navbar-left" style="background-color: #303c54; max-height: 60px;">
+                <li>
+                    <div class="navbar-header">
+                        <!-- <a href="javascript:void(0);" class="bars"></a> -->
+                        <!-- <a class="navbar-brand"><img src="{% static 'resources\assets\images\candela.png' %}" width="30" alt="Oreo"><span class="m-l-10">Candela Technologies</span></a> -->
+                    </div>
+                </li>
+                <!-- <li><a href="javascript:void(0);" class="ls-toggle-btn" data-close="true"><i class="zmdi zmdi-settings"
+                            title="Back"></i></a></li>
+ -->
+
+                <li class="d-none d-md-inline-block">
+                <li>
+                    <a href="#" class="ls-toggle-btn"><i class="zmdi zmdi-menu"></i></a>
+                </li>
+                <li class="active open">
+                    <a href="{% url 'home' %}"></i><b><span style="font-weight:bolder;  display: block;
+                        width: 100%;
+                        padding-left: 20px;
+                        padding-right: 20px;
+                        background: #5985de;
+                        color: #FFF;
+                        text-align: center;
+                       ">Dashboard</span></b></a>
+                </li>
+                <li class="active open">
+                    <a href="{% url 'statistics' %}"></i><b><span style="font-weight:bolder">Statistics</span></b></a>
+                </li>
+                </li>
+                <li class="float-right">
+                    <p style="color: white;"><b>Active User : </b>{{tester_email_id.name}}</p>
+
+                    <a href="{% url 'logout' %}" class="mega-menu" data-close="true"><i class="zmdi zmdi-long-arrow-tab"
+                            title="Logout"></i></a>
+                    <!-- <a href="javascript:void(0);" class="js-right-sidebar" data-close="true"><i
+                            class="zmdi zmdi-settings" title="Settings"></i></a> -->
+                </li>
+            </ul>
+        </nav>
+    </div>
+    <!-- Left Sidebar -->power
+    <aside id="leftsidebar" class="sidebar">
+        <ul style="background-color:white" class="nav nav-tabs">
+            <li class="nav-item" style="text-align: center;margin:0 auto 0;width:100%;">
+                <a style="color: white;cursor: default;" class="nav-link active" data-toggle="tab" href="#dashboard">
+
+                    <link rel="icon" href="{% static 'resources\assets\images\gold1.svg' %}" type="icon"><img src="{% static 'resources\assets\images\alti.jpeg' %}" style="height: 24px;" /></i>&nbsp;<strong style="font-size: small; color: black;">Altice Labs</strong>
+
+                </a>
+            </li>
+        </ul>
+        <div class="tab-content">
+            <div class="tab-pane stretchRight active" id="dashboard">
+                <div class="menu">
+                    <ul style="background-color:rgb(60,75,100);margin: 0 0px;" class="list">
+                        <li class="">
+                            <a href="{% url 'view_all' %}" class="clickfornodata"
+                                style="padding-bottom: 10px; height:50.5px;">
+                                <i style="color: white;" class="zmdi zmdi-account-add"></i>
+                                <b><span style="color: white;">Resources</span></b>
+                            </a>
+                        </li>
+                        <li class="">
+                            <a href="{% url 'new_testplan' %}" style="padding-bottom: 20px; padding-top: 12px;">
+                                <i style="color: white;" class="zmdi zmdi-account-add"></i>
+                                <b><span style="color: white;">Add New Testplans</span></b>
+                            </a>
+                        </li>
+                        <li class="">
+                            <a href="{% url 'test_scheduler' %}" style="padding-bottom: 20px; padding-top: 12px;">
+                                <i style="color: white;" class="zmdi zmdi-account-add"></i>
+                                <b><span style="color: white;">Test Scheduler</span></b>
+                            </a>
+                        </li>
+                        <!-- <li class="">
+                            <a style="padding-bottom: 20px; padding-top: 12px;">
+                                <i style="color: white;" class="zmdi zmdi-account-add"></i>
+                                <b><span style="color: white;">Results</span></b>
+                            </a>
+                        </li> -->
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+    </aside>
+
+    <!-- Right Sidebar -->
+
+    <!-- Chat-launcher -->
+    <section id="section" style="top:0px;" class="content home">
+        {% csrf_token %}
+
+
+        <button type="button"
+            style="border-radius: .5rem;position: fixed; color: white;background-color: #303c54;width: 25px;top: 80;border-style: none;"
+            id="addition-btn" value="4">+</button>
+        <button type="button"
+            style="border-radius: .5rem; position: fixed; color: white;background-color: #303c54; display:none;width: 25px;top: 80;border-style: none;"
+            id="delete-btn" value="0">-</button>
+
+        <div class="content-center" id="mygrid"
+            style="width: 100%; height:90%;margin-top: -40px;overflow-y: auto;padding-right: 15px;">
+
+            <div id="grid-template" style=" display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            grid-column-gap: 12px;
+            grid-row-gap:12px;
+            width: 100%;
+            height: 100%;
+            ">
+                <div class="wrapper-1" style="display: flex;flex-direction: row; grid-row: 1/2;
+            grid-column: 1/3;position:relative; gap:10px; overflow: hidden;box-sizing: border-box;">
+                    <div class="box1" id="dashboard1" style=" flex: 1 1 1px;">
+                        <div class="allchart" id="chart1" style="width:100%;height:100%; border:4px solid yellow;position:relative;
+                    ">
+                            <canvas class="chartcanvas" id="mychart1"></canvas>
+                        </div>
+                    </div>
+                    <div class="handler-1" style="
+                      width: 5px;
+                margin:5px 0 ;
+                cursor: ew-resize;
+                flex: 0 0 auto;
+                background-color: #6b83b3;
+                
+                  "></div>
+                    <div class="box1" id="dashboard2" style=" flex: 1 1 1px ;">
+                        <div id="chart2" class="allchart" style="width:100%;height:100%;">
+                            <canvas class="chartcanvas" id="mychart2"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="wrapper-2" style="display: flex;flex-direction: row;grid-row: 2;
+            grid-column: 1/3;position:relative;gap:10px;overflow: auto; box-sizing: border-box;">
+                    <div class="box2" id="dashboard3" style=" flex: 1 1 1px;">
+                        <div id="chart3" class="allchart" style="width:100%;height:100%;">
+                            <canvas class="chartcanvas" id="mychart3"></canvas>
+                        </div>
+                    </div>
+                    <div class="handler-2" style="
+                width: 5px;
+                margin:5px 0 ;
+                cursor: ew-resize;
+                flex: 0 0 auto;
+                background-color: #6b83b3;
+              "></div>
+                    <div class="box2" id="dashboard4" style=" flex: 1 1 1px;">
+                        <div id="chart4" class="allchart" style="width:100%;height:100%;">
+                            <canvas class="chartcanvas" id="mychart4"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+
+
+
+                <div id="pivot-1" class="pivottable" style="height: auto; top: 115; 
+                overflow-y:hidden;float: right;position: fixed;right:10;bottom: 39;overflow-y: auto;">
+                    <b>Select</b>
+
+                    <div id="smart-card" style="overflow:auto;height:50%; border: #303c54 2px solid;"></div>
+
+
+                    <br>
+                    <b>Select Any</b>
+
+                    <div id="series" style="height:15%; overflow-y:auto;">
+                        <input style="display: none;" type="checkbox" id="main-change-1" value="0"
+                            name="series_for_1"></input>
+
+                        <input type="checkbox" id="main-change-2" value="1" name="series_for_1"
+                            checked>&nbsp;&nbsp;Passes</input>
+                        <hr>
+                        <input type="checkbox" id="main-change-3" value="2" name="series_for_1"
+                            checked>&nbsp;&nbsp;Failed</input>
+                        <hr>
+                        <input type="checkbox" id="main-change-4" value="3" name="series_for_1"
+                            checked>&nbsp;&nbsp;Error</input>
+                        <hr>
+                    </div>
+
+
+
+                    <b>Select Chart-Type</b>
+                    <div class="selectbutton" id="chart-type-1" style="height:15%;overflow-y:auto;">
+                        <input type="radio" name="selectbutton1" id="main-change-1-1" value="bar" checked><label>
+                            &nbsp;&nbsp;Bar Chart</label>
+                        <hr>
+                        <input type="radio" name="selectbutton1" id="main-change-1-3" value="pie"><label>
+                            &nbsp;&nbsp;Pie Chart</label>
+                        <hr>
+                        <input type="radio" name="selectbutton1" id="area1" value="line"><label>
+                            &nbsp;&nbsp;Area Chart</label>
+                        <hr>
+                        <input type="radio" name="selectbutton1" id="stacked-1" value="bar"><label>
+                            &nbsp;&nbsp;Stacked Bar Chart</label>
+                        <hr>
+                        <input type="radio" name="selectbutton1" id="main-change-1-2" value="line"><label>
+                            &nbsp;&nbsp;Line Chart</label>
+                        <hr>
+                        <input type="radio" name="selectbutton1" id="main-change-1-4" value="bubble"><label>
+                            &nbsp;&nbsp;Bubble Chart</label>
+                        <hr>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+    </section>
+</body>
+
+
+<!--scripting for dashboard-->
+<script>
+
+    let columns = [];
+    let rows = [];
+    let datatable = [];
+    //requesting the data for dashboard from data_with_testcases.json
+    $.ajax({
+        url: "/json",
+        dataType: "json",
+        type: "GET",
+        contentType: "application/json; charset=utf-8",
+        success: function (alldata) {
+            //checking if there is no data
+            alldata.forEach(item => {
+                if (item["security"] == "wpa") {
+                    item["security"] = "wpa_personal"
+                }
+            })
+
+            let data = alldata.filter(function (currentValue, index, arr) {
+                if (currentValue["result"] != undefined && (currentValue["result"] == "passed" || currentValue["result"] == "failed" || currentValue["result"] == "error" || currentValue["result"] == "xfailed")) {
+                    return currentValue
+                }
+            })
+
+
+            if (!$.trim(data)) {
+                alert("No Data For Dashboard");
+                document.getElementsByClassName("clickfornodata")[0].click()
+            }
+            //checking if any test is completed or not
+            else {
+                let allaborted = true
+                let allpending = true
+                let allrunning = true
+                let nocompleted = true
+
+                $.each(data, function (index, value) {
+
+
+                    if (columns.length == 0) {
+                        for (key in value) {
+                            columns.push(key);
+                        }
+                    }
+                    var temp = [];
+                    for (key in value) {
+                        if (value["status"] != "Aborted") {
+                            allaborted = false
+                        }
+                        if (value["status"] != "Pending") {
+                            allpending = false
+                        }
+                        if (value["status"] != "Running") {
+                            allrunning = false
+                        }
+
+
+                        temp.push(value[key]);
+                    }
+
+                    if (temp[columns.indexOf("status")] != "Aborted" && temp[columns.indexOf("status")] != "Running" && temp[columns.indexOf("status")] != "Pending") {
+                        rows.push(temp);
+                        nocompleted = false
+                    }
+                })
+
+                if (allaborted == true || allpending == true || allrunning == true || nocompleted == true) {
+                    if (allaborted) {
+                        alert("All tests are aborted");
+                    } else if (allpending) {
+                        alert("All tests are pending");
+                    }
+                    else if (allrunning) {
+                        alert("All tests are running");
+                    }
+                    else {
+                        alert("No test is completed");
+
+                    }
+
+                    document.getElementsByClassName("clickfornodata")[0].click()
+                }
+
+
+                else {
+
+
+                    // populating the araays for chart data
+                    for (let i = 0; i < columns.length - 4; i++) {
+                        let aggregated_data = [];
+                        let label = [];
+                        let duration = [];
+                        let pass = [];
+                        let fail = [];
+                        let error = [];
+                        for (items in rows) {
+                            if (!label.includes(rows[items][i]))
+                                label.push(rows[items][i]);
+
+                            if (duration[label.indexOf(rows[items][i])] != undefined) {
+                                duration[label.indexOf(rows[items][i])] += rows[items][columns.length-6];
+                            }
+                            else {
+                                duration[label.indexOf(rows[items][i])] = rows[items][columns.length-6];
+                            }
+
+                            if (pass[label.indexOf(rows[items][i])] != undefined) {
+                                pass[label.indexOf(rows[items][i])] += rows[items][columns.length-5];
+                            }
+                            else {
+                                pass[label.indexOf(rows[items][i])] = rows[items][columns.length-5];
+                            }
+
+                            if (fail[label.indexOf(rows[items][i])] != undefined) {
+                                fail[label.indexOf(rows[items][i])] += rows[items][columns.length-4];
+                            }
+                            else {
+                                fail[label.indexOf(rows[items][i])] = rows[items][columns.length-4];
+                            }
+
+                            if (error[label.indexOf(rows[items][i])] != undefined) {
+                                error[label.indexOf(rows[items][i])] += rows[items][columns.length-3];
+                            }
+                            else {
+                                error[label.indexOf(rows[items][i])] = rows[items][columns.length-3];
+                            }
+                        }
+                        aggregated_data.push(label);
+                        aggregated_data.push(duration);
+                        aggregated_data.push(pass);
+                        aggregated_data.push(fail);
+                        aggregated_data.push(error);
+
+                        datatable.push(aggregated_data);
+                    }
+
+                    //background colours for charts
+                    const Backgroundcolors = ['rgba(0,50,255)',
+                        "rgb(102,176,50)",
+                        'rgb(255,69,0) ',
+                        'rgb(255,179,71)',
+                    ]
+                    // backgroundcolours for area chart
+                    const BackgroundcolorsForAreaChart = ['rgba(0,50,255,0.7)',
+                        "rgb(102,176,50,0.7)",
+                        'rgb(255,69,0,0.7) ',
+                        'rgb(255,179,71,0.7)',]
+                    //border colours
+                    const BorderColor = [
+                        'rgba(0,50,255)',
+                        "rgb(102,176,50)",
+                        'rgb(255,69,0) ',
+                        'rgb(255,179,71)',
+                    ]
+                    //colours for pie chart
+                    let PieChartColors = [
+                        "#5DA5DA",
+                        "#FAA43A",
+                        "#60BD68",
+                        "#F17CB0",
+                        "#B2912F",
+                        "#4D4D4D",
+                        "#B276B2",
+                        "#DECF3F",
+                        "#F15854",
+                        "#00b638",
+                        "#efaa30",
+                        "#50c8ea",
+                         "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941", "#006FA6", "#A30059",
+"#FFDBE5", "#7A4900", "#0000A6", "#63FFAC", "#B79762", "#004D43", "#8FB0FF", "#997D87",
+"#5A0007", "#809693", "#FEFFE6", "#1B4400", "#4FC601", "#3B5DFF", "#4A3B53", "#FF2F80",
+"#61615A", "#BA0900", "#6B7900", "#00C2A0", "#FFAA92", "#FF90C9", "#B903AA", "#D16100",
+"#DDEFFF", "#000035", "#7B4F4B", "#A1C299", "#300018", "#0AA6D8", "#013349", "#00846F",
+"#372101", "#FFB500", "#C2FFED", "#A079BF", "#CC0744", "#C0B9B2", "#C2FF99", "#001E09",
+"#00489C", "#6F0062", "#0CBD66", "#EEC3FF", "#456D75", "#B77B68", "#7A87A1", "#788D66",
+"#885578", "#FAD09F", "#FF8A9A", "#D157A0", "#BEC459", "#456648", "#0086ED",
+                    ]
+                   
+                    //footer function for tooltips
+                    let footerfortooltip = function (ttItem) {
+                        if (statefor1 != undefined || statefor2 != undefined || statefor3 != undefined || statefor4 != undefined || statefor5 != undefined) {
+                            let tooltipdefaultcheck
+                            let selectedIndexes
+
+                            if (ttItem[0].chart.canvas.id == "mychart1") {
+                                tooltipdefaultcheck = defaultcheckfor1
+                                if (statefor1 != undefined) {
+                                    selectedIndexes = statefor1.selected.map((value, index) => {
+
+                                        return tree.getItem(value).path
+                                    })
+                                }
+                                else {
+                                    return
+                                }
+                            } else if (ttItem[0].chart.canvas.id == "mychart2") {
+                                tooltipdefaultcheck = defaultcheckfor2
+
+                                if (statefor2 != undefined) {
+                                    selectedIndexes = statefor2.selected.map((value, index) => {
+
+                                        return tree.getItem(value).path
+                                    })
+                                }
+                                else {
+                                    return ""
+                                }
+                            } else if (ttItem[0].chart.canvas.id == "mychart3") {
+                                tooltipdefaultcheck = defaultcheckfor3
+
+                                if (statefor3 != undefined) {
+                                    selectedIndexes = statefor3.selected.map((value, index) => {
+
+                                        return tree.getItem(value).path
+                                    })
+                                }
+                                else {
+                                    return ""
+                                }
+                            } else if (ttItem[0].chart.canvas.id == "mychart4") {
+                                tooltipdefaultcheck = defaultcheckfor4
+
+                                if (statefor4 != undefined) {
+                                    selectedIndexes = statefor4.selected.map((value, index) => {
+
+                                        return tree.getItem(value).path
+                                    })
+                                } else {
+                                    return ""
+                                }
+                            } else if (ttItem[0].chart.canvas.id == "mychart5") {
+                                tooltipdefaultcheck = defaultcheckfor5
+
+                                let prefix = tree.getState().selected[0].slice(0, tree.getState().selected[0].indexOf("Item"))
+                                if (statefor5.selected[0].slice(0, statefor5.selected[0].indexOf("Item")) != prefix) {
+
+                                    statefor5.selected.forEach((item, index, arr) => {
+                                        arr[index] = prefix + item.substring(prefix.length)
+                                    })
+                                } selectedIndexes = statefor5.selected.map((value, index) => {
+
+                                    return tree.getItem(value).path
+                                })
+                            } else if (ttItem[0].chart.canvas.id == "mychart6") {
+                                tooltipdefaultcheck = defaultcheckfor6
+
+                                let prefix = tree.getState().selected[0].slice(0, tree.getState().selected[0].indexOf("Item"))
+                                if (statefor6.selected[0].slice(0, statefor6.selected[0].indexOf("Item")) != prefix) {
+
+                                    statefor6.selected.forEach((item, index, arr) => {
+                                        arr[index] = prefix + item.substring(prefix.length)
+                                    })
+                                }
+                                selectedIndexes = statefor6.selected.map((value, index) => {
+
+                                    return tree.getItem(value).path
+                                })
+                            } else if (ttItem[0].chart.canvas.id == "mychart7") {
+                                tooltipdefaultcheck = defaultcheckfor7
+
+                                let prefix = tree.getState().selected[0].slice(0, tree.getState().selected[0].indexOf("Item"))
+                                if (statefor7.selected[0].slice(0, statefor7.selected[0].indexOf("Item")) != prefix) {
+
+                                    statefor7.selected.forEach((item, index, arr) => {
+                                        arr[index] = prefix + item.substring(prefix.length)
+                                    })
+                                }
+                                selectedIndexes = statefor7.selected.map((value, index) => {
+
+                                    return tree.getItem(value).path
+                                })
+                            } else if (ttItem[0].chart.canvas.id == "mychart8") {
+                                tooltipdefaultcheck = defaultcheckfor8
+
+                                let prefix = tree.getState().selected[0].slice(0, tree.getState().selected[0].indexOf("Item"))
+                                if (statefor8.selected[0].slice(0, statefor8.selected[0].indexOf("Item")) != prefix) {
+
+                                    statefor8.selected.forEach((item, index, arr) => {
+                                        arr[index] = prefix + item.substring(prefix.length)
+                                    })
+                                }
+                                selectedIndexes = statefor8.selected.map((value, index) => {
+
+                                    return tree.getItem(value).path
+                                })
+                            }
+
+
+
+                            let categoryarray = []
+                            let datasets = []
+                            let tempdataset = []
+                            let fullclicked = []
+
+
+                            for (let i of selectedIndexes) {
+                                if (tree.getItem(i).getAttribute("att") == "parent") {
+                                    categoryarray.push(tree.getItem(i).value)
+                                    fullclicked.push(tree.getItem(i).value)
+
+                                    if (tempdataset.length != 0) {
+                                        datasets.push([...tempdataset])
+                                        tempdataset = []
+                                    }
+
+                                }
+                                else {
+                                    if (categoryarray.indexOf(tree.getItem("" + parseInt(i)).value) == -1) {
+                                        categoryarray.push(tree.getItem("" + parseInt(i)).value)
+
+
+                                        if (tempdataset.length != 0) {
+                                            datasets.push([...tempdataset])
+                                            tempdataset = []
+                                        }
+                                        tempdataset.push(tree.getItem("" + i).value)
+                                    }
+                                    else {
+                                        tempdataset.push(tree.getItem("" + i).value)
+                                    }
+                                }
+
+
+                            }
+
+                            datasets.push([...tempdataset])
+                            // ...................
+                            let arr = []
+                            if (fullclicked.length == 0) {
+                                fullclicked.push(tooltipdefaultcheck)
+                            }
+
+                            for (let i = 0; i < categoryarray.length; i++) {
+                                if (categoryarray[i] != tooltipdefaultcheck && fullclicked.indexOf(categoryarray[i]) == -1) {
+                                    let label = ""
+                                    label += categoryarray[i].split("_").join(" ").toUpperCase() + ":"
+
+                                    for (let j = 0; j < datasets[i].length; j++) {
+                                        label += " " + datasets[i][j] + "->("
+                                        label += ttItem[0].dataset.label + " : "
+                                        let a = 0
+                                        data.forEach((value, index) => {
+                                            if (value[categoryarray[i]] == datasets[i][j]) {
+                                                let flag = true
+                                                for (let k = 0; k < datasets.length; k++) {
+                                                    if (datasets[k].indexOf("" + value[categoryarray[k]]) == -1 || value[tooltipdefaultcheck] != ttItem[0].label)
+                                                        flag = false
+                                                }
+                                                if (flag == true)
+                                                    a += value[ttItem[0].dataset.label.toLowerCase()]
+
+                                            }
+                                        })
+                                        label += a
+                                        label += ") "
+                                    }
+                                    arr.push(label)
+                                }
+                            }
+                            return [...arr]
+
+                        }
+                        else { return "" }
+
+                    }
+
+                    //default tooltip for all chart
+                    let defaulttooltip = {
+                        callbacks: {
+                            label: function (context) {
+
+                                let total = 0;
+                                for (let i = 1; i < context.chart.config._config.data.datasets.length; i++) {
+                                    total = total
+                                        + Number(context.chart.config._config.data.datasets[i].data[context.dataIndex])
+                                }
+
+                                let percentage = (Number(context.parsed.y) * 100 / total).toFixed(2);
+
+                                return context.dataset.label + " : " + context.parsed.y + ` out of ${total} (${percentage}%)`
+
+                            },
+                            footer: footerfortooltip
+
+                        },
+
+
+                    }
+                    //tooltip for pie chart
+                    let tooltipConfigPie = {
+                        callbacks: {
+                            title: (ttItem) => (ttItem[0].dataset.label),
+                            label: function (context) {
+
+                                let total = 0;
+                                for (let i = 1; i < context.chart.config._config.data.datasets.length; i++) {
+                                    total = total
+                                        + Number(context.chart.config._config.data.datasets[i].data[context.dataIndex])
+                                }
+
+                                let percentage = (Number(context.parsed) * 100 / total).toFixed(2);
+
+
+                                return context.label + " : " + context.parsed + ` out of ${total} (${percentage}%)`
+
+                            },
+                            footer: footerfortooltip
+                        }
+                    }
+                    //tool tip for bubble chart
+                    let tooltipConfigbubble = {
+                        callbacks: {
+                            title: function (context) {
+                                let x = context[0].formattedValue
+                                let z = x.split(",")
+                                let y = z[0].substring(1)
+                                return y
+                            },
+                            label: function (context) {
+                                return context.label + ":" + context.parsed.y
+
+                            },
+                        }
+                    }
+                    //labels for all chart
+                    let defaultlabels = {
+                        filter: function (item, chart) {
+                            if (item.hidden == true) return false
+                            return true;
+
+                        }
+                    }
+
+                    Chart.overrides[type = "pie"].plugins.tooltip = tooltipConfigPie;
+                    Chart.overrides[type = "bubble"].plugins.tooltip = tooltipConfigbubble
+
+                    //variables for the extra charts to be added by the user
+                    let myChart5
+                    let myChart6
+                    let myChart7
+                    let myChart8
+
+                    //adding listener on addition button to add the extra charts
+                    document.getElementById("addition-btn").addEventListener("click", () => {
+
+
+                        let numberofchartavailable = parseInt(document.getElementById("addition-btn").value)
+
+                        if (numberofchartavailable > 0) {
+
+                            let deletebtn = document.getElementById("delete-btn")
+                            deletebtn.style.display = "inline-block"
+                            deletebtn.value = parseInt(deletebtn.value) + 1
+                            numberofchartavailable -= 1
+                            let additionalgraphs = document.getElementById("addition-btn")
+                            additionalgraphs.value = numberofchartavailable
+
+                            let newchartcontainer = document.createElement("div");
+                            newchartcontainer.style.margin = "20 0 20"
+                            newchartcontainer.style.padding = "5px"
+                            newchartcontainer.style.height = "50%"
+                            newchartcontainer.setAttribute("class", "allchart newaddedchart")
+                            // newchartcontainer.style.height = document.getElementById("mychart1").style.height;
+                            newchartcontainer.style.width = "auto"
+                            // newchartcontainer.style.marginRight = "290px"
+                            newchartcontainer.style.border = "3px solid rgb(60, 75, 100)"
+                            // newchartcontainer.style.resize="vertical"
+                            //newchartcontainer.style.overflow = "auto"
+
+                            let newcanvas = document.createElement("canvas");
+                            newcanvas.setAttribute("class", "chartcanvas");
+
+                            newchartcontainer.appendChild(newcanvas);
+                            document.getElementById("mygrid").appendChild(newchartcontainer);
+
+                            let x
+                            let chartcontainers = document.getElementsByClassName("allchart");
+                            let idx = 0;
+                            for (container of chartcontainers) {
+                                idx++
+                                let bordercolor = container.style.border
+                                if (bordercolor == "4px solid yellow") {
+                                    switch (idx) {
+                                        case 1: {
+                                            x = myChart1;
+                                            break;
+                                        }
+                                        case 2: {
+                                            x = myChart2;
+                                            break;
+                                        }
+                                        case 3: {
+                                            x = myChart3;
+                                            break;
+                                        }
+                                        case 4: {
+                                            x = myChart4;
+                                            break;
+                                        }
+                                        case 5: {
+
+                                            x = myChart5;
+                                            break;
+                                        }
+                                        case 6: {
+                                            x = myChart6;
+                                            break;
+                                        }
+                                        case 7: {
+                                            x = myChart7;
+                                            break;
+                                        }
+                                        case 7: {
+                                            x = myChart8;
+                                            break;
+                                        }
+                                    }
+
+                                    break;
+                                }
+
+
+                            }
+
+                            let tool
+                            if (x.config.type != "pie") {
+
+                                tool = defaulttooltip
+
+
+                            }
+                            else tool = tooltipConfigPie
+
+
+                            let newaddedchart = new Chart(newcanvas, {
+                                type: x.config.type,
+                                data: {
+                                    labels: x.data.labels,
+                                    datasets: [{ ...x.data.datasets[0] }, { ...x.data.datasets[1] }, { ...x.data.datasets[2] }, { ...x.data.datasets[3] }]
+
+                                },
+                                options: {
+                                    responsive: true,
+                                    maintainAspectRatio: false,
+                                    scales: JSON.parse(JSON.stringify(x.options.scales)),
+                                    plugins: {
+                                        title: {
+                                            display: true,
+                                            text: x.options.plugins.title.text,
+                                            font: {
+                                                weight: 1000,
+                                                size: 18,
+                                            }
+                                        }, tooltip: tool,
+                                        legend: {
+                                            onClick: null,
+                                            labels: {
+                                                filter: function (item, chart) {
+                                                    if (item.hidden == true) return false
+                                                    return true;
+
+                                                },
+                                            }
+                                        }
+
+                                    },
+
+                                }
+                            })
+
+                            let datatoadd
+                            if (myChart5 == undefined) {
+                                myChart5 = newaddedchart
+                                statefor5 = tree.getState()
+
+                                datatoadd = {
+                                    "myChart5": {
+                                        type: myChart5.config.type,
+                                        data: JSON.parse(JSON.stringify(myChart5.data)),
+                                        options: JSON.parse(JSON.stringify(myChart5.options)),
+                                        state: JSON.parse(JSON.stringify(statefor5))
+                                    }
+                                }
+                                newcanvas.setAttribute("id", `mychart5`)
+                                if (typeof (x.options.plugins.title.text) != "string") {
+                                    defaultcheckfor5 = (x.options.plugins.title.text[0] + "").split(" ").join("_").toLocaleLowerCase()
+                                } else {
+                                    defaultcheckfor5 = (x.options.plugins.title.text + "").split(" ").join("_").toLocaleLowerCase()
+
+                                }
+                            }
+                            else if (myChart6 == undefined) {
+                                myChart6 = newaddedchart
+                                statefor6 = tree.getState()
+
+                                datatoadd = {
+                                    "myChart5": {
+                                        type: myChart5.config.type,
+                                        data: JSON.parse(JSON.stringify(myChart5.data)),
+                                        options: JSON.parse(JSON.stringify(myChart5.options)),
+                                        state: JSON.parse(JSON.stringify(statefor5))
+                                    },
+                                    "myChart6": {
+                                        type: myChart6.config.type,
+                                        data: JSON.parse(JSON.stringify(myChart6.data)),
+                                        options: JSON.parse(JSON.stringify(myChart6.options)),
+                                        state: JSON.parse(JSON.stringify(statefor6))
+                                    }
+
+                                }
+
+                                newcanvas.setAttribute("id", `mychart6`)
+                                if (typeof (x.options.plugins.title.text) != "string") {
+                                    defaultcheckfor6 = (x.options.plugins.title.text[0] + "").split(" ").join("_").toLocaleLowerCase()
+                                } else {
+                                    defaultcheckfor6 = (x.options.plugins.title.text + "").split(" ").join("_").toLocaleLowerCase()
+
+                                }
+
+                            }
+                            else if (myChart7 == undefined) {
+                                myChart7 = newaddedchart
+                                statefor7 = tree.getState()
+
+                                datatoadd = {
+                                    "myChart5": {
+                                        type: myChart5.config.type,
+                                        data: JSON.parse(JSON.stringify(myChart5.data)),
+                                        options: JSON.parse(JSON.stringify(myChart5.options)),
+                                        state: JSON.parse(JSON.stringify(statefor5))
+                                    },
+                                    "myChart6": {
+                                        type: myChart6.config.type,
+                                        data: JSON.parse(JSON.stringify(myChart6.data)),
+                                        options: JSON.parse(JSON.stringify(myChart6.options)),
+                                        state: JSON.parse(JSON.stringify(statefor6))
+
+                                    },
+                                    "myChart7": {
+                                        type: myChart7.config.type,
+                                        data: JSON.parse(JSON.stringify(myChart7.data)),
+                                        options: JSON.parse(JSON.stringify(myChart7.options)),
+                                        state: JSON.parse(JSON.stringify(statefor7))
+
+                                    }
+
+                                }
+
+                                newcanvas.setAttribute("id", `mychart7`)
+                                if (typeof (x.options.plugins.title.text) != "string") {
+                                    defaultcheckfor7 = (x.options.plugins.title.text[0] + "").split(" ").join("_").toLocaleLowerCase()
+                                } else {
+                                    defaultcheckfor7 = (x.options.plugins.title.text + "").split(" ").join("_").toLocaleLowerCase()
+
+                                }
+                            }
+                            else if (myChart8 == undefined) {
+                                myChart8 = newaddedchart
+                                statefor8 = tree.getState()
+
+                                datatoadd = {
+                                    "myChart5": {
+                                        type: myChart5.config.type,
+                                        data: JSON.parse(JSON.stringify(myChart5.data)),
+                                        options: JSON.parse(JSON.stringify(myChart5.options)),
+                                        state: JSON.parse(JSON.stringify(statefor5))
+                                    },
+                                    "myChart6": {
+                                        type: myChart6.config.type,
+                                        data: JSON.parse(JSON.stringify(myChart6.data)),
+                                        options: JSON.parse(JSON.stringify(myChart6.options)),
+                                        state: JSON.parse(JSON.stringify(statefor6))
+                                    },
+                                    "myChart7": {
+                                        type: myChart7.config.type,
+                                        data: JSON.parse(JSON.stringify(myChart7.data)),
+                                        options: JSON.parse(JSON.stringify(myChart7.options)),
+                                        state: JSON.parse(JSON.stringify(statefor7))
+                                    },
+                                    "myChart8": {
+                                        type: myChart8.config.type,
+                                        data: JSON.parse(JSON.stringify(myChart8.data)),
+                                        options: JSON.parse(JSON.stringify(myChart8.options)),
+                                        state: JSON.parse(JSON.stringify(statefor8))
+                                    }
+
+                                }
+                                newcanvas.setAttribute("id", `mychart8`)
+                                if (typeof (x.options.plugins.title.text) != "string") {
+                                    defaultcheckfor8 = (x.options.plugins.title.text[0] + "").split(" ").join("_").toLocaleLowerCase()
+                                } else {
+                                    defaultcheckfor8 = (x.options.plugins.title.text + "").split(" ").join("_").toLocaleLowerCase()
+
+                                }
+
+                            }
+
+                            document.getElementsByClassName("chartcanvas")[document.getElementsByClassName("chartcanvas").length - 1].click()
+                            $.ajaxSetup({
+                                beforeSend: function (xhr, settings) {
+                                    function getCookie(name) {
+                                        var cookieValue = null;
+                                        if (document.cookie && document.cookie != '') {
+                                            var cookies = document.cookie.split(';');
+                                            for (var i = 0; i < cookies.length; i++) {
+                                                var cookie = jQuery.trim(cookies[i]);
+                                                // Does this cookie string begin with the name we want?
+                                                if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                                                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                        return cookieValue;
+                                    }
+                                    if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
+                                        // Only send the token to relative URLs i.e. locally.
+                                        xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+                                    }
+                                }
+                            });
+
+                            $.ajax({
+                                url: "{% url 'extra_charts' %}",
+                                dataType: "json",
+                                type: "POST",
+                                contentType: "application/json; charset=utf-8",
+                                data: JSON.stringify(datatoadd)
+                                ,
+                                success: function (data) {
+                                }
+                            });
+
+                        }
+                        else {
+                            alert("Maximum No. of Charts Drawn")
+                        }
+                        document.getElementById("mygrid").scrollTo({ top: document.getElementById("mygrid").scrollHeight, behavior: 'smooth' })
+
+                    })
+
+                    //function for deleteion of a single chart
+                    function indivisualdel(index) {
+
+                        document.getElementsByClassName("chartcanvas")[index - 1].click()
+                        let seriesvalue = []
+                        $('#series input[type="checkbox"]:checked').each(function (index, checkbox) {
+                            if (checkbox.checked == true) {
+                                seriesvalue.push(checkbox.value)
+                            }
+                        });
+
+
+                        let charttype
+                        let charttypeid
+                        $('#chart-type-1 input:checked').each(function (index, checkbox) {
+                            if (checkbox.checked == true) {
+                                charttype = checkbox.value
+                                charttypeid = checkbox.id
+
+                            }
+                        });
+                        let newlabels = []
+                        let newdatasets = []
+                        let newtext
+
+                        switch (index) {
+                            case 6: statefor5 = JSON.parse(JSON.stringify(statefor6))
+                            myChart6.data.datasets.forEach(item => {
+                                    newdatasets.push(JSON.parse(JSON.stringify(item)))
+                                })
+                                newlabels=[...myChart6.data.labels]
+                                newtext=JSON.parse(JSON.stringify(myChart6.options.plugins.title.text))
+                                break;
+
+                            case 7: statefor6 = JSON.parse(JSON.stringify(statefor7))
+                            myChart7.data.datasets.forEach(item => {
+                                    newdatasets.push(JSON.parse(JSON.stringify(item)))
+                                })
+                                newlabels=[...myChart7.data.labels]
+                                newtext=JSON.parse(JSON.stringify(myChart7.options.plugins.title.text))
+                                break;
+
+                            case 8: statefor7 = JSON.parse(JSON.stringify(statefor8))
+                                myChart8.data.datasets.forEach(item => {
+                                    newdatasets.push(JSON.parse(JSON.stringify(item)))
+                                })
+                                newlabels=[...myChart8.data.labels]
+                                newtext=JSON.parse(JSON.stringify(myChart8.options.plugins.title.text))
+                                break;
+                        }
+
+
+
+
+
+                        document.getElementsByClassName("chartcanvas")[index - 2].click()
+
+
+                        $('#chart-type-1 input[type="radio"]').each(function (index, checkbox) {
+                            if (checkbox.value == charttype && checkbox.id == charttypeid) {
+                                checkbox.click();
+                            }
+
+                        })
+                        $('#series input[type="checkbox"]').each(function (index, checkbox) {
+                            if (seriesvalue.indexOf(checkbox.value) != -1) {
+                                if (checkbox.checked == false)
+                                    checkbox.click();
+                            }
+                            else {
+                                if (checkbox.checked == true) {
+                                    checkbox.click()
+                                }
+                            }
+
+                        })
+
+                        switch(index){
+                            case 6:
+                            myChart5.data.datasets = newdatasets
+                            myChart5.data.labels = [...newlabels]
+                            myChart5.options.plugins.title.text = newtext
+                            defaultcheckfor5=defaultcheckfor6
+                            defaultcheck=defaultcheckfor5
+                            myChart5.update()
+                                break;
+                            case 7:
+                            myChart6.data.datasets = newdatasets
+                            myChart6.data.labels = [...newlabels]
+                            myChart6.options.plugins.title.text = newtext
+                            defaultcheckfor6=defaultcheckfor7
+                            defaultcheck=defaultcheckfor6
+
+
+                            myChart6.update()
+                                break;
+                            case 8:
+                            myChart7.data.datasets = newdatasets
+                            myChart7.data.labels = [...newlabels]
+                            myChart7.options.plugins.title.text = newtext
+                            defaultcheckfor7=defaultcheckfor8
+                            defaultcheck=defaultcheckfor7
+
+
+                            myChart7.update()
+                                break;
+                        }
+
+                    }
+
+                    //listener to delete the added charts
+                    document.getElementById("delete-btn").addEventListener("click", () => {
+                        let delbtn = document.getElementById("delete-btn");
+                        let updatedModelJson = {}
+                        //         let chartvariable;
+                        let chartcontainers = [...document.getElementsByClassName("allchart")]
+                        let len = chartcontainers.length
+                        let flag = false;
+                        for (let i = 4; i < len; i++) {
+
+                            let bordercolor = chartcontainers[i].style.border
+                            if (bordercolor == "4px solid yellow") {
+                                flag = true;
+                                document.getElementById("addition-btn").value = parseInt(document.getElementById("addition-btn").value) + 1
+                                delbtn.value = parseInt(delbtn.value) - 1;
+
+                                if (i == 4) {
+
+                                    if (myChart6 != undefined) {
+                                        indivisualdel(6)
+                                        if (myChart7 != undefined) {
+                                            indivisualdel(7)
+                                            if (myChart8 != undefined) {
+                                                indivisualdel(8)
+                                                updatedModelJson = {
+                                                    "myChart5": {
+                                                        type: myChart6.config.type,
+                                                        data: JSON.parse(JSON.stringify(myChart6.data)),
+                                                        options: JSON.parse(JSON.stringify(myChart6.options)),
+                                                        state: JSON.parse(JSON.stringify(statefor6))
+                                                    },
+                                                    "myChart6": {
+                                                        type: myChart7.config.type,
+                                                        data: JSON.parse(JSON.stringify(myChart7.data)),
+                                                        options: JSON.parse(JSON.stringify(myChart7.options)),
+                                                        state: JSON.parse(JSON.stringify(statefor7))
+                                                    },
+                                                    "myChart7": {
+                                                        type: myChart8.config.type,
+                                                        data: JSON.parse(JSON.stringify(myChart8.data)),
+                                                        options: JSON.parse(JSON.stringify(myChart8.options)),
+                                                        state: JSON.parse(JSON.stringify(statefor8))
+                                                    }
+                                                }
+                                                myChart8 = undefined
+
+                                            }
+
+                                            else {
+                                                updatedModelJson = {
+                                                    "myChart5": {
+                                                        type: myChart6.config.type,
+                                                        data: JSON.parse(JSON.stringify(myChart6.data)),
+                                                        options: JSON.parse(JSON.stringify(myChart6.options)),
+                                                        state: JSON.parse(JSON.stringify(statefor6))
+                                                    },
+                                                    "myChart6": {
+                                                        type: myChart7.config.type,
+                                                        data: JSON.parse(JSON.stringify(myChart7.data)),
+                                                        options: JSON.parse(JSON.stringify(myChart7.options)),
+                                                        state: JSON.parse(JSON.stringify(statefor7))
+                                                    },
+                                                }
+                                                myChart7 = undefined
+
+                                            }
+                                        }
+
+                                        else {
+                                            updatedModelJson = {
+                                                "myChart5": {
+                                                    type: myChart6.config.type,
+                                                    data: JSON.parse(JSON.stringify(myChart6.data)),
+                                                    options: JSON.parse(JSON.stringify(myChart6.options)),
+                                                    state: JSON.parse(JSON.stringify(statefor6))
+                                                }
+                                            }
+                                            myChart6 = undefined
+
+                                        }
+                                    }
+
+                                    else {
+
+                                        updatedModelJson = {}
+                                        myChart5 = undefined
+
+
+                                    }
+                                }
+                                //if we are deleting sixth chart
+                                else if (i == 5) {
+                                    if (myChart7 != undefined) {
+                                        indivisualdel(7)
+
+
+
+                                        if (myChart8 != undefined) {
+
+                                            indivisualdel(8)
+
+
+                                            updatedModelJson = {
+                                                "myChart5": {
+                                                    type: myChart5.config.type,
+                                                    data: JSON.parse(JSON.stringify(myChart5.data)),
+                                                    options: JSON.parse(JSON.stringify(myChart5.options)),
+                                                    state: JSON.parse(JSON.stringify(statefor5))
+                                                },
+                                                "myChart6": {
+                                                    type: myChart7.config.type,
+                                                    data: JSON.parse(JSON.stringify(myChart7.data)),
+                                                    options: JSON.parse(JSON.stringify(myChart7.options)),
+                                                    state: JSON.parse(JSON.stringify(statefor7))
+                                                },
+                                                "myChart7": {
+                                                    type: myChart8.config.type,
+                                                    data: JSON.parse(JSON.stringify(myChart8.data)),
+                                                    options: JSON.parse(JSON.stringify(myChart8.options)),
+                                                    state: JSON.parse(JSON.stringify(statefor8))
+                                                }
+                                            }
+
+                                            myChart8 = undefined
+
+                                        }
+                                        else {
+                                            updatedModelJson = {
+                                                "myChart5": {
+                                                    type: myChart5.config.type,
+                                                    data: JSON.parse(JSON.stringify(myChart5.data)),
+                                                    options: JSON.parse(JSON.stringify(myChart5.options)),
+                                                    state: JSON.parse(JSON.stringify(statefor5))
+                                                },
+                                                "myChart6": {
+                                                    type: myChart7.config.type,
+                                                    data: JSON.parse(JSON.stringify(myChart7.data)),
+                                                    options: JSON.parse(JSON.stringify(myChart7.options)),
+                                                    state: JSON.parse(JSON.stringify(statefor7))
+                                                }
+
+                                            }
+                                            myChart7 = undefined
+
+                                        }
+                                    }
+                                    else {
+                                        updatedModelJson = {
+                                            "myChart5": {
+                                                type: myChart5.config.type,
+                                                data: JSON.parse(JSON.stringify(myChart5.data)),
+                                                options: JSON.parse(JSON.stringify(myChart5.options)),
+                                                state: JSON.parse(JSON.stringify(statefor5))
+                                            }
+                                        }
+                                        myChart6 = undefined
+
+                                    }
+                                }
+
+                                // if we are deleting seventh chart
+                                else if (i == 6) {
+
+                                    if (myChart8 != undefined) {
+                                        console.table(myChart7.data.labels)
+                                        indivisualdel(8)
+                                        console.table(myChart7.data.labels)
+                                        updatedModelJson = {
+                                            "myChart5": {
+                                                type: myChart5.config.type,
+                                                data: JSON.parse(JSON.stringify(myChart5.data)),
+                                                options: JSON.parse(JSON.stringify(myChart5.options)),
+                                                state: JSON.parse(JSON.stringify(statefor5))
+                                            },
+                                            "myChart6": {
+                                                type: myChart6.config.type,
+                                                data: JSON.parse(JSON.stringify(myChart6.data)),
+                                                options: JSON.parse(JSON.stringify(myChart6.options)),
+                                                state: JSON.parse(JSON.stringify(statefor6))
+                                            },
+                                            "myChart7": {
+                                                type: myChart8.config.type,
+                                                data: JSON.parse(JSON.stringify(myChart8.data)),
+                                                options: JSON.parse(JSON.stringify(myChart8.options)),
+                                                state: JSON.parse(JSON.stringify(statefor8))
+                                            }
+
+                                        }
+
+                                        myChart8 = undefined
+
+                                    }
+
+                                    else {
+                                        updatedModelJson = {
+                                            "myChart5": {
+                                                type: myChart5.config.type,
+                                                data: JSON.parse(JSON.stringify(myChart5.data)),
+                                                options: JSON.parse(JSON.stringify(myChart5.options)),
+                                                state: JSON.parse(JSON.stringify(statefor5))
+                                            },
+                                            "myChart6": {
+                                                type: myChart6.config.type,
+                                                data: JSON.parse(JSON.stringify(myChart6.data)),
+                                                options: JSON.parse(JSON.stringify(myChart6.options)),
+                                                state: JSON.parse(JSON.stringify(statefor6))
+                                            }
+
+                                        }
+                                        myChart7 = undefined
+                                    }
+
+                                }
+                                //if we are deleting eight chart
+                                else if (i == 7) {
+                                    updatedModelJson = {
+                                        "myChart5": {
+                                            type: myChart5.config.type,
+                                            data: JSON.parse(JSON.stringify(myChart5.data)),
+                                            options: JSON.parse(JSON.stringify(myChart5.options)),
+                                            state: JSON.parse(JSON.stringify(statefor5))
+                                        },
+                                        "myChart6": {
+                                            type: myChart6.config.type,
+                                            data: JSON.parse(JSON.stringify(myChart6.data)),
+                                            options: JSON.parse(JSON.stringify(myChart6.options)),
+                                            state: JSON.parse(JSON.stringify(statefor6))
+                                        },
+                                        "myChart7": {
+                                            type: myChart7.config.type,
+                                            data: JSON.parse(JSON.stringify(myChart7.data)),
+                                            options: JSON.parse(JSON.stringify(myChart7.options)),
+                                            state: JSON.parse(JSON.stringify(statefor7))
+                                        }
+
+                                    }
+                                    myChart8 = undefined
+                                }
+
+                                break;
+                            }
+
+
+                        }
+                        $.ajaxSetup({
+                            beforeSend: function (xhr, settings) {
+                                function getCookie(name) {
+                                    var cookieValue = null;
+                                    if (document.cookie && document.cookie != '') {
+                                        var cookies = document.cookie.split(';');
+                                        for (var i = 0; i < cookies.length; i++) {
+                                            var cookie = jQuery.trim(cookies[i]);
+                                            // Does this cookie string begin with the name we want?
+                                            if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                                                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                                                break;
+                                            }
+                                        }
+                                    }
+                                    return cookieValue;
+                                }
+                                if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
+                                    // Only send the token to relative URLs i.e. locally.
+                                    xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+                                }
+                            }
+                        });
+
+                        $.ajax({
+                            url: "{% url 'extra_charts' %}",
+                            dataType: "json",
+                            type: "POST",
+                            contentType: "application/json; charset=utf-8",
+                            data: JSON.stringify(updatedModelJson)
+                            ,
+                            success: function (data) {
+                            }
+                        });
+
+
+                        if (flag == false) {
+                            alert("This Chart cannot be deleted")
+                        }
+                        else {
+                            chartcontainers[chartcontainers.length - 1].remove()
+                            document.getElementsByClassName("chartcanvas")[document.getElementsByClassName("chartcanvas").length - 1].click()
+
+                        }
+
+                        if (delbtn.value == 0) {
+                            delbtn.style.display = "none"
+                        }
+
+                    })
+                    //---------configure the graphs---------------
+                    const ctx1 = document.getElementById('mychart1');
+                    const myChart1 = new Chart(ctx1, {
+                        type: 'bar',
+                        data: {
+                            labels: datatable[2][0],
+                            datasets: [
+                                { label: "DURATION", backgroundColor: Backgroundcolors[0], borderColor: BorderColor[0], borderWidth: 2, data: datatable[2][1], hidden: true },
+                                { label: "PASSED", backgroundColor: Backgroundcolors[1], borderColor: BorderColor[1], borderWidth: 2, data: datatable[2][2], hidden: false },
+                                { label: "FAILED", backgroundColor: Backgroundcolors[2], borderColor: BorderColor[2], borderWidth: 2, data: datatable[2][3], hidden: false },
+                                { label: "ERROR", backgroundColor: Backgroundcolors[3], borderColor: BorderColor[3], borderWidth: 2, data: datatable[2][4], hidden: false }
+                            ]
+                        }, options: {
+
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                x: {
+                                    stacked: false,
+                                    display: true,
+                                },
+                                y: {
+                                    stacked: false,
+                                    display: true,
+                                }
+                            },
+
+                            plugins: {
+                                title: {
+                                    display: true,
+                                    text: "TESTER NAME",
+                                    font: {
+                                        weight: 1000,
+                                        size: 18,
+                                    }
+                                },
+                                tooltip: defaulttooltip,
+                                legend: {
+                                    onClick: null,
+                                    labels: {
+                                        filter: function (item, chart) {
+                                            if (item.hidden == true) return false
+                                            return true;
+
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    })
+                    //function to update the added charts state in the database
+                    function updatestoredchart() {
+                        let datatoupdate
+                        if (myChart8 != undefined) {
+                            datatoupdate = {
+                                "myChart5": {
+                                    type: myChart5.config.type,
+                                    data: JSON.parse(JSON.stringify(myChart5.data)),
+                                    options: JSON.parse(JSON.stringify(myChart5.options)),
+                                    state: JSON.parse(JSON.stringify(statefor5))
+                                },
+                                "myChart6": {
+                                    type: myChart6.config.type,
+                                    data: JSON.parse(JSON.stringify(myChart6.data)),
+                                    options: JSON.parse(JSON.stringify(myChart6.options)),
+                                    state: JSON.parse(JSON.stringify(statefor6))
+
+                                },
+                                "myChart7": {
+                                    type: myChart7.config.type,
+                                    data: JSON.parse(JSON.stringify(myChart7.data)),
+                                    options: JSON.parse(JSON.stringify(myChart7.options)),
+                                    state: JSON.parse(JSON.stringify(statefor7))
+
+                                },
+                                "myChart8": {
+                                    type: myChart8.config.type,
+                                    data: JSON.parse(JSON.stringify(myChart8.data)),
+                                    options: JSON.parse(JSON.stringify(myChart8.options)),
+                                    state: JSON.parse(JSON.stringify(statefor8))
+
+                                }
+
+                            }
+                        } else if (myChart7 != undefined) {
+                            datatoupdate = {
+                                "myChart5": {
+                                    type: myChart5.config.type,
+                                    data: JSON.parse(JSON.stringify(myChart5.data)),
+                                    options: JSON.parse(JSON.stringify(myChart5.options)),
+                                    state: JSON.parse(JSON.stringify(statefor5))
+
+                                },
+                                "myChart6": {
+                                    type: myChart6.config.type,
+                                    data: JSON.parse(JSON.stringify(myChart6.data)),
+                                    options: JSON.parse(JSON.stringify(myChart6.options)),
+                                    state: JSON.parse(JSON.stringify(statefor6))
+
+                                },
+                                "myChart7": {
+                                    type: myChart7.config.type,
+                                    data: JSON.parse(JSON.stringify(myChart7.data)),
+                                    options: JSON.parse(JSON.stringify(myChart7.options)),
+                                    state: JSON.parse(JSON.stringify(statefor7))
+
+                                }
+
+                            }
+                        } else if (myChart6 != undefined) {
+                            datatoupdate = {
+                                "myChart5": {
+                                    type: myChart5.config.type,
+                                    data: JSON.parse(JSON.stringify(myChart5.data)),
+                                    options: JSON.parse(JSON.stringify(myChart5.options)),
+                                    state: JSON.parse(JSON.stringify(statefor5))
+
+                                },
+                                "myChart6": {
+                                    type: myChart6.config.type,
+                                    data: JSON.parse(JSON.stringify(myChart6.data)),
+                                    options: JSON.parse(JSON.stringify(myChart6.options)),
+                                    state: JSON.parse(JSON.stringify(statefor6))
+
+                                }
+
+                            }
+                        } else if (myChart5 != undefined) {
+                            datatoupdate = {
+                                "myChart5": {
+                                    type: myChart5.config.type,
+                                    data: JSON.parse(JSON.stringify(myChart5.data)),
+                                    options: JSON.parse(JSON.stringify(myChart5.options)),
+                                    state: JSON.parse(JSON.stringify(statefor5))
+
+                                }
+
+                            }
+
+                        }
+
+                        $.ajaxSetup({
+                            beforeSend: function (xhr, settings) {
+                                function getCookie(name) {
+                                    var cookieValue = null;
+                                    if (document.cookie && document.cookie != '') {
+                                        var cookies = document.cookie.split(';');
+                                        for (var i = 0; i < cookies.length; i++) {
+                                            var cookie = jQuery.trim(cookies[i]);
+                                            // Does this cookie string begin with the name we want?
+                                            if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                                                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                                                break;
+                                            }
+                                        }
+                                    }
+                                    return cookieValue;
+                                }
+                                if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
+                                    // Only send the token to relative URLs i.e. locally.
+                                    xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+                                }
+                            }
+                        });
+
+                        $.ajax({
+                            url: "{% url 'extra_charts' %}",
+                            dataType: "json",
+                            type: "POST",
+                            contentType: "application/json; charset=utf-8",
+                            data: JSON.stringify(datatoupdate)
+                            ,
+                            success: function (data) {
+                            }
+                        });
+                    }
+
+                    function changeSeriesFor1() {
+                        let selected = [];
+                        let unselected = [];
+                        $('#series input:checked').each(function () {
+                            selected.push($(this).attr('value'))
+                        });
+
+                        for (let i = 0; i < 4; i++) {
+                            if (!selected.includes("" + i)) unselected.push(i);
+                        }
+
+                        let chartcontainers = document.getElementsByClassName("allchart");
+                        idx = 0;
+                        let chartvariable
+                        for (container of chartcontainers) {
+                            idx++;
+                            let bordercolor = container.style.border
+                            if (bordercolor == "4px solid yellow") {
+                                chartvariable = `myChart${idx}`
+                                break;
+
+                            }
+
+                        }
+                        let chartname = eval(chartvariable)
+
+                        for (key in selected) {
+                            chartname.show(selected[key])
+                            chartname.data.datasets[selected[key]].hidden = false
+
+
+                        }
+                        for (key in unselected) {
+                            chartname.hide(unselected[key])
+                            chartname.data.datasets[unselected[key]].hidden = true
+
+                        }
+                        updatestoredchart()
+                    }
+                    var eventForSeries1 = document.getElementById("series").addEventListener("change", () => {
+                        changeSeriesFor1()
+
+                    })
+
+                    //function to change the chart type
+                    document.getElementById("chart-type-1").addEventListener('click', (e) => {
+
+                        let chartcontainers = document.getElementsByClassName("allchart");
+                        idx = 0;
+                        let chartvariable
+                        for (container of chartcontainers) {
+                            idx++;
+                            let bordercolor = container.style.border
+                            if (bordercolor == "4px solid yellow") {
+                                chartvariable = `myChart${idx}`
+                                break;
+                            }
+
+                        }
+                        let chartname = eval(chartvariable)
+
+
+                        chartname.options.interaction.intersect = true
+                        chartname.config.type = e.target.value
+                        chartname.options.animation.duration = 50;
+                        if (e.target.value == "pie") {
+
+                            chartname.data.datasets.forEach(function (item) {
+                                item.backgroundColor = PieChartColors;
+                                item.borderColor = "white"
+                                item.borderWidth = 0
+                            })
+
+                            chartname.options.scales.x.display = false
+                            chartname.options.scales.y.display = false
+                            chartname.options.plugins.tooltip = tooltipConfigPie
+                            $('#series input[type="checkbox"]').each(function (index, checkbox) {
+
+                                if (index != 1) {
+                                    checkbox.checked = false;
+                                }
+                                else {
+                                    checkbox.checked = true;
+                                }
+                            });
+                        }
+                        else {
+                            chartname.options.plugins.tooltip = defaulttooltip
+                            chartname.data.datasets.forEach(function (item, index) {
+
+                                item.backgroundColor = Backgroundcolors[index]
+                                item.borderColor = BorderColor[index]
+                                item.fill = false
+                                item.borderWidth = 3
+                            })
+                            if (defaultcheck!="test_case" || typeof (chartname.data.labels[0]) == "number")
+                                chartname.options.scales.x.display = true
+                            chartname.options.scales.y.display = true
+                            if (e.target.value == "bar" && e.target.id == "stacked-1") {
+
+                                chartname.options.scales.x.stacked = true
+                                chartname.options.scales.y.stacked = true
+                            }
+                            else if (e.target.value == "line" && e.target.id == "area1") {
+                                chartname.options.scales.x.stacked = false
+                                chartname.options.scales.y.stacked = false
+                                chartname.options.interaction.intersect = false
+                                chartname.data.datasets.forEach(function (item, index) {
+                                    item.backgroundColor = BackgroundcolorsForAreaChart[index]
+                                    item.fill = true
+
+                                })
+
+                            }
+
+                            else {
+
+                                chartname.options.scales.x.stacked = false
+                                chartname.options.scales.y.stacked = false
+                            }
+                        }
+
+                        chartname.update()
+
+
+                        chartname.options.animation.duration = 1000
+                        changeSeriesFor1()
+                    })
+
+
+
+                    // function generateoptions() {
+
+                    //     let labelforchart1 = getSelectedCategoryLabels();
+                    //     let select = document.getElementById("filter")
+                    //     select.innerHTML = "";
+                    //     for (let i = 0; i < labelforchart1.length; i++) {
+                    //         $("#filter").append(new Option("" + labelforchart1[i], i));
+                    //         $('#filter').selectpicker('refresh');
+                    //     }
+
+
+
+
+                    //     updatestoredchart()
+
+
+                    // }
+
+                    // function getSelectedCategoryLabels() {
+                    //     let listoflabels = document.getElementsByName("category_for_1");
+                    //     for (let i = 0; i < listoflabels.length; i++) {
+                    //         if (listoflabels[i].checked) return datatable[listoflabels[i].value][0]
+                    //     }
+                    // }
+
+                    // function getCategoryindex() {
+                    //     let listoflabels = document.getElementsByName("category_for_1");
+                    //     for (let i = 0; i < listoflabels.length; i++) {
+                    //         if (listoflabels[i].checked) return listoflabels[i].value
+                    //     }
+                    // }
+                    // generateoptions()
+
+                    // document.getElementById("filter").addEventListener("change", () => {
+
+
+                    //     let chartcontainers = document.getElementsByClassName("allchart");
+                    //     idx = 0;
+                    //     let chartvariable
+                    //     for (container of chartcontainers) {
+                    //         idx++;
+                    //         let bordercolor = container.style.border
+                    //         if (bordercolor == "4px solid yellow") {
+                    //             chartvariable = `myChart${idx}`
+                    //             break;
+                    //         }
+
+                    //     }
+                    //     let chartname = eval(chartvariable)
+
+
+
+                    //     var tofilter = [...document.getElementById("filter").options].filter(option => option.selected)
+                    //         .map(option => option.value);
+
+
+                    //     var dataIndex = getCategoryindex();
+                    //     var newLabel = [...datatable[dataIndex][0]];
+                    //     chartname.data.labels = newLabel
+
+                    //     var newDuration = [...datatable[dataIndex][1]]
+                    //     chartname.data.datasets[0].data = newDuration
+
+                    //     var newPassed = [...datatable[dataIndex][2]]
+                    //     chartname.data.datasets[1].data = newPassed
+
+                    //     var newFailed = [...datatable[dataIndex][3]]
+                    //     chartname.data.datasets[2].data = newFailed
+
+                    //     var newError = [...datatable[dataIndex][4]]
+                    //     chartname.data.datasets[3].data = newError
+
+                    //     if (tofilter.length == 0) {
+                    //         chartname.update()
+                    //     }
+                    //     else {
+
+                    //         chartname.data.datasets.forEach((item) => {
+                    //             let x = [];
+                    //             for (key in tofilter) {
+                    //                 x.push(item.data[tofilter[key]])
+                    //             }
+                    //             item.data = x
+
+                    //         })
+                    //         let newlabels = [];
+                    //         for (key in tofilter) {
+                    //             newlabels.push(chartname.data.labels[tofilter[key]])
+                    //         }
+                    //         chartname.data.labels = newlabels
+
+                    //         chartname.update();
+                    //     }
+                    // })
+
+
+
+
+
+                    //------------------------------------------------------------------------------------------------------------------
+
+                    const ctx2 = document.getElementById('mychart2');
+                    const myChart2 = new Chart(ctx2, {
+                        type: 'bar',
+                        data: {
+                            labels: datatable[16][0],
+                            datasets: [
+                                { label: "DURATION", backgroundColor: Backgroundcolors[0], borderColor: BorderColor[0], borderWidth: 3, data: datatable[18][1], hidden: true, },
+                                { label: "PASSED", backgroundColor: Backgroundcolors[1], borderColor: BorderColor[1], borderWidth: 3, data: datatable[18][2], hidden: false },
+                                { label: "FAILED", backgroundColor: Backgroundcolors[2], borderColor: BorderColor[2], borderWidth: 3, data: datatable[18][3], hidden: false },
+                                { label: "ERROR", backgroundColor: Backgroundcolors[3], borderColor: BorderColor[3], borderWidth: 3, data: datatable[18][4], hidden: false }
+                            ]
+                        }, options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            interaction: {
+                                intersect: true
+                            },
+                            scales: {
+                                x: {
+                                    stacked: true,
+                                    display: true,
+                                },
+                                y: {
+                                    stacked: true,
+                                    display: true,
+                                }
+                            },
+
+                            plugins: {
+                                title: {
+                                    display: true,
+                                    text: "BAND",
+                                    font: {
+                                        weight: 1000,
+                                        size: 18,
+                                    }
+
+                                },
+                                tooltip: defaulttooltip,
+                                legend: {
+                                    onClick: null,
+                                    labels: {
+                                        filter: function (item, chart) {
+                                            if (item.hidden == true) return false
+                                            return true;
+
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    })
+
+
+                    //------------------------------------------------------------------------------------------------------------------
+                    const ctx3 = document.getElementById('mychart3');
+                    const myChart3 = new Chart(ctx3, {
+                        type: 'bar',
+                        data: {
+                            labels: datatable[17][0],
+                            datasets: [
+                                { label: "DURATION", backgroundColor: PieChartColors, borderColor: "white", borderWidth: 0, data: datatable[17][1], hidden: true },
+                                { label: "PASSED", backgroundColor: PieChartColors, borderColor: "white", borderWidth: 0, data: datatable[17][2], hidden: false },
+                                { label: "FAILED", backgroundColor: PieChartColors, borderColor: "white", borderWidth: 0, data: datatable[17][3], hidden: true },
+                                { label: "ERROR", backgroundColor: PieChartColors, borderColor: "white", borderWidth: 0, data: datatable[17][4], hidden: true }
+                            ]
+                        }, options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            interaction: {
+                                intersect: true
+                            },
+                            scales: {
+                                x: {
+                                    display: false,
+                                    stacked: false,
+                                },
+                                y: {
+                                    display: false,
+                                    stacked: false,
+                                }
+                            },
+                            plugins: {
+                                title: {
+                                    display: true,
+                                    text: "SECURITY",
+                                    font: {
+                                        weight: 1000,
+                                        size: 18,
+                                    }
+
+                                },
+                                tooltip: tooltipConfigPie,
+                                legend: {
+                                    onClick: null,
+                                    labels: {
+                                        filter: function (item, chart) {
+                                            if (item.hidden == true) return false
+                                            return true;
+
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    })
+                    myChart3.config.type = "pie"
+                    myChart3.update()
+                    //----------------------------------------------------------------------------------------------------------
+
+                    const ctx4 = document.getElementById('mychart4');
+                    const myChart4 = new Chart(ctx4, {
+                        type: 'bar',
+                        data: {
+                            labels: datatable[5][0],
+                            datasets: [
+                                { label: "DURATION", backgroundColor: Backgroundcolors[0], borderColor: BorderColor[0], borderWidth: 3, data: datatable[5][1], hidden: true },
+                                { label: "PASSED", backgroundColor: Backgroundcolors[1], borderColor: BorderColor[1], borderWidth: 3, data: datatable[5][2], hidden: false },
+                                { label: "FAILED", backgroundColor: Backgroundcolors[2], borderColor: BorderColor[2], borderWidth: 3, data: datatable[5][3], hidden: false },
+                                { label: "ERROR", backgroundColor: Backgroundcolors[3], borderColor: BorderColor[3], borderWidth: 3, data: datatable[5][4], hidden: false }
+                            ]
+                        }, options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                x: {
+                                    stacked: true,
+                                    display: true,
+                                },
+                                y: {
+                                    stacked: true,
+                                    display: true,
+                                }
+                            },
+                            plugins: {
+                                title: {
+                                    display: true,
+                                    text: "TESTPLAN",
+                                    font: {
+                                        weight: 1000,
+                                        size: 18,
+                                    }
+                                },
+                                tooltip: defaulttooltip,
+                                legend: {
+                                    onClick: null,
+                                    labels: {
+                                        filter: function (item, chart) {
+                                            if (item.hidden == true) return false
+                                            return true;
+
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    })
+
+                    //variable to store the state of smart tree for each chart
+                    let statefor1
+                    let statefor2
+                    let statefor3
+                    let statefor4
+                    let statefor5
+                    let statefor6
+                    let statefor7
+                    let statefor8
+
+
+                    //function if the state of smart tree for a particular chart is undefined
+                    function changeForFirstTime(chartname, category, tree) {
+
+                        const group = document.querySelectorAll('smart-tree-items-group')
+                        let groupitem;
+                        let categoryarray = [...chartname.data.labels]
+
+                        for (let i = 0; i < group.length; i++) {
+                            if (group[i].value == category) {
+                                tree.select(i)
+                                break;
+                            }
+                        }
+                        let selected = tree.selectedIndexes
+                        tree.collapseAll(true)
+                        tree.clearSelection()
+                        tree.collapseAll(false)
+                        for (let i = 1; i < selected.length; i++) {
+                            if (categoryarray.indexOf(tree.getItem(selected[i]).value) == -1) {
+                                tree.unselect(+selected[i])
+                            } else tree.select(+selected[i])
+                        }
+                    }
+
+
+                    //-------------listening to change in charttobe modified----------------------------------------------------------- 
+                    let outer = document.getElementById("section").addEventListener("click", (e) => {
+
+                        if (e.target.classList.contains('chartcanvas')) {
+                            clickevent = false
+
+                            let chartcontainers = document.getElementsByClassName("allchart");
+                            let idx = 0;
+                            for (container of chartcontainers) {
+                                idx++
+                                if (container.contains(e.target)) {
+                                    container.style.border = "4px solid yellow"
+                                }
+                                else {
+                                    container.style.border = "4px solid rgb(60,75,100)"
+                                }
+                            }
+
+
+
+                            let chartdiv = document.getElementsByClassName("allchart");
+                            idx = 0;
+                            let chartvariable
+                            let defaultcheckvar
+                            for (container of chartdiv) {
+                                idx++;
+                                let bordercolor = container.style.border
+                                if (bordercolor == "4px solid yellow") {
+                                    chartvariable = `myChart${idx}`
+                                    defaultcheckvar = `defaultcheckfor${idx}`
+                                    break;
+                                }
+                            }
+                            let chartname = eval(chartvariable)
+                            let defaultcheckname = eval(defaultcheckvar)
+                            let charttype = chartname.config.type;
+                            let chartcategory = chartname.options.plugins.title.text[0]
+                            let chartseries = [];
+
+
+                            for (seriesidx in chartname.data.datasets) {
+                                if (chartname.data.datasets[seriesidx].hidden == false) {
+                                    chartseries.push(eval(seriesidx))
+                                }
+                            }
+
+                            $('#series input[type="checkbox"]').each(function (index, checkbox) {
+                                if (chartseries.indexOf(index) != -1) {
+                                    checkbox.checked = true;
+                                }
+                                else {
+                                    checkbox.checked = false;
+                                }
+                            });
+
+                            $('#chart-type-1 input[type="radio"]').each(function (index, radio) {
+
+                                if (radio.value == charttype) {
+
+                                    if (radio.value == "pie") radio.checked = true
+                                    else if (radio.value == "bubble") radio.checked = true
+                                    else if (radio.value == "bar" && chartname.options.scales.x.stacked == false && index == 0) radio.checked = true
+                                    else if (radio.value == "bar" && chartname.options.scales.x.stacked == true && index == 3) radio.checked = true
+                                    else if (radio.value == "line" && chartname.data.datasets[0].fill == false && index == 4) radio.checked = true
+                                    else if (radio.value == "line" && chartname.data.datasets[0].fill && index == 2) radio.checked = true
+
+
+
+                                }
+                                else radio.checked = false
+                            });
+
+
+                            const tree = document.querySelector('smart-tree')
+                            let category = chartname.options.plugins.title.text
+                            if (typeof (category) == "string") {
+                                category = category.split(" ").join("_").toLowerCase()
+                            }
+                            else {
+                                category = category[0].split(" ").join("_").toLowerCase()
+                            }
+                            let prefix = tree.getItem(0).getAttribute("id").slice(0, tree.getItem(0).getAttribute("id").indexOf("Item"))
+
+                            //let prefix = tree.getState().selected[0].slice(0, tree.getState().selected[0].indexOf("Item"))
+
+
+                            if (defaultcheckname != undefined) {
+                                defaultcheck = defaultcheckname
+                            } else {
+                                switch (defaultcheckvar) {
+                                    case "defaultcheckfor5": defaultcheckfor5 = category;
+                                        break;
+                                    case "defaultcheckfor6": defaultcheckfor6 = category;
+                                        break;
+                                    case "defaultcheckfor7": defaultcheckfor7 = category;
+                                        break;
+                                    case "defaultcheckfor8": defaultcheckfor8 = category;
+                                        break;
+                                }
+                                defaultcheck = category
+                            }
+
+
+                            if (chartvariable == "myChart1") {
+                                if (statefor1 != undefined) {
+                                    tree.loadState(statefor1)
+                                }
+                                else {
+                                    changeForFirstTime(chartname, category, tree)
+                                }
+
+                            } else if (chartvariable == "myChart2") {
+                                if (statefor2 != undefined) {
+                                    tree.loadState(statefor2)
+                                }
+                                else {
+                                    changeForFirstTime(chartname, category, tree)
+                                }
+                            } else if (chartvariable == "myChart3") {
+                                if (statefor3 != undefined) {
+                                    tree.loadState(statefor3)
+                                }
+                                else {
+                                    changeForFirstTime(chartname, category, tree)
+                                }
+                            } else if (chartvariable == "myChart4") {
+                                if (statefor4 != undefined) {
+                                    tree.loadState(statefor4)
+                                }
+                                else {
+                                    changeForFirstTime(chartname, category, tree)
+                                }
+                            } else if (chartvariable == "myChart5") {
+                                if (statefor5 != undefined && statefor5.selected.length != 0) {
+
+                                    if (statefor5.selected[0].slice(0, statefor5.selected[0].indexOf("Item")) != prefix) {
+
+                                        statefor5.selected.forEach((item, index, arr) => {
+                                            arr[index] = prefix + item.substring(prefix.length)
+                                        })
+                                    }
+                                    tree.loadState(statefor5)
+                                }
+                                else {
+                                    changeForFirstTime(chartname, category, tree)
+                                }
+                            }
+                            else if (chartvariable == "myChart6") {
+                                if (statefor6 != undefined && statefor6.selected.length != 0) {
+                                    if (statefor6.selected[0].slice(0, statefor6.selected[0].indexOf("Item")) != prefix) {
+
+                                        statefor6.selected.forEach((item, index, arr) => {
+                                            arr[index] = prefix + item.substring(prefix.length)
+                                        })
+                                    }
+                                    tree.loadState(statefor6)
+                                }
+                                else {
+                                    changeForFirstTime(chartname, category, tree)
+                                }
+                            }
+                            else if (chartvariable == "myChart7") {
+                                if (statefor7 != undefined && statefor7.selected.length != 0) {
+                                    if (statefor7.selected[0].slice(0, statefor7.selected[0].indexOf("Item")) != prefix) {
+
+                                        statefor7.selected.forEach((item, index, arr) => {
+                                            arr[index] = prefix + item.substring(prefix.length)
+                                        })
+                                    }
+                                    tree.loadState(statefor7)
+                                }
+                                else {
+                                    changeForFirstTime(chartname, category, tree)
+                                }
+                            }
+                            else if (chartvariable == "myChart8") {
+                                if (statefor8 != undefined && statefor8.selected.length != 0) {
+                                    if (statefor8.selected[0].slice(0, statefor8.selected[0].indexOf("Item")) != prefix) {
+
+                                        statefor8.selected.forEach((item, index, arr) => {
+                                            arr[index] = prefix + item.substring(prefix.length)
+                                        })
+                                    }
+                                    tree.loadState(statefor8)
+                                }
+                                else {
+                                    changeForFirstTime(chartname, category, tree)
+                                }
+                            }
+
+                        }
+
+                        clickevent = true
+                    })
+
+                    $.ajax({
+                        url: "/extra_charts/",
+                        dataType: "json",
+                        type: "GET",
+                        contentType: "application/json; charset=utf-8",
+                        success: function (data) {
+                            if (data.myChart5 != null) {
+
+                                let numberofchartavailable = parseInt(document.getElementById("addition-btn").value)
+                                let deletebtn = document.getElementById("delete-btn")
+                                deletebtn.style.display = "inline-block"
+                                deletebtn.value = parseInt(deletebtn.value) + 1
+                                numberofchartavailable -= 1
+                                let additionalgraphs = document.getElementById("addition-btn")
+                                additionalgraphs.value = numberofchartavailable
+
+                                let newchartcontainer = document.createElement("div");
+                                newchartcontainer.style.margin = "20 0 20"
+                                newchartcontainer.style.padding = "5px"
+                                newchartcontainer.style.height = "50%"
+                                newchartcontainer.setAttribute("class", "allchart newaddedchart")
+                                // newchartcontainer.style.height = document.getElementById("mychart1").style.height;
+                                newchartcontainer.style.width = "auto"
+                                //newchartcontainer.style.marginRight = "290px"
+                                newchartcontainer.style.border = "3px solid rgb(60, 75, 100)"
+                                // newchartcontainer.style.resize="vertical"
+                                //newchartcontainer.style.overflow = "auto"
+
+                                let newcanvas = document.createElement("canvas");
+                                newcanvas.setAttribute("class", "chartcanvas")
+                                newcanvas.setAttribute("id", `mychart5`)
+
+                                newchartcontainer.appendChild(newcanvas);
+                                document.getElementById("mygrid").appendChild(newchartcontainer);
+
+                                myChart5 = new Chart(newcanvas, {
+                                    type: data.myChart5.type,
+                                    data: data.myChart5.data,
+                                    options: data.myChart5.options
+                                })
+                                if (myChart5.config.type == "pie") myChart5.options.plugins.tooltip = tooltipConfigPie
+                                else myChart5.options.plugins.tooltip = defaulttooltip
+                                myChart5.options.plugins.legend.labels = defaultlabels
+                                myChart5.update()
+                                statefor5 = data.myChart5.state
+                                defaultcheckfor5 = (myChart5.options.plugins.title.text[0] + "").split(" ").join("_").toLocaleLowerCase()
+
+                            }
+                            if (data.myChart6 != null) {
+
+                                let numberofchartavailable = parseInt(document.getElementById("addition-btn").value)
+                                let deletebtn = document.getElementById("delete-btn")
+                                deletebtn.style.display = "inline-block"
+                                deletebtn.value = parseInt(deletebtn.value) + 1
+                                numberofchartavailable -= 1
+                                let additionalgraphs = document.getElementById("addition-btn")
+                                additionalgraphs.value = numberofchartavailable
+
+                                let newchartcontainer = document.createElement("div");
+                                newchartcontainer.style.margin = "20 0 20"
+                                newchartcontainer.style.padding = "5px"
+                                newchartcontainer.style.height = "50%"
+                                newchartcontainer.setAttribute("class", "allchart newaddedchart")
+                                // newchartcontainer.style.height = document.getElementById("mychart1").style.height;
+                                newchartcontainer.style.width = "auto"
+                                //newchartcontainer.style.marginRight = "290px"
+                                newchartcontainer.style.border = "3px solid rgb(60, 75, 100)"
+                                // newchartcontainer.style.resize="vertical"
+                                //newchartcontainer.style.overflow = "auto"
+
+                                let newcanvas = document.createElement("canvas");
+                                newcanvas.setAttribute("class", "chartcanvas")
+                                newcanvas.setAttribute("id", `mychart6`)
+
+                                newchartcontainer.appendChild(newcanvas);
+                                document.getElementById("mygrid").appendChild(newchartcontainer);
+
+                                myChart6 = new Chart(newcanvas, {
+                                    type: data.myChart6.type,
+                                    data: data.myChart6.data,
+                                    options: data.myChart6.options
+                                })
+                                if (myChart6.config.type == "pie") myChart6.options.plugins.tooltip = tooltipConfigPie
+                                else myChart6.options.plugins.tooltip = defaulttooltip
+                                myChart6.options.plugins.legend.labels = defaultlabels
+                                myChart6.update()
+                                statefor6 = data.myChart6.state
+                                defaultcheckfor6 = (myChart6.options.plugins.title.text[0] + "").split(" ").join("_").toLocaleLowerCase()
+
+                            }
+                            if (data.myChart7 != null) {
+
+                                let numberofchartavailable = parseInt(document.getElementById("addition-btn").value)
+                                let deletebtn = document.getElementById("delete-btn")
+                                deletebtn.style.display = "inline-block"
+                                deletebtn.value = parseInt(deletebtn.value) + 1
+                                numberofchartavailable -= 1
+                                let additionalgraphs = document.getElementById("addition-btn")
+                                additionalgraphs.value = numberofchartavailable
+
+                                let newchartcontainer = document.createElement("div");
+                                newchartcontainer.style.margin = "20 0 20"
+                                newchartcontainer.style.padding = "5px"
+                                newchartcontainer.style.height = "50%"
+                                newchartcontainer.setAttribute("class", "allchart newaddedchart")
+                                // newchartcontainer.style.height = document.getElementById("mychart1").style.height;
+                                newchartcontainer.style.width = "auto"
+                                //newchartcontainer.style.marginRight = "290px"
+                                newchartcontainer.style.border = "3px solid rgb(60, 75, 100)"
+                                // newchartcontainer.style.resize="vertical"
+                                //newchartcontainer.style.overflow = "auto"
+
+                                let newcanvas = document.createElement("canvas");
+                                newcanvas.setAttribute("class", "chartcanvas")
+                                newcanvas.setAttribute("id", `mychart7`)
+
+                                newchartcontainer.appendChild(newcanvas);
+                                document.getElementById("mygrid").appendChild(newchartcontainer);
+
+                                myChart7 = new Chart(newcanvas, {
+                                    type: data.myChart7.type,
+                                    data: data.myChart7.data,
+                                    options: data.myChart7.options
+                                })
+                                if (myChart7.config.type == "pie") myChart7.options.plugins.tooltip = tooltipConfigPie
+                                else myChart7.options.plugins.tooltip = defaulttooltip
+                                myChart7.options.plugins.legend.labels = defaultlabels
+                                myChart7.update()
+                                statefor7 = data.myChart7.state
+                                defaultcheckfor7 = (myChart7.options.plugins.title.text[0] + "").split(" ").join("_").toLocaleLowerCase()
+
+                            }
+                            if (data.myChart8 != null) {
+
+                                let numberofchartavailable = parseInt(document.getElementById("addition-btn").value)
+                                let deletebtn = document.getElementById("delete-btn")
+                                deletebtn.style.display = "inline-block"
+                                deletebtn.value = parseInt(deletebtn.value) + 1
+                                numberofchartavailable -= 1
+                                let additionalgraphs = document.getElementById("addition-btn")
+                                additionalgraphs.value = numberofchartavailable
+
+                                let newchartcontainer = document.createElement("div");
+                                newchartcontainer.style.margin = "20 0 20"
+                                newchartcontainer.style.padding = "5px"
+                                newchartcontainer.style.height = "50%"
+                                newchartcontainer.setAttribute("class", "allchart newaddedchart")
+                                // newchartcontainer.style.height = document.getElementById("mychart1").style.height;
+                                newchartcontainer.style.width = "auto"
+                                //newchartcontainer.style.marginRight = "290px"
+                                newchartcontainer.style.border = "3px solid rgb(60, 75, 100)"
+                                // newchartcontainer.style.resize="vertical"
+                                //newchartcontainer.style.overflow = "auto"
+
+                                let newcanvas = document.createElement("canvas");
+                                newcanvas.setAttribute("class", "chartcanvas")
+                                newchartcontainer.appendChild(newcanvas);
+                                newcanvas.setAttribute("id", `mychart8`)
+
+                                document.getElementById("mygrid").appendChild(newchartcontainer);
+
+                                myChart8 = new Chart(newcanvas, {
+                                    type: data.myChart8.type,
+                                    data: data.myChart8.data,
+                                    options: data.myChart8.options
+                                })
+                                if (myChart8.config.type == "pie") myChart8.options.plugins.tooltip = tooltipConfigPie
+                                else myChart8.options.plugins.tooltip = defaulttooltip
+                                myChart8.options.plugins.legend.labels = defaultlabels
+                                myChart8.update()
+                                statefor8 = data.myChart8.state
+                                defaultcheckfor8 = (myChart8.options.plugins.title.text[0] + "").split(" ").join("_").toLocaleLowerCase()
+
+                            }
+
+                        }
+                    })
+                    function customSortingFunction(items, parentItem) {	
+                        if (parentItem.value === 'id') {	
+                            console.log(parentItem)	
+                            items.sort(function (a, b) {	
+                                console.log(a.value + " " + b.value)	
+                                return parseFloat(a.value) - parseFloat(b.value);	
+                            });	
+                        }	
+                        else if (parentItem.value === 'channel') {	
+                            console.log(parentItem)	
+                            var reA = /[^a-zA-Z]/g;	
+                            var reN = /[^0-9]/g;	
+                            items.sort(function (a, b) {	
+                                a=a.value	
+                                b=b.value	
+                                let aA = a.replace(reA, "");	
+                                let bA = b.replace(reA, "");	
+                                if (aA === bA) {	
+                                    let aN = parseInt(a.replace(reN, ""), 10);	
+                                    let bN = parseInt(b.replace(reN, ""), 10);	
+                                    return aN === bN ? 0 : aN > bN ? 1 : -1;	
+                                } else {	
+                                    return aA > bA ? 1 : -1;	
+                                }	
+                            });	
+                        }	
+                        else if(parentItem.value=='bandwidth'){	
+                            items.sort(function(a,b){	
+                                a=a.value	
+                                b=b.value	
+                                return b.localeCompare(a)	
+                            })	
+                        }else if(parentItem.value=='sub_feature'){	
+                            items.sort(function(a,b){	
+                                return a.value.localeCompare(b.value)	
+                            })	
+                        }	
+                    }
+
+                    //option to be added in smart tree as root element
+                    let pivotlabels = Object.keys(data[0])
+                    pivotlabels.splice(pivotlabels.indexOf("passed"), 1)
+                    pivotlabels.splice(pivotlabels.indexOf("failed"), 1)
+                    pivotlabels.splice(pivotlabels.indexOf("duration"), 1)
+                    pivotlabels.splice(pivotlabels.indexOf("error"), 1)
+                    pivotlabels.splice(pivotlabels.indexOf("result"), 1)
+                    pivotlabels.splice(pivotlabels.indexOf("firmware_name"), 1)
+                    pivotlabels.splice(pivotlabels.indexOf("test_case_name"), 1)
+                    pivotlabels.splice(pivotlabels.indexOf("task"), 1)
+                    pivotlabels.splice(pivotlabels.indexOf("name"), 1)
+                    pivotlabels.splice(pivotlabels.indexOf("starttime"), 1)
+                    pivotlabels.splice(pivotlabels.indexOf("status"), 1)
+
+
+                    //creating the smart tree
+                    var opt = `<smart-tree has-three-states toggle-mode='arrow' style='width: max-content;' selection-mode='checkBox'  show-root-lines show-lines sorted>`;
+                    for (let parent of pivotlabels) {
+                        opt += `<smart-tree-items-group  att="parent" value='${parent}'>${parent.split("_").join(" ").toUpperCase()} `
+                        let addedchild = []
+                        for (let obj of data) {
+                            if (addedchild.indexOf(obj[parent]) == -1 && obj["result"] != undefined && (obj["result"] == "passed" || obj["result"] == "failed" || obj["result"] == "error")) {
+                                opt += `<smart-tree-item att="child" value="${obj[parent]}">${obj[parent]}</smart-tree-item>`;
+                                addedchild.push(obj[parent])
+                            }
+
+                        }
+                        opt += "</smart-tree-items-group>";
+
+                    }
+                    opt += "</smart-tree>";
+
+
+                    document.getElementById('smart-card').innerHTML = opt;
+
+
+
+                    const tree = document.querySelector('smart-tree');
+
+                    // tree.sorted = false;
+                    tree.sort=customSortingFunction
+                    tree.overflow = "auto"
+                    tree.select(2)
+                    let defaultcheckfor1 = "tester_name"
+                    let defaultcheckfor2 = "band"
+                    let defaultcheckfor3 = "security"
+                    let defaultcheckfor4 = "testplan"
+                    let defaultcheckfor5
+                    let defaultcheckfor6
+                    let defaultcheckfor7
+                    let defaultcheckfor8
+                    let defaultcheck = "tester_name"
+
+                    let clickevent = true
+                    //--------------------------listening to the change in the checkboxes in smart tree
+                    document.getElementById("smart-card").addEventListener('change', function (event) {
+                        if (clickevent) {
+                            let selectedIndexes = tree.selectedIndexes;
+                            let selectedValues = tree.getSelectedValues()
+                            let indexToCheck = []
+
+                            let categoryarray = []
+                            let datasets = []
+                            let tempdataset = []
+                            let fullclicked = []
+                            let finalcategory = []
+                            let finalpasses = []
+                            let finalfailed = []
+                            let finalerror = []
+
+                            for (let i of selectedIndexes) {
+                                if (tree.getItem(i).getAttribute("att") == "parent") {
+                                    categoryarray.push(tree.getItem(i).value)
+                                    fullclicked.push(tree.getItem(i).value)
+
+                                    if (tempdataset.length != 0) {
+                                        datasets.push([...tempdataset])
+                                        tempdataset = []
+                                    }
+
+                                    //selectedValues.splice(selectedValues.indexOf(tree.getItem(i).value), 1)
+                                }
+                                else {
+                                    if (categoryarray.indexOf(tree.getItem("" + parseInt(i)).value) == -1) {
+                                        categoryarray.push(tree.getItem("" + parseInt(i)).value)
+
+
+                                        if (tempdataset.length != 0) {
+                                            datasets.push([...tempdataset])
+                                            tempdataset = []
+                                        }
+                                        tempdataset.push(tree.getItem("" + i).value)
+                                    }
+                                    else {
+                                        tempdataset.push(tree.getItem("" + i).value)
+                                    }
+                                    indexToCheck.push(i)
+                                }
+
+
+                            }
+
+                            datasets.push([...tempdataset])
+
+                            //starting populating arrays for chart
+
+
+                            // if (fullclicked.length != 0) {
+                            //     finalcategory.push(...datasets[categoryarray.indexOf(fullclicked[0])])
+                            // } else {
+
+
+                            //     finalcategory.push(...datasets[0])
+                            //     fullclicked.push(categoryarray[0])
+                            // }
+
+
+                            // good modified answe................
+                            // if (fullclicked.length != 0) {
+                            //     if(fullclicked.length>1){
+                            //         finalcategory.push(...datasets[categoryarray.indexOf(fullclicked[fullclicked.indexOf(defaultcheck)])])
+                            //     }
+                            //     else {
+                            //         finalcategory.push(...datasets[categoryarray.indexOf(fullclicked[0])])
+                            //         defaultcheck=fullclicked[0]
+                            //     }
+                            //     } 
+                            //     else {
+
+
+                            //     finalcategory.push(...datasets[0])
+                            //     fullclicked.push(categoryarray[0])
+                            //     defaultcheck=categoryarray[0]
+                            // }
+                            //end of good modified answer.....
+
+                            if (categoryarray.length != 0) {
+                                if (categoryarray.length == 1) {
+                                    finalcategory.push(...datasets[0])
+                                    defaultcheck = categoryarray[0]
+                                    fullclicked.push(categoryarray[0])
+                                }
+                                else {
+                                    if (fullclicked.indexOf(defaultcheck) == -1 && categoryarray.indexOf(defaultcheck) != -1) {
+                                        fullclicked.push(defaultcheck)
+                                        finalcategory.push(...datasets[categoryarray.indexOf(defaultcheck)])
+                                    }
+                                    else if (fullclicked.indexOf(defaultcheck) != -1 && categoryarray.indexOf(defaultcheck) != -1) {
+                                        finalcategory.push(...datasets[categoryarray.indexOf(defaultcheck)])
+                                    }
+                                    else if (fullclicked.indexOf(defaultcheck) == -1 && categoryarray.indexOf(defaultcheck) == -1) {
+                                        finalcategory.push(...datasets[0])
+                                        fullclicked.push(categoryarray[0])
+                                        defaultcheck = categoryarray[0]
+                                    }
+                                }
+                            }
+
+
+                            for (let idx = 0; idx < finalcategory.length; idx++) {
+                                let pass = 0
+                                let fail = 0
+                                let error = 0
+                                $.each(data, (index, value) => {
+                                    let flag = true
+                                    if ("" + value[categoryarray[categoryarray.indexOf(defaultcheck)]] != finalcategory[idx]) flag = false
+                                    else {
+                                        for (let setidx = 0; setidx < datasets.length; setidx++) {
+                                            if (datasets[setidx].indexOf("" + value[categoryarray[setidx]]) == -1) flag = false
+                                        }
+                                    }
+
+                                    if (flag == true) {
+                                        pass += value["passed"]
+                                        fail += value["failed"]
+                                        error += value["error"]
+                                    }
+                                    flag = true
+                                })
+                                finalpasses.push(pass)
+                                finalfailed.push(fail)
+                                finalerror.push(error)
+
+                            }
+
+                            let chartcontainers = document.getElementsByClassName("allchart");
+                            idx = 0;
+                            let chartvariable
+                            let defaultchaeckvar
+                            for (container of chartcontainers) {
+                                idx++;
+                                let bordercolor = container.style.border
+                                if (bordercolor == "4px solid yellow") {
+                                    chartvariable = `myChart${idx}`
+                                    defaultchaeckvar = `defaultcheckfor${idx}`
+                                    break;
+                                }
+
+                            }
+                            console.log(defaultchaeckvar)
+                            let defaultcheckname = eval(defaultchaeckvar) 
+                            switch(defaultchaeckvar){
+                                case "defaultcheckfor1":defaultcheckfor1=defaultcheck;
+                                break;
+                                case "defaultcheckfor2":defaultcheckfor2=defaultcheck;
+                                break;
+                                case "defaultcheckfor3":defaultcheckfor3=defaultcheck;
+                                break;
+                                case "defaultcheckfor4":defaultcheckfor4=defaultcheck;
+                                break;
+                                case "defaultcheckfor5":defaultcheckfor5=defaultcheck;
+                                break;
+                                case "defaultcheckfor6":defaultcheckfor6=defaultcheck;
+                                break;
+                                case "defaultcheckfor7":defaultcheckfor7=defaultcheck;
+                                break;
+                                case "defaultcheckfor8":defaultcheckfor8=defaultcheck;
+                                break;
+                            }
+                            let chartname = eval(chartvariable) != undefined ? eval(chartvariable) : chartvariable
+                            const lab = [...finalcategory]
+                            if (lab[0] != undefined) {
+                                if (defaultcheck=="test_case" || chartname.config.type == "pie") {
+
+                                    chartname.options.scales.x.display = false
+                                }
+                                else {
+
+                                    chartname.options.scales.x.display = true
+                                }
+                                let charttitle = []
+                                charttitle.push(fullclicked[fullclicked.indexOf(defaultcheck)].split("_").join(" ").toUpperCase())
+                                for (let i = 0; i < categoryarray.length; i++) {
+                                    if (fullclicked.indexOf(categoryarray[i]) == -1) {
+                                        let subtitle = `${categoryarray[i].split("_").join(" ").toUpperCase()}->(`
+                                        for (let j = 0; j < datasets[i].length; j++) {
+                                            if (j != datasets[i].length - 1)
+                                                subtitle += `${datasets[i][j]},`
+                                            else subtitle += `${datasets[i][j]}`
+                                        }
+                                        subtitle += ") "
+                                        if (charttitle[1] != undefined)
+                                            charttitle[1] += subtitle
+                                        else {
+                                            charttitle[1] = ""
+                                            charttitle[1] += subtitle
+                                        }
+                                    }
+
+                                }
+
+
+                                chartname.data.labels = [...finalcategory];
+                                chartname.data.datasets[0].data = [...finalerror];
+                                chartname.data.datasets[1].data = [...finalpasses];
+                                chartname.data.datasets[2].data = [...finalfailed];
+                                chartname.data.datasets[3].data = [...finalerror];
+                                chartname.options.plugins.title.text = [...charttitle]
+                                chartname.update()
+                            }
+                            else {
+                                chartname.data.labels = [];
+                                chartname.data.datasets[0].data = [];
+                                chartname.data.datasets[1].data = [];
+                                chartname.data.datasets[2].data = [];
+                                chartname.data.datasets[3].data = [];
+                                chartname.options.plugins.title.text = ""
+                                chartname.update()
+                            }
+
+
+                            if (chartvariable == "myChart1") {
+                                statefor1 = tree.getState();
+                            } else if (chartvariable == "myChart2") {
+                                statefor2 = tree.getState()
+                            } else if (chartvariable == "myChart3") {
+                                statefor3 = tree.getState()
+                            } else if (chartvariable == "myChart4") {
+                                statefor4 = tree.getState()
+                            }
+                            else if (chartvariable == "myChart5") {
+                                statefor5 = tree.getState()
+                            }
+                            else if (chartvariable == "myChart6") {
+                                statefor6 = tree.getState()
+                            }
+                            else if (chartvariable == "myChart7") {
+                                statefor7 = tree.getState()
+                            }
+                            else if (chartvariable == "myChart8") {
+                                statefor8 = tree.getState()
+                            }
+
+                            updatestoredchart()
+                        }
+
+                    })
+                }
+            }
+        }
+    })
+</script>
+<script>
+    //handiling the resizing of default chart horizontally
+    var handler1 = document.querySelector('.handler-1');
+    var wrapper1 = handler1.closest('.wrapper-1');
+    var boxA1 = wrapper1.querySelector('.box1');
+    var isHandlerDragging1 = false;
+
+    document.addEventListener('mousedown', function (e) {
+        if (e.target === handler1) {
+            isHandlerDragging1 = true;
+            let boxes = document.querySelectorAll(".box1");
+            boxes.forEach((value, key) => {
+                value.style.flex = "1 1 auto"
+            })
+        }
+    });
+
+    document.addEventListener('mousemove', function (e) {
+        if (!isHandlerDragging1) {
+            return false;
+        }
+
+        var containerOffsetLeft1 = document.getElementById("section").offsetLeft;
+
+        var pointerRelativeXpos1 = e.clientX;
+
+        boxA1.style.width = (pointerRelativeXpos1 - containerOffsetLeft1 - 20) + 'px';
+
+    });
+
+    document.addEventListener('mouseup', function (e) {
+        isHandlerDragging1 = false;
+    });
+
+
+
+    var handler2 = document.querySelector('.handler-2');
+    var wrapper2 = handler2.closest('.wrapper-2');
+    var boxA2 = wrapper2.querySelector('.box2');
+    var isHandlerDragging2 = false;
+
+    document.addEventListener('mousedown', function (e) {
+        if (e.target === handler2) {
+            isHandlerDragging2 = true;
+            let boxes = document.querySelectorAll(".box2");
+            boxes.forEach((value, key) => {
+                value.style.flex = "1 1 auto"
+            })
+        }
+    });
+
+    document.addEventListener('mousemove', function (e) {
+        if (!isHandlerDragging2) {
+            return false;
+        }
+
+
+        var containerOffsetLeft2 = document.getElementById("section").offsetLeft;
+
+        var pointerRelativeXpos2 = e.clientX
+        boxA2.style.width = (pointerRelativeXpos2 - containerOffsetLeft2 - 20) + 'px';
+    });
+
+    document.addEventListener('mouseup', function (e) {
+        isHandlerDragging2 = false;
+    });
+</script>
+
+<script>
+
+
+
+</script>
+
+<script src="{% static 'resources\assets\bundles\libscripts.bundle.js' %} "></script>
+<script src="{% static 'resources\assets\bundles\vendorscripts.bundle.js' %} "></script>
+<script src="{% static 'resources\assets\bundles\mainscripts.bundle.js' %} "></script>
+<script src="{% static 'resources\assets\bundles\morrisscripts.bundle.js' %} "></script>
+<script src="{% static 'resources\assets\bundles\jvectormap.bundle.js' %} "></script>
+<script src="{% static 'resources\assets\bundles\knob.bundle.js' %} "></script>
+<script src="{% static 'resources\assets\js\pages\index.js' %} "></script>
+<script type="module" src="{% static 'resources\assets\js\pages\smart.tree.js' %}"></script>
+
+<!--Start of Tawk.to Script-->
+<script>
+    var __basePath = './';
+</script>
+<script type="text/javascript">
+    window.history.forward();
+
+    function noBack() {
+        window.history.forward();
+    }
+</script>
+<script type="text/javascript ">
+var Tawk_API = Tawk_API || {},
+Tawk_LoadStart = new Date();
+(function() {
+var s1 = document.createElement("script "),
+s0 = document.getElementsByTagName("script ")[0];
+s1.async = true;
+s1.src = '{% static 'resources\assets\js\pages\tawk.js' %}';
+s1.charset = 'UTF-8';
+s1.setAttribute('crossorigin', '*');
+s0.parentNode.insertBefore(s1, s0);
+})();
+</script>
+
+
+<!--End of Tawk.to Script-->
+</body>
+
+</html>

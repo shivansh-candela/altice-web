@@ -1,0 +1,113 @@
+.bg-clr {
+    background-color: white;/*#dcdbdb; /*#efefef;*/
+    padding-top: 20px;
+    }
+
+.card {
+    background-color: #efefef;/*#d0ffb7;
+/*width: 8rem;*/}
+
+.test-scheduler-info-head {
+    padding: 20px;
+    position: relative;
+    box-shadow: none;
+    color: #757575;
+}
+
+.table tr td {
+    background-color: eeeeee;
+    border: 2px solid #cccccc;
+    }/*efefef;}*/
+
+.table th:hover {
+    background-color: #000;
+}
+
+tr:hover td {
+    background-color: transparent; /* or #000 */
+}
+
+.table thead {
+    color: #646362; /*#ead900; */
+    background-color: #d0ffb7;
+    border-bottom: 4px solid #cccccc;
+    }
+
+.table th {
+    border: 2px solid #cccccc;
+    }
+
+.result {
+    border:2px solid #7e7e7e;
+    border-radius: 5px;
+    background-color: #abaea9;
+    }
+
+.ap-row {
+    display: table;
+    /*content: "";
+    clear: both;*/
+}
+
+.ap-col{
+  float: left;
+  padding-top: 10px;
+  /*  width: 50%;
+  height: 300px;  Should be removed. Only for demonstration */
+}
+
+.ap-icon {
+    margin: 20px 10px 0px 10px;
+    /*width: 80px;
+    border-right: 4px solid #dcead6;
+    height: 100%;
+    padding-top: 15px;
+    padding-bottom: 20px; */
+}
+
+.ap-icon img {
+    /*position: absolute;
+    /*justify-content: center;*/
+    /*text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 30px;
+    align-items: center;
+    display: block;*/
+}
+
+.ap-data {
+    padding-left: 10px;
+    border-left: 4px solid #fff;/*#dcdbdb;*/
+    color: red;
+    /*width: 20px;
+    border-top: 1px solid #eceff1*/
+}
+
+.navbar{
+    background-color: #0b6326;
+    margin-bottom: 20px;
+}
+
+.top-nav-bar-clr{
+    color: #d6cb07;
+}
+
+.float-right{
+    padding-top: 20px;
+}
+
+.text-muted{
+    color: black!important;
+}
+
+.header{
+    color: #666877;
+}
+
+.select{
+    /*border: 1px solid #c1bdbd;
+    border-radius: 10px;
+    height: 30px;
+    background-color: #efefef;*/
+    }
